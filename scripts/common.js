@@ -420,9 +420,12 @@ const QuizEngine = (() => {
 
     s.questions.forEach((q, qi) => {
       q.querySelectorAll('[data-option]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (!btn.disabled) {
-            answer(cid, qi, btn.dataset.option);
+        // Remove any existing listener by cloning (prevents double-wiring on re-init)
+        const fresh = btn.cloneNode(true);
+        btn.parentNode.replaceChild(fresh, btn);
+        fresh.addEventListener('click', () => {
+          if (!fresh.disabled) {
+            answer(cid, qi, fresh.dataset.option);
           }
         });
       });
@@ -522,14 +525,15 @@ const FlashcardEngine = (() => {
     if (nextBtn)   nextBtn.addEventListener('click', () => next(deckId));
     if (shuffleBtn) shuffleBtn.addEventListener('click', () => shuffle(deckId));
 
-    // Keyboard navigation (when flashcard area is focused)
+    // Keyboard navigation (only when user is not typing in an input/textarea)
     document.addEventListener('keydown', e => {
-      if (document.activeElement.closest(`[data-flashcard-deck="${deckId}"]`) !== null ||
-          document.querySelector(`[data-flashcard-deck="${deckId}"]`)) {
-        if (e.key === 'ArrowRight') next(deckId);
-        if (e.key === 'ArrowLeft')  prev(deckId);
-        if (e.key === ' ')          { e.preventDefault(); flip(deckId); }
-      }
+      const tag = document.activeElement?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      const deckEl = document.querySelector(`[data-flashcard-deck="${deckId}"]`);
+      if (!deckEl) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); next(deckId); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(deckId); }
+      if (e.key === ' ')          { e.preventDefault(); flip(deckId); }
     });
   }
 
@@ -962,7 +966,8 @@ const SidebarManager = (() => {
     const overallEl = document.getElementById('sidebar-overall-progress');
     if (overallEl) {
       const ov = ProgressManager.getOverallProgress();
-      overallEl.querySelector('[data-overall-pct]').textContent = `${ov.pct}%`;
+      const pctEl = overallEl.querySelector('[data-overall-pct]');
+      if (pctEl) pctEl.textContent = `${ov.pct}%`;
       const fill = overallEl.querySelector('.progress-fill');
       if (fill) fill.style.width = `${ov.pct}%`;
     }
