@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topic 4 — Monitor & Manage | AI-102 Part 1</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      transition: border-color var(--transition-fast);
+    }
+    .metric-card:hover { border-color: var(--border-default); }
+    .metric-name {
+      font-family: var(--font-mono); font-size: 0.78rem;
+      font-weight: 500; color: var(--blue-300);
+      margin-bottom: var(--space-2);
+    }
+    .metric-desc {
+      font-size: 0.82rem; color: var(--text-secondary);
+      line-height: 1.55; margin: 0;
+    }
+    .metric-example {
+      font-size: 0.75rem; color: var(--text-muted);
+      margin-top: var(--space-2); font-family: var(--font-mono);
+    }
+
+    .kql-block {
+      background: var(--navy-950);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      margin: var(--space-4) 0;
+      position: relative;
+    }
+    .kql-label {
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--amber-400); margin-bottom: var(--space-3);
+      font-family: var(--font-heading);
+    }
+    .kql-query {
+      font-family: var(--font-mono); font-size: 0.85rem;
+      color: var(--text-secondary); line-height: 1.8;
+      white-space: pre;
+    }
+    .kql-keyword { color: #c792ea; }
+    .kql-table   { color: #82aaff; }
+    .kql-string  { color: #c3e88d; }
+    .kql-number  { color: #f78c6c; }
+    .kql-comment { color: var(--slate-500); font-style: italic; }
+    .kql-func    { color: #ffcb6b; }
+    .kql-op      { color: #89ddff; }
+
+    .alert-row {
+      display: flex; gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--border-subtle);
+      align-items: flex-start; font-size: 0.85rem;
+    }
+    .alert-row:last-child { border-bottom: none; }
+
+    .cost-tier {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      border: 1px solid var(--border-subtle);
+      position: relative; overflow: hidden;
+    }
+    .cost-tier-badge {
+      font-family: var(--font-mono); font-size: 1.8rem;
+      font-weight: 800; line-height: 1; margin-bottom: var(--space-2);
+    }
+
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px);
+    }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+
+  <!-- ════════ SIDEBAR ════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">AI</div>
+      <div>
+        <div class="sidebar-logo-text">AI-102 Study Hub</div>
+        <div class="sidebar-logo-sub">Azure AI Engineer</div>
+      </div>
+    </div>
+    <div style="padding:var(--space-3) var(--space-4);">
+      <input id="sidebar-search" type="text" placeholder="Search topics…"
+        style="width:100%;background:var(--bg-card);border:1px solid var(--border-subtle);
+        border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);
+        color:var(--text-primary);font-size:0.8rem;font-family:var(--font-body);outline:none;">
+    </div>
+        <nav class="sidebar-nav">
+      <a href="../../index.html" class="sidebar-item">Dashboard</a>
+      <div class="sidebar-group open" data-part-group="1">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span>
+          <span class="item-badge" data-part-progress="1">0/5</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part1-plan-manage/topics/01-foundry-services.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-foundry-services">
+            <span class="topic-dot" data-topic-check="p1-foundry-services"></span>Foundry Services
+          </a>
+          <a href="../../part1-plan-manage/topics/02-plan-create-deploy.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-plan-create-deploy">
+            <span class="topic-dot" data-topic-check="p1-plan-create-deploy"></span>Plan, Create &amp; Deploy
+          </a>
+          <a href="../../part1-plan-manage/topics/03-security.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-security">
+            <span class="topic-dot" data-topic-check="p1-security"></span>Security &amp; Auth
+          </a>
+          <a href="../../part1-plan-manage/topics/04-monitor.html" class="sidebar-item sidebar-sub-item active" data-topic-nav="p1-monitor">
+            <span class="topic-dot" data-topic-check="p1-monitor"></span>Monitor &amp; Manage
+          </a>
+          <a href="../../part1-plan-manage/topics/05-responsible-ai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-responsible-ai">
+            <span class="topic-dot" data-topic-check="p1-responsible-ai"></span>Responsible AI
+          </a>
+          <a href="../../part1-plan-manage/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../../part1-plan-manage/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="2">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 2 — Generative AI</span>
+          <span class="item-badge" data-part-progress="2">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part2-generative-ai/topics/01-foundry-build.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-foundry-build">
+            <span class="topic-dot" data-topic-check="p2-foundry-build"></span>Build with Foundry
+          </a>
+          <a href="../../part2-generative-ai/topics/02-azure-openai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-azure-openai">
+            <span class="topic-dot" data-topic-check="p2-azure-openai"></span>Azure OpenAI
+          </a>
+          <a href="../../part2-generative-ai/topics/03-optimize-operationalize.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-optimize">
+            <span class="topic-dot" data-topic-check="p2-optimize"></span>Optimize &amp; Operationalize
+          </a>
+          <a href="../../part2-generative-ai/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../../part2-generative-ai/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="3">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 3 — Agentic</span>
+          <span class="item-badge" data-part-progress="3">0/1</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part3-agentic/topics/01-custom-agents.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p3-custom-agents">
+            <span class="topic-dot" data-topic-check="p3-custom-agents"></span>Custom Agents
+          </a>
+          <a href="../../part3-agentic/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../../part3-agentic/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="4">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 4 — NLP</span>
+          <span class="item-badge" data-part-progress="4">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part4-nlp/topics/01-analyze-translate-text.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-analyze-text">
+            <span class="topic-dot" data-topic-check="p4-analyze-text"></span>Analyze &amp; Translate Text
+          </a>
+          <a href="../../part4-nlp/topics/02-speech.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-speech">
+            <span class="topic-dot" data-topic-check="p4-speech"></span>Speech Processing
+          </a>
+          <a href="../../part4-nlp/topics/03-custom-language-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-custom-language">
+            <span class="topic-dot" data-topic-check="p4-custom-language"></span>Custom Language Models
+          </a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="5">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 5 — Knowledge Mining</span>
+          <span class="item-badge" data-part-progress="5">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part5-knowledge-mining/topics/01-ai-search.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-ai-search">
+            <span class="topic-dot" data-topic-check="p5-ai-search"></span>Azure AI Search
+          </a>
+          <a href="../../part5-knowledge-mining/topics/02-document-intelligence.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-document-intelligence">
+            <span class="topic-dot" data-topic-check="p5-document-intelligence"></span>Document Intelligence
+          </a>
+          <a href="../../part5-knowledge-mining/topics/03-content-understanding.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-content-understanding">
+            <span class="topic-dot" data-topic-check="p5-content-understanding"></span>Content Understanding
+          </a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="6">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 6 — Computer Vision</span>
+          <span class="item-badge" data-part-progress="6">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part6-computer-vision/topics/01-analyze-images.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-analyze-images">
+            <span class="topic-dot" data-topic-check="p6-analyze-images"></span>Analyze Images
+          </a>
+          <a href="../../part6-computer-vision/topics/02-custom-vision-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-custom-vision">
+            <span class="topic-dot" data-topic-check="p6-custom-vision"></span>Custom Vision Models
+          </a>
+          <a href="../../part6-computer-vision/topics/03-video-analysis.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-video-analysis">
+            <span class="topic-dot" data-topic-check="p6-video-analysis"></span>Video Analysis
+          </a>
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-progress" id="sidebar-overall-progress">
+      <div class="sidebar-progress-label">
+        <span>Overall Progress</span>
+        <span data-overall-pct style="color:var(--blue-300);font-family:var(--font-mono)">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <!-- ════════ MAIN ════════ -->
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Monitor & Manage</span>
+      </div>
+      <div class="topbar-actions">
+        <span style="font-size:0.75rem;color:var(--text-muted)">Exam in</span>
+        <span data-countdown style="font-family:var(--font-mono);font-size:0.85rem;color:var(--amber-400);font-weight:700">—</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- ── TOPIC HEADER ── -->
+      <div class="topic-header animate-fade-in">
+        <div class="topic-part-badge badge badge-blue domain-p1">⚙️ Part 1 · Topic 4 of 5</div>
+        <h1 class="topic-title">Monitor & Manage Azure AI Services</h1>
+        <p style="font-size:1rem;color:var(--text-secondary);max-width:680px;line-height:1.7;margin-top:var(--space-3)">
+          Once your Azure AI service is deployed and secured, you need to keep
+          it healthy, understand how it's being used, catch problems early,
+          and keep costs under control. This topic covers Azure Monitor,
+          Application Insights, diagnostic logs, KQL queries, alert rules,
+          and cost management.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">🐍 <strong>Python examples included</strong></span>
+          <span class="topic-meta-item">☁️ <strong>Portal walkthroughs included</strong></span>
+          <span class="topic-meta-item">⏱️ <strong>~45 min read</strong></span>
+          <span class="topic-meta-item">
+            ✅ <strong>Prerequisites:</strong>
+            <a href="01-foundry-services.html" style="color:var(--blue-300)">T1</a>,
+            <a href="02-plan-create-deploy.html" style="color:var(--blue-300)">T2</a>,
+            <a href="03-security.html" style="color:var(--blue-300)">T3</a>
+          </span>
+        </div>
+      </div>
+
+      <div class="callout callout-concept">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-content">
+          <div class="callout-title">Building on Previous Topics</div>
+          <p>
+            This topic uses: <strong>resource</strong>, <strong>resource group</strong>,
+            <strong>subscription</strong>, <strong>endpoint</strong>, <strong>API key</strong>,
+            <strong>managed identity</strong>, and <strong>environment variable</strong>
+            from Topics 1–3. New concepts — Azure Monitor, KQL, diagnostic settings —
+            are all introduced before they appear in any code or walkthrough.
+          </p>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 1 — VOCABULARY
+      ════════════════════════════════ -->
+      <div class="section-block" id="vocab">
+        <div class="section-label">🔤 Section 1 — New Vocabulary for This Topic</div>
+        <h2>Monitoring terms you must know</h2>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <span class="term-name">Azure Monitor</span>
+            <p class="term-definition">
+              Microsoft's central monitoring platform for all Azure resources.
+              It collects metrics (numbers that measure performance) and logs
+              (records of events that happened). Think of it as the health
+              dashboard for your entire Azure environment.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Metric</span>
+            <p class="term-definition">
+              A numeric measurement collected at regular intervals.
+              Examples for AI services: total API calls per minute,
+              average response latency in milliseconds, number of errors per hour.
+              Metrics are great for spotting trends and triggering alerts.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Log</span>
+            <p class="term-definition">
+              A detailed record of something that happened — who called the service,
+              what they requested, what the response was, did it succeed or fail.
+              Logs give you the "why" behind what metrics show.
+              More detailed than metrics but also larger to store.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Application Insights</span>
+            <p class="term-definition">
+              An Azure Monitor feature specifically designed for monitoring
+              applications. It tracks performance, usage patterns, exceptions,
+              and custom events. Unlike basic Azure Monitor metrics, it can
+              track what happens inside your Python application code — not just
+              at the infrastructure level.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Diagnostic Settings</span>
+            <p class="term-definition">
+              A configuration on an Azure resource that tells Azure Monitor
+              where to send the resource's logs and metrics.
+              You choose what to capture (audit logs, request logs, metrics)
+              and where to send it (Log Analytics workspace, Storage Account,
+              or Event Hub).
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Log Analytics Workspace</span>
+            <p class="term-definition">
+              A storage and query service for logs. Once you route your
+              Azure AI service logs here via diagnostic settings, you can
+              search and analyse them using KQL (Kusto Query Language).
+              Think of it as a database specifically for Azure logs.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">KQL — Kusto Query Language</span>
+            <p class="term-definition">
+              The query language used to search and analyse data in a
+              Log Analytics workspace. Similar to SQL but designed for
+              log data. You write a query that says what table to look in,
+              what to filter by, and how to summarise the results.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Alert Rule</span>
+            <p class="term-definition">
+              A rule that watches a metric or log condition and triggers
+              a notification when the condition is met. For example:
+              "Alert me if error rate exceeds 5% in any 5-minute window."
+              Alert rules can trigger emails, SMS, webhooks, or automated
+              actions via Logic Apps or Azure Functions.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Action Group</span>
+            <p class="term-definition">
+              A collection of notification targets that get triggered when
+              an alert fires. An action group might contain: send email to
+              the on-call engineer, send an SMS, and call a webhook to
+              create a ServiceNow incident. You reuse one action group
+              across multiple alert rules.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Pricing Tier (in cost context)</span>
+            <p class="term-definition">
+              From Topic 2 you know F0 is free and S0 is paid.
+              In cost management, you also need to know that S0 charges
+              per API call (pay-as-you-go). Understanding your call volume
+              helps forecast costs. Azure Cost Management helps you set
+              budgets and alerts.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Budget (Azure Cost Management)</span>
+            <p class="term-definition">
+              A spending limit you set in Azure Cost Management.
+              You define a monthly spend threshold (e.g. $100/month) and
+              Azure sends you alerts when you reach 80%, 90%, or 100% of
+              that budget. It does NOT automatically stop services —
+              it only sends notifications.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Retention Period</span>
+            <p class="term-definition">
+              How long logs are kept before being deleted.
+              In Log Analytics, the default retention is 30 days.
+              You can extend it (up to 730 days, at extra cost).
+              For compliance, some organisations must retain logs for
+              90 days or more — this affects your Log Analytics configuration.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 2 — AZURE MONITOR OVERVIEW
+      ════════════════════════════════ -->
+      <div class="section-block" id="monitor-overview">
+        <div class="section-label">📊 Section 2 — Azure Monitor Overview</div>
+        <h2>How Azure Monitor works for AI services</h2>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🏥</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A hospital patient monitoring system</div>
+            <p>
+              Imagine a patient in a hospital hooked up to monitors.
+              The monitors constantly measure vitals — heart rate, blood pressure,
+              oxygen — these are <strong>metrics</strong>. The medical chart records
+              every event — "patient complained of chest pain at 14:32, given medication at 14:35" —
+              these are <strong>logs</strong>. The alarm on the monitor goes off if
+              heart rate goes above 120 — that's an <strong>alert rule</strong>.
+              The nurse is paged automatically — that's an <strong>action group</strong>.
+              <br><br>
+              Azure Monitor does exactly the same for your AI service.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">
+          The monitoring data flow
+        </h3>
+
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-title">Your Azure AI Service generates data</div>
+              <p class="step-desc">
+                Every API call your service handles produces data — how long it took,
+                whether it succeeded, how many tokens were used. This data is captured
+                automatically by Azure at the platform level.
+              </p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-title">Azure Monitor collects it</div>
+              <p class="step-desc">
+                Azure Monitor sits in the middle, collecting both metrics
+                (numeric measurements) and logs (event records) from your resource.
+                This happens automatically for metrics — logs require you to
+                configure diagnostic settings (covered in Section 4).
+              </p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-title">You view metrics in Metrics Explorer</div>
+              <p class="step-desc">
+                In the Azure portal → your resource → Metrics, you can chart any
+                metric over time — calls, errors, latency — and see trends.
+              </p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <div class="step-title">Logs go to Log Analytics for deep analysis</div>
+              <p class="step-desc">
+                Detailed logs are routed to a Log Analytics workspace where
+                you can write KQL queries to search, filter, and aggregate them.
+              </p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">5</div>
+            <div class="step-content">
+              <div class="step-title">Alert rules watch for problems and notify you</div>
+              <p class="step-desc">
+                Alert rules monitor metrics or log query results 24/7.
+                When a threshold is crossed, they trigger an action group
+                that notifies the right people or systems.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 3 — METRICS
+      ════════════════════════════════ -->
+      <div class="section-block" id="metrics">
+        <div class="section-label">📈 Section 3 — Azure Monitor Metrics for AI Services</div>
+        <h2>The metrics you can track</h2>
+        <p>
+          Azure AI services automatically emit these metrics to Azure Monitor.
+          No configuration needed — they appear as soon as your resource exists.
+          You view them in the Azure portal → your resource → <strong>Metrics</strong>.
+        </p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin-top:var(--space-6)">
+
+          <div class="metric-card">
+            <div class="metric-name">Total Calls</div>
+            <p class="metric-desc">The total number of API calls made to your service in a time period. Use this to understand usage volume and growth trends.</p>
+            <div class="metric-example">e.g. 45,230 calls in the last hour</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-name">Successful Calls</div>
+            <p class="metric-desc">Calls that returned an HTTP 2xx response — the service processed the request successfully. Compare against Total Calls to calculate success rate.</p>
+            <div class="metric-example">e.g. 45,180 successful / 45,230 total = 99.9%</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-name">Total Errors</div>
+            <p class="metric-desc">The number of calls that failed. A spike here usually means your app has a bug, the service is misconfigured, or you're hitting a rate limit.</p>
+            <div class="metric-example">e.g. 50 errors in the last hour</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-name">Server Errors</div>
+            <p class="metric-desc">HTTP 5xx errors — the service itself failed, not your request. These are Azure-side problems. If you see these, check Azure Service Health for incidents.</p>
+            <div class="metric-example">e.g. HTTP 503 Service Unavailable</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-name">Client Errors</div>
+            <p class="metric-desc">HTTP 4xx errors — your request was wrong. Common causes: invalid API key (401), bad request format (400), rate limit exceeded (429).</p>
+            <div class="metric-example">e.g. HTTP 429 Too Many Requests</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-name">Latency</div>
+            <p class="metric-desc">How long the service takes to respond, in milliseconds. High latency means slow responses for your users. Usually shown as average, P95, or P99 percentile.</p>
+            <div class="metric-example">e.g. avg 245ms, P99 1200ms</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-name">Data In</div>
+            <p class="metric-desc">Total bytes sent TO the service. Useful for billing analysis — some services charge based on the amount of data processed.</p>
+            <div class="metric-example">e.g. 2.3 GB sent in the last day</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-name">Data Out</div>
+            <p class="metric-desc">Total bytes returned FROM the service. Responses — especially from language models — can be large. Monitor this for unexpected cost spikes.</p>
+            <div class="metric-example">e.g. 8.1 GB received in the last day</div>
+          </div>
+
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">
+          How to view metrics in the Azure portal
+        </h3>
+
+        <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+          <div class="portal-step" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4);align-items:flex-start">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">1</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Go to your Azure AI resource</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">portal.azure.com → search for your resource → click it to open</p>
+            </div>
+          </div>
+          <div class="portal-step" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4);align-items:flex-start">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">2</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Click Metrics in the left menu</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Under the Monitoring section. This opens the Metrics Explorer.</p>
+            </div>
+          </div>
+          <div class="portal-step" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4);align-items:flex-start">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">3</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Select a metric to chart</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Click <strong>+ Add metric</strong> → choose from the list (e.g. Total Calls) → choose aggregation (Sum, Average, Max) → the chart appears. You can add multiple metrics to the same chart.</p>
+            </div>
+          </div>
+          <div class="portal-step" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4);align-items:flex-start">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">4</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Adjust the time range</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Use the time picker (top right) to view metrics for Last 1 hour, Last 24 hours, Last 7 days, or a custom range.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 4 — APPLICATION INSIGHTS
+      ════════════════════════════════ -->
+      <div class="section-block" id="app-insights">
+        <div class="section-label">🔍 Section 4 — Application Insights</div>
+        <h2>Monitoring what happens inside your application</h2>
+        <p>
+          Azure Monitor metrics show you what's happening at the service level —
+          how many calls, how fast. Application Insights goes deeper — it shows
+          you what's happening inside your Python application: which functions
+          are slow, which exceptions are being thrown, how users are flowing
+          through your app.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Azure Monitor vs Application Insights — The Difference</div>
+            <p>
+              <strong>Azure Monitor</strong> watches the AI service itself — total calls,
+              latency, errors reported by Azure. It answers: "Is the service healthy?"
+              <br><br>
+              <strong>Application Insights</strong> watches your application code —
+              exceptions, custom events, end-to-end request tracking.
+              It answers: "Is my app using the service correctly and efficiently?"
+              <br><br>
+              On the exam, if the scenario mentions monitoring an
+              <em>application</em> or tracking <em>custom events</em>,
+              the answer is Application Insights.
+              If it's about monitoring the <em>Azure resource itself</em>,
+              the answer is Azure Monitor.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">
+          Adding Application Insights to your Python app
+        </h3>
+        <p>
+          A new Python concept here: <strong>with statement</strong> (context manager).
+          It is used by the Application Insights SDK to track operations.
+          It is explained fully in the code comments.
+          <br>Install with: <code>pip install azure-monitor-opentelemetry</code>
+        </p>
+
+<pre><code><span class="token-comment"># Install first: pip install azure-monitor-opentelemetry</span>
+
+<span class="token-comment"># This library instruments your Python app to send telemetry to Application Insights</span>
+<span class="token-keyword">from</span> azure.monitor.opentelemetry <span class="token-keyword">import</span> configure_azure_monitor
+
+<span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> azure.ai.textanalytics <span class="token-keyword">import</span> TextAnalyticsClient
+<span class="token-keyword">from</span> azure.core.credentials <span class="token-keyword">import</span> AzureKeyCredential
+
+
+<span class="token-comment"># ── Step 1: Set up Application Insights ──────────────────────────────</span>
+
+<span class="token-comment"># Your Application Insights connection string</span>
+<span class="token-comment"># Found in: Azure portal → Application Insights resource → Overview → Connection String</span>
+<span class="token-comment"># Format: InstrumentationKey=xxx;IngestionEndpoint=https://...;LiveEndpoint=https://...</span>
+connection_string = os.environ.get(<span class="token-string">"APPLICATIONINSIGHTS_CONNECTION_STRING"</span>)
+
+<span class="token-comment"># configure_azure_monitor() sets up automatic telemetry collection</span>
+<span class="token-comment"># After this line, Python exceptions, HTTP calls, and performance data</span>
+<span class="token-comment"># are automatically sent to Application Insights — no extra code needed</span>
+configure_azure_monitor(connection_string=connection_string)
+
+
+<span class="token-comment"># ── Step 2: Use your AI service normally — telemetry is collected auto ─</span>
+
+key      = os.environ.get(<span class="token-string">"LANGUAGE_KEY"</span>)
+endpoint = os.environ.get(<span class="token-string">"LANGUAGE_ENDPOINT"</span>)
+client   = TextAnalyticsClient(endpoint=endpoint, credential=AzureKeyCredential(key))
+
+<span class="token-comment"># This call is now automatically tracked by Application Insights</span>
+<span class="token-comment"># Duration, success/failure, and any exceptions are recorded</span>
+result = client.analyze_sentiment(documents=[<span class="token-string">"Azure AI is excellent!"</span>])
+
+<span class="token-keyword">print</span>(<span class="token-string">f"Sentiment: {result[0].sentiment}"</span>)
+<span class="token-comment"># Application Insights receives: duration of this call, success=True, HTTP status</span>
+
+
+<span class="token-comment"># ── Step 3: Add a custom event (optional but powerful) ────────────────</span>
+
+<span class="token-comment"># New concept: "from X import Y" — importing a specific class from a library</span>
+<span class="token-keyword">from</span> opentelemetry <span class="token-keyword">import</span> trace
+
+<span class="token-comment"># Get the tracer — this lets us create custom tracking spans</span>
+<span class="token-comment"># A span is a named unit of work that gets recorded in Application Insights</span>
+tracer = trace.get_tracer(__name__)
+
+<span class="token-comment"># "with" statement — new Python concept explained:</span>
+<span class="token-comment"># "with tracer.start_as_current_span(...) as span:" means:</span>
+<span class="token-comment">#   "Start tracking a named operation called 'sentiment-analysis-batch'</span>
+<span class="token-comment">#    and call it 'span' inside this block"</span>
+<span class="token-comment"># Everything inside the indented block is timed and recorded as one unit</span>
+<span class="token-comment"># When the block finishes (or if an error occurs), the span is automatically closed</span>
+<span class="token-keyword">with</span> tracer.start_as_current_span(<span class="token-string">"sentiment-analysis-batch"</span>) <span class="token-keyword">as</span> span:
+
+    <span class="token-comment"># Add custom attributes to this span — extra information to record</span>
+    span.set_attribute(<span class="token-string">"document.count"</span>, <span class="token-number">3</span>)   <span class="token-comment"># How many documents we're analysing</span>
+    span.set_attribute(<span class="token-string">"batch.type"</span>, <span class="token-string">"sentiment"</span>)  <span class="token-comment"># What type of analysis</span>
+
+    <span class="token-comment"># The actual AI call happens inside the "with" block</span>
+    <span class="token-comment"># so Application Insights knows it's part of this named operation</span>
+    docs = [<span class="token-string">"Great service!"</span>, <span class="token-string">"Terrible experience."</span>, <span class="token-string">"It was okay."</span>]
+    results = client.analyze_sentiment(documents=docs)
+
+    <span class="token-comment"># New concept: for loop — runs the indented block once for each item in a list</span>
+    <span class="token-comment"># "for doc in results" means: take each item from results, call it "doc", run the block</span>
+    <span class="token-keyword">for</span> doc <span class="token-keyword">in</span> results:
+        <span class="token-keyword">print</span>(<span class="token-string">f"  Sentiment: {doc.sentiment} | Score: {doc.confidence_scores}"</span>)
+
+<span class="token-comment"># After the "with" block: Application Insights records the complete span</span>
+<span class="token-comment"># including duration, custom attributes, and any exceptions that occurred</span></code></pre>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 5 — DIAGNOSTIC SETTINGS
+      ════════════════════════════════ -->
+      <div class="section-block" id="diagnostic">
+        <div class="section-label">🗂️ Section 5 — Diagnostic Settings</div>
+        <h2>Routing logs to the right destination</h2>
+        <p>
+          By default, Azure AI service logs are not stored anywhere — they are
+          generated and discarded. To keep them for analysis, you must configure
+          <strong>diagnostic settings</strong> to route them to a destination.
+        </p>
+
+        <h3 style="margin-bottom:var(--space-4)">Three log destinations</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin-bottom:var(--space-8)">
+
+          <div class="card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-3)">📋</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Log Analytics Workspace</div>
+            <p style="font-size:0.85rem">
+              <strong>Best for analysis and querying.</strong> Logs are stored
+              in a structured database you can query with KQL. You can write
+              dashboards, alert rules, and complex queries. This is the most
+              common destination for operational analysis.
+            </p>
+            <div class="badge badge-green" style="margin-top:var(--space-3)">Recommended for querying</div>
+          </div>
+
+          <div class="card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-3)">🗄️</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Azure Storage Account</div>
+            <p style="font-size:0.85rem">
+              <strong>Best for long-term archival.</strong> Logs are stored
+              as JSON files in Blob Storage. Cheaper than Log Analytics for
+              long retention periods. Not easy to query directly — use this
+              for compliance archiving where you need logs kept for years.
+            </p>
+            <div class="badge badge-blue" style="margin-top:var(--space-3)">Best for archiving</div>
+          </div>
+
+          <div class="card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-3)">📡</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Azure Event Hub</div>
+            <p style="font-size:0.85rem">
+              <strong>Best for streaming to external systems.</strong>
+              Logs are streamed in real time to Event Hub, where external
+              systems (like Splunk, Datadog, or your own SIEM) can consume them.
+              Use when you already have a non-Azure monitoring platform.
+            </p>
+            <div class="badge badge-amber" style="margin-top:var(--space-3)">Best for external SIEM</div>
+          </div>
+
+        </div>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — Splunk Integration</div>
+            <p>
+              Given your Splunk background — this is relevant. If an exam scenario
+              mentions sending Azure AI service logs to Splunk or another external
+              SIEM, the answer is <strong>Event Hub</strong> as the destination in
+              diagnostic settings. Splunk has a connector that reads from Event Hub.
+              You would NOT send logs directly to Splunk from Azure — you go
+              Azure → Event Hub → Splunk.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">
+          Log categories for Azure AI services
+        </h3>
+        <p>When setting up diagnostic settings, you choose which log categories to capture:</p>
+
+        <table class="compare-table">
+          <thead>
+            <tr><th>Log Category</th><th>What it records</th><th>Use when</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>AuditEvent</code></td>
+              <td>Key reads, key regenerations, changes to network rules, RBAC assignments. Who did what to manage the resource.</td>
+              <td>Security auditing, compliance, detecting unauthorised changes.</td>
+            </tr>
+            <tr>
+              <td><code>RequestResponse</code></td>
+              <td>Every API call — timestamp, caller IP, request type, response code, latency.</td>
+              <td>Debugging errors, understanding usage patterns, billing analysis.</td>
+            </tr>
+            <tr>
+              <td><code>Trace</code></td>
+              <td>Detailed internal service traces — very verbose. Useful for deep debugging.</td>
+              <td>Only when investigating a specific hard-to-reproduce issue.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:var(--space-6);margin-bottom:var(--space-4)">
+          How to configure diagnostic settings — portal walkthrough
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">1</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Open your AI resource → Diagnostic settings</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Left menu → Monitoring section → Diagnostic settings → click <strong>+ Add diagnostic setting</strong></p>
+            </div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">2</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Choose log categories and metrics</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Check <strong>Audit</strong>, <strong>RequestResponse</strong>, and <strong>AllMetrics</strong> for full coverage.</p>
+            </div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">3</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Choose destination</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Tick <strong>Send to Log Analytics workspace</strong> and select your workspace. Optionally also send to a Storage Account for archiving.</p>
+            </div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">4</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Save</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Click <strong>Save</strong>. Logs start flowing within a few minutes. New logs appear in Log Analytics within 5–15 minutes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 6 — KQL
+      ════════════════════════════════ -->
+      <div class="section-block" id="kql">
+        <div class="section-label">🔎 Section 6 — KQL: Querying Your Logs</div>
+        <h2>Writing KQL queries to analyse Azure AI service logs</h2>
+        <p>
+          KQL (Kusto Query Language) is how you search your logs in Log Analytics.
+          It looks a bit like SQL but works differently.
+          Let's learn the key building blocks before reading actual queries.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🔎</span>
+          <div class="callout-content">
+            <div class="callout-title">KQL is like filtering a spreadsheet with pipes</div>
+            <p>
+              Think of each log entry as a row in a spreadsheet. KQL lets you:
+              <br>• Pick which spreadsheet (table) to look at
+              <br>• Filter to only rows matching your criteria
+              <br>• Pick which columns to show
+              <br>• Sort and group the results
+              <br><br>
+              The <code>|</code> symbol (pipe) chains these steps together —
+              the output of one step flows into the next, like water through pipes.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">KQL building blocks</h3>
+
+        <table class="compare-table">
+          <thead>
+            <tr><th>KQL Keyword</th><th>What it does</th><th>SQL equivalent</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code class="highlight-col">TableName</code></td><td>Start with the table to query — always first</td><td>FROM TableName</td></tr>
+            <tr><td><code class="highlight-col">| where</code></td><td>Filter rows — keep only rows matching a condition</td><td>WHERE</td></tr>
+            <tr><td><code class="highlight-col">| project</code></td><td>Choose which columns to show (drop the rest)</td><td>SELECT col1, col2</td></tr>
+            <tr><td><code class="highlight-col">| summarize</code></td><td>Group and aggregate — count, average, sum</td><td>GROUP BY + SUM/COUNT</td></tr>
+            <tr><td><code class="highlight-col">| order by</code></td><td>Sort the results by a column</td><td>ORDER BY</td></tr>
+            <tr><td><code class="highlight-col">| take</code></td><td>Return only the first N rows</td><td>TOP N / LIMIT N</td></tr>
+            <tr><td><code class="highlight-col">| extend</code></td><td>Add a new calculated column to the results</td><td>Computed column</td></tr>
+            <tr><td><code class="highlight-col">ago()</code></td><td>Time function — "1h ago" means one hour before now</td><td>DATEADD / NOW()-1h</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">
+          Exam-ready KQL queries for Azure AI services
+        </h3>
+        <p style="margin-bottom:var(--space-6)">
+          These are the queries the exam most commonly tests.
+          Read the comments — they explain what every line does.
+        </p>
+
+        <!-- Query 1 -->
+        <div class="kql-block">
+          <div class="kql-label">Query 1 — View all errors in the last 24 hours</div>
+          <div class="kql-query"><span class="kql-comment">// AzureDiagnostics is the main table that holds logs from Azure resources</span>
+<span class="kql-table">AzureDiagnostics</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> TimeGenerated <span class="kql-op">></span> <span class="kql-func">ago</span>(<span class="kql-number">24</span>h)           <span class="kql-comment">// Only look at the last 24 hours</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> ResourceProvider <span class="kql-op">==</span> <span class="kql-string">"MICROSOFT.COGNITIVESERVICES"</span>  <span class="kql-comment">// Only Azure AI Services logs</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> ResultType <span class="kql-op">==</span> <span class="kql-string">"Failed"</span>             <span class="kql-comment">// Only failed requests</span>
+<span class="kql-op">|</span> <span class="kql-keyword">project</span> TimeGenerated, OperationName, ResultDescription, CallerIPAddress
+                                              <span class="kql-comment">// Show only these 4 columns — drop everything else</span>
+<span class="kql-op">|</span> <span class="kql-keyword">order by</span> TimeGenerated <span class="kql-keyword">desc</span>               <span class="kql-comment">// Most recent errors first</span></div>
+        </div>
+
+        <!-- Query 2 -->
+        <div class="kql-block">
+          <div class="kql-label">Query 2 — Count errors by type in the last hour</div>
+          <div class="kql-query"><span class="kql-table">AzureDiagnostics</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> TimeGenerated <span class="kql-op">></span> <span class="kql-func">ago</span>(<span class="kql-number">1</span>h)
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> ResourceProvider <span class="kql-op">==</span> <span class="kql-string">"MICROSOFT.COGNITIVESERVICES"</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> ResultType <span class="kql-op">==</span> <span class="kql-string">"Failed"</span>
+<span class="kql-op">|</span> <span class="kql-keyword">summarize</span> ErrorCount <span class="kql-op">=</span> <span class="kql-func">count</span>() <span class="kql-keyword">by</span> ResultDescription
+                                              <span class="kql-comment">// Group rows by error message, count how many of each</span>
+<span class="kql-op">|</span> <span class="kql-keyword">order by</span> ErrorCount <span class="kql-keyword">desc</span>                 <span class="kql-comment">// Most common error first</span></div>
+        </div>
+
+        <!-- Query 3 -->
+        <div class="kql-block">
+          <div class="kql-label">Query 3 — Average latency per hour over the last day</div>
+          <div class="kql-query"><span class="kql-table">AzureDiagnostics</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> TimeGenerated <span class="kql-op">></span> <span class="kql-func">ago</span>(<span class="kql-number">24</span>h)
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> ResourceProvider <span class="kql-op">==</span> <span class="kql-string">"MICROSOFT.COGNITIVESERVICES"</span>
+<span class="kql-op">|</span> <span class="kql-keyword">summarize</span> AvgLatencyMs <span class="kql-op">=</span> <span class="kql-func">avg</span>(DurationMs) <span class="kql-keyword">by</span> <span class="kql-func">bin</span>(TimeGenerated, <span class="kql-number">1</span>h)
+            <span class="kql-comment">// bin(TimeGenerated, 1h) groups timestamps into 1-hour buckets</span>
+            <span class="kql-comment">// avg(DurationMs) calculates the average latency in each bucket</span>
+<span class="kql-op">|</span> <span class="kql-keyword">order by</span> TimeGenerated <span class="kql-keyword">asc</span>               <span class="kql-comment">// Oldest first — good for trend charts</span></div>
+        </div>
+
+        <!-- Query 4 -->
+        <div class="kql-block">
+          <div class="kql-label">Query 4 — Audit log: who regenerated an API key?</div>
+          <div class="kql-query"><span class="kql-table">AzureDiagnostics</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> TimeGenerated <span class="kql-op">></span> <span class="kql-func">ago</span>(<span class="kql-number">7</span>d)             <span class="kql-comment">// Last 7 days</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> ResourceProvider <span class="kql-op">==</span> <span class="kql-string">"MICROSOFT.COGNITIVESERVICES"</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> OperationName <span class="kql-op">==</span> <span class="kql-string">"List Account Keys"</span>    <span class="kql-comment">// Filter to key-related operations only</span>
+    <span class="kql-op">or</span> OperationName <span class="kql-op">==</span> <span class="kql-string">"Regenerate Account Key"</span>
+<span class="kql-op">|</span> <span class="kql-keyword">project</span> TimeGenerated, OperationName, CallerIPAddress, Identity
+<span class="kql-op">|</span> <span class="kql-keyword">order by</span> TimeGenerated <span class="kql-keyword">desc</span></div>
+        </div>
+
+        <!-- Query 5 — TLS monitoring (from Key Vault docs, exam relevant) -->
+        <div class="kql-block">
+          <div class="kql-label">Query 5 — Check TLS versions used by clients</div>
+          <div class="kql-query"><span class="kql-table">AzureDiagnostics</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> ResourceProvider <span class="kql-op">==</span> <span class="kql-string">"MICROSOFT.COGNITIVESERVICES"</span>
+<span class="kql-op">|</span> <span class="kql-keyword">where</span> TimeGenerated <span class="kql-op">></span> <span class="kql-func">ago</span>(<span class="kql-number">1</span>d)
+<span class="kql-op">|</span> <span class="kql-keyword">summarize</span> RequestCount <span class="kql-op">=</span> <span class="kql-func">count</span>() <span class="kql-keyword">by</span> TlsVersion_s   <span class="kql-comment">// Group by TLS version used</span>
+<span class="kql-op">|</span> <span class="kql-keyword">order by</span> RequestCount <span class="kql-keyword">desc</span>
+<span class="kql-comment">// Use this to identify clients still using outdated TLS 1.0 or 1.1</span></div>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">✅</span>
+          <div class="callout-content">
+            <div class="callout-title">How to run KQL queries in the portal</div>
+            <p>
+              Azure portal → <strong>Log Analytics workspaces</strong> → your workspace →
+              <strong>Logs</strong>. Paste any query above into the query editor and click
+              <strong>Run</strong>. Results appear as a table below.
+              You can also access logs from your AI resource directly:
+              your resource → Monitoring → <strong>Logs</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 7 — ALERT RULES
+      ════════════════════════════════ -->
+      <div class="section-block" id="alerts">
+        <div class="section-label">🔔 Section 7 — Alert Rules & Action Groups</div>
+        <h2>Getting notified when something goes wrong</h2>
+        <p>
+          You shouldn't need to check metrics manually every hour.
+          Alert rules watch your metrics and logs 24/7 and notify you
+          automatically when a threshold is breached.
+        </p>
+
+        <h3 style="margin-bottom:var(--space-4)">Anatomy of an alert rule</h3>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-4);margin-bottom:var(--space-8)">
+          <div class="card" style="border-color:rgba(59,130,246,0.3)">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🎯</div>
+            <div class="card-title" style="font-size:0.85rem;margin-bottom:var(--space-2)">Scope</div>
+            <p style="font-size:0.8rem">Which resource to monitor — your Azure AI service, a resource group, or entire subscription.</p>
+          </div>
+          <div class="card" style="border-color:rgba(245,158,11,0.3)">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">📐</div>
+            <div class="card-title" style="font-size:0.85rem;margin-bottom:var(--space-2)">Condition</div>
+            <p style="font-size:0.8rem">The threshold that triggers the alert — e.g. "Total Errors > 10 in a 5-minute window."</p>
+          </div>
+          <div class="card" style="border-color:rgba(139,92,246,0.3)">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">📢</div>
+            <div class="card-title" style="font-size:0.85rem;margin-bottom:var(--space-2)">Action Group</div>
+            <p style="font-size:0.8rem">Who/what gets notified — email, SMS, webhook, Logic App, Azure Function.</p>
+          </div>
+          <div class="card" style="border-color:rgba(16,185,129,0.3)">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">⚙️</div>
+            <div class="card-title" style="font-size:0.85rem;margin-bottom:var(--space-2)">Severity</div>
+            <p style="font-size:0.8rem">How serious: 0 (Critical) → 1 (Error) → 2 (Warning) → 3 (Informational) → 4 (Verbose).</p>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:var(--space-4)">Alert rules commonly tested on the exam</h3>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);overflow:hidden">
+          <div style="background:var(--navy-800);padding:var(--space-3) var(--space-5);display:grid;grid-template-columns:1fr 1fr 120px;gap:var(--space-4);font-size:0.75rem;font-weight:700;color:var(--text-muted);font-family:var(--font-heading)">
+            <div>Alert type</div><div>Condition example</div><div>Why monitor this</div>
+          </div>
+
+          <div class="alert-row" style="display:grid;grid-template-columns:1fr 1fr 120px;gap:var(--space-4)">
+            <div><strong style="font-size:0.85rem">High error rate</strong></div>
+            <div style="color:var(--text-secondary);font-size:0.82rem">Total Errors &gt; 50 in 5 minutes</div>
+            <div style="font-size:0.78rem;color:var(--text-muted)">App bugs, bad requests, auth failures</div>
+          </div>
+          <div class="alert-row" style="display:grid;grid-template-columns:1fr 1fr 120px;gap:var(--space-4)">
+            <div><strong style="font-size:0.85rem">High latency</strong></div>
+            <div style="color:var(--text-secondary);font-size:0.82rem">Avg Latency &gt; 2000ms over 10 minutes</div>
+            <div style="font-size:0.78rem;color:var(--text-muted)">Service degradation, slow responses</div>
+          </div>
+          <div class="alert-row" style="display:grid;grid-template-columns:1fr 1fr 120px;gap:var(--space-4)">
+            <div><strong style="font-size:0.85rem">Key regeneration</strong></div>
+            <div style="color:var(--text-secondary);font-size:0.82rem">AuditEvent: Regenerate Account Key detected</div>
+            <div style="font-size:0.78rem;color:var(--text-muted)">Security — alert on unexpected key changes</div>
+          </div>
+          <div class="alert-row" style="display:grid;grid-template-columns:1fr 1fr 120px;gap:var(--space-4)">
+            <div><strong style="font-size:0.85rem">429 rate limit hits</strong></div>
+            <div style="color:var(--text-secondary);font-size:0.82rem">Client Errors with HTTP 429 &gt; 0</div>
+            <div style="font-size:0.78rem;color:var(--text-muted)">You're hitting your quota ceiling</div>
+          </div>
+          <div class="alert-row" style="display:grid;grid-template-columns:1fr 1fr 120px;gap:var(--space-4)">
+            <div><strong style="font-size:0.85rem">Zero calls</strong></div>
+            <div style="color:var(--text-secondary);font-size:0.82rem">Total Calls = 0 for 15 minutes (during business hours)</div>
+            <div style="font-size:0.78rem;color:var(--text-muted)">Detect outages — service may be down</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">
+          Creating an alert rule — portal walkthrough
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">1</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Open your AI resource → Alerts</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Left menu → Monitoring → Alerts → click <strong>+ Create → Alert rule</strong></p>
+            </div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">2</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Set the Condition</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Click <strong>Add condition</strong> → choose signal type (Metrics or Log search) → select the metric (e.g. Total Errors) → set threshold (e.g. Greater than 10) → set evaluation frequency (e.g. every 5 minutes over a 5-minute window)</p>
+            </div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">3</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Create or select an Action Group</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Click <strong>+ Create action group</strong> → name it → add actions: Email/SMS/Push/Voice → add your email address → OK. You can reuse this action group across multiple alert rules.</p>
+            </div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--blue-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">4</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Name the alert and set severity → Review + Create</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Give it a descriptive name like "AI Language — High Error Rate". Choose severity 1 (Error) for this example. Click <strong>Review + create</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 8 — COST MANAGEMENT
+      ════════════════════════════════ -->
+      <div class="section-block" id="costs">
+        <div class="section-label">💰 Section 8 — Cost Management</div>
+        <h2>Keeping Azure AI costs under control</h2>
+        <p>
+          Azure AI services charge per API call (on S0 tier).
+          Unexpected traffic spikes or misconfigured apps can run up large bills.
+          The exam tests your knowledge of cost management tools and strategies.
+        </p>
+
+        <h3 style="margin-bottom:var(--space-4)">F0 vs S0 — cost implications</h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin-bottom:var(--space-8)">
+          <div class="cost-tier">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--green-500)"></div>
+            <div class="cost-tier-badge" style="color:var(--green-400)">F0</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:var(--space-4)">Free Tier</div>
+            <ul style="font-size:0.85rem;color:var(--text-secondary);line-height:1.9;list-style:none;padding:0">
+              <li>✅ $0/month</li>
+              <li>✅ Great for learning and dev</li>
+              <li>❌ Limited calls per minute</li>
+              <li>❌ Limited calls per month</li>
+              <li>❌ Only 1 per service per subscription</li>
+              <li>❌ No private endpoints</li>
+              <li>❌ No SLA guarantee</li>
+            </ul>
+          </div>
+          <div class="cost-tier">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--blue-400)"></div>
+            <div class="cost-tier-badge" style="color:var(--blue-300)">S0</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:var(--space-4)">Standard Tier</div>
+            <ul style="font-size:0.85rem;color:var(--text-secondary);line-height:1.9;list-style:none;padding:0">
+              <li>✅ Pay per call (varies by service)</li>
+              <li>✅ No monthly call limit</li>
+              <li>✅ Private endpoints supported</li>
+              <li>✅ SLA guarantee (99.9% uptime)</li>
+              <li>✅ Multiple per subscription</li>
+              <li>⚠️ Costs scale with usage</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:var(--space-4)">Cost management tools</h3>
+
+        <div class="accordion">
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              📊 Azure Cost Management + Billing
+              <span class="accordion-chevron">▼</span>
+            </button>
+            <div class="accordion-body">
+              <p>
+                The central tool for viewing and managing Azure spending.
+                Found at: Azure portal → search "Cost Management".
+                <br><br>
+                Key features:
+                <br>• <strong>Cost Analysis</strong> — charts of actual spend by service, resource group, tag, or time period
+                <br>• <strong>Budgets</strong> — set a monthly spend limit and get notified at 80%, 90%, 100%
+                <br>• <strong>Forecasts</strong> — projected spend based on current usage trends
+                <br>• <strong>Cost Alerts</strong> — alerts when actual or forecast spend exceeds thresholds
+                <br><br>
+                <strong>Important exam fact:</strong> Budgets do NOT stop services from running.
+                They only send notifications. To actually stop spending, you would need to
+                delete or disable resources manually (or automate it via a Logic App).
+              </p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              🏷️ Resource Tagging for Cost Attribution
+              <span class="accordion-chevron">▼</span>
+            </button>
+            <div class="accordion-body">
+              <p>
+                Tags are key-value labels you apply to Azure resources.
+                For example: <code>Department: Finance</code>, <code>Project: CustomerAI</code>,
+                <code>Environment: Production</code>.
+                <br><br>
+                In Cost Management, you can filter and group costs by tag.
+                This lets you answer "how much did the Finance department's AI services cost
+                this month?" — very useful for chargeback/showback in enterprises like CIBC.
+                <br><br>
+                <strong>How to apply tags:</strong> Azure portal → your resource → Tags →
+                add key-value pairs → Save.
+              </p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              ⚡ Managing Quota and Rate Limits
+              <span class="accordion-chevron">▼</span>
+            </button>
+            <div class="accordion-body">
+              <p>
+                Every Azure AI service has <strong>quota limits</strong> — maximum calls
+                per minute (TPM = Transactions Per Minute) and per month.
+                Hitting quota returns HTTP 429 (Too Many Requests).
+                <br><br>
+                To manage quota:
+                <br>• Azure portal → your resource → <strong>Quotas</strong> (or Resource Management → Quotas)
+                <br>• You can request quota increases from Microsoft
+                <br>• For Azure OpenAI: quota is measured in <strong>TPM (Tokens Per Minute)</strong>
+                  — the number of tokens processed per minute across all deployments
+                <br><br>
+                <strong>Cost optimisation strategies for the exam:</strong>
+                <br>• Use F0 for development, S0 only for production
+                <br>• Implement caching — don't call the AI service for the same input twice
+                <br>• Choose the right model — GPT-3.5-turbo is far cheaper than GPT-4o for simple tasks
+                <br>• Monitor token usage for OpenAI — unnecessary long prompts cost more
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-exam" style="margin-top:var(--space-6)">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — Budget Behaviour</div>
+            <p>
+              A very common exam question: <em>"A company sets a $500 budget for their
+              Azure AI service. The budget is reached. What happens?"</em>
+              <br><br>
+              The answer is: <strong>Nothing happens automatically</strong>.
+              Azure sends email notifications to the budget owner but does NOT
+              stop the service, delete resources, or restrict API calls.
+              The service continues running and continues charging.
+              To stop it you must manually intervene.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 9 — EXAM TIPS
+      ════════════════════════════════ -->
+      <div class="section-block" id="exam-tips">
+        <div class="section-label">🎯 Section 9 — Exam Tips</div>
+        <h2>What this topic is tested on</h2>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Top 5 Tested Facts from This Topic</div>
+            <p>
+              <strong>1. Diagnostic settings must be explicitly configured</strong> —
+              Logs do not go anywhere by default. You must create a diagnostic
+              setting and choose a destination. Metrics are always collected
+              automatically — only logs need configuration.<br><br>
+
+              <strong>2. Log Analytics = KQL queries; Storage Account = archiving</strong> —
+              If an exam scenario says "query logs" → Log Analytics.
+              "Archive logs for 2 years" → Storage Account.
+              "Stream to Splunk" → Event Hub.<br><br>
+
+              <strong>3. Budgets don't stop services</strong> — Budgets send notifications
+              only. Services keep running even after budget is exhausted.<br><br>
+
+              <strong>4. Application Insights = application-level monitoring</strong> —
+              If a scenario mentions tracking exceptions, custom events, or
+              end-to-end request traces in your application code → Application Insights.
+              Azure Monitor metrics alone cannot track what happens inside your app.<br><br>
+
+              <strong>5. Alert severity levels</strong> — 0 = Critical, 1 = Error,
+              2 = Warning, 3 = Informational, 4 = Verbose.
+              Lower number = higher severity.
+              The exam may show a severity number and ask what it means.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 10 — QUIZ
+      ════════════════════════════════ -->
+      <div class="section-block" id="quiz">
+        <div class="section-label">✅ Section 10 — Quick Quiz</div>
+        <h2>Test your understanding</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">
+          5 questions — select an answer to see the explanation immediately.
+        </p>
+
+        <div class="quiz-container" data-quiz="topic4-quiz" id="topic4-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Topic 4 Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 5</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:20%" data-q-progress></div>
+          </div>
+
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A DevOps engineer needs to store Azure AI Language service logs for compliance purposes for 2 years. The logs will rarely be queried — they just need to be retained safely and cheaply.</div>
+                <p class="quiz-question">Which diagnostic settings destination should they choose?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Log Analytics Workspace — best for long-term retention and querying</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Azure Storage Account — cheapest option for archiving logs rarely queried</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Azure Event Hub — streams logs in real time for compliance systems</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Application Insights — tracks compliance-related application events</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Azure Storage Account is the cheapest option for long-term log archiving. Logs are stored as JSON files in Blob Storage. Log Analytics (option A) is more expensive for long retention and is optimised for querying, not archiving — the scenario says logs "will rarely be queried." Event Hub (option C) is for real-time streaming to external systems. Application Insights (option D) monitors application code, not compliance archiving.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A developer needs to write a KQL query that shows only failed requests to their Azure AI service in the last 6 hours, and shows the most recent failures first. Which query is correct?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span>
+                    <span class="quiz-option-text" style="font-family:var(--font-mono);font-size:0.78rem">AzureDiagnostics | where TimeGenerated > ago(6h) | where ResultType == "Failed" | order by TimeGenerated desc</span>
+                  </button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span>
+                    <span class="quiz-option-text" style="font-family:var(--font-mono);font-size:0.78rem">AzureDiagnostics | order by TimeGenerated desc | where ResultType == "Failed" | where TimeGenerated > ago(6h)</span>
+                  </button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span>
+                    <span class="quiz-option-text" style="font-family:var(--font-mono);font-size:0.78rem">SELECT * FROM AzureDiagnostics WHERE ResultType = 'Failed' AND TimeGenerated > DATEADD(hour,-6,GETDATE())</span>
+                  </button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span>
+                    <span class="quiz-option-text" style="font-family:var(--font-mono);font-size:0.78rem">AzureDiagnostics | where ago(6h) | where ResultType = "Failed" | sort desc</span>
+                  </button>
+                </div>
+                <div class="quiz-explanation" data-correct="A">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>A is correct.</strong> KQL queries start with the table name, then use pipe-separated operators in logical order: filter by time, filter by condition, then sort. Option B has the operators in the wrong order (ordering before filtering is less efficient but more importantly the exam expects the standard pattern). Option C uses SQL syntax — not KQL. Option D uses incorrect KQL syntax (<code>where ago(6h)</code> is not valid — it should be <code>where TimeGenerated > ago(6h)</code>).</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A company's Azure AI service budget is set to $500/month. On the 20th of the month, the actual spend reaches $500. The development team continues making API calls for the rest of the month.</div>
+                <p class="quiz-question">What happens when the $500 budget is reached?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Azure automatically stops the AI service to prevent further charges</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Azure sends email notifications to the budget owner but the service continues running and billing continues</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Azure throttles the API calls to free tier limits until the next billing period</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The resource is automatically deleted after 24 hours of being over budget</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Azure Cost Management budgets are <strong>notification-only</strong>. When the threshold is reached, Azure sends email alerts to the configured recipients. The service continues running, API calls continue working, and billing continues to accumulate beyond the budget amount. Azure does NOT automatically stop, throttle, or delete resources when a budget is exceeded. To prevent overspending you must take manual action or set up automation (e.g. a Logic App that disables the resource when a budget alert fires).</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A developer wants to track exceptions thrown in their Python application when calling Azure AI services, and send custom events to understand user behaviour. Which monitoring tool should they use?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Azure Monitor Metrics — it tracks all errors from the AI service automatically</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Application Insights — it monitors application code, exceptions, and custom events</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Log Analytics workspace with KQL queries on AzureDiagnostics table</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Azure Cost Management — it tracks API usage patterns</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Application Insights is specifically designed for application-level monitoring — tracking exceptions thrown in your code, custom events you define, user flows, and performance. Azure Monitor Metrics (option A) monitors the AI service at the infrastructure level — total calls, latency — but cannot see inside your Python code. Log Analytics/KQL (option C) can query diagnostic logs but doesn't track application-level custom events. Cost Management (option D) is for billing, not application monitoring.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q5 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An alert rule on an Azure AI Language service is configured with severity 1. What does severity 1 mean, and what is the most severe level?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Severity 1 = Informational. Most severe = Severity 4 (Critical)</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Severity 1 = Error. Most severe = Severity 0 (Critical)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Severity 1 = Critical. It is the most severe level.</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Severity 1 = Warning. Most severe = Severity 5 (Emergency)</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Azure alert severity levels: <strong>0 = Critical</strong> (most severe), <strong>1 = Error</strong>, <strong>2 = Warning</strong>, <strong>3 = Informational</strong>, <strong>4 = Verbose</strong> (least severe). Lower number = higher severity — the opposite of what many people intuitively expect. Severity 0 (Critical) is for outages affecting all users. Severity 1 (Error) is for significant errors requiring prompt action. There is no severity 5 in Azure.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 5</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- ── MARK COMPLETE + NAV ── -->
+      <div class="completion-bar">
+        <div class="completion-checkbox" data-complete-toggle="p1-monitor">
+          <span class="check-icon">✓</span>
+        </div>
+        <span class="completion-label" data-complete-label>Mark this topic as complete</span>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="03-security.html" class="topic-nav-prev">
+          <span style="color:var(--text-muted)">←</span>
+          <div>
+            <div class="topic-nav-label">Previous topic</div>
+            <div class="topic-nav-title">Security & Authentication</div>
+          </div>
+        </a>
+        <a href="05-responsible-ai.html" class="topic-nav-next">
+          <div>
+            <div class="topic-nav-label">Next topic</div>
+            <div class="topic-nav-title">Responsible AI →</div>
+          </div>
+        </a>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /app-shell -->
+
+<script src="../../scripts/common.js"></script>
+</body>
+</html>

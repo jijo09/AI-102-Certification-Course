@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topic 3 — Security & Authentication | AI-102 Part 1</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      position: relative; overflow: hidden;
+      transition: border-color var(--transition-fast);
+    }
+    .auth-card:hover { border-color: var(--border-default); }
+    .auth-card-stripe {
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .auth-card-icon { font-size: 2rem; margin-bottom: var(--space-3); }
+    .auth-card-title {
+      font-family: var(--font-heading); font-size: 1rem;
+      font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-2);
+    }
+    .auth-card-desc {
+      font-size: 0.85rem; color: var(--text-secondary);
+      line-height: 1.65; margin-bottom: var(--space-4);
+    }
+    .auth-card-when {
+      font-size: 0.78rem; padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md); border: 1px solid var(--border-subtle);
+      background: var(--bg-secondary);
+    }
+    .auth-card-when-label {
+      font-family: var(--font-heading); font-size: 0.68rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: var(--space-1);
+    }
+
+    .role-row {
+      display: grid;
+      grid-template-columns: 220px 1fr 80px;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--border-subtle);
+      align-items: start;
+      font-size: 0.85rem;
+    }
+    .role-row:last-child { border-bottom: none; }
+    .role-row:hover { background: rgba(59,130,246,0.03); }
+    .role-name {
+      font-family: var(--font-mono); font-size: 0.78rem;
+      color: var(--blue-300); font-weight: 500;
+    }
+    .role-access { color: var(--text-secondary); line-height: 1.5; }
+    .role-endpoint {
+      font-family: var(--font-mono); font-size: 0.72rem;
+      font-weight: 600; text-align: center; padding: 3px 8px;
+      border-radius: var(--radius-sm);
+    }
+    .role-yes { background: rgba(16,185,129,0.15); color: var(--green-400); }
+    .role-no  { background: rgba(239,68,68,0.12);  color: var(--red-400);   }
+
+    .network-layer {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-3);
+      overflow: hidden;
+    }
+    .network-layer-header {
+      background: var(--bg-card);
+      padding: var(--space-3) var(--space-5);
+      display: flex; align-items: center; gap: var(--space-3);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .network-layer-body {
+      padding: var(--space-4) var(--space-5);
+      background: var(--bg-secondary);
+      font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;
+    }
+
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px);
+    }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+
+<div class="app-shell">
+
+  <!-- ════════ SIDEBAR ════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">AI</div>
+      <div>
+        <div class="sidebar-logo-text">AI-102 Study Hub</div>
+        <div class="sidebar-logo-sub">Azure AI Engineer</div>
+      </div>
+    </div>
+    <div style="padding:var(--space-3) var(--space-4);">
+      <input id="sidebar-search" type="text" placeholder="Search topics…"
+        style="width:100%;background:var(--bg-card);border:1px solid var(--border-subtle);
+        border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);
+        color:var(--text-primary);font-size:0.8rem;font-family:var(--font-body);outline:none;">
+    </div>
+        <nav class="sidebar-nav">
+      <a href="../../index.html" class="sidebar-item">Dashboard</a>
+      <div class="sidebar-group open" data-part-group="1">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span>
+          <span class="item-badge" data-part-progress="1">0/5</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part1-plan-manage/topics/01-foundry-services.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-foundry-services">
+            <span class="topic-dot" data-topic-check="p1-foundry-services"></span>Foundry Services
+          </a>
+          <a href="../../part1-plan-manage/topics/02-plan-create-deploy.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-plan-create-deploy">
+            <span class="topic-dot" data-topic-check="p1-plan-create-deploy"></span>Plan, Create &amp; Deploy
+          </a>
+          <a href="../../part1-plan-manage/topics/03-security.html" class="sidebar-item sidebar-sub-item active" data-topic-nav="p1-security">
+            <span class="topic-dot" data-topic-check="p1-security"></span>Security &amp; Auth
+          </a>
+          <a href="../../part1-plan-manage/topics/04-monitor.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-monitor">
+            <span class="topic-dot" data-topic-check="p1-monitor"></span>Monitor &amp; Manage
+          </a>
+          <a href="../../part1-plan-manage/topics/05-responsible-ai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-responsible-ai">
+            <span class="topic-dot" data-topic-check="p1-responsible-ai"></span>Responsible AI
+          </a>
+          <a href="../../part1-plan-manage/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../../part1-plan-manage/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="2">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 2 — Generative AI</span>
+          <span class="item-badge" data-part-progress="2">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part2-generative-ai/topics/01-foundry-build.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-foundry-build">
+            <span class="topic-dot" data-topic-check="p2-foundry-build"></span>Build with Foundry
+          </a>
+          <a href="../../part2-generative-ai/topics/02-azure-openai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-azure-openai">
+            <span class="topic-dot" data-topic-check="p2-azure-openai"></span>Azure OpenAI
+          </a>
+          <a href="../../part2-generative-ai/topics/03-optimize-operationalize.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-optimize">
+            <span class="topic-dot" data-topic-check="p2-optimize"></span>Optimize &amp; Operationalize
+          </a>
+          <a href="../../part2-generative-ai/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../../part2-generative-ai/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="3">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 3 — Agentic</span>
+          <span class="item-badge" data-part-progress="3">0/1</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part3-agentic/topics/01-custom-agents.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p3-custom-agents">
+            <span class="topic-dot" data-topic-check="p3-custom-agents"></span>Custom Agents
+          </a>
+          <a href="../../part3-agentic/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../../part3-agentic/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="4">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 4 — NLP</span>
+          <span class="item-badge" data-part-progress="4">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part4-nlp/topics/01-analyze-translate-text.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-analyze-text">
+            <span class="topic-dot" data-topic-check="p4-analyze-text"></span>Analyze &amp; Translate Text
+          </a>
+          <a href="../../part4-nlp/topics/02-speech.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-speech">
+            <span class="topic-dot" data-topic-check="p4-speech"></span>Speech Processing
+          </a>
+          <a href="../../part4-nlp/topics/03-custom-language-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-custom-language">
+            <span class="topic-dot" data-topic-check="p4-custom-language"></span>Custom Language Models
+          </a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="5">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 5 — Knowledge Mining</span>
+          <span class="item-badge" data-part-progress="5">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part5-knowledge-mining/topics/01-ai-search.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-ai-search">
+            <span class="topic-dot" data-topic-check="p5-ai-search"></span>Azure AI Search
+          </a>
+          <a href="../../part5-knowledge-mining/topics/02-document-intelligence.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-document-intelligence">
+            <span class="topic-dot" data-topic-check="p5-document-intelligence"></span>Document Intelligence
+          </a>
+          <a href="../../part5-knowledge-mining/topics/03-content-understanding.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-content-understanding">
+            <span class="topic-dot" data-topic-check="p5-content-understanding"></span>Content Understanding
+          </a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="6">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 6 — Computer Vision</span>
+          <span class="item-badge" data-part-progress="6">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part6-computer-vision/topics/01-analyze-images.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-analyze-images">
+            <span class="topic-dot" data-topic-check="p6-analyze-images"></span>Analyze Images
+          </a>
+          <a href="../../part6-computer-vision/topics/02-custom-vision-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-custom-vision">
+            <span class="topic-dot" data-topic-check="p6-custom-vision"></span>Custom Vision Models
+          </a>
+          <a href="../../part6-computer-vision/topics/03-video-analysis.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-video-analysis">
+            <span class="topic-dot" data-topic-check="p6-video-analysis"></span>Video Analysis
+          </a>
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-progress" id="sidebar-overall-progress">
+      <div class="sidebar-progress-label">
+        <span>Overall Progress</span>
+        <span data-overall-pct style="color:var(--blue-300);font-family:var(--font-mono)">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <!-- ════════ MAIN ════════ -->
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Security & Authentication</span>
+      </div>
+      <div class="topbar-actions">
+        <span style="font-size:0.75rem;color:var(--text-muted)">Exam in</span>
+        <span data-countdown style="font-family:var(--font-mono);font-size:0.85rem;color:var(--amber-400);font-weight:700">—</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- ── TOPIC HEADER ── -->
+      <div class="topic-header animate-fade-in">
+        <div class="topic-part-badge badge badge-blue domain-p1">⚙️ Part 1 · Topic 3 of 5</div>
+        <h1 class="topic-title">Security & Authentication</h1>
+        <p style="font-size:1rem;color:var(--text-secondary);max-width:680px;line-height:1.7;margin-top:var(--space-3)">
+          This is one of the most heavily tested topics in the entire AI-102 exam.
+          Security questions appear in every domain — not just Part 1.
+          Master this topic once and you'll gain marks across all 6 parts.
+          We cover every authentication method, RBAC roles, Key Vault,
+          private endpoints, network security, and encryption.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">🐍 <strong>Python examples — every line explained</strong></span>
+          <span class="topic-meta-item">⏱️ <strong>~55 min read</strong></span>
+          <span class="topic-meta-item">🔥 <strong>Very high exam weight</strong></span>
+          <span class="topic-meta-item">
+            ✅ <strong>Prerequisites:</strong>
+            <a href="01-foundry-services.html" style="color:var(--blue-300)">Topic 1</a> &
+            <a href="02-plan-create-deploy.html" style="color:var(--blue-300)">Topic 2</a>
+          </span>
+        </div>
+      </div>
+
+      <!-- prerequisite reminder -->
+      <div class="callout callout-concept">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-content">
+          <div class="callout-title">Building on Topics 1 & 2</div>
+          <p>
+            This topic uses: <strong>API key</strong>, <strong>endpoint</strong>,
+            <strong>resource</strong>, <strong>resource group</strong>,
+            <strong>subscription</strong>, <strong>SDK</strong>,
+            <strong>environment variable</strong>, and <strong>pip install</strong>
+            from the previous topics. It introduces entirely new security concepts
+            on top of that foundation.
+          </p>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 1 — NEW VOCABULARY
+      ════════════════════════════════ -->
+      <div class="section-block" id="vocab">
+        <div class="section-label">🔤 Section 1 — New Vocabulary for This Topic</div>
+        <h2>Security terms you must know</h2>
+        <p>All of these appear in exam questions. Learn them before the concepts below use them.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <span class="term-name">Authentication</span>
+            <p class="term-definition">
+              Proving who you are. When your Python code calls an Azure AI service,
+              it must prove it's authorised to do so. Authentication is the
+              "who are you?" check. There are multiple ways to authenticate —
+              this topic covers all of them.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Authorisation</span>
+            <p class="term-definition">
+              Deciding what you're allowed to do after you've proven who you are.
+              Authentication = proving identity. Authorisation = determining permissions.
+              In Azure, RBAC (Role-Based Access Control) handles authorisation.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Microsoft Entra ID</span>
+            <p class="term-definition">
+              The new name for Azure Active Directory (Azure AD). Microsoft's
+              cloud identity service — the system that manages users, groups,
+              and application identities in Azure. If you see "Azure AD" in an
+              exam question, it means Microsoft Entra ID.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Managed Identity</span>
+            <p class="term-definition">
+              An identity in Microsoft Entra ID that Azure automatically creates
+              and manages for a resource (like a Virtual Machine, App Service,
+              or Function). The resource can use this identity to authenticate
+              to other Azure services without storing any credentials in code.
+              Think of it as Azure giving your resource an automatic ID card.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">System-Assigned Managed Identity</span>
+            <p class="term-definition">
+              A managed identity that is tied directly to one specific Azure resource.
+              When that resource is deleted, the identity is automatically deleted too.
+              One resource = one identity. Simpler to set up.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">User-Assigned Managed Identity</span>
+            <p class="term-definition">
+              A managed identity that exists independently of any single resource.
+              You create it separately and then assign it to one or more resources.
+              When a resource is deleted, the identity still exists.
+              Use when multiple resources need to share the same identity.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Service Principal</span>
+            <p class="term-definition">
+              An application identity in Microsoft Entra ID — like a user account
+              but for an application rather than a person. Used when code running
+              outside Azure (e.g. on your laptop or in GitHub Actions)
+              needs to authenticate to Azure services.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">RBAC — Role-Based Access Control</span>
+            <p class="term-definition">
+              Azure's permission system. You assign a <em>role</em> (a set of permissions)
+              to a <em>principal</em> (a user, group, or identity) at a specific
+              <em>scope</em> (subscription, resource group, or resource).
+              This determines what actions that principal can perform.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Azure Key Vault</span>
+            <p class="term-definition">
+              A secure cloud storage service for secrets (API keys, passwords),
+              keys (encryption keys), and certificates (SSL/TLS).
+              Instead of storing an API key in your code or an environment variable,
+              you store it in Key Vault and your code retrieves it securely at runtime.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Private Endpoint</span>
+            <p class="term-definition">
+              A network interface that connects your Azure AI resource to your
+              private Virtual Network (VNet). Once a private endpoint is configured,
+              the resource is no longer accessible from the public internet —
+              it can only be reached from within your VNet.
+              Requires S0 pricing tier (not available on F0).
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">VNet — Virtual Network</span>
+            <p class="term-definition">
+              Azure's private network. Similar to your office network but in the cloud.
+              Resources inside a VNet can communicate with each other privately.
+              You can connect your on-premises network to a VNet using VPN or
+              ExpressRoute to extend your corporate network into Azure.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Customer-Managed Keys (CMK)</span>
+            <p class="term-definition">
+              By default, Azure encrypts your data using Microsoft-managed keys.
+              Customer-Managed Keys let you use your own encryption keys stored
+              in Azure Key Vault. You control the keys — meaning you control
+              access to the encrypted data. Required for some compliance frameworks.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Least Privilege</span>
+            <p class="term-definition">
+              A security principle: give any user, application, or service
+              only the minimum permissions it needs to do its job — no more.
+              If an app only needs to read from an AI service, don't give it
+              the Owner role. Give it only the Cognitive Services User role.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Key Rotation</span>
+            <p class="term-definition">
+              The practice of regularly replacing API keys to limit the damage if
+              a key is ever leaked. Azure AI services give you two keys (Key1, Key2)
+              specifically to enable zero-downtime rotation: switch apps to Key2,
+              regenerate Key1, switch apps back to Key1.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 2 — THE BIG PICTURE
+      ════════════════════════════════ -->
+      <div class="section-block" id="overview">
+        <div class="section-label">🗺️ Section 2 — The Security Big Picture</div>
+        <h2>Three layers of security you need to understand</h2>
+        <p>
+          Azure AI security works in three independent layers. The exam tests
+          all three separately and in combination. Understand each layer
+          clearly before diving into the details.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🏦</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A bank vault</div>
+            <p>
+              Imagine your Azure AI resource is a bank vault full of sensitive data.
+              <br><br>
+              <strong>Layer 1 — Authentication</strong> is the security guard at the door who checks
+              your ID before letting you in. This is <em>who</em> you are.
+              <br><br>
+              <strong>Layer 2 — Authorisation (RBAC)</strong> is the list on the guard's clipboard
+              that says what each person is allowed to do inside the vault —
+              some people can only view, others can also add, some can delete.
+              This is <em>what</em> you can do.
+              <br><br>
+              <strong>Layer 3 — Network Security</strong> is the physical perimeter —
+              the walls, private road, and gate around the bank building.
+              Even if you have valid ID and permissions, you can't get in
+              unless you're physically on the right network. This is
+              <em>where</em> you can connect from.
+            </p>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-top:var(--space-6)">
+          <div class="card" style="border-color:rgba(59,130,246,0.3);text-align:center">
+            <div style="font-size:2rem;margin-bottom:var(--space-3)">🪪</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Layer 1<br>Authentication</div>
+            <p style="font-size:0.8rem;color:var(--text-muted)">API keys · Entra ID tokens · Managed Identity · Service Principals</p>
+          </div>
+          <div class="card" style="border-color:rgba(245,158,11,0.3);text-align:center">
+            <div style="font-size:2rem;margin-bottom:var(--space-3)">📋</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Layer 2<br>Authorisation</div>
+            <p style="font-size:0.8rem;color:var(--text-muted)">RBAC roles · Scope · Least privilege</p>
+          </div>
+          <div class="card" style="border-color:rgba(239,68,68,0.3);text-align:center">
+            <div style="font-size:2rem;margin-bottom:var(--space-3)">🛡️</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Layer 3<br>Network Security</div>
+            <p style="font-size:0.8rem;color:var(--text-muted)">Private endpoints · VNet · IP firewall rules · Custom domain</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 3 — AUTHENTICATION TYPES
+      ════════════════════════════════ -->
+      <div class="section-block" id="auth">
+        <div class="section-label">🪪 Section 3 — Authentication Types</div>
+        <h2>Four ways to authenticate to an Azure AI service</h2>
+        <p>
+          The exam presents scenarios and asks which authentication method is most appropriate.
+          Each method has a specific use case. Learn the pattern for each.
+        </p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--space-5);margin-top:var(--space-6)">
+
+          <!-- Method 1: API Keys -->
+          <div class="auth-card">
+            <div class="auth-card-stripe" style="background:var(--blue-400)"></div>
+            <div class="auth-card-icon">🔑</div>
+            <div class="auth-card-title">Method 1 — Subscription Keys (API Keys)</div>
+            <p class="auth-card-desc">
+              The simplest method. Your Azure AI resource gives you two keys:
+              Key1 and Key2. You include one of these keys in every API request
+              in a header called <code>Ocp-Apim-Subscription-Key</code>.
+              Azure validates the key and grants access.
+              <br><br>
+              You have <strong>two keys</strong> so you can rotate them without downtime:
+              switch to Key2, regenerate Key1, switch back to Key1.
+            </p>
+            <div class="auth-card-when">
+              <div class="auth-card-when-label" style="color:var(--blue-300)">✅ Use when</div>
+              Simple apps, learning, development, or when the calling application
+              runs outside Azure and a managed identity is not available.
+              <br><br>
+              <div class="auth-card-when-label" style="color:var(--red-400);margin-top:var(--space-2)">❌ Avoid when</div>
+              High security environments — keys can be stolen if mishandled.
+              Prefer managed identity for production workloads running in Azure.
+            </div>
+          </div>
+
+          <!-- Method 2: Entra ID Token -->
+          <div class="auth-card">
+            <div class="auth-card-stripe" style="background:var(--purple-500)"></div>
+            <div class="auth-card-icon">🎫</div>
+            <div class="auth-card-title">Method 2 — Microsoft Entra ID Token</div>
+            <p class="auth-card-desc">
+              Instead of a static key, you request a temporary token from
+              Microsoft Entra ID (formerly Azure AD). This token is valid for
+              a short time (usually 1 hour) and then expires. It is included
+              in the request header as <code>Authorization: Bearer &lt;token&gt;</code>.
+              <br><br>
+              This is more secure than API keys because tokens expire
+              automatically and can be revoked instantly.
+            </p>
+            <div class="auth-card-when">
+              <div class="auth-card-when-label" style="color:var(--purple-400)">✅ Use when</div>
+              Your application already uses Entra ID for authentication,
+              you need fine-grained access control via RBAC roles,
+              or compliance requirements forbid static credentials.
+            </div>
+          </div>
+
+          <!-- Method 3: Managed Identity -->
+          <div class="auth-card">
+            <div class="auth-card-stripe" style="background:var(--green-500)"></div>
+            <div class="auth-card-icon">🤖</div>
+            <div class="auth-card-title">Method 3 — Managed Identity</div>
+            <p class="auth-card-desc">
+              The most recommended method for Azure-to-Azure authentication.
+              Your Azure resource (e.g. App Service, Function, VM) gets an
+              automatic identity managed by Azure. It uses that identity to
+              get Entra ID tokens automatically — <strong>no credentials
+              stored anywhere in your code or configuration</strong>.
+              <br><br>
+              <strong>System-assigned:</strong> one-to-one with the resource, deleted when resource is deleted.<br>
+              <strong>User-assigned:</strong> independent, can be shared across multiple resources.
+            </p>
+            <div class="auth-card-when">
+              <div class="auth-card-when-label" style="color:var(--green-400)">✅ Use when</div>
+              Your code runs inside Azure (App Service, Function, VM, AKS).
+              This is the <strong>gold standard</strong> for production — no secrets to manage,
+              no risk of key leakage, automatic token rotation.
+            </div>
+          </div>
+
+          <!-- Method 4: Service Principal -->
+          <div class="auth-card">
+            <div class="auth-card-stripe" style="background:var(--amber-500)"></div>
+            <div class="auth-card-icon">🏢</div>
+            <div class="auth-card-title">Method 4 — Service Principal</div>
+            <p class="auth-card-desc">
+              An application identity registered in Microsoft Entra ID.
+              Used when code runs <strong>outside Azure</strong> — on a developer's
+              laptop, in a GitHub Actions pipeline, or on an on-premises server —
+              and needs to authenticate to Azure services.
+              <br><br>
+              You create a service principal, give it a client ID and a secret
+              (or certificate), and use those to get an Entra ID token.
+            </p>
+            <div class="auth-card-when">
+              <div class="auth-card-when-label" style="color:var(--amber-400)">✅ Use when</div>
+              Code runs outside Azure and needs to authenticate to Azure services.
+              Common in CI/CD pipelines (GitHub Actions, Azure DevOps)
+              and on-premises server integrations.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Python code for each method -->
+        <h3 style="margin-top:var(--space-10);margin-bottom:var(--space-4)">
+          Python code for each authentication method
+        </h3>
+
+        <div class="tabs">
+          <button class="tab-btn active">🔑 API Key</button>
+          <button class="tab-btn">🤖 Managed Identity</button>
+          <button class="tab-btn">🎫 Entra ID Token</button>
+          <button class="tab-btn">🏢 Service Principal</button>
+        </div>
+
+        <div>
+          <!-- API Key Tab -->
+          <div class="tab-panel active">
+            <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:var(--space-4)">
+              The simplest method — you learned this pattern in Topic 1.
+              Using the API key directly with <code>AzureKeyCredential</code>.
+            </p>
+<pre><code><span class="token-comment"># Import modules (from Topic 1 and Topic 2)</span>
+<span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> azure.ai.textanalytics <span class="token-keyword">import</span> TextAnalyticsClient
+<span class="token-keyword">from</span> azure.core.credentials <span class="token-keyword">import</span> AzureKeyCredential
+
+<span class="token-comment"># Read key and endpoint from environment variables (never hard-code!)</span>
+key      = os.environ.get(<span class="token-string">"LANGUAGE_KEY"</span>)
+endpoint = os.environ.get(<span class="token-string">"LANGUAGE_ENDPOINT"</span>)
+
+<span class="token-comment"># AzureKeyCredential wraps your key into the format Azure expects</span>
+credential = AzureKeyCredential(key)
+
+<span class="token-comment"># Create the client using API key authentication</span>
+client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
+
+<span class="token-keyword">print</span>(<span class="token-string">"Authenticated with API Key ✅"</span>)</code></pre>
+          </div>
+
+          <!-- Managed Identity Tab -->
+          <div class="tab-panel">
+            <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:var(--space-4)">
+              The recommended production method. Notice there is no key or secret
+              anywhere in this code — Azure handles authentication automatically.
+              Requires <code>pip install azure-identity</code>.
+            </p>
+<pre><code><span class="token-comment"># azure-identity provides credential classes for all Entra ID-based authentication</span>
+<span class="token-comment"># Install with: pip install azure-identity</span>
+<span class="token-keyword">from</span> azure.identity <span class="token-keyword">import</span> DefaultAzureCredential
+
+<span class="token-comment"># The Language SDK — same as before</span>
+<span class="token-keyword">from</span> azure.ai.textanalytics <span class="token-keyword">import</span> TextAnalyticsClient
+<span class="token-keyword">import</span> os
+
+endpoint = os.environ.get(<span class="token-string">"LANGUAGE_ENDPOINT"</span>)
+
+<span class="token-comment"># DefaultAzureCredential is a "smart" credential that tries multiple methods</span>
+<span class="token-comment"># in order until one works:</span>
+<span class="token-comment"># 1. Environment variables (for service principal)</span>
+<span class="token-comment"># 2. Managed Identity (when running inside Azure)</span>
+<span class="token-comment"># 3. Azure CLI credentials (when running locally as a developer)</span>
+<span class="token-comment"># This makes it work in both development (your laptop) AND production (Azure)</span>
+credential = DefaultAzureCredential()
+
+<span class="token-comment"># Pass the credential to the client — the SDK handles getting the token automatically</span>
+<span class="token-comment"># No key needed — Azure fetches and refreshes the token behind the scenes</span>
+client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
+
+<span class="token-keyword">print</span>(<span class="token-string">"Authenticated with Managed Identity / DefaultAzureCredential ✅"</span>)
+
+<span class="token-comment"># ── For EXPLICIT managed identity (user-assigned) ─────────────────────</span>
+<span class="token-keyword">from</span> azure.identity <span class="token-keyword">import</span> ManagedIdentityCredential
+
+<span class="token-comment"># If you have a user-assigned managed identity, specify its client ID</span>
+<span class="token-comment"># client_id is the unique identifier of the user-assigned managed identity</span>
+<span class="token-comment"># (found in Azure portal → Managed Identities → your identity → Overview)</span>
+user_assigned_credential = ManagedIdentityCredential(
+    client_id=<span class="token-string">"your-managed-identity-client-id-here"</span>
+)
+
+client_explicit = TextAnalyticsClient(endpoint=endpoint, credential=user_assigned_credential)
+<span class="token-keyword">print</span>(<span class="token-string">"Authenticated with User-Assigned Managed Identity ✅"</span>)</code></pre>
+          </div>
+
+          <!-- Entra ID Token Tab -->
+          <div class="tab-panel">
+            <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:var(--space-4)">
+              Getting an Entra ID token manually and using it in a REST API call.
+              The exam may show raw HTTP requests — this is what they look like.
+            </p>
+<pre><code><span class="token-comment"># This example shows how Entra ID tokens work at the HTTP level</span>
+<span class="token-comment"># The SDK does all this automatically — but the exam may show raw HTTP requests</span>
+
+<span class="token-keyword">import</span> requests  <span class="token-comment"># HTTP library — install with: pip install requests</span>
+
+<span class="token-comment"># ── Step 1: Get a token from Microsoft Entra ID ───────────────────────</span>
+
+<span class="token-comment"># Your Azure tenant ID — found in Azure portal → Entra ID → Overview</span>
+tenant_id = <span class="token-string">"your-tenant-id"</span>
+
+<span class="token-comment"># The token endpoint for your tenant — this is always this format</span>
+token_url = <span class="token-string">f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"</span>
+
+<span class="token-comment"># The "scope" tells Entra ID which Azure service you want to access</span>
+<span class="token-comment"># For Azure Cognitive Services / AI Services, the scope is always this URL</span>
+token_data = {
+    <span class="token-string">"grant_type"</span>: <span class="token-string">"client_credentials"</span>,   <span class="token-comment"># We're authenticating as an app, not a user</span>
+    <span class="token-string">"client_id"</span>: <span class="token-string">"your-service-principal-client-id"</span>,
+    <span class="token-string">"client_secret"</span>: <span class="token-string">"your-service-principal-secret"</span>,
+    <span class="token-string">"scope"</span>: <span class="token-string">"https://cognitiveservices.azure.com/.default"</span>
+}
+
+<span class="token-comment"># POST request to get the token — Entra ID responds with a JSON object</span>
+token_response = requests.post(token_url, data=token_data)
+
+<span class="token-comment"># Extract the access_token from the JSON response</span>
+<span class="token-comment"># .json() converts the response body from text into a Python dictionary</span>
+<span class="token-comment"># ["access_token"] retrieves the value stored under that key in the dictionary</span>
+access_token = token_response.json()[<span class="token-string">"access_token"</span>]
+
+
+<span class="token-comment"># ── Step 2: Use the token in an API call ──────────────────────────────</span>
+
+<span class="token-comment"># The token goes in the "Authorization" header with the word "Bearer " before it</span>
+<span class="token-comment"># "Bearer" is a token type — it just means "the holder of this token is authorised"</span>
+headers = {
+    <span class="token-string">"Authorization"</span>: <span class="token-string">f"Bearer {access_token}"</span>,
+    <span class="token-string">"Content-Type"</span>: <span class="token-string">"application/json"</span>
+}
+
+<span class="token-comment"># Now make the actual API call with the token in the header</span>
+endpoint = <span class="token-string">"https://your-resource.cognitiveservices.azure.com/"</span>
+response = requests.post(
+    <span class="token-string">f"{endpoint}text/analytics/v3.1/languages"</span>,
+    headers=headers,
+    json={<span class="token-string">"documents"</span>: [{<span class="token-string">"id"</span>: <span class="token-string">"1"</span>, <span class="token-string">"text"</span>: <span class="token-string">"Hello world"</span>}]}
+)
+
+<span class="token-keyword">print</span>(response.json())  <span class="token-comment"># Print the API response</span></code></pre>
+          </div>
+
+          <!-- Service Principal Tab -->
+          <div class="tab-panel">
+            <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:var(--space-4)">
+              Service principal authentication — for code running outside Azure.
+              Uses <code>ClientSecretCredential</code> from <code>azure-identity</code>.
+            </p>
+<pre><code><span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> azure.identity <span class="token-keyword">import</span> ClientSecretCredential
+<span class="token-keyword">from</span> azure.ai.textanalytics <span class="token-keyword">import</span> TextAnalyticsClient
+
+<span class="token-comment"># Three pieces of information identify a service principal:</span>
+
+<span class="token-comment"># 1. tenant_id — the unique ID of your Azure organisation (tenant)</span>
+<span class="token-comment">#    Found in: Azure portal → Microsoft Entra ID → Overview → Tenant ID</span>
+tenant_id = os.environ.get(<span class="token-string">"AZURE_TENANT_ID"</span>)
+
+<span class="token-comment"># 2. client_id — the unique ID of the registered application (service principal)</span>
+<span class="token-comment">#    Found in: Azure portal → Entra ID → App Registrations → your app → Application ID</span>
+client_id = os.environ.get(<span class="token-string">"AZURE_CLIENT_ID"</span>)
+
+<span class="token-comment"># 3. client_secret — a password generated for the service principal</span>
+<span class="token-comment">#    Found in: App Registrations → your app → Certificates & secrets</span>
+<span class="token-comment">#    ⚠️ Store this in an environment variable or Key Vault — never in code!</span>
+client_secret = os.environ.get(<span class="token-string">"AZURE_CLIENT_SECRET"</span>)
+
+endpoint = os.environ.get(<span class="token-string">"LANGUAGE_ENDPOINT"</span>)
+
+<span class="token-comment"># ClientSecretCredential uses the three values to get an Entra ID token automatically</span>
+credential = ClientSecretCredential(
+    tenant_id=tenant_id,
+    client_id=client_id,
+    client_secret=client_secret
+)
+
+<span class="token-comment"># Pass the credential to the client — same as managed identity from here on</span>
+client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
+
+<span class="token-keyword">print</span>(<span class="token-string">"Authenticated with Service Principal ✅"</span>)</code></pre>
+          </div>
+        </div><!-- /tab panels -->
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 4 — RBAC ROLES
+      ════════════════════════════════ -->
+      <div class="section-block" id="rbac">
+        <div class="section-label">📋 Section 4 — RBAC Roles for Azure AI Services</div>
+
+        <h2>Who can do what — the role table</h2>
+        <p>
+          Once someone is authenticated, RBAC determines what they're allowed to do.
+          The exam tests specific roles for Azure AI resources — especially the
+          <strong>critical trap</strong> around Owner and Contributor.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">The Most Tested RBAC Trap — Owner ≠ API Access</div>
+            <p>
+              This catches many candidates. In Azure AI services,
+              <strong>Owner</strong> and <strong>Contributor</strong> roles let you
+              manage the resource (create it, delete it, change settings) but they
+              do <strong>NOT</strong> grant access to call the service's endpoint
+              (the AI functionality itself). To call the endpoint, you need
+              <strong>Cognitive Services User</strong> role or to use an API key.
+              This is different from most other Azure services.
+            </p>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);overflow:hidden;margin-top:var(--space-6)">
+          <!-- Header row -->
+          <div class="role-row" style="background:var(--navy-800);font-weight:700;font-size:0.78rem;color:var(--text-muted)">
+            <div>Role Name</div>
+            <div>What it allows</div>
+            <div style="text-align:center">Endpoint Access?</div>
+          </div>
+
+          <div class="role-row">
+            <div class="role-name">Owner</div>
+            <div class="role-access">Full control of the resource — create, delete, change settings, assign roles. Inherits all Contributor permissions.</div>
+            <div><span class="role-endpoint role-no">❌ No</span></div>
+          </div>
+
+          <div class="role-row">
+            <div class="role-name">Contributor</div>
+            <div class="role-access">Create and manage the resource. Cannot assign roles to others. Cannot access the AI endpoint functionality.</div>
+            <div><span class="role-endpoint role-no">❌ No</span></div>
+          </div>
+
+          <div class="role-row">
+            <div class="role-name">Cognitive Services Contributor</div>
+            <div class="role-access">Manage the AI service settings AND view the resource keys. Can regenerate keys. Combines management + key access.</div>
+            <div><span class="role-endpoint role-yes">✅ Via key</span></div>
+          </div>
+
+          <div class="role-row">
+            <div class="role-name">Cognitive Services User</div>
+            <div class="role-access">Call the service endpoints and view keys. Cannot change resource settings or delete the resource. The minimum role for application developers.</div>
+            <div><span class="role-endpoint role-yes">✅ Yes</span></div>
+          </div>
+
+          <div class="role-row">
+            <div class="role-name">Cognitive Services OpenAI User</div>
+            <div class="role-access">Call Azure OpenAI endpoints specifically. For applications that only need Azure OpenAI access (not other AI services).</div>
+            <div><span class="role-endpoint role-yes">✅ OpenAI only</span></div>
+          </div>
+
+          <div class="role-row">
+            <div class="role-name">Cognitive Services OpenAI Contributor</div>
+            <div class="role-access">Full access to Azure OpenAI — call endpoints AND manage deployments, fine-tuning, and models.</div>
+            <div><span class="role-endpoint role-yes">✅ OpenAI full</span></div>
+          </div>
+
+          <div class="role-row" style="background:rgba(59,130,246,0.04)">
+            <div class="role-name">Search Service Contributor</div>
+            <div class="role-access">Manage the Azure AI Search service (create indexes, configure settings). Does NOT grant access to the search endpoint.</div>
+            <div><span class="role-endpoint role-no">❌ No</span></div>
+          </div>
+
+          <div class="role-row" style="background:rgba(59,130,246,0.04)">
+            <div class="role-name">Search Index Data Reader</div>
+            <div class="role-access">Query the search index. Read-only access to search endpoint results. The minimum role for apps that only need to search.</div>
+            <div><span class="role-endpoint role-yes">✅ Read only</span></div>
+          </div>
+
+        </div>
+
+        <div class="callout callout-exam" style="margin-top:var(--space-6)">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">How to apply RBAC in the Azure Portal</div>
+            <p>
+              1. Go to your AI resource in the Azure portal<br>
+              2. In the left menu click <strong>Access control (IAM)</strong><br>
+              3. Click <strong>+ Add → Add role assignment</strong><br>
+              4. Select the role → Next<br>
+              5. Select the user, group, or managed identity → Next → Review + assign<br><br>
+              The scope of the assignment matters: assigning at resource group level
+              gives access to all resources in that group.
+              Assigning at resource level gives access only to that specific resource.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 5 — KEY VAULT
+      ════════════════════════════════ -->
+      <div class="section-block" id="keyvault">
+        <div class="section-label">🔐 Section 5 — Azure Key Vault</div>
+
+        <h2>Storing and retrieving secrets securely</h2>
+        <p>
+          In Topic 2, you learned to store your API key in an environment variable.
+          For production, the better approach is Azure Key Vault — a dedicated
+          cloud service for storing secrets, keys, and certificates.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🏦</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A safe deposit box</div>
+            <p>
+              An environment variable is like writing your PIN on a sticky note
+              inside your desk drawer — safer than a public whiteboard, but still
+              vulnerable if someone gets into your desk. Azure Key Vault is like
+              a bank's safe deposit box: locked, audited, and only accessible
+              to people with the right key card. Even if your application server
+              is compromised, the attacker can't get to your secrets without
+              also compromising the Key Vault access policies.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">
+          Key Vault concepts you must know
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4)">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:var(--space-3)">Three types of items in Key Vault</div>
+            <p style="font-size:0.85rem">
+              <strong>Secrets</strong> — Text values like API keys, connection strings, passwords.<br><br>
+              <strong>Keys</strong> — Cryptographic keys used for encryption/decryption. Used for Customer-Managed Keys (CMK).<br><br>
+              <strong>Certificates</strong> — SSL/TLS certificates for securing web endpoints.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:var(--space-3)">One Key Vault per application</div>
+            <p style="font-size:0.85rem">
+              Microsoft's best practice: use a separate Key Vault for each application.
+              This limits the "blast radius" — if an attacker gains access to one
+              vault, they can only reach that application's secrets, not secrets
+              from all your applications.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:var(--space-3)">Access via Managed Identity</div>
+            <p style="font-size:0.85rem">
+              Your application (running in Azure) should access Key Vault using
+              its managed identity — not another set of credentials. This creates
+              a chain: app → managed identity → Key Vault → secret.
+              No credentials stored anywhere.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:var(--space-3)">Soft Delete & Purge Protection</div>
+            <p style="font-size:0.85rem">
+              <strong>Soft delete:</strong> deleted secrets are retained for 90 days
+              before permanent removal — accidental deletion recovery.<br><br>
+              <strong>Purge protection:</strong> prevents anyone (including admins)
+              from permanently deleting a vault during the retention period.
+              Required for Customer-Managed Keys compliance.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">
+          Python — Reading a secret from Key Vault
+        </h3>
+        <p style="margin-bottom:var(--space-4)">
+          A new Python concept here: <strong>chaining methods</strong>.
+          When you call <code>client.get_secret("name")</code>, it returns an object.
+          You then use <code>.value</code> on that object to get the actual secret text.
+          This is explained in the code comments.
+          <br>Requires: <code>pip install azure-keyvault-secrets azure-identity</code>
+        </p>
+
+<pre><code><span class="token-comment"># Install these first:</span>
+<span class="token-comment"># pip install azure-keyvault-secrets azure-identity</span>
+
+<span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> azure.keyvault.secrets <span class="token-keyword">import</span> SecretClient   <span class="token-comment"># SDK for reading Key Vault secrets</span>
+<span class="token-keyword">from</span> azure.identity <span class="token-keyword">import</span> DefaultAzureCredential  <span class="token-comment"># From Topic 3 Section 3</span>
+
+
+<span class="token-comment"># ── Your Key Vault URL ────────────────────────────────────────────────</span>
+<span class="token-comment"># Format is always: https://YOUR-VAULT-NAME.vault.azure.net/</span>
+<span class="token-comment"># Found in: Azure portal → Key Vault → Overview → Vault URI</span>
+vault_url = os.environ.get(<span class="token-string">"KEY_VAULT_URL"</span>)  <span class="token-comment"># e.g. "https://myvault.vault.azure.net/"</span>
+
+
+<span class="token-comment"># ── Authenticate using Managed Identity (no credentials in code!) ─────</span>
+<span class="token-comment"># DefaultAzureCredential automatically uses the managed identity of the</span>
+<span class="token-comment"># Azure resource this code is running on (App Service, VM, Function, etc.)</span>
+credential = DefaultAzureCredential()
+
+
+<span class="token-comment"># ── Create the Key Vault client ───────────────────────────────────────</span>
+<span class="token-comment"># SecretClient is specifically for reading/writing secrets (not keys or certs)</span>
+<span class="token-comment"># vault_url tells it which Key Vault to connect to</span>
+<span class="token-comment"># credential tells it how to prove it has access</span>
+secret_client = SecretClient(vault_url=vault_url, credential=credential)
+
+
+<span class="token-comment"># ── Retrieve a secret ─────────────────────────────────────────────────</span>
+<span class="token-comment"># get_secret("name") fetches the secret object from Key Vault</span>
+<span class="token-comment"># The name must match the secret name you created in Key Vault</span>
+secret_object = secret_client.get_secret(<span class="token-string">"language-api-key"</span>)
+
+<span class="token-comment"># The secret object has a .value property that holds the actual secret text</span>
+<span class="token-comment"># (The object also has .name, .id, .properties for metadata — but we want .value)</span>
+api_key = secret_object.value
+
+<span class="token-keyword">print</span>(<span class="token-string">f"Secret retrieved successfully. Key starts with: {api_key[:4]}..."</span>)
+<span class="token-comment"># We only print the first 4 characters — never print a full key!</span>
+
+
+<span class="token-comment"># ── Now use the key to call the AI service ────────────────────────────</span>
+<span class="token-keyword">from</span> azure.ai.textanalytics <span class="token-keyword">import</span> TextAnalyticsClient
+<span class="token-keyword">from</span> azure.core.credentials <span class="token-keyword">import</span> AzureKeyCredential
+
+endpoint = os.environ.get(<span class="token-string">"LANGUAGE_ENDPOINT"</span>)
+
+<span class="token-comment"># Use the key we retrieved from Key Vault — not from an env variable</span>
+ai_credential = AzureKeyCredential(api_key)
+ai_client = TextAnalyticsClient(endpoint=endpoint, credential=ai_credential)
+
+<span class="token-keyword">print</span>(<span class="token-string">"AI client created using key from Key Vault ✅"</span>)</code></pre>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">
+          Customer-Managed Keys (CMK) — what the exam tests
+        </h3>
+        <p>
+          By default Azure encrypts your data with Microsoft-managed keys.
+          Customer-Managed Keys let you use your own keys stored in Key Vault.
+          The exam tests the configuration requirements — not the Python code.
+        </p>
+        <table class="compare-table">
+          <thead>
+            <tr><th>CMK Requirement</th><th>Why it matters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Store the key in Azure Key Vault</td>
+              <td>CMK keys must live in Key Vault — Azure Managed HSM or standard Key Vault.</td>
+            </tr>
+            <tr>
+              <td>Provide the Key Identifier URI</td>
+              <td>You give Azure AI service the URI of your key so it can find and use it for encryption.</td>
+            </tr>
+            <tr>
+              <td>Grant the AI service access to Key Vault</td>
+              <td>The AI service's managed identity must have Key Vault Crypto User role on the vault.</td>
+            </tr>
+            <tr>
+              <td>Enable Soft Delete + Purge Protection on the vault</td>
+              <td>Required by Microsoft for CMK vaults — prevents accidental permanent deletion of encryption keys.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — CMK Trick Question</div>
+            <p>
+              The exam asks: <em>"Which of the following is NOT required when
+              configuring Customer-Managed Keys?"</em> The wrong answers typically
+              include: "disable Soft Delete on the Key Vault" (wrong — you must
+              ENABLE it), or "Azure Managed HSM is required" (wrong — standard
+              Key Vault works). The correct requirements are:
+              Key Vault URI, create/import the key, grant the AI service access,
+              and enable Soft Delete + Purge Protection.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 6 — NETWORK SECURITY
+      ════════════════════════════════ -->
+      <div class="section-block" id="network">
+        <div class="section-label">🛡️ Section 6 — Network Security</div>
+
+        <h2>Controlling where your AI service can be accessed from</h2>
+        <p>
+          Even with authentication and RBAC in place, you can add a third layer
+          of security by restricting which networks can even reach your service.
+          Think of this as controlling the physical perimeter.
+        </p>
+
+        <h3 style="margin-bottom:var(--space-4)">Three network access modes</h3>
+
+        <div class="network-layer">
+          <div class="network-layer-header">
+            <span style="font-size:1.2rem">🌍</span>
+            <div>
+              <div style="font-family:var(--font-heading);font-weight:600;font-size:0.9rem">All Networks (default)</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">Public internet accessible · F0 and S0</div>
+            </div>
+            <span class="badge badge-amber" style="margin-left:auto">Least Secure</span>
+          </div>
+          <div class="network-layer-body">
+            The default setting. Your AI service endpoint is reachable from anywhere on the internet
+            (but still requires authentication). Fine for development and learning, but not recommended
+            for production with sensitive data.
+          </div>
+        </div>
+
+        <div class="network-layer">
+          <div class="network-layer-header">
+            <span style="font-size:1.2rem">🔧</span>
+            <div>
+              <div style="font-family:var(--font-heading);font-weight:600;font-size:0.9rem">Selected Networks (IP Firewall Rules)</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">Specific IP addresses or VNets allowed · S0 only</div>
+            </div>
+            <span class="badge badge-blue" style="margin-left:auto">Moderate Security</span>
+          </div>
+          <div class="network-layer-body">
+            You specify which IP addresses or Azure Virtual Networks are allowed to reach the service.
+            All other traffic is blocked. For example: "Only allow traffic from our office IP address
+            (203.0.113.0/24) and our Azure VNet." Configurable in:
+            Azure portal → your resource → <strong>Networking</strong> → Firewalls and virtual networks.
+            <br><br>
+            <strong>Note:</strong> requires S0 tier. Does NOT require a custom domain (unlike private endpoints).
+          </div>
+        </div>
+
+        <div class="network-layer">
+          <div class="network-layer-header">
+            <span style="font-size:1.2rem">🔒</span>
+            <div>
+              <div style="font-family:var(--font-heading);font-weight:600;font-size:0.9rem">Private Endpoint</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">Completely private — no public internet · S0 only</div>
+            </div>
+            <span class="badge badge-green" style="margin-left:auto">Most Secure</span>
+          </div>
+          <div class="network-layer-body">
+            The most secure option. A private endpoint creates a network interface inside your
+            Azure Virtual Network. Your AI service gets a private IP address within your VNet
+            and is completely removed from the public internet. No one outside your VNet can reach it.
+            <br><br>
+            <strong>Requirements:</strong>
+            <br>• S0 tier (not available on F0)
+            <br>• An Azure Virtual Network must exist
+            <br>• DNS must be configured so requests to your endpoint URL resolve to the private IP
+            <br>• For Azure AI Speech specifically: a <strong>custom subdomain</strong> must be enabled
+            on the resource before creating a private endpoint. This is a Speech-specific requirement.
+            <br><br>
+            <strong>How to create:</strong> Azure portal → your resource → Networking → Private endpoint connections → + Private endpoint
+          </div>
+        </div>
+
+        <div class="callout callout-exam" style="margin-top:var(--space-6)">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Scenario Pattern — Network Security</div>
+            <p>
+              <em>"A company requires that the AI service must not be accessible from the public internet and all traffic must stay within the Azure Virtual Network."</em>
+              → Answer: <strong>Private endpoint on S0 tier</strong>
+              <br><br>
+              <em>"A company wants to restrict their AI service to only be accessible from their corporate network (IP range 10.0.0.0/8)."</em>
+              → Answer: <strong>Selected Networks with IP firewall rule</strong>
+              <br><br>
+              <em>"A developer needs to use a private endpoint with the Azure AI Speech service."</em>
+              → Answer: <strong>First enable a custom subdomain on the Speech resource, then create the private endpoint</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 7 — KEY ROTATION
+      ════════════════════════════════ -->
+      <div class="section-block" id="rotation">
+        <div class="section-label">🔄 Section 7 — Protecting & Rotating Keys</div>
+
+        <h2>Zero-downtime key rotation</h2>
+        <p>
+          API keys should be rotated regularly — replaced with a new key
+          to limit the damage if a key is ever compromised.
+          Azure gives you two keys (Key1 and Key2) specifically to enable
+          this without any downtime.
+        </p>
+
+        <div class="step-list" style="margin-top:var(--space-6)">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-title">Switch all applications to Key2</div>
+              <p class="step-desc">Update your apps, environment variables, or Key Vault secret to use Key2 instead of Key1. Deploy the changes. All traffic now uses Key2.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-title">Regenerate Key1</div>
+              <p class="step-desc">
+                In the Azure portal → your resource → Keys and Endpoint → click
+                <span class="portal-click" style="background:var(--bg-secondary);border:1px solid var(--border-default);border-radius:4px;padding:2px 8px;font-family:var(--font-mono);font-size:0.75px;color:var(--blue-300)">↻ Regenerate Key1</span>.
+                Azure creates a new, completely different Key1 value.
+                The old Key1 is immediately invalidated.
+                Your apps are unaffected because they're using Key2.
+              </p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-title">Switch all applications back to the new Key1</div>
+              <p class="step-desc">Update your apps to use the new Key1 value. Now Key2 is unused and ready for the next rotation cycle.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <div class="step-title">Optionally regenerate Key2 as well</div>
+              <p class="step-desc">For maximum security, also regenerate Key2 so both keys are fresh. Repeat this entire cycle periodically (monthly or quarterly is common).</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-3)">
+          Regenerating a key via the REST API (what the exam shows)
+        </h3>
+        <p>
+          The exam sometimes shows a raw HTTP request for key regeneration and
+          asks what it does. Know this pattern:
+        </p>
+
+<pre><code><span class="token-comment"># This is a REST API call (not Python) — it regenerates a key via the Azure Management API</span>
+<span class="token-comment"># The exam may show this pattern and ask what "keyName: Key2" does</span>
+
+POST https://management.azure.com/subscriptions/{subscription-id}/resourceGroups/{rg}/providers/
+Microsoft.CognitiveServices/accounts/{resource-name}/regenerateKey?api-version=2023-05-01
+
+Body:
+{
+    "keyName": "Key2"    <span class="token-comment"># Specifies WHICH key to regenerate (Key1 or Key2)</span>
+}
+
+<span class="token-comment"># Result: Key2 is regenerated (a new value is created)</span>
+<span class="token-comment"># Key1 is NOT affected</span>
+<span class="token-comment"># This is the secondary subscription key being reset — not both keys</span></code></pre>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 8 — SECURITY DECISION GUIDE
+      ════════════════════════════════ -->
+      <div class="section-block" id="decision">
+        <div class="section-label">🗺️ Section 8 — Security Decision Guide</div>
+
+        <h2>Choosing the right security approach for any scenario</h2>
+
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Scenario Keyword</th>
+              <th>Right Answer</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>"No credentials in code"</td>
+              <td>Managed Identity + DefaultAzureCredential</td>
+              <td>Managed identity has no credentials to store — Azure handles it automatically</td>
+            </tr>
+            <tr>
+              <td>"Code runs outside Azure" / "CI/CD pipeline"</td>
+              <td>Service Principal with client secret</td>
+              <td>Managed identity only works inside Azure. External code needs a service principal.</td>
+            </tr>
+            <tr>
+              <td>"Multiple services share the same identity"</td>
+              <td>User-Assigned Managed Identity</td>
+              <td>User-assigned identities can be assigned to multiple resources simultaneously</td>
+            </tr>
+            <tr>
+              <td>"Not accessible from the public internet"</td>
+              <td>Private endpoint (S0 tier)</td>
+              <td>Private endpoint removes the resource from public internet entirely</td>
+            </tr>
+            <tr>
+              <td>"Only accessible from our office IP"</td>
+              <td>IP Firewall rules / Selected Networks</td>
+              <td>Firewall rules block all IPs except those explicitly allowed</td>
+            </tr>
+            <tr>
+              <td>"Store API keys securely" / "No secrets in config files"</td>
+              <td>Azure Key Vault</td>
+              <td>Key Vault is purpose-built for secure secret storage</td>
+            </tr>
+            <tr>
+              <td>"Rotate keys without downtime"</td>
+              <td>Two-key rotation (Key1 / Key2)</td>
+              <td>Switch to Key2, regenerate Key1, switch back</td>
+            </tr>
+            <tr>
+              <td>"Manage your own encryption keys"</td>
+              <td>Customer-Managed Keys (CMK) via Key Vault</td>
+              <td>CMK lets you control the encryption keys used on your data</td>
+            </tr>
+            <tr>
+              <td>"App only needs to call the AI endpoint, not manage it"</td>
+              <td>Cognitive Services User role</td>
+              <td>Least privilege — User role grants endpoint access only, no management permissions</td>
+            </tr>
+            <tr>
+              <td>"Owner / Contributor can't call the AI endpoint"</td>
+              <td>Add Cognitive Services User role</td>
+              <td>Owner/Contributor are management roles, not endpoint access roles</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 9 — EXAM TIPS
+      ════════════════════════════════ -->
+      <div class="section-block" id="exam-tips">
+        <div class="section-label">🎯 Section 9 — Exam Tips</div>
+        <h2>Security questions — what to watch for</h2>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Top 6 Security Traps on the Exam</div>
+            <p>
+              <strong>1. Owner ≠ endpoint access</strong> — Giving someone the Owner role
+              does NOT let them call the AI service endpoint. They need
+              Cognitive Services User role for that. This is tested constantly.<br><br>
+
+              <strong>2. F0 cannot use private endpoints</strong> — Any scenario
+              requiring network isolation requires S0 tier minimum.<br><br>
+
+              <strong>3. Speech needs custom domain before private endpoint</strong> —
+              Unique to Speech service. Other services don't have this requirement.<br><br>
+
+              <strong>4. CMK requires soft delete + purge protection ENABLED</strong> —
+              A wrong answer often says "disable soft delete". It must be enabled.<br><br>
+
+              <strong>5. System-assigned vs user-assigned managed identity</strong> —
+              Multiple resources sharing one identity → user-assigned.
+              One resource, one identity, auto-deleted with resource → system-assigned.<br><br>
+
+              <strong>6. Key2 regeneration only resets Key2</strong> —
+              <code>"keyName": "Key2"</code> resets the secondary key only.
+              Key1 is untouched. The exam asks "what is the result of this request?"
+              and the answer is always "only the specified key is reset."
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════
+           SECTION 10 — QUIZ
+      ════════════════════════════════ -->
+      <div class="section-block" id="quiz">
+        <div class="section-label">✅ Section 10 — Quick Quiz</div>
+        <h2>Test your understanding</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">
+          6 questions. Select an answer to see the explanation immediately.
+        </p>
+
+        <div class="quiz-container" data-quiz="topic3-quiz" id="topic3-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Topic 3 Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 6</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:16.7%" data-q-progress></div>
+          </div>
+
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A developer has been assigned the Owner role on an Azure AI Language resource. When they run their Python code to call the sentiment analysis endpoint, they receive a 401 Unauthorised error.</div>
+                <p class="quiz-question">What is the most likely cause and how should it be resolved?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Owner role does not grant access to call the service endpoint. Assign the Cognitive Services User role in addition to Owner.</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The API key has expired and needs to be regenerated.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The developer needs to upgrade the resource from F0 to S0 tier.</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The resource is in the wrong region for the Language service.</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="A">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>A is correct.</strong> This is the most famous RBAC trap in the AI-102 exam. The Owner role grants management permissions (create, delete, configure the resource) but does NOT grant access to call the AI service endpoints. To call the endpoint, the developer needs the <strong>Cognitive Services User</strong> role assigned. API keys don't expire (option B), the tier doesn't cause 401 errors (option C), and region doesn't cause 401 (option D).</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A company runs multiple Azure App Services that all need to call the same Azure AI Language service. The security team requires that no credentials are stored in any configuration files or code. Which authentication approach should be used?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Store the API key in environment variables on each App Service</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Create a User-Assigned Managed Identity and assign it to all App Services, then grant it the Cognitive Services User role</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Create a System-Assigned Managed Identity for each App Service separately</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Create a Service Principal and distribute the client secret to each App Service</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> A User-Assigned Managed Identity can be shared across multiple resources — perfect for this scenario. No credentials are stored anywhere (the identity is managed by Azure). Option A still involves credentials (environment variables). Option C would create separate identities for each App Service, requiring separate role assignments and more management overhead. Option D involves a client secret, which is a credential — violating the "no credentials stored" requirement.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A healthcare company is deploying Azure AI Language service. Their compliance requirements state that data must be encrypted using their own encryption keys (not Microsoft's), and the encryption keys must be stored securely and recoverable in case of accidental deletion.</div>
+                <p class="quiz-question">Which two things must be configured to meet these requirements?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Customer-Managed Keys (CMK) with the key stored in Azure Key Vault, and Soft Delete + Purge Protection enabled on the vault</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Customer-Managed Keys (CMK) with Soft Delete disabled on Key Vault to allow key replacement</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Microsoft-Managed Keys with Soft Delete enabled on Key Vault</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A private endpoint on the resource — this automatically enables custom encryption</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="A">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>A is correct.</strong> Customer-Managed Keys stored in Azure Key Vault address the "own encryption keys" requirement. Soft Delete + Purge Protection must be ENABLED (not disabled) — they protect against accidental deletion of the encryption keys, which would make your encrypted data permanently inaccessible. Option B is wrong because Soft Delete must be ENABLED. Option C uses Microsoft keys, not customer keys. Option D — private endpoints control network access, not encryption.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A developer needs to configure their Azure AI Speech service so it can only be accessed from within their Azure Virtual Network. They attempt to create a private endpoint but the option is greyed out. What is the most likely cause?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Speech service does not support private endpoints</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The resource is on the F0 (free) tier which does not support private endpoints</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The developer must enable a custom subdomain on the Speech resource before a private endpoint can be created</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Both B and C could be the cause</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="D">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>D is correct.</strong> Both are valid causes. Private endpoints require S0 tier (not F0), AND the Speech service specifically requires a custom subdomain to be enabled before a private endpoint can be attached. If either is missing, private endpoint creation will not be available. This is one of the trickiest Speech-specific requirements on the exam — no other AI service has the custom subdomain prerequisite.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q5 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A GitHub Actions workflow needs to authenticate to Azure to deploy an Azure AI resource. The company's policy states no credentials may be embedded in YAML files. What is the correct authentication approach?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">System-Assigned Managed Identity assigned to the GitHub Actions runner</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Service Principal credentials stored as GitHub Secrets, referenced as environment variables in the workflow</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">An API key hard-coded in the GitHub Actions YAML file</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">DefaultAzureCredential with no other configuration needed</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> GitHub Actions runs outside Azure, so managed identity cannot be used directly (managed identity requires the code to run inside an Azure resource). A service principal is the correct approach for external CI/CD pipelines. The client ID, tenant ID, and client secret are stored as GitHub Secrets (encrypted storage) and referenced as environment variables — never embedded in the YAML file. Option A is wrong because managed identity doesn't work on GitHub runners. Option C violates the "no credentials in YAML" policy. Option D would fail because there's no managed identity available.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q6 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A developer sends the following API request: POST …/regenerateKey with body {"keyName": "Key2"}. What is the exact result of this operation?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Both Key1 and Key2 are regenerated simultaneously</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Key2 (the secondary key) is reset to a new value. Key1 is not affected.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A new key is generated and stored in Azure Key Vault</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The primary and secondary keys are rotated — Key2 becomes Key1 and a new Key2 is generated</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The <code>regenerateKey</code> API call with <code>"keyName": "Key2"</code> regenerates only Key2 — the secondary subscription key. Key1 is completely unaffected. This is the safe way to rotate keys: while Key2 is being regenerated, applications still running on Key1 experience zero downtime. Option A is wrong — only the specified key is affected. Option C is wrong — the key is not stored in Key Vault automatically. Option D is wrong — keys are not rotated/swapped, just regenerated.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 6</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- ── MARK COMPLETE + NAV ── -->
+      <div class="completion-bar">
+        <div class="completion-checkbox" data-complete-toggle="p1-security">
+          <span class="check-icon">✓</span>
+        </div>
+        <span class="completion-label" data-complete-label>Mark this topic as complete</span>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="02-plan-create-deploy.html" class="topic-nav-prev">
+          <span style="color:var(--text-muted)">←</span>
+          <div>
+            <div class="topic-nav-label">Previous topic</div>
+            <div class="topic-nav-title">Plan, Create & Deploy</div>
+          </div>
+        </a>
+        <a href="04-monitor.html" class="topic-nav-next">
+          <div>
+            <div class="topic-nav-label">Next topic</div>
+            <div class="topic-nav-title">Monitor & Manage →</div>
+          </div>
+        </a>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /app-shell -->
+
+<script src="../../scripts/common.js"></script>
+</body>
+</html>

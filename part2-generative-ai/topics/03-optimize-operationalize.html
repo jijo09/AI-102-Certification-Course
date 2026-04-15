@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topic 3 — Optimize & Operationalize | AI-102 Part 2</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .param-card {
+      background:var(--bg-card); border:1px solid var(--border-subtle);
+      border-radius:var(--radius-lg); padding:var(--space-5);
+      transition:border-color var(--transition-fast);
+    }
+    .param-card:hover { border-color:var(--border-default); }
+    .param-name { font-family:var(--font-mono); font-size:0.85rem; font-weight:600; color:var(--purple-400); margin-bottom:var(--space-2); }
+    .param-type { font-size:0.7rem; color:var(--text-muted); margin-bottom:var(--space-2); font-family:var(--font-mono); }
+    .param-desc { font-size:0.83rem; color:var(--text-secondary); line-height:1.6; margin:0; }
+
+    .pe-technique {
+      background:var(--bg-card); border:1px solid var(--border-subtle);
+      border-radius:var(--radius-xl); padding:var(--space-6);
+      margin-bottom:var(--space-4);
+    }
+    .pe-name { font-family:var(--font-heading); font-size:0.95rem; font-weight:700; color:var(--text-primary); margin-bottom:var(--space-2); }
+    .pe-when { font-size:0.75rem; color:var(--text-muted); margin-bottom:var(--space-3); font-family:var(--font-heading); }
+    .pe-example { background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:var(--space-4); margin-top:var(--space-4); font-size:0.82rem; color:var(--text-secondary); font-style:italic; line-height:1.6; }
+
+    #sidebar-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.6); z-index:99; backdrop-filter:blur(2px);
+    }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">AI</div>
+      <div><div class="sidebar-logo-text">AI-102 Study Hub</div><div class="sidebar-logo-sub">Azure AI Engineer</div></div>
+    </div>
+    <div style="padding:var(--space-3) var(--space-4);">
+      <input id="sidebar-search" type="text" placeholder="Search topics…"
+        style="width:100%;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);color:var(--text-primary);font-size:0.8rem;font-family:var(--font-body);outline:none;">
+    </div>
+        <nav class="sidebar-nav">
+      <a href="../../index.html" class="sidebar-item">Dashboard</a>
+      <div class="sidebar-group" data-part-group="1">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span>
+          <span class="item-badge" data-part-progress="1">0/5</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part1-plan-manage/topics/01-foundry-services.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-foundry-services">
+            <span class="topic-dot" data-topic-check="p1-foundry-services"></span>Foundry Services
+          </a>
+          <a href="../../part1-plan-manage/topics/02-plan-create-deploy.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-plan-create-deploy">
+            <span class="topic-dot" data-topic-check="p1-plan-create-deploy"></span>Plan, Create &amp; Deploy
+          </a>
+          <a href="../../part1-plan-manage/topics/03-security.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-security">
+            <span class="topic-dot" data-topic-check="p1-security"></span>Security &amp; Auth
+          </a>
+          <a href="../../part1-plan-manage/topics/04-monitor.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-monitor">
+            <span class="topic-dot" data-topic-check="p1-monitor"></span>Monitor &amp; Manage
+          </a>
+          <a href="../../part1-plan-manage/topics/05-responsible-ai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-responsible-ai">
+            <span class="topic-dot" data-topic-check="p1-responsible-ai"></span>Responsible AI
+          </a>
+          <a href="../../part1-plan-manage/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../../part1-plan-manage/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group open" data-part-group="2">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 2 — Generative AI</span>
+          <span class="item-badge" data-part-progress="2">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part2-generative-ai/topics/01-foundry-build.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-foundry-build">
+            <span class="topic-dot" data-topic-check="p2-foundry-build"></span>Build with Foundry
+          </a>
+          <a href="../../part2-generative-ai/topics/02-azure-openai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-azure-openai">
+            <span class="topic-dot" data-topic-check="p2-azure-openai"></span>Azure OpenAI
+          </a>
+          <a href="../../part2-generative-ai/topics/03-optimize-operationalize.html" class="sidebar-item sidebar-sub-item active" data-topic-nav="p2-optimize">
+            <span class="topic-dot" data-topic-check="p2-optimize"></span>Optimize &amp; Operationalize
+          </a>
+          <a href="../../part2-generative-ai/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../../part2-generative-ai/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="3">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 3 — Agentic</span>
+          <span class="item-badge" data-part-progress="3">0/1</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part3-agentic/topics/01-custom-agents.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p3-custom-agents">
+            <span class="topic-dot" data-topic-check="p3-custom-agents"></span>Custom Agents
+          </a>
+          <a href="../../part3-agentic/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../../part3-agentic/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="4">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 4 — NLP</span>
+          <span class="item-badge" data-part-progress="4">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part4-nlp/topics/01-analyze-translate-text.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-analyze-text">
+            <span class="topic-dot" data-topic-check="p4-analyze-text"></span>Analyze &amp; Translate Text
+          </a>
+          <a href="../../part4-nlp/topics/02-speech.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-speech">
+            <span class="topic-dot" data-topic-check="p4-speech"></span>Speech Processing
+          </a>
+          <a href="../../part4-nlp/topics/03-custom-language-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-custom-language">
+            <span class="topic-dot" data-topic-check="p4-custom-language"></span>Custom Language Models
+          </a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="5">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 5 — Knowledge Mining</span>
+          <span class="item-badge" data-part-progress="5">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part5-knowledge-mining/topics/01-ai-search.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-ai-search">
+            <span class="topic-dot" data-topic-check="p5-ai-search"></span>Azure AI Search
+          </a>
+          <a href="../../part5-knowledge-mining/topics/02-document-intelligence.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-document-intelligence">
+            <span class="topic-dot" data-topic-check="p5-document-intelligence"></span>Document Intelligence
+          </a>
+          <a href="../../part5-knowledge-mining/topics/03-content-understanding.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-content-understanding">
+            <span class="topic-dot" data-topic-check="p5-content-understanding"></span>Content Understanding
+          </a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="6">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 6 — Computer Vision</span>
+          <span class="item-badge" data-part-progress="6">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../../part6-computer-vision/topics/01-analyze-images.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-analyze-images">
+            <span class="topic-dot" data-topic-check="p6-analyze-images"></span>Analyze Images
+          </a>
+          <a href="../../part6-computer-vision/topics/02-custom-vision-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-custom-vision">
+            <span class="topic-dot" data-topic-check="p6-custom-vision"></span>Custom Vision Models
+          </a>
+          <a href="../../part6-computer-vision/topics/03-video-analysis.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-video-analysis">
+            <span class="topic-dot" data-topic-check="p6-video-analysis"></span>Video Analysis
+          </a>
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-progress" id="sidebar-overall-progress">
+      <div class="sidebar-progress-label">
+        <span>Overall Progress</span>
+        <span data-overall-pct style="color:var(--blue-300);font-family:var(--font-mono)">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span><span class="current">Optimize & Operationalize</span>
+      </div>
+      <div class="topbar-actions">
+        <span style="font-size:0.75rem;color:var(--text-muted)">Exam in</span>
+        <span data-countdown style="font-family:var(--font-mono);font-size:0.85rem;color:var(--amber-400);font-weight:700">—</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header animate-fade-in">
+        <div class="topic-part-badge badge" style="background:rgba(139,92,246,0.15);color:var(--purple-400);border:1px solid rgba(139,92,246,0.3)">🤖 Part 2 · Topic 3 of 3</div>
+        <h1 class="topic-title">Optimize & Operationalize GenAI Solutions</h1>
+        <p style="font-size:1rem;color:var(--text-secondary);max-width:680px;line-height:1.7;margin-top:var(--space-3)">
+          Making your GenAI solution production-ready. This topic covers generation parameters
+          that control model behaviour, prompt engineering techniques for better responses,
+          fine-tuning vs RAG tradeoffs, quota and throughput management,
+          monitoring and tracing, and orchestrating multiple AI models together.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">🐍 <strong>Python — every line explained</strong></span>
+          <span class="topic-meta-item">⏱️ <strong>~45 min</strong></span>
+          <span class="topic-meta-item">🔥 <strong>High exam weight</strong></span>
+          <span class="topic-meta-item">✅ <strong>Requires Topics 1 & 2 (Part 2)</strong></span>
+        </div>
+      </div>
+
+      <div class="callout callout-concept">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-content">
+          <div class="callout-title">Building on Topics 1 & 2</div>
+          <p>
+            Uses: <strong>token</strong>, <strong>LLM</strong>, <strong>deployment name</strong>,
+            <strong>messages array</strong>, <strong>chat.completions.create()</strong>,
+            <strong>RAG</strong>, <strong>Prompt Flow</strong>, <strong>evaluation metrics</strong>.
+            New concepts introduced below before any code.
+          </p>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           SECTION 1 — VOCABULARY
+      ══════════════════════════════ -->
+      <div class="section-block" id="vocab">
+        <div class="section-label">🔤 Section 1 — New Vocabulary</div>
+        <h2>Optimisation and operationalisation terms</h2>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <span class="term-name">Temperature</span>
+            <p class="term-definition">
+              A parameter (0.0 to 2.0) that controls how random or deterministic the
+              model's output is. Low temperature (0.0–0.3) = more predictable, consistent
+              responses. High temperature (0.8–2.0) = more creative, varied, sometimes
+              unexpected responses. For factual tasks, use low temperature.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">top_p (nucleus sampling)</span>
+            <p class="term-definition">
+              An alternative to temperature. Controls output diversity by limiting the
+              model to tokens that collectively represent the top P% of probability mass.
+              0.1 = very focused, 1.0 = all tokens considered. Use temperature OR top_p —
+              not both simultaneously.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">max_tokens</span>
+            <p class="term-definition">
+              The maximum number of tokens the model can generate in its response.
+              Does not affect input tokens. Setting this too low cuts off the response
+              mid-sentence. Setting it too high wastes tokens (you pay for unused capacity).
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">frequency_penalty</span>
+            <p class="term-definition">
+              A value from -2.0 to 2.0 that penalises the model for using words it has
+              already used in the response. Positive values (0.5–1.0) reduce repetition —
+              the model is less likely to repeat the same phrases. Useful for longer outputs.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">presence_penalty</span>
+            <p class="term-definition">
+              Similar to frequency_penalty but penalises any word that has appeared at all
+              (not based on frequency). Encourages the model to introduce new topics and
+              vocabulary. Useful for open-ended creative tasks.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">stop (stop sequences)</span>
+            <p class="term-definition">
+              A list of strings that, when generated, cause the model to stop.
+              For example: <code>stop=["###"]</code> — if the model outputs "###" it stops
+              immediately. Useful for structured outputs where you want the model to stop
+              at a specific boundary marker.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">TPM — Tokens Per Minute</span>
+            <p class="term-definition">
+              The quota limit for Azure OpenAI — the maximum number of tokens your
+              deployment can process per minute. Exceeding TPM returns HTTP 429 (Too Many
+              Requests). You can set TPM per deployment and request quota increases
+              from Microsoft.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">PTU — Provisioned Throughput Units</span>
+            <p class="term-definition">
+              A reserved capacity unit for Azure OpenAI. Instead of pay-per-token,
+              you reserve a fixed number of PTUs that guarantee consistent throughput.
+              More expensive upfront but no throttling. Best for predictable high-volume
+              production workloads.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Fine-Tuning</span>
+            <p class="term-definition">
+              Training a pre-existing model on your own dataset to make it better at a
+              specific task or to adopt a specific writing style. Different from RAG —
+              fine-tuning changes the model's weights permanently, while RAG provides
+              context at query time. Fine-tuned models are also more expensive to run.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Zero-Shot Prompting</span>
+            <p class="term-definition">
+              Asking the model to perform a task without providing any examples.
+              Just a clear instruction: "Classify this email as spam or not spam."
+              Works well for tasks the model already understands from training.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Few-Shot Prompting</span>
+            <p class="term-definition">
+              Providing 2–5 examples of the task in the prompt before the actual
+              question. The model learns the pattern from the examples and applies it.
+              More reliable than zero-shot for specialised formats or unusual tasks.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Chain-of-Thought Prompting</span>
+            <p class="term-definition">
+              Instructing the model to "think step by step" before giving its final
+              answer. This dramatically improves accuracy on complex reasoning tasks
+              like maths, logic, and multi-step problems. The model externalises its
+              reasoning process.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Tracing</span>
+            <p class="term-definition">
+              Recording the complete execution path of a Prompt Flow or multi-model
+              pipeline — every step, every input, every output, every duration.
+              Used for debugging, performance analysis, and cost attribution.
+              Enabled in Foundry via Application Insights.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Model Reflection</span>
+            <p class="term-definition">
+              A pattern where the model evaluates its own output and iteratively
+              improves it. The model generates an answer, then critiques that answer,
+              then revises it based on the critique. Can produce higher-quality outputs
+              than a single generation pass.
+            </p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Orchestration</span>
+            <p class="term-definition">
+              Coordinating multiple AI models or services to work together in a pipeline.
+              For example: GPT-4o summarises a document → Azure AI Language extracts
+              key entities → another GPT model generates a report. Each model is
+              specialised; orchestration combines them.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           SECTION 2 — GENERATION PARAMETERS
+      ══════════════════════════════ -->
+      <div class="section-block" id="parameters">
+        <div class="section-label">🎛️ Section 2 — Generation Parameters</div>
+        <h2>Controlling how the model generates text</h2>
+        <p>
+          Every call to the Chat Completions API can include optional parameters
+          that change how the model generates its response. The exam tests whether
+          you know which parameter to use for which problem.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🎚️</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A music mixing board</div>
+            <p>
+              Think of the generation parameters as sliders on a mixing board.
+              <strong>Temperature</strong> is the "creativity" dial — turn it up for
+              jazz improvisation, turn it down for playing classical sheet music exactly.
+              <strong>max_tokens</strong> is the track length limit.
+              <strong>frequency_penalty</strong> is the "no repeating yourself" dial.
+              <strong>stop sequences</strong> are the track markers where recording stops.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-6);margin-bottom:var(--space-4)">Temperature — the most important parameter</h3>
+
+        <table class="compare-table">
+          <thead><tr><th>Temperature Value</th><th>Behaviour</th><th>Best for</th></tr></thead>
+          <tbody>
+            <tr><td><code>0.0</code></td><td>Fully deterministic — same prompt always gives the same answer</td><td>Factual Q&A, classification, extraction tasks where consistency is critical</td></tr>
+            <tr><td><code>0.1 – 0.3</code></td><td>Very focused, slightly varied</td><td>Technical writing, code generation, structured summaries</td></tr>
+            <tr><td><code>0.7</code></td><td>Balanced (Azure's default) — natural and somewhat varied</td><td>General conversation, customer service</td></tr>
+            <tr><td><code>1.0 – 1.5</code></td><td>Creative and varied outputs</td><td>Marketing copy, brainstorming, creative writing</td></tr>
+            <tr><td><code>2.0</code></td><td>Very random — may become incoherent</td><td>Rarely used in production — experimental only</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">All parameters in a single Python call</h3>
+
+<pre><code><span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> openai <span class="token-keyword">import</span> AzureOpenAI
+
+client = AzureOpenAI(
+    azure_endpoint = os.environ.get(<span class="token-string">"AZURE_OPENAI_ENDPOINT"</span>),
+    api_key        = os.environ.get(<span class="token-string">"AZURE_OPENAI_KEY"</span>),
+    api_version    = <span class="token-string">"2024-02-01"</span>
+)
+
+response = client.chat.completions.create(
+    model    = <span class="token-string">"my-gpt4o"</span>,
+    messages = [
+        {<span class="token-string">"role"</span>: <span class="token-string">"system"</span>, <span class="token-string">"content"</span>: <span class="token-string">"You are a product description writer."</span>},
+        {<span class="token-string">"role"</span>: <span class="token-string">"user"</span>,   <span class="token-string">"content"</span>: <span class="token-string">"Write a product description for wireless headphones."</span>}
+    ],
+
+    <span class="token-comment"># ── Generation control parameters ────────────────────────────────────</span>
+
+    temperature       = <span class="token-number">0.8</span>,
+    <span class="token-comment"># 0.8 = moderately creative (good for marketing copy)</span>
+    <span class="token-comment"># Range: 0.0 (deterministic) to 2.0 (very random)</span>
+    <span class="token-comment"># Use EITHER temperature OR top_p — not both</span>
+
+    max_tokens        = <span class="token-number">300</span>,
+    <span class="token-comment"># Maximum tokens in the response</span>
+    <span class="token-comment"># Response is cut off if it reaches this limit</span>
+    <span class="token-comment"># Does NOT include input tokens — just output</span>
+
+    frequency_penalty = <span class="token-number">0.5</span>,
+    <span class="token-comment"># Reduces repetition of words already used in the response</span>
+    <span class="token-comment"># Range: -2.0 to 2.0  |  0 = no penalty  |  positive = less repetition</span>
+
+    presence_penalty  = <span class="token-number">0.3</span>,
+    <span class="token-comment"># Encourages new topics/vocabulary</span>
+    <span class="token-comment"># Range: -2.0 to 2.0  |  0 = no penalty  |  positive = more novelty</span>
+
+    stop              = [<span class="token-string">"###"</span>, <span class="token-string">"END"</span>],
+    <span class="token-comment"># Stop generating if the model outputs "###" or "END"</span>
+    <span class="token-comment"># Useful for structured outputs with known end markers</span>
+
+    n                 = <span class="token-number">1</span>,
+    <span class="token-comment"># Number of response alternatives to generate</span>
+    <span class="token-comment"># n=1 is standard. n=3 generates 3 different responses — you choose the best</span>
+    <span class="token-comment"># Higher n costs proportionally more tokens</span>
+)
+
+answer = response.choices[<span class="token-number">0</span>].message.content
+<span class="token-keyword">print</span>(answer)</code></pre>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — Parameter Scenario Questions</div>
+            <p>
+              <em>"Outputs are inconsistent for the same question — sometimes accurate, sometimes not."</em>
+              → Lower <strong>temperature</strong> (towards 0.0) for more consistency.
+              <br><br>
+              <em>"The model keeps repeating the same phrases."</em>
+              → Increase <strong>frequency_penalty</strong>
+              <br><br>
+              <em>"Responses are getting cut off before completing."</em>
+              → Increase <strong>max_tokens</strong>
+              <br><br>
+              <em>"Need the model to stop generating after producing a JSON object."</em>
+              → Use <strong>stop sequences</strong> — e.g. <code>stop=["```"]</code>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           SECTION 3 — PROMPT ENGINEERING
+      ══════════════════════════════ -->
+      <div class="section-block" id="prompt-engineering">
+        <div class="section-label">✍️ Section 3 — Prompt Engineering Techniques</div>
+        <h2>Getting better responses through better prompts</h2>
+        <p>
+          Prompt engineering is the practice of crafting prompts that reliably
+          produce the outputs you want. These are the techniques the exam tests.
+        </p>
+
+        <div class="pe-technique">
+          <div class="pe-name">1. Zero-Shot Prompting</div>
+          <div class="pe-when">When: the task is straightforward and the model understands it from training</div>
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin:0 0 var(--space-3)">
+            No examples provided — just a clear instruction. Works for well-understood tasks.
+            Fast and simple but may not produce the exact format you need.
+          </p>
+          <div class="pe-example">
+            <strong>System:</strong> You are a sentiment classifier.<br>
+            <strong>User:</strong> Classify this review as positive, negative, or neutral:
+            "The product arrived on time but the packaging was damaged."<br>
+            <strong>Assistant:</strong> Neutral
+          </div>
+        </div>
+
+        <div class="pe-technique">
+          <div class="pe-name">2. Few-Shot Prompting</div>
+          <div class="pe-when">When: you need a specific format, style, or behaviour the model might not infer from zero-shot</div>
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin:0 0 var(--space-3)">
+            You include 2–5 example input/output pairs in the prompt. The model learns
+            the pattern and applies it to the new input. More reliable for structured
+            or unusual output formats.
+          </p>
+          <div class="pe-example">
+            <strong>System:</strong> You extract key information from customer complaints in JSON format.<br>
+            <strong>User:</strong> Examples:<br>
+            Input: "My order #12345 hasn't arrived after 3 weeks."<br>
+            Output: {"order_id": "12345", "issue": "delayed delivery", "urgency": "high"}<br><br>
+            Input: "The item in order #99001 was broken when I opened it."<br>
+            Output: {"order_id": "99001", "issue": "damaged item", "urgency": "medium"}<br><br>
+            Now process: "I never received my order #55555 from last month."
+          </div>
+        </div>
+
+        <div class="pe-technique">
+          <div class="pe-name">3. Chain-of-Thought (CoT) Prompting</div>
+          <div class="pe-when">When: the task involves complex reasoning, maths, logic, or multi-step analysis</div>
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin:0 0 var(--space-3)">
+            Add "Think step by step" or "Let's reason through this" to the prompt.
+            The model externalises its reasoning before giving a final answer.
+            Dramatically improves accuracy on reasoning tasks.
+          </p>
+          <div class="pe-example">
+            <strong>User:</strong> A company has 3 servers. Each server processes 150 requests/minute.
+            If traffic increases by 40%, how many servers will be needed?
+            Think step by step before giving your answer.<br><br>
+            <strong>Assistant:</strong> Let me work through this step by step.<br>
+            Step 1: Current capacity = 3 × 150 = 450 req/min<br>
+            Step 2: New traffic = 450 × 1.40 = 630 req/min<br>
+            Step 3: Servers needed = 630 ÷ 150 = 4.2 → round up to 5<br>
+            <strong>Answer: 5 servers</strong>
+          </div>
+        </div>
+
+        <div class="pe-technique">
+          <div class="pe-name">4. System Prompt Engineering</div>
+          <div class="pe-when">When: you need consistent persona, tone, constraints, or output format across all interactions</div>
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin:0 0 var(--space-3)">
+            The system message is the most powerful control you have over the model.
+            A well-crafted system message defines: persona, tone, knowledge scope,
+            output format, what to refuse, and how to handle edge cases.
+          </p>
+          <div class="pe-example">
+            <strong>System message (well-engineered):</strong><br>
+            "You are a financial advisor assistant for Contoso Bank.
+            Rules: (1) Only answer questions about Contoso Bank products.
+            (2) Never speculate about stock prices or investment returns.
+            (3) Always end with 'For personalised advice, speak with a Contoso advisor.'
+            (4) If asked about competitor products, politely decline and focus on Contoso offerings.
+            (5) Format responses as bullet points when listing features."
+          </div>
+        </div>
+
+        <div class="pe-technique">
+          <div class="pe-name">5. Meta-Prompting</div>
+          <div class="pe-when">When: you want the model to help you write a better prompt</div>
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin:0 0 var(--space-3)">
+            Ask the model to help design the prompt itself: "Write a system prompt
+            for an AI that helps CIBC customers track their spending." The model
+            generates a prompt you then use in your application.
+          </p>
+          <div class="pe-example">
+            <strong>User:</strong> Write a detailed system prompt for an AI assistant that helps hospital nurses document patient observations efficiently and accurately, following medical documentation standards.
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           SECTION 4 — FINE-TUNING
+      ══════════════════════════════ -->
+      <div class="section-block" id="fine-tuning">
+        <div class="section-label">🔬 Section 4 — Fine-Tuning</div>
+        <h2>When to fine-tune a model and how it works</h2>
+        <p>
+          Fine-tuning customises a pre-trained model by training it further on your
+          own dataset. The model's internal weights are updated to make it better at
+          specific tasks or to adopt a specific writing style or domain knowledge.
+        </p>
+
+        <h3 style="margin-bottom:var(--space-4)">Fine-tuning vs RAG — the most important decision</h3>
+
+        <table class="compare-table">
+          <thead><tr><th>Decision factor</th><th>Use RAG</th><th>Use Fine-Tuning</th></tr></thead>
+          <tbody>
+            <tr><td>Goal</td><td>Ground responses in specific, up-to-date documents</td><td>Teach the model a new style, format, or domain-specific behaviour</td></tr>
+            <tr><td>Data freshness</td><td>Documents can be updated without retraining</td><td>Model must be retrained when data changes</td></tr>
+            <tr><td>Factual accuracy</td><td>High — answers traced to source documents</td><td>Lower — model may still hallucinate even after fine-tuning</td></tr>
+            <tr><td>Cost</td><td>Lower upfront, per-query retrieval cost</td><td>Training cost + higher inference cost (fine-tuned models cost more per token)</td></tr>
+            <tr><td>When to use</td><td>Enterprise Q&A, document search, any use case where data changes regularly</td><td>Teaching specific tone/format, simplifying prompts, consistent output structure</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — Fine-Tuning vs RAG Decision</div>
+            <p>
+              <em>"A company wants the AI to answer questions using their current product catalogue, which updates weekly."</em>
+              → <strong>RAG</strong> — data changes frequently, fine-tuning every week is impractical.
+              <br><br>
+              <em>"A company wants the AI to always respond in their brand's unique tone and use their specific terminology, without needing a long system prompt every time."</em>
+              → <strong>Fine-Tuning</strong> — teaching style and format is what fine-tuning is for.
+              <br><br>
+              <em>"A company needs their AI to avoid making factual errors about competitors."</em>
+              → <strong>RAG</strong> — fine-tuning doesn't eliminate hallucination; grounding does.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Fine-tuning training data format</h3>
+        <p>
+          Azure OpenAI fine-tuning requires training data in <strong>JSONL format</strong>
+          (one JSON object per line). Each object is a conversation with system, user,
+          and assistant messages — showing the model the style of response you want.
+        </p>
+
+<pre><code><span class="token-comment"># Fine-tuning training data format — JSONL (JSON Lines)</span>
+<span class="token-comment"># Each line is one training example — a complete conversation</span>
+<span class="token-comment"># The model learns to respond to "user" messages the way "assistant" does in your examples</span>
+
+<span class="token-comment"># Line 1: training example 1</span>
+{<span class="token-string">"messages"</span>: [
+    {<span class="token-string">"role"</span>: <span class="token-string">"system"</span>,    <span class="token-string">"content"</span>: <span class="token-string">"You are a concise technical support agent."</span>},
+    {<span class="token-string">"role"</span>: <span class="token-string">"user"</span>,      <span class="token-string">"content"</span>: <span class="token-string">"My printer won't connect to WiFi."</span>},
+    {<span class="token-string">"role"</span>: <span class="token-string">"assistant"</span>, <span class="token-string">"content"</span>: <span class="token-string">"Try: 1) Restart router. 2) Forget and rejoin network. 3) Update printer firmware."</span>}
+]}
+
+<span class="token-comment"># Line 2: training example 2</span>
+{<span class="token-string">"messages"</span>: [
+    {<span class="token-string">"role"</span>: <span class="token-string">"system"</span>,    <span class="token-string">"content"</span>: <span class="token-string">"You are a concise technical support agent."</span>},
+    {<span class="token-string">"role"</span>: <span class="token-string">"user"</span>,      <span class="token-string">"content"</span>: <span class="token-string">"I can't login — password reset email not arriving."</span>},
+    {<span class="token-string">"role"</span>: <span class="token-string">"assistant"</span>, <span class="token-string">"content"</span>: <span class="token-string">"Check spam folder. Whitelist noreply@company.com. Try alternate email if registered."</span>}
+]}
+
+<span class="token-comment"># Minimum: 10 training examples (recommended: 50-100+)</span>
+<span class="token-comment"># More examples = better fine-tuning results</span>
+<span class="token-comment"># Upload this file to Foundry: your project → Fine-tuning → + New fine-tune job</span></code></pre>
+      </div>
+
+      <!-- ══════════════════════════════
+           SECTION 5 — QUOTA & THROUGHPUT
+      ══════════════════════════════ -->
+      <div class="section-block" id="quota">
+        <div class="section-label">⚡ Section 5 — Quota & Throughput Management</div>
+        <h2>Managing scale and avoiding throttling</h2>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">TPM vs PTU — Plain English</div>
+            <p>
+              <strong>TPM (Tokens Per Minute)</strong> is like a tap with a flow rate limit.
+              You can use as much water (tokens) as you want, but only up to the rate
+              limit. If you try to use more, you get throttled (HTTP 429) until the
+              next minute resets your allowance.
+              <br><br>
+              <strong>PTU (Provisioned Throughput Units)</strong> is like paying to have
+              a dedicated pipe installed. Your pipe is always available — no sharing,
+              no throttling. But you pay for the pipe whether you use it or not.
+            </p>
+          </div>
+        </div>
+
+        <table class="compare-table" style="margin-top:var(--space-6)">
+          <thead><tr><th></th><th>Standard (TPM-based)</th><th>Provisioned Managed (PTU)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Billing</strong></td><td>Pay per token used</td><td>Fixed hourly cost regardless of usage</td></tr>
+            <tr><td><strong>Throughput</strong></td><td>Variable — may throttle at peak</td><td>Guaranteed consistent throughput</td></tr>
+            <tr><td><strong>Throttling</strong></td><td>Yes — HTTP 429 if TPM exceeded</td><td>No throttling — reserved capacity</td></tr>
+            <tr><td><strong>Best for</strong></td><td>Variable/unpredictable traffic, dev/test</td><td>Production workloads with predictable high traffic</td></tr>
+            <tr><td><strong>Minimum commitment</strong></td><td>None</td><td>Minimum 1 hour reservation</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Handling HTTP 429 (throttling) in Python</h3>
+        <p style="margin-bottom:var(--space-4)">
+          New Python concept: <strong>try/except</strong> — a way to handle errors gracefully
+          instead of crashing. Explained fully in comments.
+        </p>
+
+<pre><code><span class="token-keyword">import</span> os, time
+<span class="token-keyword">from</span> openai <span class="token-keyword">import</span> AzureOpenAI, RateLimitError
+
+client = AzureOpenAI(
+    azure_endpoint = os.environ.get(<span class="token-string">"AZURE_OPENAI_ENDPOINT"</span>),
+    api_key        = os.environ.get(<span class="token-string">"AZURE_OPENAI_KEY"</span>),
+    api_version    = <span class="token-string">"2024-02-01"</span>
+)
+
+<span class="token-comment"># New concept: try/except ────────────────────────────────────────────</span>
+<span class="token-comment"># "try:" — attempt to run this code</span>
+<span class="token-comment"># "except SomeError:" — if THIS specific error occurs, run this instead</span>
+<span class="token-comment"># This prevents your program from crashing when an error happens</span>
+<span class="token-comment"># It's like a safety net — "try this, but if it fails, do that"</span>
+
+MAX_RETRIES = <span class="token-number">3</span>   <span class="token-comment"># How many times to retry before giving up</span>
+
+<span class="token-keyword">for</span> attempt <span class="token-keyword">in</span> range(MAX_RETRIES):   <span class="token-comment"># range(3) = [0, 1, 2] — loops 3 times</span>
+    <span class="token-keyword">try</span>:
+        <span class="token-comment"># Try to call the API</span>
+        response = client.chat.completions.create(
+            model    = <span class="token-string">"my-gpt4o"</span>,
+            messages = [{<span class="token-string">"role"</span>: <span class="token-string">"user"</span>, <span class="token-string">"content"</span>: <span class="token-string">"Explain quantum computing simply."</span>}]
+        )
+        <span class="token-comment"># If the call succeeded, print the result and break out of the loop</span>
+        <span class="token-keyword">print</span>(response.choices[<span class="token-number">0</span>].message.content)
+        <span class="token-keyword">break</span>    <span class="token-comment"># "break" exits the loop immediately — success!</span>
+
+    <span class="token-keyword">except</span> RateLimitError <span class="token-keyword">as</span> e:
+        <span class="token-comment"># RateLimitError happens when we exceed our TPM quota (HTTP 429)</span>
+        <span class="token-comment"># "as e" gives us access to the error details</span>
+        <span class="token-keyword">if</span> attempt < MAX_RETRIES - <span class="token-number">1</span>:   <span class="token-comment"># If this isn't our last attempt...</span>
+            wait_seconds = <span class="token-number">2</span> ** attempt    <span class="token-comment"># Exponential backoff: 1s, 2s, 4s</span>
+            <span class="token-keyword">print</span>(<span class="token-string">f"Rate limited. Waiting {wait_seconds}s before retry {attempt+1}..."</span>)
+            time.sleep(wait_seconds)      <span class="token-comment"># time.sleep() pauses the program for N seconds</span>
+        <span class="token-keyword">else</span>:
+            <span class="token-comment"># We've used all our retries — give up and report the error</span>
+            <span class="token-keyword">print</span>(<span class="token-string">f"Failed after {MAX_RETRIES} attempts: {e}"</span>)</code></pre>
+      </div>
+
+      <!-- ══════════════════════════════
+           SECTION 6 — MONITORING & TRACING
+      ══════════════════════════════ -->
+      <div class="section-block" id="monitoring">
+        <div class="section-label">📊 Section 6 — Monitoring, Tracing & Feedback</div>
+        <h2>Keeping your GenAI solution healthy in production</h2>
+        <p>
+          From Part 1 Topic 4 you know Azure Monitor and Application Insights.
+          GenAI solutions add additional monitoring needs specific to LLM behaviour.
+        </p>
+
+        <h3 style="margin-bottom:var(--space-4)">Key metrics to monitor for GenAI</h3>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--space-4);margin-bottom:var(--space-8)">
+          <div class="card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🔢</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Token Usage</div>
+            <p style="font-size:0.83rem">Prompt tokens + completion tokens = total cost. Monitor to detect runaway prompts (huge inputs) or verbose outputs driving up costs. Available in response.usage.</p>
+          </div>
+          <div class="card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">⏱️</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Latency</div>
+            <p style="font-size:0.83rem">Time from request sent to first token received (TTFT — Time to First Token) and total response time. GPT-4o is slower than GPT-3.5-turbo. Monitor to detect degradation.</p>
+          </div>
+          <div class="card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">❌</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Error Rate</div>
+            <p style="font-size:0.83rem">429 (throttling), 400 (bad request), 500 (service error). Spikes in 429s indicate you need more TPM or should switch to PTU.</p>
+          </div>
+          <div class="card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">⭐</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">User Feedback</div>
+            <p style="font-size:0.83rem">Thumbs up/down ratings from users on AI responses. Collect these to identify which query types perform poorly and guide further prompt or RAG improvements.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:var(--space-4)">Enabling tracing in Foundry</h3>
+        <p>
+          Tracing records the complete execution of a Prompt Flow — every node,
+          every input/output, every duration. This is invaluable for debugging.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--purple-500);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">1</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Connect Application Insights to your Foundry project</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">ai.azure.com → your project → Settings → Tracing → Connect an Application Insights resource → Save.</p>
+            </div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--purple-500);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">2</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">Enable tracing on your flow</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Open your Prompt Flow → Run settings → Enable Tracing. Every run now records complete node-by-node telemetry.</p>
+            </div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:28px;height:28px;min-width:28px;background:var(--purple-500);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.75rem;font-weight:700;color:#fff;margin-top:2px">3</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:4px">View traces in Application Insights</div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Azure portal → Application Insights → Investigate → Transaction search → Find your flow runs. See each node, its inputs, outputs, and duration in a waterfall view.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           SECTION 7 — MODEL REFLECTION
+      ══════════════════════════════ -->
+      <div class="section-block" id="reflection">
+        <div class="section-label">🪞 Section 7 — Model Reflection & Orchestration</div>
+        <h2>Self-improvement and multi-model pipelines</h2>
+
+        <h3 style="margin-bottom:var(--space-4)">Model Reflection — the model critiques itself</h3>
+        <p style="margin-bottom:var(--space-6)">
+          Model Reflection is a pattern where you ask the model to generate a
+          response, then ask it to critique that response, then generate an
+          improved version. This iterative loop produces higher quality outputs
+          than a single generation pass.
+        </p>
+
+<pre><code><span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> openai <span class="token-keyword">import</span> AzureOpenAI
+
+client = AzureOpenAI(
+    azure_endpoint=os.environ.get(<span class="token-string">"AZURE_OPENAI_ENDPOINT"</span>),
+    api_key=os.environ.get(<span class="token-string">"AZURE_OPENAI_KEY"</span>),
+    api_version=<span class="token-string">"2024-02-01"</span>
+)
+MODEL = <span class="token-string">"my-gpt4o"</span>
+
+<span class="token-comment"># ── Step 1: Generate initial response ─────────────────────────────────</span>
+user_task = <span class="token-string">"Write a 3-sentence summary of quantum computing for a non-technical audience."</span>
+
+initial = client.chat.completions.create(
+    model    = MODEL,
+    messages = [{<span class="token-string">"role"</span>: <span class="token-string">"user"</span>, <span class="token-string">"content"</span>: user_task}]
+)
+initial_response = initial.choices[<span class="token-number">0</span>].message.content
+<span class="token-keyword">print</span>(<span class="token-string">f"INITIAL:\n{initial_response}\n"</span>)
+
+
+<span class="token-comment"># ── Step 2: Ask the model to critique its own response ────────────────</span>
+<span class="token-comment"># We include the initial response in the conversation history</span>
+<span class="token-comment"># so the model can see what it generated and evaluate it</span>
+critique = client.chat.completions.create(
+    model    = MODEL,
+    messages = [
+        {<span class="token-string">"role"</span>: <span class="token-string">"user"</span>,      <span class="token-string">"content"</span>: user_task},
+        {<span class="token-string">"role"</span>: <span class="token-string">"assistant"</span>, <span class="token-string">"content"</span>: initial_response},  <span class="token-comment"># The initial response</span>
+        {<span class="token-string">"role"</span>: <span class="token-string">"user"</span>,      <span class="token-string">"content"</span>: <span class="token-string">"Critique this response. Is it accurate? "</span>
+                                          <span class="token-string">"Is it truly non-technical? What could be improved?"</span>}
+    ]
+)
+critique_text = critique.choices[<span class="token-number">0</span>].message.content
+<span class="token-keyword">print</span>(<span class="token-string">f"CRITIQUE:\n{critique_text}\n"</span>)
+
+
+<span class="token-comment"># ── Step 3: Generate improved response based on the critique ──────────</span>
+improved = client.chat.completions.create(
+    model    = MODEL,
+    messages = [
+        {<span class="token-string">"role"</span>: <span class="token-string">"user"</span>,      <span class="token-string">"content"</span>: user_task},
+        {<span class="token-string">"role"</span>: <span class="token-string">"assistant"</span>, <span class="token-string">"content"</span>: initial_response},
+        {<span class="token-string">"role"</span>: <span class="token-string">"user"</span>,      <span class="token-string">"content"</span>: <span class="token-string">"Critique: "</span> + critique_text},
+        {<span class="token-string">"role"</span>: <span class="token-string">"user"</span>,      <span class="token-string">"content"</span>: <span class="token-string">"Now write an improved version addressing the critique."</span>}
+    ]
+)
+improved_response = improved.choices[<span class="token-number">0</span>].message.content
+<span class="token-keyword">print</span>(<span class="token-string">f"IMPROVED:\n{improved_response}"</span>)</code></pre>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Orchestration — multiple models working together</h3>
+        <p>
+          Real enterprise AI solutions often combine multiple models and services,
+          each doing what it does best. The exam tests understanding of when to
+          combine models and how.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Example Multi-Model Pipeline — Customer Support</div>
+            <p>
+              <strong>Step 1 — Whisper (Azure OpenAI)</strong>: Transcribe the customer's voice call to text.
+              <br><br>
+              <strong>Step 2 — Azure AI Language</strong>: Extract intent (complaint/enquiry/cancellation) and key entities (account number, product name) from the transcript.
+              <br><br>
+              <strong>Step 3 — Azure AI Search (RAG)</strong>: Retrieve relevant policy documents based on the intent.
+              <br><br>
+              <strong>Step 4 — GPT-4o</strong>: Generate a personalised, grounded response for the agent to read to the customer.
+              <br><br>
+              <strong>Step 5 — Azure AI Content Safety</strong>: Screen the generated response before delivery.
+              <br><br>
+              Each model is specialised. Prompt Flow orchestrates all 5 steps.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           SECTION 8 — EXAM TIPS
+      ══════════════════════════════ -->
+      <div class="section-block" id="exam-tips">
+        <div class="section-label">🎯 Section 8 — Exam Tips</div>
+        <h2>Optimisation — what the exam specifically tests</h2>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Top 6 Tested Facts from This Topic</div>
+            <p>
+              <strong>1. Temperature 0 = deterministic</strong> — Same prompt always gives
+              same output. For factual tasks requiring consistency, use temperature 0.<br><br>
+
+              <strong>2. Use temperature OR top_p — not both</strong> — They are alternatives.
+              Microsoft recommends altering one but not both simultaneously.<br><br>
+
+              <strong>3. Fine-tuning does NOT eliminate hallucination</strong> — Fine-tuning
+              teaches style and format, not facts. For factual accuracy, use RAG.<br><br>
+
+              <strong>4. Fine-tuning JSONL format</strong> — Training data must be in JSONL
+              with messages arrays (system + user + assistant). Minimum 10 examples.<br><br>
+
+              <strong>5. PTU for production, TPM for dev</strong> — If a scenario mentions
+              "predictable high traffic" or "no throttling" → PTU (Provisioned).
+              If it mentions "variable traffic" or "cost optimisation" → Standard TPM.<br><br>
+
+              <strong>6. Chain-of-thought for complex reasoning</strong> — Add "think step
+              by step" to any maths, logic, or multi-step analysis task. This dramatically
+              improves accuracy and is directly tested.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="section-block" id="quiz">
+        <div class="section-label">✅ Section 9 — Quick Quiz</div>
+        <h2>Test your understanding</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">5 questions — select an answer to see the explanation immediately.</p>
+
+        <div class="quiz-container" data-quiz="p2t3-quiz" id="p2t3-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Topic 3 Quiz — Optimize & Operationalize</span>
+            <span class="quiz-question-count" data-q-counter>1 / 5</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--purple-500);transition:width 0.4s ease;width:20%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <div data-question>
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A developer notices that their customer service chatbot gives slightly different answers every time the same question is asked. One response says "The return window is 30 days", the next says "You have up to 4 weeks to return items." Both are technically correct but inconsistent, which is confusing users.</div>
+                <p class="quiz-question">Which parameter change will most effectively make responses consistent?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Increase temperature to 1.5 — higher temperature produces more precise answers</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Decrease temperature to 0.0 or near 0 — makes responses more deterministic and consistent</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Increase max_tokens — more tokens allows the model to be more specific</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Set frequency_penalty to 2.0 — prevents the model from repeating different phrasings</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Temperature controls randomness. High temperature = varied, creative outputs. Low temperature (near 0) = deterministic, consistent outputs. Setting temperature close to 0 will make the model give the same response to the same question every time — exactly what's needed for consistent factual customer service answers. Increasing temperature (option A) would make things worse. max_tokens (option C) controls response length, not consistency. frequency_penalty (option D) reduces word repetition within one response, not across separate responses.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A financial services company wants to train an AI model to respond in their specific formal tone and always structure responses with "Situation:", "Options:", and "Recommendation:" headers. The format never changes regardless of the question type.</div>
+                <p class="quiz-question">Which approach is most appropriate?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">RAG — retrieve format examples from a search index at query time</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Fine-tuning — train the model on examples in the specific format to bake in the style</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Increase max_tokens to allow for the structured format</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Zero-shot prompting — ask the model to use the format in every user message</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Fine-tuning is ideal for teaching a specific output format, structure, or writing style that must be consistent across all responses. You provide training examples showing the format, the model learns it, and applies it without needing format instructions in every prompt. RAG (option A) retrieves data, not formatting examples. max_tokens (option C) controls length, not structure. Zero-shot prompting (option D) works but requires repeating the format instructions in every system or user message — fine-tuning eliminates this overhead and is more reliable.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A maths tutoring app uses GPT-4o to help students with algebra problems. When asked "If 3x + 7 = 22, what is x?", the model sometimes gives wrong answers directly. The developer wants to improve accuracy significantly without changing the model.</div>
+                <p class="quiz-question">Which prompt engineering technique should they apply?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Increase temperature to 2.0 — more randomness generates more possible solutions</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Chain-of-thought prompting — add "Solve this step by step" to make the model show its working</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Few-shot prompting — provide 3 examples of algebra problems with answers</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Reduce max_tokens — shorter responses are more likely to be correct</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Chain-of-thought (CoT) prompting is the most effective technique for mathematical and logical reasoning tasks. Adding "Solve this step by step" or "Show your working" forces the model to reason through each step before committing to an answer, which dramatically improves accuracy. The model is less likely to make errors when it explicitly writes out each algebraic step. While few-shot (option C) can help, CoT is specifically the technique for reasoning/maths. Temperature 2.0 (option A) increases errors. Reducing max_tokens (option D) would prevent showing working, making things worse.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A company's Azure OpenAI deployment processes customer service queries. Traffic is exactly 50,000 requests per day consistently, 7 days a week. The team is tired of occasional HTTP 429 throttling during peak hours that disrupts service.</div>
+                <p class="quiz-question">Which deployment type should they switch to?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Stay on Standard — increase the TPM limit by requesting a quota increase from Microsoft</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Switch to Provisioned Managed (PTU) — reserved throughput guarantees no throttling</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Switch to F0 tier — it has different throttling behaviour</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Deploy to multiple regions and load balance — this spreads the TPM quota</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The scenario describes predictable, consistent high traffic and a requirement for no throttling — this is exactly the use case for <strong>Provisioned Managed (PTU)</strong>. PTU reserves a fixed capacity that is always available and never throttled. Standard (option A) can have its TPM increased but is still subject to throttling. F0 (option C) is a free tier — it has stricter limits, not fewer. Multi-region distribution (option D) can spread load but doesn't eliminate throttling and adds complexity without guaranteeing throughput.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A developer needs to generate structured customer feedback analysis. They want the model to output ONLY a JSON object and stop immediately after the closing brace. Which parameter achieves this?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Set temperature=0 to ensure the output is always valid JSON</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Set max_tokens to a small number to limit the response length</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Set stop=["```"] or stop=["\n\n"] to stop generation after the JSON block</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Set presence_penalty=2.0 to discourage the model from adding extra commentary</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Stop sequences are specifically designed for this scenario — they tell the model to stop generating the moment a specific string appears. If you instruct the model to wrap the JSON in code fences (<code>```json ... ```</code>), you can use <code>stop=["```"]</code> to stop after the closing fence. Temperature 0 (option A) makes it consistent but doesn't stop it from adding commentary after the JSON. max_tokens (option B) might cut off the JSON before it's complete. presence_penalty (option D) encourages new topics — the opposite of what you want, and it doesn't control stopping behaviour.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 5</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next style="background:var(--purple-500)">Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- MARK COMPLETE -->
+      <div class="completion-bar">
+        <div class="completion-checkbox" data-complete-toggle="p2-optimize"><span class="check-icon">✓</span></div>
+        <span class="completion-label" data-complete-label>Mark this topic as complete</span>
+      </div>
+
+      <!-- PART COMPLETE BANNER -->
+      <div style="background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(59,130,246,0.08));border:1px solid rgba(139,92,246,0.3);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);text-align:center;position:relative;overflow:hidden;margin-bottom:var(--space-8)">
+        <div style="font-size:3rem;margin-bottom:var(--space-4)">🎉</div>
+        <div style="font-family:var(--font-heading);font-size:clamp(1.4rem,3vw,2rem);font-weight:800;color:var(--purple-400);margin-bottom:var(--space-3)">Part 2 Complete!</div>
+        <p style="font-size:0.975rem;color:var(--text-secondary);max-width:500px;margin:0 auto var(--space-6);line-height:1.7">
+          You've finished all 3 topics in <strong>Implement Generative AI Solutions</strong> (15–20% of the exam).
+          Before moving on, test your knowledge with flashcards and the full quiz.
+        </p>
+        <div style="display:flex;gap:var(--space-4);justify-content:center;flex-wrap:wrap">
+          <a href="../flashcards.html" class="btn btn-secondary">🃏 Part 2 Flashcards</a>
+          <a href="../quiz.html" class="btn btn-secondary">📝 Part 2 Full Quiz</a>
+          <a href="../../part3-agentic/index.html" class="btn btn-primary" style="background:var(--amber-500)">Start Part 3 — Agentic →</a>
+        </div>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="02-azure-openai.html" class="topic-nav-prev">
+          <span style="color:var(--text-muted)">←</span>
+          <div><div class="topic-nav-label">Previous topic</div><div class="topic-nav-title">Azure OpenAI</div></div>
+        </a>
+        <a href="../../part3-agentic/index.html" class="topic-nav-next">
+          <div><div class="topic-nav-label">Next — Part 3</div><div class="topic-nav-title">Agentic Solutions →</div></div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../scripts/common.js"></script>
+</body>
+</html>

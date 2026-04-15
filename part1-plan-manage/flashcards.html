@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 1 Flashcards — AI-102 Study Hub</title>
+  <link rel="stylesheet" href="../styles/main.css" />
+  <style>
+    .fc-page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: var(--space-10) var(--space-6);
+    }
+
+    /* Category filter pills */
+    .category-bar {
+      display: flex; gap: var(--space-2); flex-wrap: wrap;
+      margin-bottom: var(--space-8);
+    }
+    .cat-pill {
+      padding: var(--space-2) var(--space-4);
+      border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+      font-family: var(--font-heading); cursor: pointer;
+      border: 1.5px solid var(--border-subtle);
+      background: var(--bg-card); color: var(--text-muted);
+      transition: all var(--transition-fast);
+    }
+    .cat-pill.active {
+      background: rgba(59,130,246,0.15);
+      color: var(--blue-300); border-color: var(--blue-400);
+    }
+    .cat-pill:hover:not(.active) {
+      border-color: var(--border-default); color: var(--text-secondary);
+    }
+
+    /* Flashcard enhanced */
+    .fc-wrapper {
+      perspective: 1400px;
+      margin-bottom: var(--space-6);
+    }
+    .fc-card {
+      position: relative; width: 100%; height: 260px;
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .fc-card.flipped { transform: rotateY(180deg); }
+
+    .fc-face {
+      position: absolute; inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: var(--radius-2xl);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: var(--space-8) var(--space-10);
+      text-align: center;
+      border: 1.5px solid var(--border-default);
+      box-shadow: var(--shadow-card);
+    }
+    .fc-front {
+      background: linear-gradient(145deg, var(--navy-800), var(--navy-900));
+    }
+    .fc-back {
+      background: linear-gradient(145deg, var(--navy-700), var(--navy-800));
+      transform: rotateY(180deg);
+    }
+
+    .fc-side-label {
+      position: absolute; top: var(--space-4); left: 50%; transform: translateX(-50%);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--text-muted);
+      font-family: var(--font-heading);
+    }
+
+    .fc-category-tag {
+      position: absolute; top: var(--space-4); right: var(--space-5);
+      font-size: 0.65rem; font-weight: 700; font-family: var(--font-heading);
+      padding: 2px 8px; border-radius: 10px;
+    }
+
+    .fc-term {
+      font-family: var(--font-heading); font-size: clamp(1.3rem, 4vw, 1.8rem);
+      font-weight: 800; color: var(--text-primary); line-height: 1.2;
+    }
+    .fc-definition {
+      font-size: 0.92rem; color: var(--text-secondary);
+      line-height: 1.7; max-width: 540px;
+    }
+    .fc-hint {
+      position: absolute; bottom: var(--space-4);
+      font-size: 0.68rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+
+    /* Navigation */
+    .fc-nav {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .fc-counter-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-1);
+    }
+    .fc-counter {
+      font-family: var(--font-mono); font-size: 0.9rem;
+      color: var(--text-primary); font-weight: 700;
+    }
+    .fc-progress-mini {
+      width: 120px; height: 4px;
+      background: var(--navy-700); border-radius: 2px; overflow: hidden;
+    }
+    .fc-progress-mini-fill {
+      height: 100%; border-radius: 2px;
+      background: linear-gradient(90deg, var(--blue-400), var(--blue-300));
+      transition: width 0.4s ease;
+    }
+
+    /* Known / Unknown buttons */
+    .fc-rating {
+      display: flex; gap: var(--space-3);
+      justify-content: center; margin-bottom: var(--space-8);
+    }
+    .fc-rating-note {
+      font-size: 0.75rem; color: var(--text-muted);
+      text-align: center; margin-bottom: var(--space-4);
+    }
+
+    /* Stats panel */
+    .fc-stats {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6);
+      display: flex; gap: var(--space-6); flex-wrap: wrap; margin-bottom: var(--space-8);
+    }
+    .fc-stat-item { text-align: center; }
+    .fc-stat-val {
+      font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800;
+      line-height: 1;
+    }
+    .fc-stat-lbl { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* Complete screen */
+    .fc-complete {
+      display: none; text-align: center;
+      padding: var(--space-12) var(--space-8);
+    }
+    .fc-complete.show { display: block; }
+    .fc-complete-score {
+      font-family: var(--font-heading); font-size: 4rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--blue-400), var(--green-400));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; line-height: 1; margin-bottom: var(--space-3);
+    }
+
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px);
+    }
+    #sidebar-overlay.show { display: block; }
+
+    @media (max-width: 600px) {
+      .fc-face { padding: var(--space-6); }
+      .fc-term { font-size: 1.2rem; }
+      .fc-definition { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+
+  <!-- ════════ SIDEBAR ════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">AI</div>
+      <div>
+        <div class="sidebar-logo-text">AI-102 Study Hub</div>
+        <div class="sidebar-logo-sub">Azure AI Engineer</div>
+      </div>
+    </div>
+        <nav class="sidebar-nav">
+      <a href="../index.html" class="sidebar-item">Dashboard</a>
+      <div class="sidebar-group open" data-part-group="1">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span>
+          <span class="item-badge" data-part-progress="1">0/5</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../part1-plan-manage/topics/01-foundry-services.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-foundry-services">
+            <span class="topic-dot" data-topic-check="p1-foundry-services"></span>Foundry Services
+          </a>
+          <a href="../part1-plan-manage/topics/02-plan-create-deploy.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-plan-create-deploy">
+            <span class="topic-dot" data-topic-check="p1-plan-create-deploy"></span>Plan, Create &amp; Deploy
+          </a>
+          <a href="../part1-plan-manage/topics/03-security.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-security">
+            <span class="topic-dot" data-topic-check="p1-security"></span>Security &amp; Auth
+          </a>
+          <a href="../part1-plan-manage/topics/04-monitor.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-monitor">
+            <span class="topic-dot" data-topic-check="p1-monitor"></span>Monitor &amp; Manage
+          </a>
+          <a href="../part1-plan-manage/topics/05-responsible-ai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-responsible-ai">
+            <span class="topic-dot" data-topic-check="p1-responsible-ai"></span>Responsible AI
+          </a>
+          <a href="../part1-plan-manage/flashcards.html" class="sidebar-item sidebar-sub-item active">Flashcards</a>
+          <a href="../part1-plan-manage/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="2">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 2 — Generative AI</span>
+          <span class="item-badge" data-part-progress="2">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../part2-generative-ai/topics/01-foundry-build.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-foundry-build">
+            <span class="topic-dot" data-topic-check="p2-foundry-build"></span>Build with Foundry
+          </a>
+          <a href="../part2-generative-ai/topics/02-azure-openai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-azure-openai">
+            <span class="topic-dot" data-topic-check="p2-azure-openai"></span>Azure OpenAI
+          </a>
+          <a href="../part2-generative-ai/topics/03-optimize-operationalize.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-optimize">
+            <span class="topic-dot" data-topic-check="p2-optimize"></span>Optimize &amp; Operationalize
+          </a>
+          <a href="../part2-generative-ai/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../part2-generative-ai/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="3">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 3 — Agentic</span>
+          <span class="item-badge" data-part-progress="3">0/1</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../part3-agentic/topics/01-custom-agents.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p3-custom-agents">
+            <span class="topic-dot" data-topic-check="p3-custom-agents"></span>Custom Agents
+          </a>
+          <a href="../part3-agentic/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="../part3-agentic/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="4">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 4 — NLP</span>
+          <span class="item-badge" data-part-progress="4">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../part4-nlp/topics/01-analyze-translate-text.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-analyze-text">
+            <span class="topic-dot" data-topic-check="p4-analyze-text"></span>Analyze &amp; Translate Text
+          </a>
+          <a href="../part4-nlp/topics/02-speech.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-speech">
+            <span class="topic-dot" data-topic-check="p4-speech"></span>Speech Processing
+          </a>
+          <a href="../part4-nlp/topics/03-custom-language-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-custom-language">
+            <span class="topic-dot" data-topic-check="p4-custom-language"></span>Custom Language Models
+          </a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="5">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 5 — Knowledge Mining</span>
+          <span class="item-badge" data-part-progress="5">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../part5-knowledge-mining/topics/01-ai-search.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-ai-search">
+            <span class="topic-dot" data-topic-check="p5-ai-search"></span>Azure AI Search
+          </a>
+          <a href="../part5-knowledge-mining/topics/02-document-intelligence.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-document-intelligence">
+            <span class="topic-dot" data-topic-check="p5-document-intelligence"></span>Document Intelligence
+          </a>
+          <a href="../part5-knowledge-mining/topics/03-content-understanding.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-content-understanding">
+            <span class="topic-dot" data-topic-check="p5-content-understanding"></span>Content Understanding
+          </a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="6">
+        <button class="sidebar-group-header" data-group-toggle>
+          <span class="sidebar-chevron"></span>
+          <span class="sidebar-group-title">Part 6 — Computer Vision</span>
+          <span class="item-badge" data-part-progress="6">0/3</span>
+        </button>
+        <div class="sidebar-group-body">
+          <a href="../part6-computer-vision/topics/01-analyze-images.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-analyze-images">
+            <span class="topic-dot" data-topic-check="p6-analyze-images"></span>Analyze Images
+          </a>
+          <a href="../part6-computer-vision/topics/02-custom-vision-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-custom-vision">
+            <span class="topic-dot" data-topic-check="p6-custom-vision"></span>Custom Vision Models
+          </a>
+          <a href="../part6-computer-vision/topics/03-video-analysis.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-video-analysis">
+            <span class="topic-dot" data-topic-check="p6-video-analysis"></span>Video Analysis
+          </a>
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-progress" id="sidebar-overall-progress">
+      <div class="sidebar-progress-label">
+        <span>Overall Progress</span>
+        <span data-overall-pct style="color:var(--blue-300);font-family:var(--font-mono)">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <!-- ════════ MAIN ════════ -->
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Flashcards</span>
+      </div>
+      <div class="topbar-actions">
+        <span data-countdown style="font-family:var(--font-mono);font-size:0.85rem;color:var(--amber-400);font-weight:700">—</span>
+      </div>
+    </header>
+
+    <div class="fc-page animate-fade-in">
+
+      <!-- Header -->
+      <div style="margin-bottom:var(--space-8)">
+        <div class="badge badge-blue" style="margin-bottom:var(--space-3)">🃏 Part 1 · All 5 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Flashcards</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">
+          <strong>56 terms</strong> across all 5 Part 1 topics.
+          Click a card to flip it. Use ← → arrow keys or the buttons to navigate.
+          Press <kbd style="background:var(--bg-card);border:1px solid var(--border-default);padding:1px 5px;border-radius:4px;font-family:var(--font-mono);font-size:0.75rem">Space</kbd> to flip.
+        </p>
+      </div>
+
+      <!-- Category filters -->
+      <div class="category-bar" id="cat-bar">
+        <button class="cat-pill active" data-cat="all">All (56)</button>
+        <button class="cat-pill" data-cat="t1">🏗️ T1 – Services (13)</button>
+        <button class="cat-pill" data-cat="t2">🚀 T2 – Deploy (12)</button>
+        <button class="cat-pill" data-cat="t3">🔒 T3 – Security (13)</button>
+        <button class="cat-pill" data-cat="t4">📈 T4 – Monitor (9)</button>
+        <button class="cat-pill" data-cat="t5">⚖️ T5 – RAI (9)</button>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="fc-stats" id="fc-stats">
+        <div class="fc-stat-item">
+          <div class="fc-stat-val" id="stat-total">56</div>
+          <div class="fc-stat-lbl">Total cards</div>
+        </div>
+        <div class="fc-stat-item">
+          <div class="fc-stat-val" style="color:var(--green-400)" id="stat-known">0</div>
+          <div class="fc-stat-lbl">Known ✓</div>
+        </div>
+        <div class="fc-stat-item">
+          <div class="fc-stat-val" style="color:var(--red-400)" id="stat-unknown">0</div>
+          <div class="fc-stat-lbl">Review again</div>
+        </div>
+        <div class="fc-stat-item" style="margin-left:auto">
+          <button class="btn btn-ghost btn-sm" onclick="shuffleDeck()">🔀 Shuffle</button>
+          <button class="btn btn-ghost btn-sm" style="margin-left:var(--space-2)" onclick="resetDeck()">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- Flashcard -->
+      <div class="fc-wrapper" id="fc-wrapper">
+        <div class="fc-card" id="fc-card" onclick="flipCard()">
+          <div class="fc-face fc-front">
+            <span class="fc-side-label">TERM</span>
+            <span class="fc-category-tag" id="fc-cat-tag"></span>
+            <div class="fc-term" id="fc-term">Loading…</div>
+            <span class="fc-hint">👆 Click to reveal definition</span>
+          </div>
+          <div class="fc-face fc-back">
+            <span class="fc-side-label">DEFINITION</span>
+            <div class="fc-definition" id="fc-def">…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="fc-nav">
+        <button class="btn btn-secondary" id="btn-prev" onclick="navigate(-1)">← Prev</button>
+        <div class="fc-counter-wrap">
+          <div class="fc-counter" id="fc-counter">1 / 56</div>
+          <div class="fc-progress-mini">
+            <div class="fc-progress-mini-fill" id="fc-prog-fill" style="width:1.8%"></div>
+          </div>
+        </div>
+        <button class="btn btn-secondary" id="btn-next" onclick="navigate(1)">Next →</button>
+      </div>
+
+      <!-- Rating buttons -->
+      <div class="fc-rating-note" id="rating-note">Flip the card first, then rate your confidence</div>
+      <div class="fc-rating" id="fc-rating">
+        <button class="btn btn-secondary" id="btn-unknown" onclick="rate(false)" style="border-color:rgba(239,68,68,0.4);color:var(--red-400)" disabled>
+          😅 Need more review
+        </button>
+        <button class="btn btn-secondary" id="btn-known" onclick="rate(true)" style="border-color:rgba(16,185,129,0.4);color:var(--green-400)" disabled>
+          ✓ Got it!
+        </button>
+      </div>
+
+      <!-- Complete screen -->
+      <div class="fc-complete" id="fc-complete">
+        <div style="font-size:3rem;margin-bottom:var(--space-4)">🎉</div>
+        <div class="fc-complete-score" id="fc-final-score">0%</div>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-2)">cards marked as known</p>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-8)" id="fc-final-msg"></p>
+        <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="reviewUnknown()">🔁 Review unknowns only</button>
+          <button class="btn btn-primary" onclick="resetDeck()">↺ Start over</button>
+          <a href="quiz.html" class="btn btn-success">✅ Take the Quiz</a>
+        </div>
+      </div>
+
+      <!-- Bottom nav -->
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="index.html" class="btn btn-ghost">← Part 1 Overview</a>
+        <a href="quiz.html" class="btn btn-primary">Take Part 1 Quiz →</a>
+      </div>
+
+    </div><!-- /fc-page -->
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ALL FLASHCARD DATA
+     56 cards across 5 topics
+═══════════════════════════════════════════ -->
+<script src="../scripts/common.js"></script>
+<script>
+const ALL_CARDS = [
+
+  // ── TOPIC 1 — Foundry Services ──────────────────────────────────────
+  { cat:'t1', term:'Subscription',
+    def:'Your Azure account\'s billing container. Everything you create in Azure lives under a subscription, and all costs are charged to it.' },
+  { cat:'t1', term:'Resource Group',
+    def:'A logical folder in Azure that holds related resources together. Deleting the resource group deletes everything inside it.' },
+  { cat:'t1', term:'Resource',
+    def:'Any individual service you create in Azure — a Language service, Vision service, storage account, etc. Each has its own settings and costs.' },
+  { cat:'t1', term:'Endpoint',
+    def:'A URL address your code sends requests to in order to use an Azure AI service. Format: https://your-name.cognitiveservices.azure.com/' },
+  { cat:'t1', term:'API Key',
+    def:'A secret string that proves your code is authorised to call an Azure AI service. Azure gives you Key1 and Key2 to enable zero-downtime rotation.' },
+  { cat:'t1', term:'SDK',
+    def:'Software Development Kit. A pre-built Python library (installed with pip) that makes calling Azure AI services much easier than raw HTTP requests.' },
+  { cat:'t1', term:'Microsoft Foundry',
+    def:'The unified platform (portal at ai.azure.com and SDK) that brings together all Azure AI services. Previously called Azure AI Studio.' },
+  { cat:'t1', term:'F0 Tier',
+    def:'The free pricing tier for Azure AI services. Zero cost but limited calls per minute/month, no private endpoints, only one per subscription per service.' },
+  { cat:'t1', term:'S0 Tier',
+    def:'The standard paid pricing tier. Pay-per-call, no artificial rate limits, supports private endpoints, SLA guaranteed. Required for production.' },
+  { cat:'t1', term:'Form Recognizer',
+    def:'The old name for Azure AI Document Intelligence. The exam uses both names. The pip package is still called azure-ai-formrecognizer.' },
+  { cat:'t1', term:'CLU — Conversational Language Understanding',
+    def:'The replacement for LUIS (Language Understanding). Used to build models that understand user intents and extract entities from conversational text.' },
+  { cat:'t1', term:'Custom Question Answering',
+    def:'The replacement for QnA Maker. Part of Azure AI Language. Build a knowledge base from FAQ documents and return best-matching answers to user questions.' },
+  { cat:'t1', term:'Azure AI Search Endpoint Pattern',
+    def:'https://name.search.windows.net — different from other AI services which use cognitiveservices.azure.com. Azure OpenAI uses openai.azure.com.' },
+
+  // ── TOPIC 2 — Plan, Create & Deploy ────────────────────────────────
+  { cat:'t2', term:'Provisioning',
+    def:'The act of creating and configuring an Azure resource so it\'s ready to use. "Provision an Azure AI resource" = create it and configure its settings.' },
+  { cat:'t2', term:'ARM Template',
+    def:'Azure Resource Manager template. A JSON file describing Azure resources to create — like a blueprint. Enables consistent repeatable deployments.' },
+  { cat:'t2', term:'Bicep',
+    def:'A simpler, more readable alternative to ARM JSON for writing infrastructure as code. Compiles to ARM JSON automatically.' },
+  { cat:'t2', term:'Environment Variable',
+    def:'A value stored in the operating system (not in code) that Python reads with os.environ.get("NAME"). Used to store API keys securely outside source code.' },
+  { cat:'t2', term:'Container',
+    def:'A lightweight portable package containing an app and everything it needs to run. Runs identically on your laptop, in Azure, or on an edge device.' },
+  { cat:'t2', term:'ACI — Azure Container Instances',
+    def:'Simplest way to run a container in Azure. No cluster to manage. Best for testing, short-lived tasks, or low-traffic workloads. Manual scaling only.' },
+  { cat:'t2', term:'AKS — Azure Kubernetes Service',
+    def:'Managed Kubernetes for running containers at scale. Automatic scaling, load balancing, self-healing. Best for production high-traffic workloads.' },
+  { cat:'t2', term:'Edge Deployment',
+    def:'Running an AI model on a local device (camera, factory machine, IoT device) rather than in the cloud. Used when internet is unreliable or latency must be extremely low.' },
+  { cat:'t2', term:'Container Mandatory Params',
+    def:'Azure AI service containers always require: Eula=accept, Billing=<endpoint>, ApiKey=<key>. Without these three the container will not start.' },
+  { cat:'t2', term:'text-embedding-ada-002',
+    def:'The Azure OpenAI embedding model. Converts text into numerical vectors. Used in RAG patterns, semantic search, and similarity comparisons. Know this name.' },
+  { cat:'t2', term:'Deployment (OpenAI context)',
+    def:'A named instance of a model hosted inside your Azure OpenAI resource. You create a deployment with a name (e.g. "my-gpt4o") and reference that name in code.' },
+  { cat:'t2', term:'Multi-region High Availability',
+    def:'Deploying your Azure AI service to multiple regions. Use Azure Traffic Manager to route users to the nearest or healthiest regional endpoint.' },
+
+  // ── TOPIC 3 — Security & Authentication ─────────────────────────────
+  { cat:'t3', term:'Authentication',
+    def:'Proving who you are. The "who are you?" check before Azure AI grants access. Four methods: API keys, Entra ID tokens, managed identity, service principal.' },
+  { cat:'t3', term:'Microsoft Entra ID',
+    def:'New name for Azure Active Directory (Azure AD). Microsoft\'s cloud identity service managing users, groups, and application identities.' },
+  { cat:'t3', term:'Managed Identity',
+    def:'An identity Azure automatically creates and manages for a resource. The resource uses it to authenticate to other Azure services — no credentials needed in code.' },
+  { cat:'t3', term:'System-Assigned Managed Identity',
+    def:'Tied to one specific Azure resource. Automatically deleted when the resource is deleted. One resource = one identity. Simpler to set up.' },
+  { cat:'t3', term:'User-Assigned Managed Identity',
+    def:'Exists independently of any single resource. Can be assigned to multiple resources simultaneously. Survives resource deletion. Best when multiple resources share one identity.' },
+  { cat:'t3', term:'Service Principal',
+    def:'An application identity in Microsoft Entra ID used when code runs outside Azure (GitHub Actions, developer laptop, on-premises). Identified by tenant ID, client ID, and client secret.' },
+  { cat:'t3', term:'DefaultAzureCredential',
+    def:'A Python credential class from azure-identity that tries multiple auth methods in order: environment variables → managed identity → Azure CLI. Works in both dev and production.' },
+  { cat:'t3', term:'RBAC — Role-Based Access Control',
+    def:'Azure\'s permission system. Assigns a role (set of permissions) to a principal (user/identity) at a scope (subscription/resource group/resource).' },
+  { cat:'t3', term:'Cognitive Services User Role',
+    def:'The minimum RBAC role needed to call Azure AI service endpoints. Owner and Contributor do NOT grant endpoint access — this role is required separately.' },
+  { cat:'t3', term:'Azure Key Vault',
+    def:'A secure cloud service for storing secrets (API keys), keys (encryption keys), and certificates. Use managed identity to access it — no credentials to store.' },
+  { cat:'t3', term:'Private Endpoint',
+    def:'Connects an Azure AI resource to your private VNet, removing it from the public internet. Requires S0 tier. Speech service also needs a custom subdomain first.' },
+  { cat:'t3', term:'Customer-Managed Keys (CMK)',
+    def:'Using your own encryption keys (stored in Key Vault) to encrypt Azure AI service data, instead of Microsoft-managed keys. Requires Soft Delete + Purge Protection enabled.' },
+  { cat:'t3', term:'Key Rotation — Zero Downtime',
+    def:'Switch apps to Key2 → regenerate Key1 → switch apps back to Key1. Azure gives two keys specifically to enable this without any service interruption.' },
+
+  // ── TOPIC 4 — Monitor & Manage ─────────────────────────────────────
+  { cat:'t4', term:'Azure Monitor',
+    def:'Microsoft\'s central monitoring platform. Collects metrics (numbers) and logs (event records) from Azure resources. The health dashboard for your Azure environment.' },
+  { cat:'t4', term:'Application Insights',
+    def:'Azure Monitor feature for application-level monitoring. Tracks exceptions, custom events, and performance inside your Python application code — not just infrastructure.' },
+  { cat:'t4', term:'Diagnostic Settings',
+    def:'Configuration on an Azure resource that routes its logs to a destination: Log Analytics workspace (for querying), Storage Account (for archiving), or Event Hub (for streaming).' },
+  { cat:'t4', term:'Log Analytics Workspace',
+    def:'Storage and query service for Azure logs. Query with KQL. Best destination for logs you need to analyse and alert on. Default retention: 30 days.' },
+  { cat:'t4', term:'KQL — Kusto Query Language',
+    def:'Query language for Log Analytics. Uses pipes (|) to chain operators: table | where condition | project columns | summarize | order by. Different from SQL.' },
+  { cat:'t4', term:'Alert Rule',
+    def:'Watches a metric or log condition 24/7. Triggers an action group when a threshold is exceeded. Severity: 0=Critical, 1=Error, 2=Warning, 3=Info, 4=Verbose.' },
+  { cat:'t4', term:'Action Group',
+    def:'A collection of notification targets triggered when an alert fires: email, SMS, webhook, Logic App. One action group reused across multiple alert rules.' },
+  { cat:'t4', term:'Azure Cost Management Budget',
+    def:'A spending limit that triggers email notifications when thresholds (e.g. 80%, 100%) are reached. Does NOT stop services — only sends notifications.' },
+  { cat:'t4', term:'HTTP 429',
+    def:'Too Many Requests. Returned when you exceed the quota (transactions per minute limit) for an Azure AI service. Monitor Client Errors metric to detect this.' },
+
+  // ── TOPIC 5 — Responsible AI ────────────────────────────────────────
+  { cat:'t5', term:'Fairness (RAI Principle)',
+    def:'AI systems must treat all people equally regardless of age, gender, race, religion, or other protected characteristics. Biased outcomes that discriminate = Fairness violation.' },
+  { cat:'t5', term:'Reliability & Safety (RAI Principle)',
+    def:'AI systems must work correctly, consistently, and fail safely. A system that gives inconsistent results or fails silently in critical situations = Reliability & Safety violation.' },
+  { cat:'t5', term:'Privacy & Security (RAI Principle)',
+    def:'AI systems must protect user data and personal information. Using private data without consent, or systems that leak PII = Privacy & Security violation.' },
+  { cat:'t5', term:'Inclusiveness (RAI Principle)',
+    def:'AI must benefit everyone including marginalised groups, people with disabilities, and diverse linguistic backgrounds. Lower accuracy for certain accents = Inclusiveness violation.' },
+  { cat:'t5', term:'Transparency (RAI Principle)',
+    def:'AI systems must be understandable and disclose that they are AI. Black-box decisions with no explanation, or AI pretending to be human = Transparency violation.' },
+  { cat:'t5', term:'Accountability (RAI Principle)',
+    def:'Humans must remain responsible for AI systems. Automated AI with no human oversight, no appeal process, or blaming "the algorithm" for harm = Accountability violation.' },
+  { cat:'t5', term:'Content Safety Severity Scale',
+    def:'0 = Safe, 2 = Low, 4 = Medium, 6 = High. Four harm categories: Hate, Sexual, Violence, Self-Harm. Content at or above your threshold is blocked.' },
+  { cat:'t5', term:'Prompt Shield — Jailbreak',
+    def:'Detects user prompt attacks where someone tries to override the model\'s system instructions. E.g. "Ignore previous instructions and..." Detected by Prompt Shields.' },
+  { cat:'t5', term:'Prompt Shield — Indirect Injection',
+    def:'Detects malicious instructions hidden inside documents the model processes. Also called a Document Attack. Common in RAG systems processing external content.' },
+
+];
+
+// ─────────────────────────────────────────────
+// ENGINE
+// ─────────────────────────────────────────────
+let deck       = [];        // current active deck (filtered + shuffled)
+let pointer    = 0;         // current card index
+let isFlipped  = false;
+let rated      = {};        // {index: true/false}
+let allCards   = [...ALL_CARDS];
+
+const catColors = {
+  t1: { bg:'rgba(59,130,246,0.15)',  color:'var(--blue-300)',   label:'T1 Services' },
+  t2: { bg:'rgba(139,92,246,0.15)',  color:'var(--purple-400)', label:'T2 Deploy' },
+  t3: { bg:'rgba(239,68,68,0.15)',   color:'var(--red-400)',    label:'T3 Security' },
+  t4: { bg:'rgba(16,185,129,0.15)',  color:'var(--green-400)',  label:'T4 Monitor' },
+  t5: { bg:'rgba(245,158,11,0.15)',  color:'var(--amber-400)',  label:'T5 RAI' },
+};
+
+function buildDeck(cat) {
+  deck = cat === 'all'
+    ? [...allCards]
+    : allCards.filter(c => c.cat === cat);
+  pointer  = 0;
+  isFlipped = false;
+  rated    = {};
+  renderCard();
+  updateStats();
+  document.getElementById('fc-complete').classList.remove('show');
+  document.getElementById('fc-wrapper').style.display = '';
+  document.getElementById('fc-nav').style.display = '';
+  document.getElementById('fc-rating').style.display = '';
+  document.getElementById('rating-note').style.display = '';
+}
+
+function renderCard() {
+  if (!deck.length) return;
+  const card = deck[pointer];
+  const col  = catColors[card.cat];
+
+  // Reset flip
+  const fcEl = document.getElementById('fc-card');
+  isFlipped = false;
+  fcEl.classList.remove('flipped');
+
+  // Content
+  document.getElementById('fc-term').textContent = card.term;
+  document.getElementById('fc-def').textContent  = card.def;
+
+  // Category tag
+  const tag = document.getElementById('fc-cat-tag');
+  tag.textContent = col.label;
+  tag.style.background = col.bg;
+  tag.style.color = col.color;
+
+  // Counter
+  document.getElementById('fc-counter').textContent = `${pointer + 1} / ${deck.length}`;
+
+  // Mini progress bar
+  document.getElementById('fc-prog-fill').style.width =
+    `${((pointer + 1) / deck.length) * 100}%`;
+
+  // Navigation buttons
+  document.getElementById('btn-prev').disabled = pointer === 0;
+  document.getElementById('btn-next').disabled = pointer === deck.length - 1;
+
+  // Rating buttons — disabled until flipped
+  setRatingEnabled(false);
+  document.getElementById('rating-note').textContent = 'Flip the card first, then rate your confidence';
+
+  // Apply card border colour based on previous rating
+  const wasRated = rated[pointer];
+  fcEl.style.borderColor = wasRated === true
+    ? 'rgba(16,185,129,0.5)'
+    : wasRated === false
+    ? 'rgba(239,68,68,0.4)'
+    : '';
+}
+
+function flipCard() {
+  const fcEl = document.getElementById('fc-card');
+  isFlipped = !isFlipped;
+  fcEl.classList.toggle('flipped', isFlipped);
+  if (isFlipped) {
+    setRatingEnabled(true);
+    document.getElementById('rating-note').textContent = 'How well did you know this?';
+  }
+}
+
+function setRatingEnabled(en) {
+  document.getElementById('btn-known').disabled   = !en;
+  document.getElementById('btn-unknown').disabled = !en;
+}
+
+function navigate(dir) {
+  const next = pointer + dir;
+  if (next < 0 || next >= deck.length) return;
+  pointer = next;
+  renderCard();
+  updateStats();
+}
+
+function rate(known) {
+  rated[pointer] = known;
+  updateStats();
+
+  // Auto-advance
+  if (pointer < deck.length - 1) {
+    pointer++;
+    renderCard();
+  } else {
+    showComplete();
+  }
+}
+
+function updateStats() {
+  const total   = deck.length;
+  const knownN  = Object.values(rated).filter(v => v === true).length;
+  const unknownN= Object.values(rated).filter(v => v === false).length;
+  document.getElementById('stat-total').textContent   = total;
+  document.getElementById('stat-known').textContent   = knownN;
+  document.getElementById('stat-unknown').textContent = unknownN;
+}
+
+function showComplete() {
+  const knownN = Object.values(rated).filter(v => v === true).length;
+  const pct    = Math.round((knownN / deck.length) * 100);
+  document.getElementById('fc-final-score').textContent = `${pct}%`;
+
+  let msg = '';
+  if (pct >= 90) msg = '🏆 Outstanding — you know this material extremely well!';
+  else if (pct >= 75) msg = '✅ Great work! Review the ones you missed and you\'ll be exam-ready.';
+  else if (pct >= 50) msg = '📚 Getting there — try the review mode for your unknowns.';
+  else msg = '💪 Keep going — flashcards are most effective with repeated practice.';
+
+  document.getElementById('fc-final-msg').textContent = msg;
+  document.getElementById('fc-complete').classList.add('show');
+  document.getElementById('fc-wrapper').style.display = 'none';
+  document.getElementById('fc-nav').style.display     = 'none';
+  document.getElementById('fc-rating').style.display  = 'none';
+  document.getElementById('rating-note').style.display = 'none';
+}
+
+function shuffleDeck() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  pointer  = 0;
+  isFlipped = false;
+  rated    = {};
+  renderCard();
+  updateStats();
+  document.getElementById('fc-complete').classList.remove('show');
+  document.getElementById('fc-wrapper').style.display = '';
+  document.getElementById('fc-nav').style.display = '';
+  document.getElementById('fc-rating').style.display = '';
+  document.getElementById('rating-note').style.display = '';
+}
+
+function resetDeck() {
+  pointer  = 0;
+  isFlipped = false;
+  rated    = {};
+  renderCard();
+  updateStats();
+  document.getElementById('fc-complete').classList.remove('show');
+  document.getElementById('fc-wrapper').style.display = '';
+  document.getElementById('fc-nav').style.display = '';
+  document.getElementById('fc-rating').style.display = '';
+  document.getElementById('rating-note').style.display = '';
+}
+
+function reviewUnknown() {
+  const unknowns = Object.entries(rated)
+    .filter(([,v]) => v === false)
+    .map(([i]) => deck[parseInt(i)]);
+  if (!unknowns.length) {
+    alert('No unknowns to review — all cards marked as known!');
+    return;
+  }
+  deck    = unknowns;
+  pointer = 0; isFlipped = false; rated = {};
+  renderCard(); updateStats();
+  document.getElementById('fc-complete').classList.remove('show');
+  document.getElementById('fc-wrapper').style.display = '';
+  document.getElementById('fc-nav').style.display = '';
+  document.getElementById('fc-rating').style.display = '';
+  document.getElementById('rating-note').style.display = '';
+}
+
+// Category filter
+document.getElementById('cat-bar').addEventListener('click', e => {
+  const pill = e.target.closest('.cat-pill');
+  if (!pill) return;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  buildDeck(pill.dataset.cat);
+});
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'ArrowLeft')  navigate(-1);
+  if (e.key === ' ' && !e.target.matches('button, input')) {
+    e.preventDefault(); flipCard();
+  }
+});
+
+// Init
+buildDeck('all');
+</script>
+</body>
+</html>
