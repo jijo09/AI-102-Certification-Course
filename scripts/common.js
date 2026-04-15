@@ -56,6 +56,15 @@ const PARTS_META = {
   6: { title: 'Computer Vision',                weight: '10–15%', color: 'var(--part6-color)', icon: '👁️',  topicIds: ['p6-analyze-images','p6-custom-vision','p6-video-analysis'] },
 };
 
+const PART_INDEX_FILES = {
+  1: 'part1-plan-manage/index.html',
+  2: 'part2-generative-ai/index.html',
+  3: 'part3-agentic/index.html',
+  4: 'part4-nlp/index.html',
+  5: 'part5-knowledge-mining/index.html',
+  6: 'part6-computer-vision/index.html',
+};
+
 /* ============================================================
    SECTION 1 — PROGRESS MANAGER
    Saves/loads topic completion state in localStorage
@@ -616,11 +625,16 @@ function initCopyButtons() {
    progress indicators per part
    ============================================================ */
 const SidebarManager = (() => {
+  const DESKTOP_BREAKPOINT = window.matchMedia('(max-width: 900px)');
+  const COLLAPSED_KEY = 'sidebarCollapsed';
 
   function init() {
+    _prepareDesktopSidebarUI();
+    _applySavedDesktopState();
     _highlightActive();
     _initMobileToggle();
     _initSidebarGroups();
+    _initSidebarSettings();
     _renderProgressDots();
     _initAccordions();
 
@@ -641,17 +655,156 @@ const SidebarManager = (() => {
     });
   }
 
+  function _prepareDesktopSidebarUI() {
+    const sidebar = document.querySelector('.sidebar');
+    const logo = document.querySelector('.sidebar-logo');
+    const topbar = document.querySelector('.topbar');
+    if (!sidebar || !logo) return;
+
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      const label = item.textContent.trim().replace(/\s+/g, ' ');
+      if (label) {
+        item.dataset.shortLabel = _buildShortLabel(label);
+        item.title = label;
+      }
+      if ((item.getAttribute('href') || '').trim() === '#') {
+        item.classList.add('sidebar-utility');
+      }
+    });
+
+    document.querySelectorAll('.sidebar-group').forEach(group => {
+      const header = group.querySelector('.sidebar-group-header');
+      if (!header) return;
+      const partNum = group.dataset.partGroup || '';
+      header.dataset.shortLabel = `P${partNum}`;
+      header.title = header.textContent.trim().replace(/\s+/g, ' ');
+      if (PART_INDEX_FILES[partNum]) {
+        header.dataset.partIndex = _resolveRelativePath(PART_INDEX_FILES[partNum]);
+      }
+    });
+
+    if (topbar && !topbar.querySelector('.sidebar-desktop-toggle')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sidebar-desktop-toggle';
+      btn.setAttribute('aria-label', 'Collapse sidebar');
+      btn.title = 'Collapse sidebar';
+      btn.addEventListener('click', _toggleDesktopSidebar);
+      topbar.insertBefore(btn, topbar.firstChild);
+    }
+
+    DESKTOP_BREAKPOINT.addEventListener('change', () => {
+      const sidebarEl = document.querySelector('.sidebar');
+      const overlay = document.getElementById('sidebar-overlay') || document.getElementById('sbo');
+      if (!DESKTOP_BREAKPOINT.matches && sidebarEl) {
+        sidebarEl.classList.remove('open');
+        overlay?.classList.remove('show');
+      }
+      _applySavedDesktopState();
+    });
+  }
+
+  function _buildShortLabel(label) {
+    const normalized = label.toLowerCase();
+    const specialMap = {
+      'dashboard': '⌂',
+      'set exam date': '◷',
+      'reset progress': '↺',
+      'flashcards': '🃏',
+      'part quiz': '?',
+    };
+    if (specialMap[normalized]) return specialMap[normalized];
+    if (normalized === 'dashboard') return 'DB';
+    if (normalized === 'settings') return 'ST';
+
+    const words = label
+      .replace(/&/g, ' ')
+      .replace(/[^\w\s]/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    if (!words.length) return '•';
+    if (/^\d+$/.test(words[0])) return words[0];
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+
+  function _loadSettings() {
+    try {
+      return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function _saveSettings(next) {
+    try {
+      const current = _loadSettings();
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...current, ...next }));
+    } catch (e) {
+      console.warn('AI-102: Could not save settings:', e);
+    }
+  }
+
+  function _applySavedDesktopState() {
+    const collapsed = Boolean(_loadSettings()[COLLAPSED_KEY]);
+    document.body.classList.toggle('sidebar-collapsed', !DESKTOP_BREAKPOINT.matches && collapsed);
+    const toggle = document.querySelector('.sidebar-desktop-toggle');
+    if (toggle) {
+      const label = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+      toggle.setAttribute('aria-label', label);
+      toggle.title = label;
+    }
+  }
+
+  function _toggleDesktopSidebar() {
+    if (DESKTOP_BREAKPOINT.matches) return;
+    const next = !document.body.classList.contains('sidebar-collapsed');
+    _saveSettings({ [COLLAPSED_KEY]: next });
+    document.body.classList.toggle('sidebar-collapsed', next);
+    const toggle = document.querySelector('.sidebar-desktop-toggle');
+    if (toggle) {
+      const label = next ? 'Expand sidebar' : 'Collapse sidebar';
+      toggle.setAttribute('aria-label', label);
+      toggle.title = label;
+    }
+  }
+
+  function _resolveRelativePath(targetPath) {
+    const currentPath = window.location.pathname.replace(/\\/g, '/');
+    const currentSegments = currentPath.split('/').filter(Boolean);
+    currentSegments.pop();
+
+    const targetSegments = targetPath.split('/').filter(Boolean);
+
+    while (currentSegments.length && targetSegments.length && currentSegments[0] === targetSegments[0]) {
+      currentSegments.shift();
+      targetSegments.shift();
+    }
+
+    const upLevels = currentSegments.map(() => '..');
+    return [...upLevels, ...targetSegments].join('/') || 'index.html';
+  }
+
   function _initMobileToggle() {
     const toggle = document.querySelector('.menu-toggle');
     const sidebar = document.querySelector('.sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
+    const overlay =
+      document.getElementById('sidebar-overlay') ||
+      document.getElementById('sbo');
 
     if (!toggle || !sidebar) return;
 
-    toggle.addEventListener('click', () => {
-      sidebar.classList.toggle('open');
-      if (overlay) overlay.classList.toggle('show');
-    });
+    // Some pages still use inline onclick handlers for the mobile menu.
+    // Avoid binding a second click handler here, which would toggle twice
+    // and make the sidebar feel inconsistent between pages.
+    if (!toggle.hasAttribute('onclick')) {
+      toggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('show');
+      });
+    }
 
     if (overlay) {
       overlay.addEventListener('click', () => {
@@ -659,15 +812,102 @@ const SidebarManager = (() => {
         overlay.classList.remove('show');
       });
     }
+
+    document.querySelectorAll('.sidebar-item[href]').forEach(item => {
+      item.addEventListener('click', () => {
+        if (DESKTOP_BREAKPOINT.matches && sidebar.classList.contains('open')) {
+          sidebar.classList.remove('open');
+          overlay?.classList.remove('show');
+        }
+      });
+    });
   }
 
   function _initSidebarGroups() {
     document.querySelectorAll('[data-group-toggle]').forEach(btn => {
       btn.addEventListener('click', () => {
         const group = btn.closest('.sidebar-group');
-        if (group) group.classList.toggle('open');
+        if (!group) return;
+        if (document.body.classList.contains('sidebar-collapsed') && !DESKTOP_BREAKPOINT.matches) {
+          const partIndex = btn.dataset.partIndex;
+          if (partIndex) {
+            window.location.href = partIndex;
+          }
+          return;
+        }
+        group.classList.toggle('open');
       });
     });
+  }
+
+  function _initSidebarSettings() {
+    const sidebar = document.querySelector('.sidebar');
+    const nav = document.querySelector('.sidebar-nav');
+    const progress = document.getElementById('sidebar-overall-progress');
+    if (!sidebar || !nav || !progress) return;
+
+    document.querySelectorAll('.sidebar-item.sidebar-utility').forEach(item => item.remove());
+
+    let toggle = document.getElementById('open-sidebar-settings');
+    if (!toggle) {
+      toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.id = 'open-sidebar-settings';
+      toggle.className = 'sidebar-item sidebar-settings-toggle';
+      toggle.dataset.shortLabel = '';
+      toggle.title = 'Settings';
+      toggle.textContent = 'Settings';
+      nav.appendChild(toggle);
+    }
+
+    let panel = document.getElementById('sidebar-settings-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'sidebar-settings-panel';
+      panel.className = 'sidebar-settings-panel';
+      panel.innerHTML = `
+        <div class="sidebar-settings-title">Settings</div>
+        <label class="sidebar-settings-label" for="sidebar-settings-date">Exam date</label>
+        <input id="sidebar-settings-date" class="sidebar-settings-input" type="date" />
+        <div class="sidebar-settings-actions">
+          <button type="button" id="sidebar-settings-save" class="btn btn-secondary btn-sm">Save Date</button>
+          <button type="button" id="sidebar-settings-reset" class="btn btn-ghost btn-sm">Reset Progress</button>
+        </div>
+      `;
+      sidebar.insertBefore(panel, progress);
+    }
+
+    const dateInput = document.getElementById('sidebar-settings-date');
+    const saveBtn = document.getElementById('sidebar-settings-save');
+    const resetBtn = document.getElementById('sidebar-settings-reset');
+
+    if (dateInput) {
+      const existing = ExamCountdown.getDate();
+      if (existing) {
+        dateInput.value = existing.toISOString().split('T')[0];
+      }
+    }
+
+    toggle.addEventListener('click', () => {
+      if (document.body.classList.contains('sidebar-collapsed') && !DESKTOP_BREAKPOINT.matches) {
+        _toggleDesktopSidebar();
+      }
+      panel.classList.toggle('open');
+    });
+
+    saveBtn?.addEventListener('click', () => {
+      if (!dateInput?.value) return;
+      ExamCountdown.setDate(dateInput.value);
+      panel.classList.remove('open');
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (ProgressManager.reset()) {
+        panel.classList.remove('open');
+      }
+    });
+
+    document.querySelectorAll('.topbar-actions button[onclick*="openExamDateModal"]').forEach(btn => btn.remove());
   }
 
   function _renderProgressDots() {
