@@ -649,10 +649,20 @@ const SidebarManager = (() => {
   function _highlightActive() {
     // Clear any hardcoded active states from page templates first.
     document.querySelectorAll('.sidebar-item.active').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.sidebar-group.open').forEach(group => group.classList.remove('open'));
 
     const currentPath = window.location.pathname.replace(/\\/g, '/');
     const currentSegments = currentPath.split('/').filter(Boolean);
     const currentFile = currentSegments[currentSegments.length - 1] || 'index.html';
+    
+    // Auto-detect the current part from the URL (e.g. /part1-plan-manage/)
+    const partMatch = currentPath.match(/part(\d+)-/);
+    if (partMatch) {
+      const activePartNum = partMatch[1];
+      const activeGroup = document.querySelector(`.sidebar-group[data-part-group="${activePartNum}"]`);
+      if (activeGroup) activeGroup.classList.add('open');
+    }
+
     document.querySelectorAll('.sidebar-item[href]').forEach(item => {
       const rawHref = item.getAttribute('href') || '';
       if (!rawHref || rawHref.startsWith('#')) return;
@@ -666,10 +676,10 @@ const SidebarManager = (() => {
       const resolvedFile = resolvedSegments[resolvedSegments.length - 1] || '';
 
       const isSamePath = resolvedPath.toLowerCase() === currentPath.toLowerCase();
+      const isInPartFolder = /part\d+-/.test(currentPath);
       const isDashboardMatch = currentFile === 'index.html' &&
         resolvedFile === 'index.html' &&
-        resolvedSegments.length === 1 &&
-        currentSegments.length === 1;
+        !isInPartFolder;
 
       if (isSamePath || isDashboardMatch) {
         item.classList.add('active');
@@ -797,19 +807,16 @@ const SidebarManager = (() => {
   }
 
   function _resolveRelativePath(targetPath) {
-    const currentPath = window.location.pathname.replace(/\\/g, '/');
-    const currentSegments = currentPath.split('/').filter(Boolean);
-    currentSegments.pop();
-
-    const targetSegments = targetPath.split('/').filter(Boolean);
-
-    while (currentSegments.length && targetSegments.length && currentSegments[0] === targetSegments[0]) {
-      currentSegments.shift();
-      targetSegments.shift();
+    const scripts = document.getElementsByTagName('script');
+    let prefix = '';
+    for (let i = 0; i < scripts.length; i++) {
+        const src = scripts[i].getAttribute('src');
+        if (src && src.includes('common.js')) {
+            prefix = src.replace('scripts/common.js', '');
+            break;
+        }
     }
-
-    const upLevels = currentSegments.map(() => '..');
-    return [...upLevels, ...targetSegments].join('/') || 'index.html';
+    return prefix + targetPath;
   }
 
   function _initMobileToggle() {
@@ -898,9 +905,9 @@ const SidebarManager = (() => {
         <div class="sidebar-settings-title">Settings</div>
         <label class="sidebar-settings-label" for="sidebar-settings-date">Exam date</label>
         <input id="sidebar-settings-date" class="sidebar-settings-input" type="date" />
-        <div class="sidebar-settings-actions">
-          <button type="button" id="sidebar-settings-save" class="btn btn-secondary btn-sm">Save Date</button>
-          <button type="button" id="sidebar-settings-reset" class="btn btn-ghost btn-sm">Reset Progress</button>
+        <div class="sidebar-settings-actions" style="display:flex;gap:8px;">
+          <button type="button" id="sidebar-settings-save" class="btn btn-sm" style="background:var(--amber-400);color:#0f172a;border:none;font-weight:700;flex:1;">Save Date</button>
+          <button type="button" id="sidebar-settings-reset" class="btn btn-sm" style="background:#ef4444;color:#fff;border:none;font-weight:600;flex:1;">Reset Progress</button>
         </div>
       `;
       sidebar.insertBefore(panel, progress);
@@ -1394,3 +1401,140 @@ window.ExamCountdown   = ExamCountdown;
 
 /* Auto-init when DOM is ready */
 document.addEventListener('DOMContentLoaded', () => AI102.init());
+
+
+const SidebarTemplate = (p) => `
+<aside class="sidebar">
+
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">🧠</div>
+      <div>
+        <div class="sidebar-logo-text">AI-102 Study Hub</div>
+        <div class="sidebar-logo-sub">Azure AI Engineer</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div id="sidebar-search-container" style="padding:var(--space-2) var(--space-4) var(--space-3);">
+      <input id="sidebar-search" type="text" placeholder="🔍  Search topics…"
+        style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+        border-radius:24px;padding:10px 16px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);
+        color:#fff;font-size:0.85rem;font-family:var(--font-body);outline:none;transition:0.2s;">
+    </div>
+
+    <!-- Nav -->
+    <nav class="sidebar-nav">
+      <a href="${p}index.html" class="sidebar-item">Dashboard</a>
+      <div class="sidebar-group" data-part-group="1">
+        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span><span class="item-badge" data-part-progress="1">0/5</span></button>
+        <div class="sidebar-group-body">
+          <a href="${p}part1-plan-manage/topics/01-foundry-services.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-foundry-services"><span class="topic-dot" data-topic-check="p1-foundry-services"></span>Foundry Services</a>
+          <a href="${p}part1-plan-manage/topics/02-plan-create-deploy.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-plan-create-deploy"><span class="topic-dot" data-topic-check="p1-plan-create-deploy"></span>Plan, Create &amp; Deploy</a>
+          <a href="${p}part1-plan-manage/topics/03-security.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-security"><span class="topic-dot" data-topic-check="p1-security"></span>Security &amp; Auth</a>
+          <a href="${p}part1-plan-manage/topics/04-monitor.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-monitor"><span class="topic-dot" data-topic-check="p1-monitor"></span>Monitor &amp; Manage</a>
+          <a href="${p}part1-plan-manage/topics/05-responsible-ai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-responsible-ai"><span class="topic-dot" data-topic-check="p1-responsible-ai"></span>Responsible AI</a>
+          <a href="${p}part1-plan-manage/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="${p}part1-plan-manage/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="2">
+        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 2 — Generative AI</span><span class="item-badge" data-part-progress="2">0/3</span></button>
+        <div class="sidebar-group-body">
+          <a href="${p}part2-generative-ai/topics/01-foundry-build.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-foundry-build"><span class="topic-dot" data-topic-check="p2-foundry-build"></span>Build with Foundry</a>
+          <a href="${p}part2-generative-ai/topics/02-azure-openai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-azure-openai"><span class="topic-dot" data-topic-check="p2-azure-openai"></span>Azure OpenAI</a>
+          <a href="${p}part2-generative-ai/topics/03-optimize-operationalize.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-optimize"><span class="topic-dot" data-topic-check="p2-optimize"></span>Optimize &amp; Operationalize</a>
+          <a href="${p}part2-generative-ai/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="${p}part2-generative-ai/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="3">
+        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 3 — Agentic</span><span class="item-badge" data-part-progress="3">0/1</span></button>
+        <div class="sidebar-group-body">
+          <a href="${p}part3-agentic/topics/01-custom-agents.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p3-custom-agents"><span class="topic-dot" data-topic-check="p3-custom-agents"></span>Custom Agents</a>
+          <a href="${p}part3-agentic/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="${p}part3-agentic/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="4">
+        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 4 — NLP</span><span class="item-badge" data-part-progress="4">0/3</span></button>
+        <div class="sidebar-group-body">
+          <a href="${p}part4-nlp/topics/01-analyze-translate-text.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-analyze-text"><span class="topic-dot" data-topic-check="p4-analyze-text"></span>Analyze &amp; Translate Text</a>
+          <a href="${p}part4-nlp/topics/02-speech.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-speech"><span class="topic-dot" data-topic-check="p4-speech"></span>Speech Processing</a>
+          <a href="${p}part4-nlp/topics/03-custom-language-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-custom-language"><span class="topic-dot" data-topic-check="p4-custom-language"></span>Custom Language Models</a>
+          <a href="${p}part4-nlp/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="${p}part4-nlp/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="5">
+        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 5 — Knowledge Mining</span><span class="item-badge" data-part-progress="5">0/3</span></button>
+        <div class="sidebar-group-body">
+          <a href="${p}part5-knowledge-mining/topics/01-ai-search.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-ai-search"><span class="topic-dot" data-topic-check="p5-ai-search"></span>Azure AI Search</a>
+          <a href="${p}part5-knowledge-mining/topics/02-document-intelligence.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-document-intelligence"><span class="topic-dot" data-topic-check="p5-document-intelligence"></span>Document Intelligence</a>
+          <a href="${p}part5-knowledge-mining/topics/03-content-understanding.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-content-understanding"><span class="topic-dot" data-topic-check="p5-content-understanding"></span>Content Understanding</a>
+          <a href="${p}part5-knowledge-mining/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="${p}part5-knowledge-mining/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <div class="sidebar-group" data-part-group="6">
+        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 6 — Computer Vision</span><span class="item-badge" data-part-progress="6">0/3</span></button>
+        <div class="sidebar-group-body">
+          <a href="${p}part6-computer-vision/topics/01-analyze-images.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-analyze-images"><span class="topic-dot" data-topic-check="p6-analyze-images"></span>Analyze Images</a>
+          <a href="${p}part6-computer-vision/topics/02-custom-vision-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-custom-vision"><span class="topic-dot" data-topic-check="p6-custom-vision"></span>Custom Vision Models</a>
+          <a href="${p}part6-computer-vision/topics/03-video-analysis.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-video-analysis"><span class="topic-dot" data-topic-check="p6-video-analysis"></span>Video Analysis</a>
+          <a href="${p}part6-computer-vision/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
+          <a href="${p}part6-computer-vision/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
+        </div>
+      </div>
+      <a href="#" onclick="openExamDateModal()" class="sidebar-item">Set Exam Date</a>
+      <a href="#" onclick="ProgressManager.reset()" class="sidebar-item">Reset Progress</a>
+    </nav>
+
+    <!-- Sidebar Footer — Overall Progress -->
+    <div class="sidebar-progress" id="sidebar-overall-progress">
+      <div class="sidebar-progress-label">
+        <span>Overall Progress</span>
+        <span data-overall-pct style="color:var(--blue-300);font-family:var(--font-mono)">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+  
+</aside>
+`;
+
+SidebarManager.injectAndInit = function() {
+    const container = document.getElementById('app-sidebar');
+    if (!container) return;
+    
+    const scripts = document.getElementsByTagName('script');
+    let p = '';
+    for (let i = 0; i < scripts.length; i++) {
+        const src = scripts[i].getAttribute('src');
+        if (src && src.includes('common.js')) {
+            p = src.replace('scripts/common.js', '');
+            break;
+        }
+    }
+    
+    container.outerHTML = SidebarTemplate(p);
+    
+    // Immediately apply collapsed state to prevent FOUC jank
+    try {
+      const state = JSON.parse(localStorage.getItem('ai102_settings') || '{}');
+      if (state.sidebarCollapsed) {
+        document.body.classList.add('sidebar-collapsed');
+        // Also update toggle button if it exists yet
+        const toggle = document.querySelector('.sidebar-desktop-toggle');
+        if (toggle) {
+          toggle.setAttribute('aria-label', 'Expand sidebar');
+          toggle.title = 'Expand sidebar';
+        }
+      }
+    } catch (e) {}
+};
+
+SidebarManager.injectAndInit();

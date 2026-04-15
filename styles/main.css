@@ -248,13 +248,7 @@ pre code {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, rgba(96,165,250,0.06), transparent 22%),
-    linear-gradient(90deg, rgba(148,163,184,0.05) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(148,163,184,0.04) 1px, transparent 1px);
-  background-size: auto, 18px 18px, 18px 18px;
   pointer-events: none;
-  opacity: 0.18;
 }
 
 .sidebar-logo {
@@ -266,8 +260,7 @@ pre code {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: linear-gradient(180deg, rgba(6, 17, 31, 0.96), rgba(6, 17, 31, 0.84));
-  backdrop-filter: blur(12px);
+  background: var(--navy-950);
 }
 
 .sidebar-logo-icon {
@@ -472,11 +465,17 @@ body.sidebar-collapsed .sidebar-desktop-toggle::before {
 }
 
 .sidebar-item.active {
-  background: linear-gradient(90deg, rgba(59,130,246,0.18), rgba(59,130,246,0.05));
-  color: var(--blue-100);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
   border-left-color: #7dd3fc;
-  font-weight: 500;
-  box-shadow: inset 0 0 0 1px rgba(96,165,250,0.16);
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.sidebar-settings-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.8;
+  cursor: pointer;
 }
 
 .sidebar-item .item-icon {
@@ -604,8 +603,7 @@ button.sidebar-group-header {
   border-top: 1px solid rgba(147, 197, 253, 0.08);
   margin: auto var(--space-3) var(--space-3);
   border-radius: 16px;
-  background: rgba(10, 22, 40, 0.74);
-  backdrop-filter: blur(10px);
+  background: var(--navy-800);
 }
 
 .sidebar-progress-label {
@@ -631,7 +629,7 @@ button.sidebar-group-header {
 /* Top bar */
 .topbar {
   height: var(--topbar-height);
-  background: rgba(10, 22, 40, 0.72);
+  background: var(--navy-950);
   border-bottom: 1px solid rgba(147, 197, 253, 0.1);
   display: flex;
   align-items: center;
@@ -640,7 +638,6 @@ button.sidebar-group-header {
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(16px);
   box-shadow: 0 8px 20px rgba(5, 13, 26, 0.18);
 }
 
@@ -1852,6 +1849,8 @@ body.sidebar-collapsed .sidebar-logo {
   gap: 8px;
   padding: 12px 8px;
   width: 100%;
+  border-bottom: none;
+  background: transparent;
 }
 
 body.sidebar-collapsed .sidebar-logo-icon {
@@ -1871,7 +1870,7 @@ body.sidebar-collapsed .sidebar-nav {
   width: 100%;
 }
 
-body.sidebar-collapsed #sidebar-search,
+body.sidebar-collapsed #sidebar-search-container,
 body.sidebar-collapsed .sidebar-progress,
 body.sidebar-collapsed .sidebar-group-title,
 body.sidebar-collapsed .sidebar-chevron {
@@ -1910,8 +1909,9 @@ body.sidebar-collapsed .sidebar-item {
   color: transparent;
   overflow: hidden;
   border-radius: 14px;
-  background: rgba(255,255,255,0.02);
-  box-shadow: inset 0 0 0 1px rgba(96,165,250,0.08);
+  background: transparent;
+  box-shadow: none;
+  transition: all var(--transition-fast);
 }
 
 body.sidebar-collapsed .sidebar-group-header::before,
@@ -1921,36 +1921,43 @@ body.sidebar-collapsed .sidebar-item::before {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(59,130,246,0.14);
-  border: 1px solid rgba(96,165,250,0.15);
-  color: var(--blue-100);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
   font-family: var(--font-heading);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   pointer-events: none;
+  transition: all var(--transition-fast);
+}
+
+body.sidebar-collapsed .sidebar-item[data-short-label="⌂"]::before {
+  font-size: 1.25rem;
+}
+
+body.sidebar-collapsed .sidebar-group.all-done:not(.open) .sidebar-group-header::before {
+  color: var(--green-400);
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
 }
 
 body.sidebar-collapsed .sidebar-settings-toggle::before {
   content: '\2699';
-  font-size: 1rem;
+  font-size: 1.1rem;
   letter-spacing: 0;
-}
-
-body.sidebar-collapsed .sidebar-item.active::before {
-  font-size: 0.72rem;
 }
 
 body.sidebar-collapsed .sidebar-item:hover,
 body.sidebar-collapsed .sidebar-group-header:hover {
   transform: none;
+  background: rgba(255,255,255,0.03);
 }
 
 body.sidebar-collapsed .sidebar-item > *,
@@ -1965,9 +1972,12 @@ body.sidebar-collapsed .sidebar-group-header > * {
 
 body.sidebar-collapsed .sidebar-item.active::before,
 body.sidebar-collapsed .sidebar-group.open .sidebar-group-header::before {
-  background: linear-gradient(135deg, rgba(56,189,248,0.28), rgba(59,130,246,0.16));
-  border-color: rgba(125,211,252,0.28);
-  box-shadow: 0 4px 12px rgba(14, 116, 144, 0.22);
+  color: var(--amber-400);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+  transform: translate(-50%, -50%) scale(1.15);
 }
 
 body.sidebar-collapsed .sidebar-item,
@@ -1978,14 +1988,16 @@ body.sidebar-collapsed .sidebar-group-header {
 
 body.sidebar-collapsed .sidebar-item.active,
 body.sidebar-collapsed .sidebar-group.open .sidebar-group-header {
-  background: linear-gradient(180deg, rgba(59,130,246,0.12), rgba(59,130,246,0.06));
-  box-shadow: inset 0 0 0 1px rgba(96,165,250,0.14);
+  background: transparent;
+  box-shadow: none;
 }
 
 body.sidebar-collapsed .sidebar-item:hover::before,
 body.sidebar-collapsed .sidebar-group-header:hover::before {
-  background: rgba(59,130,246,0.22);
-  border-color: rgba(96,165,250,0.28);
+  color: var(--text-primary);
+  background: transparent;
+  border-color: transparent;
+  transform: translate(-50%, -50%) scale(1.05);
 }
 
 body.sidebar-collapsed .sidebar-item.sidebar-utility {
