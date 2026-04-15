@@ -643,10 +643,31 @@ const SidebarManager = (() => {
   }
 
   function _highlightActive() {
-    const current = window.location.pathname.split('/').pop() || 'index.html';
+    // Clear any hardcoded active states from page templates first.
+    document.querySelectorAll('.sidebar-item.active').forEach(item => item.classList.remove('active'));
+
+    const currentPath = window.location.pathname.replace(/\\/g, '/');
+    const currentSegments = currentPath.split('/').filter(Boolean);
+    const currentFile = currentSegments[currentSegments.length - 1] || 'index.html';
     document.querySelectorAll('.sidebar-item[href]').forEach(item => {
-      const href = item.getAttribute('href').split('/').pop();
-      if (href === current) {
+      const rawHref = item.getAttribute('href') || '';
+      if (!rawHref || rawHref.startsWith('#')) return;
+
+      // Resolve to an absolute pathname so "index.html" pages in different
+      // folders do not all match each other by filename only.
+      const resolvedPath = decodeURIComponent(
+        new URL(rawHref, window.location.href).pathname.replace(/\\/g, '/')
+      );
+      const resolvedSegments = resolvedPath.split('/').filter(Boolean);
+      const resolvedFile = resolvedSegments[resolvedSegments.length - 1] || '';
+
+      const isSamePath = resolvedPath.toLowerCase() === currentPath.toLowerCase();
+      const isDashboardMatch = currentFile === 'index.html' &&
+        resolvedFile === 'index.html' &&
+        resolvedSegments.length === 1 &&
+        currentSegments.length === 1;
+
+      if (isSamePath || isDashboardMatch) {
         item.classList.add('active');
         // Open parent sidebar group
         const group = item.closest('.sidebar-group');
@@ -825,14 +846,18 @@ const SidebarManager = (() => {
 
   function _initSidebarGroups() {
     document.querySelectorAll('[data-group-toggle]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (event) => {
         const group = btn.closest('.sidebar-group');
         if (!group) return;
-        if (document.body.classList.contains('sidebar-collapsed') && !DESKTOP_BREAKPOINT.matches) {
-          const partIndex = btn.dataset.partIndex;
-          if (partIndex) {
-            window.location.href = partIndex;
-          }
+
+        if (document.body.classList.contains('sidebar-collapsed')) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const partNum = group.dataset.partGroup || '';
+          const fallback = PART_INDEX_FILES[partNum] ? _resolveRelativePath(PART_INDEX_FILES[partNum]) : '';
+          const partIndex = btn.dataset.partIndex || fallback;
+          if (partIndex) window.location.assign(partIndex);
           return;
         }
         group.classList.toggle('open');
