@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 4 Flashcards</title>
+  <link rel="stylesheet" href="../styles/main.css" />
+  <style>
+    .fc-page{max-width:760px;margin:0 auto;padding:var(--space-10) var(--space-6)}
+    .fc-wrapper{perspective:1400px;margin-bottom:var(--space-6)}
+    .fc-card{position:relative;width:100%;height:260px;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,0,.2,1);cursor:pointer}
+    .fc-card.flipped{transform:rotateY(180deg)}
+    .fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--radius-2xl);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--space-8) var(--space-10);text-align:center;border:1.5px solid var(--border-default);box-shadow:var(--shadow-card)}
+    .fc-front{background:linear-gradient(145deg,var(--navy-800),var(--navy-900))}
+    .fc-back{background:linear-gradient(145deg,var(--navy-700),var(--navy-800));transform:rotateY(180deg)}
+    .fc-lbl{position:absolute;top:var(--space-4);left:50%;transform:translateX(-50%);font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);font-family:var(--font-heading)}
+    .fc-ctag{position:absolute;top:var(--space-4);right:var(--space-5);font-size:.65rem;font-weight:700;font-family:var(--font-heading);padding:2px 8px;border-radius:10px}
+    .fc-term{font-family:var(--font-heading);font-size:clamp(1.2rem,4vw,1.7rem);font-weight:800;color:var(--text-primary);line-height:1.2}
+    .fc-def{font-size:.88rem;color:var(--text-secondary);line-height:1.7;max-width:540px}
+    .fc-hint{position:absolute;bottom:var(--space-4);font-size:.68rem;color:var(--text-muted)}
+    .fc-nav{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-6)}
+    .fc-ctr{font-family:var(--font-mono);font-size:.9rem;color:var(--text-primary);font-weight:700}
+    .fc-mini{width:120px;height:4px;background:var(--navy-700);border-radius:2px;overflow:hidden}
+    .fc-mini-fill{height:100%;border-radius:2px;background:var(--green-500);transition:width .4s ease}
+    .fc-rating{display:flex;gap:var(--space-3);justify-content:center;margin-bottom:var(--space-8)}
+    .fc-note{font-size:.75rem;color:var(--text-muted);text-align:center;margin-bottom:var(--space-4)}
+    .fc-stats{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-5) var(--space-6);display:flex;gap:var(--space-6);flex-wrap:wrap;margin-bottom:var(--space-8)}
+    .sv{font-family:var(--font-heading);font-size:1.6rem;font-weight:800;line-height:1}
+    .sl{font-size:.7rem;color:var(--text-muted);margin-top:2px}
+    .fc-done{display:none;text-align:center;padding:var(--space-12) var(--space-8)}
+    .fc-done.show{display:block}
+    .fc-score{font-family:var(--font-heading);font-size:4rem;font-weight:800;background:linear-gradient(135deg,var(--green-400),var(--blue-400));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:var(--space-3)}
+    .cat-bar{display:flex;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-6)}
+    .cat-pill{padding:var(--space-2) var(--space-4);border-radius:20px;font-size:.75rem;font-weight:600;font-family:var(--font-heading);cursor:pointer;border:1.5px solid var(--border-subtle);background:var(--bg-card);color:var(--text-muted);transition:all var(--transition-fast)}
+    .cat-pill.active{background:rgba(16,185,129,.15);color:var(--green-400);border-color:var(--green-500)}
+    #sbo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;backdrop-filter:blur(2px)}
+    #sbo.show{display:block}
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-icon">🧠</div><div><div class="sidebar-logo-text">AI-102 Study Hub</div><div class="sidebar-logo-sub">Azure AI Engineer</div></div></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Overview</div><a href="../index.html" class="sidebar-item"><span class="item-icon">📊</span> Dashboard</a>
+      <div class="sidebar-section-label">Part 4 — NLP</div>
+      <a href="index.html" class="sidebar-item"><span class="item-icon">💬</span> NLP Solutions</a>
+      <a href="topics/01-analyze-translate-text.html" class="sidebar-item sidebar-sub-item"><span class="item-icon">📝</span> Analyse & Translate</a>
+      <a href="topics/02-speech.html" class="sidebar-item sidebar-sub-item"><span class="item-icon">🎙️</span> Speech Services</a>
+      <a href="topics/03-custom-language-models.html" class="sidebar-item sidebar-sub-item"><span class="item-icon">🧩</span> Custom Language Models</a>
+      <a href="flashcards.html" class="sidebar-item sidebar-sub-item active"><span class="item-icon">🃏</span> Flashcards</a>
+      <a href="quiz.html" class="sidebar-item sidebar-sub-item"><span class="item-icon">✅</span> Part 4 Quiz</a>
+    </nav>
+    <div class="sidebar-progress" id="sidebar-overall-progress">
+      <div class="sidebar-progress-label"><span>Overall Progress</span><span data-overall-pct style="color:var(--blue-300);font-family:var(--font-mono)">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+    </div>
+  </aside>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb"><a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a><span class="sep">›</span><a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 4</a><span class="sep">›</span><span class="current">Flashcards</span></div>
+      <div class="topbar-actions"><span data-countdown style="font-family:var(--font-mono);font-size:.85rem;color:var(--amber-400);font-weight:700">—</span></div>
+    </header>
+    <div class="fc-page animate-fade-in">
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(16,185,129,.15);color:var(--green-400);border:1px solid rgba(16,185,129,.3);margin-bottom:var(--space-3)">🃏 Part 4 · NLP Solutions</div>
+        <h1 style="margin-bottom:var(--space-3)">Flashcards</h1>
+        <p style="color:var(--text-muted);font-size:.9rem"><strong>36 terms</strong> across all 3 Part 4 topics. Click to flip. Arrow keys or Space to navigate.</p>
+      </div>
+      <div class="cat-bar" id="catbar">
+        <button class="cat-pill active" data-cat="all">All (36)</button>
+        <button class="cat-pill" data-cat="t1">📝 T1 Language & Translate (12)</button>
+        <button class="cat-pill" data-cat="t2">🎙️ T2 Speech (12)</button>
+        <button class="cat-pill" data-cat="t3">🧩 T3 Custom Models (12)</button>
+      </div>
+      <div class="fc-stats">
+        <div><div class="sv" id="st">36</div><div class="sl">Total</div></div>
+        <div><div class="sv" style="color:var(--green-400)" id="sk">0</div><div class="sl">Known ✓</div></div>
+        <div><div class="sv" style="color:var(--red-400)" id="su">0</div><div class="sl">Review</div></div>
+        <div style="margin-left:auto">
+          <button class="btn btn-ghost btn-sm" onclick="shuffle()">🔀 Shuffle</button>
+          <button class="btn btn-ghost btn-sm" style="margin-left:var(--space-2)" onclick="reset()">↺ Reset</button>
+        </div>
+      </div>
+      <div class="fc-wrapper" id="fcw">
+        <div class="fc-card" id="fcc" onclick="flip()">
+          <div class="fc-face fc-front"><span class="fc-lbl">TERM</span><span class="fc-ctag" id="ftag" style="background:rgba(16,185,129,.15);color:var(--green-400)">Part 4</span><div class="fc-term" id="fct">…</div><span class="fc-hint">👆 Click to flip</span></div>
+          <div class="fc-face fc-back"><span class="fc-lbl">DEFINITION</span><div class="fc-def" id="fcd">…</div></div>
+        </div>
+      </div>
+      <div class="fc-nav" id="fcn">
+        <button class="btn btn-secondary" id="bp" onclick="nav(-1)">← Prev</button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-1)">
+          <div class="fc-ctr" id="fcctr">1 / 36</div>
+          <div class="fc-mini"><div class="fc-mini-fill" id="fcp" style="width:2.8%"></div></div>
+        </div>
+        <button class="btn btn-secondary" id="bn" onclick="nav(1)">Next →</button>
+      </div>
+      <div class="fc-note" id="fcnote">Flip the card first, then rate your confidence</div>
+      <div class="fc-rating" id="fcr">
+        <button class="btn btn-secondary" id="bunk" onclick="rate(false)" style="border-color:rgba(239,68,68,.4);color:var(--red-400)" disabled>😅 Need review</button>
+        <button class="btn btn-secondary" id="bknw" onclick="rate(true)" style="border-color:rgba(16,185,129,.4);color:var(--green-400)" disabled>✓ Got it!</button>
+      </div>
+      <div class="fc-done" id="fcdone">
+        <div style="font-size:3rem;margin-bottom:var(--space-4)">🎉</div>
+        <div class="fc-score" id="fcs">0%</div>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-2)">cards marked as known</p>
+        <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:var(--space-8)" id="fcmsg"></p>
+        <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="reviewUnknown()">🔁 Review unknowns</button>
+          <button class="btn btn-secondary" onclick="reset()">↺ Start over</button>
+          <a href="quiz.html" class="btn btn-success">✅ Take the Quiz</a>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="index.html" class="btn btn-ghost">← Part 4 Overview</a>
+        <a href="quiz.html" class="btn btn-primary" style="background:var(--green-600)">Take Part 4 Quiz →</a>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="../scripts/common.js"></script>
+<script>
+const cats={t1:{bg:'rgba(16,185,129,.15)',c:'var(--green-400)',l:'T1 Language'},t2:{bg:'rgba(59,130,246,.15)',c:'var(--blue-300)',l:'T2 Speech'},t3:{bg:'rgba(245,158,11,.15)',c:'var(--amber-400)',l:'T3 Custom'}};
+const ALL=[
+  {k:'t1',t:'Sentiment Analysis',d:'Determines whether text is positive/negative/neutral/mixed. Returns document-level + sentence-level sentiment with confidence scores. Use for customer reviews and social media monitoring.'},
+  {k:'t1',t:'Named Entity Recognition (NER)',d:'Identifies and categorises real-world objects in text: Person, Location, Organisation, DateTime, phone numbers. Returns entity text, category, sub-category, confidence, and offset (position).'},
+  {k:'t1',t:'Key Phrase Extraction',d:'Returns a list of the main topics/concepts in a document as phrases. "The food was excellent and service prompt" → ["excellent food","prompt service"]. Use for tagging, search indexing, summarisation.'},
+  {k:'t1',t:'Language Detection',d:'Identifies what language text is written in. Returns: language name, ISO 639-1 code (en/fr/de), confidence score. Handles 120+ languages. Returns dominant language for mixed-language documents.'},
+  {k:'t1',t:'PII Detection',d:'Finds and redacts personally identifiable information: names, emails, phones, credit cards, SSNs, addresses. Returns both found entities AND result.redacted_text with PII replaced by asterisks.'},
+  {k:'t1',t:'Opinion Mining (Aspect Sentiment)',d:'Granular sentiment analysis identifying sentiment towards specific aspects. "Battery great, camera poor" → {battery: positive}, {camera: negative}. Enabled via show_opinion_mining=True in Python.'},
+  {k:'t1',t:'Entity Linking',d:'Links entities in text to their Wikipedia entries. Disambiguates same-name entities: "Mars" in space article → planet Mars Wikipedia entry. Returns entity name, Wikipedia URL, confidence.'},
+  {k:'t1',t:'Azure AI Language endpoint',d:'https://your-name.cognitiveservices.azure.com/ — resource-specific endpoint used for all Language features (NER, sentiment, CLU, Q&A). Different from OpenAI (openai.azure.com) and Translator (api.cognitive.microsofttranslator.com).'},
+  {k:'t1',t:'Azure AI Translator endpoint',d:'https://api.cognitive.microsofttranslator.com — GLOBAL endpoint, same for all customers. Authenticated via Ocp-Apim-Subscription-Key and Ocp-Apim-Subscription-Region headers.'},
+  {k:'t1',t:'Text Translation (Translator)',d:'Translates text strings to one or more target languages in a single API call. /translate endpoint. Can translate to multiple languages simultaneously ("to":["fr","es","de"]). Auto-detects source language if not specified.'},
+  {k:'t1',t:'Transliteration',d:'Converts text from one script to another while preserving pronunciation — e.g. Japanese kanji to Latin alphabet without translating meaning. /transliterate endpoint on Azure AI Translator.'},
+  {k:'t1',t:'Document Translation',d:'Async batch translation of entire document files (PDF, DOCX, XLSX, PPTX) stored in Azure Blob Storage. Preserves formatting. Submit job → poll for completion → translated documents appear in target container.'},
+  {k:'t2',t:'Speech-to-Text (STT)',d:'Converts spoken audio to written text. Real-time: streaming from microphone or live source. Batch Transcription: async processing of recorded audio files in Blob Storage. Azure AI Speech SDK.'},
+  {k:'t2',t:'Text-to-Speech (TTS)',d:'Converts text to natural-sounding spoken audio using neural voices. SpeechSynthesizer with speak_text_async() for plain text, speak_ssml_async() for SSML markup with prosody control.'},
+  {k:'t2',t:'SSML',d:'Speech Synthesis Markup Language. XML-based markup controlling TTS output. Key elements: <voice name="..."> (select voice), <prosody rate/pitch/volume>, <break time="1s"/>, <emphasis level="strong">, <say-as interpret-as="date">.'},
+  {k:'t2',t:'Speech Translation',d:'Real-time translation of spoken audio from one language to another. Audio in → translated text (or audio) out. Uses TranslationRecognizer. result.translations is a dict: {"fr":"Bonjour","es":"Hola"}.'},
+  {k:'t2',t:'Speaker Verification',d:'Verifies that a voice matches a previously enrolled voice profile. Answers: "Is this the person they claim to be?" Returns Accept/Reject + confidence. Use for voice-based authentication.'},
+  {k:'t2',t:'Speaker Identification',d:'Determines which of a set of enrolled speakers is speaking. Answers: "Which of our known speakers is this?" Returns best matching speaker + confidence. Use for meeting transcription with speaker attribution.'},
+  {k:'t2',t:'Custom Speech Model',d:'STT model fine-tuned for your domain. Train with: Acoustic Data (recordings + transcripts), Language Data (domain text), Pronunciation Data (phonetics for misrecognised terms). Use when standard STT misrecognises technical terms or proper nouns.'},
+  {k:'t2',t:'Batch Transcription',d:'Processing large volumes of pre-recorded audio files stored in Azure Blob Storage. Submit async job → poll for completion → results written to output storage. Cheaper and more scalable than real-time for archival processing.'},
+  {k:'t2',t:'SpeechConfig',d:'Python SDK object configuring Speech service: SpeechConfig(subscription=key, region=region). Sets speech_recognition_language, speech_synthesis_voice_name. Starting point for all Speech operations.'},
+  {k:'t2',t:'ResultReason (Speech)',d:'Status of a speech recognition result. RecognizedSpeech: success — read result.text. NoMatch: audio detected but no recognisable speech (wrong language, noise). Canceled: error — check CancellationDetails.'},
+  {k:'t3',t:'CLU — Conversational Language Understanding',d:'LUIS replacement in Azure AI Language. Identifies user intent (what they want) and extracts entities (key info) from natural language. Trained on your labelled utterances. Same Language endpoint. Part of azure-ai-language-conversations SDK.'},
+  {k:'t3',t:'Intent (CLU)',d:'What the user wants to accomplish. "Book a flight to Paris" → intent: BookFlight. Each utterance maps to exactly one intent. Define intents based on actions your application supports.'},
+  {k:'t3',t:'Entity (CLU)',d:'Key information extracted from the utterance. In "Book flight to Paris on March 15" → {destination:"Paris"}, {date:"March 15"}. Entities are the "slots" an intent needs filled to take action.'},
+  {k:'t3',t:'None Intent',d:'Special CLU intent for out-of-scope utterances. Always include with diverse examples of irrelevant inputs. Without it the model forces all utterances into defined intents even when none match.'},
+  {k:'t3',t:'Utterance (CLU training)',d:'A sample sentence used to train CLU. Provide 15–30+ labelled utterances per intent. The model learns to generalise from these examples to new unseen inputs. Minimum 5 per intent.'},
+  {k:'t3',t:'Custom Question Answering',d:'QnA Maker replacement in Azure AI Language. Build a knowledge base from FAQ documents, manual entries, or web URLs. At runtime finds best matching answer using semantic similarity. Returns answer + confidence score.'},
+  {k:'t3',t:'Knowledge Base (Custom Q&A)',d:'Collection of Q&A pairs in a Custom Q&A project. Sources: manual entry, imported files (Word/PDF/Excel), or URL crawling. The model indexes pairs and returns relevant answers via semantic similarity.'},
+  {k:'t3',t:'Custom NER',d:'When prebuilt NER categories are too generic. Define your own entity types (LegalCase, ContractClause, RegulatoryBody) and train on labelled documents. Follows: create → label → train → evaluate → deploy workflow.'},
+  {k:'t3',t:'Custom Text Classification',d:'Classify documents into your categories. Single-label: exactly one label per document (Spam/NotSpam). Multi-label: multiple labels allowed (article can be Technology AND Business). Train on labelled document examples.'},
+  {k:'t3',t:'Azure Bot Service',d:'Platform for hosting and deploying conversational bots. Connects bot logic to messaging channels: Teams, webchat, Slack, SMS. Works with Bot Framework SDK for logic and CLU/Q&A for understanding.'},
+];
+let deck=[...ALL],ptr=0,flipped=false,rated={};
+const s=id=>document.getElementById(id),se=(id,d)=>{s(id).style.display=d};
+function buildDeck(cat){deck=cat==='all'?[...ALL]:ALL.filter(c=>c.k===cat);ptr=0;flipped=false;rated={};['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}
+document.getElementById('catbar').addEventListener('click',e=>{const p=e.target.closest('.cat-pill');if(!p)return;document.querySelectorAll('.cat-pill').forEach(x=>x.classList.remove('active'));p.classList.add('active');buildDeck(p.dataset.cat);});
+function render(){const c=deck[ptr],col=cats[c.k];s('fcc').classList.remove('flipped');flipped=false;s('fct').textContent=c.t;s('fcd').textContent=c.d;s('ftag').textContent=col.l;s('ftag').style.background=col.bg;s('ftag').style.color=col.c;s('fcctr').textContent=`${ptr+1} / ${deck.length}`;s('fcp').style.width=`${((ptr+1)/deck.length)*100}%`;s('bp').disabled=ptr===0;s('bn').disabled=ptr===deck.length-1;setR(false);s('fcnote').textContent='Flip the card first, then rate your confidence';const w=rated[ptr];s('fcc').style.borderColor=w===true?'rgba(16,185,129,.5)':w===false?'rgba(239,68,68,.4)':'';}
+function flip(){s('fcc').classList.toggle('flipped');flipped=!flipped;if(flipped){setR(true);s('fcnote').textContent='How well did you know this?';}}
+function setR(e){s('bknw').disabled=!e;s('bunk').disabled=!e;}
+function nav(d){const n=ptr+d;if(n<0||n>=deck.length)return;ptr=n;render();upd();}
+function rate(k){rated[ptr]=k;upd();if(ptr<deck.length-1){ptr++;render();}else done();}
+function upd(){s('st').textContent=deck.length;s('sk').textContent=Object.values(rated).filter(v=>v===true).length;s('su').textContent=Object.values(rated).filter(v=>v===false).length;}
+function done(){const k=Object.values(rated).filter(v=>v===true).length,p=Math.round(k/deck.length*100);s('fcs').textContent=`${p}%`;s('fcmsg').textContent=['💪 Keep practising!','📚 Getting there!','✅ Great work!','🏆 Part 4 mastered!'][p>=90?3:p>=75?2:p>=50?1:0];s('fcdone').classList.add('show');['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,'none'));}
+function shuffle(){for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}ptr=0;flipped=false;rated={};['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}
+function reset(){deck=[...ALL];ptr=0;flipped=false;rated={};['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');document.querySelectorAll('.cat-pill').forEach(p=>{p.classList.toggle('active',p.dataset.cat==='all');});render();upd();}
+function reviewUnknown(){const u=Object.entries(rated).filter(([,v])=>v===false).map(([i])=>deck[parseInt(i)]);if(!u.length){alert('No unknowns!');return;}deck=u;ptr=0;flipped=false;rated={};['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nav(1);if(e.key==='ArrowLeft')nav(-1);if(e.key===' '&&!e.target.matches('button,input')){e.preventDefault();flip();}});
+render();upd();
+</script>
+</body>
+</html>
