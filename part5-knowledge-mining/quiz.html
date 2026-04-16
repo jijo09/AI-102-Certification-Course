@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 5 Full Quiz — Knowledge Mining | AI-102 Study Hub</title>
+  <link rel="stylesheet" href="../styles/main.css" />
+  <style>
+    .quiz-page{max-width:820px;margin:0 auto;padding:var(--space-10) var(--space-6)}
+    .q-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:.7rem;font-weight:700;border:2px solid var(--border-subtle);color:var(--text-muted);cursor:pointer;transition:all var(--transition-fast);background:var(--bg-card)}
+    .q-dot.current{border-color:#dc2626;color:#f87171;background:rgba(239,68,68,.1)}
+    .q-dot.correct{border-color:var(--green-500);color:#fff;background:var(--green-500)}
+    .q-dot.incorrect{border-color:var(--red-500);color:#fff;background:var(--red-500)}
+    .q-topic{display:inline-flex;align-items:center;gap:var(--space-2);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:var(--font-heading);padding:2px 8px;border-radius:10px;margin-bottom:var(--space-4)}
+    #sbo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+    #sbo.show{display:block}
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb"><a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a><span class="sep">›</span><a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a><span class="sep">›</span><span class="current">Full Quiz</span></div>
+      <div class="topbar-actions"><span data-countdown style="font-family:var(--font-mono);font-size:.85rem;color:var(--amber-400);font-weight:700">—</span></div>
+    </header>
+    <div class="quiz-page animate-fade-in">
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);margin-bottom:var(--space-3)">✅ Part 5 · Knowledge Mining</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 5 Full Quiz</h1>
+        <p style="color:var(--text-muted);font-size:.9rem">15 scenario-based questions covering all 3 Part 5 topics. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-5) var(--space-6);margin-bottom:var(--space-6);display:flex;gap:var(--space-6);flex-wrap:wrap;align-items:center">
+        <div><div style="font-size:.75rem;color:var(--text-muted)">Question</div><div style="font-family:var(--font-heading);font-size:1.1rem;font-weight:800"><span id="qc">1</span> / 15</div></div>
+        <div><div style="font-size:.75rem;color:var(--text-muted)">Score</div><div style="font-family:var(--font-heading);font-size:1.1rem;font-weight:800;color:var(--green-400)" id="qs">0 / 15</div></div>
+        <div style="flex:1"><div style="font-size:.75rem;color:var(--text-muted);margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qp" style="width:6.7%;background:#dc2626"></div></div></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--space-6)" id="qdots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header"><span class="font-heading" style="font-size:.875rem;font-weight:600">Part 5 — Knowledge Mining</span><span class="quiz-question-count" data-q-counter>1 / 15</span></div>
+        <div style="height:3px;background:var(--navy-800)"><div style="height:3px;background:#dc2626;transition:width .4s ease;width:6.7%" data-q-progress></div></div>
+        <div data-quiz-body>
+
+          <!-- Q1 T1 AI Search -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(239,68,68,.15);color:#f87171">🔍 Topic 1 — Azure AI Search</div>
+              <div class="quiz-scenario">Scenario: A company indexes a document library where many PDFs are scanned image-only files (no embedded text layer). The search team wants all text — including text visible inside the scanned images — to be fully searchable in the index.</div>
+              <p class="quiz-question">Which two skills must be added to the indexer's skillset together to achieve this?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">SentimentSkill + EntityRecognitionSkill — enriches scanned documents with AI metadata</span></button>
+                <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">OcrSkill (extracts text from embedded images) + MergeSkill (merges OCR output with original document text into a single searchable field)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">SplitSkill + AzureOpenAIEmbeddingSkill — chunks and vectorises the document text</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">OcrSkill alone — it automatically writes extracted text to the main content field</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> OcrSkill reads text from images embedded in documents (scanned pages, image attachments). However, OcrSkill writes its output to its own field — not the main content field. MergeSkill is always paired with OcrSkill: it takes the OCR output and merges it with the original document text into one unified content field that downstream skills and the index can use. Without MergeSkill, OCR-extracted text is isolated and not part of the searchable content (D is wrong). SentimentSkill and NER (A) operate on already-extracted text — they don't help get text out of images. SplitSkill + Embedding (C) enables vector search but doesn't extract image text.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 T1 AI Search -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(239,68,68,.15);color:#f87171">🔍 Topic 1 — Azure AI Search</div>
+              <div class="quiz-scenario">Scenario: A product search UI must display a sidebar showing filtered category counts like "Electronics (45)", "Books (23)", "Clothing (12)" alongside keyword search results. Users should also be able to filter results to only show in-stock products. The results must be sortable by price.</div>
+              <p class="quiz-question">Which combination of field attributes must be set on the category, in_stock, and price fields respectively?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">category: searchable; in_stock: retrievable; price: sortable</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">category: searchable + facetable; in_stock: filterable; price: filterable + sortable</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">category: filterable + facetable; in_stock: filterable; price: filterable + sortable</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">category: facetable; in_stock: facetable; price: searchable</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> <em>Category</em> needs: <strong>filterable</strong> (so users can select "Electronics" to filter) and <strong>facetable</strong> (to generate the "Electronics (45)" aggregated counts in the sidebar). Making it "searchable" (A/B) would enable full-text search within category names — not what's needed here. <em>in_stock</em> must be <strong>filterable</strong> to be used in $filter expressions ($filter=in_stock eq true). <em>price</em> must be <strong>filterable</strong> ($filter=price lt 500) and <strong>sortable</strong> ($orderby=price asc). A field must be filterable before it can be used in filter expressions or sort operations.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 T1 AI Search -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(239,68,68,.15);color:#f87171">🔍 Topic 1 — Azure AI Search</div>
+              <p class="quiz-question">A data science team has enriched a document index using skillsets (entity extraction, key phrase extraction, sentiment). They want to run custom analytics and build Power BI dashboards on the enriched data — but these operations cannot query the search index directly. Which Azure AI Search feature is purpose-built for this?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Scoring Profile — custom relevance rules can route enriched data to external storage</span></button>
+                <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Knowledge Store — saves enriched documents to Azure Blob Storage or Table Storage via projections, making them available for Power BI and analytics pipelines</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Semantic Ranking — re-ranks and exports top results to external storage</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Custom Skill — Azure Function pushes each enriched document to a database after indexing</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Knowledge Store is designed exactly for this use case — persisting enriched content outside the search index for analytics and reporting. You define projections inside the skillset: table projections (→ Azure Table Storage, ideal for Power BI), object projections (→ Blob Storage, full JSON documents), and file projections (→ Blob Storage, extracted images). Power BI connects directly to Table Storage. Scoring Profiles (A) affect relevance ranking — not data routing. Semantic Ranking (C) re-orders search results — it has no data export capability. Custom Skill (D) could work technically, but Knowledge Store is the purpose-built, no-code Azure-native solution for this exact requirement.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 T1 AI Search -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(239,68,68,.15);color:#f87171">🔍 Topic 1 — Azure AI Search</div>
+              <div class="quiz-scenario">Scenario: An e-commerce company implements search for their product catalogue. Users search with natural language queries like "affordable noise-cancelling headphones for travel". The keyword search misses many relevant products because documents use different vocabulary. The team wants the best possible search relevance using Azure AI Search on the Standard tier.</div>
+              <p class="quiz-question">Which combination of search features will provide the highest relevance quality?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Keyword search with a custom scoring profile that boosts highly-rated products</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Vector search only — converts queries to embeddings for semantic matching</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Hybrid search (keyword + vector, merged via RRF) with semantic ranking on top — combines vocabulary matching, semantic similarity, and language model re-ranking for maximum relevance</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Keyword search with synonym maps to handle vocabulary variations</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The pyramid of relevance quality in Azure AI Search is: Keyword < Vector < Hybrid (RRF) < Hybrid + Semantic Ranking. Hybrid search merges keyword and vector results using Reciprocal Rank Fusion (RRF) — handling both exact vocabulary and semantic meaning. Adding semantic ranking on top applies a language model to re-score results by deep semantic relevance, returning semantic captions and answers. Standard tier supports semantic ranking. Scoring Profile (A) boosts fields but doesn't improve semantic understanding. Vector-only (B) misses exact product name/code matches. Synonym maps (D) require manually maintaining every synonym pair — not scalable.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 T1 AI Search -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(239,68,68,.15);color:#f87171">🔍 Topic 1 — Azure AI Search</div>
+              <p class="quiz-question">What is the role of the <strong>Indexer</strong> in an Azure AI Search pipeline — and what distinguishes it from the Skillset and the Index?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Indexer stores the searchable documents and handles all search queries from client applications</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The Indexer defines the AI operations to be applied — the Skillset orchestrates the execution</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Indexer is the orchestrator — it reads from the data source, passes documents through the Skillset for enrichment, and writes the enriched output to the Index. The Skillset defines what AI operations to run; the Index is the searchable store</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Index reads data from the data source directly; the Indexer manages the schema</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The Indexer is the pipeline orchestrator. It: (1) connects to the data source and reads documents, (2) passes each document through the Skillset where AI skills enrich the content, (3) writes the enriched document fields to the Index, (4) tracks state to only re-process changed documents on subsequent runs. The Skillset only defines the AI steps — it doesn't pull data or write to the Index itself. The Index is the final searchable store — it doesn't pull data, it only receives it from the Indexer. The data source is passive — it doesn't push data anywhere.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q6 T2 Document Intelligence -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(124,58,237,.15);color:#c4b5fd">📄 Topic 2 — Document Intelligence</div>
+              <div class="quiz-scenario">Scenario: A bank receives mortgage applications from customers. Every application uses the same standardised 3-page form — the applicant's name is always at the top of page 1, income is always in section 3B, and property address is always in section 4. The bank wants to automatically extract 8 specific fields from each form.</div>
+              <p class="quiz-question">Which Document Intelligence model type is most appropriate, and what is the minimum number of labelled training documents required?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Prebuilt Invoice model — mortgage applications are financial documents</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Custom Neural model — neural models are always more accurate; minimum 50 documents needed</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Custom Template model — fixed layout with fields always in the same position; minimum 5 labelled training documents</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Layout model — it extracts all text and tables from any document without training</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The key phrase is <em>"same standardised form"</em> and <em>"always in section X"</em> — this is a fixed-layout document. Custom Template model is optimised for fixed-layout forms where fields always appear in the same position on every document. The minimum training requirement is <strong>5 labelled documents</strong>. Custom Neural (B) is for variable-layout documents — using it here adds unnecessary complexity, and 50 is not a hard minimum. Prebuilt Invoice (A) doesn't cover mortgage applications. Layout (D) extracts raw structure but doesn't label semantic field names.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q7 T2 Document Intelligence -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(124,58,237,.15);color:#c4b5fd">📄 Topic 2 — Document Intelligence</div>
+              <div class="quiz-scenario">Scenario: A logistics company receives invoices from 15 different shipping carriers. Each carrier has a completely different invoice layout — different field positions, different terminology, different page structures. The company needs a single REST API endpoint to process any carrier invoice and extract: carrier name, invoice number, shipment date, and total charges.</div>
+              <p class="quiz-question">Which Document Intelligence approach meets this requirement most effectively?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Use the prebuilt Invoice model — it automatically handles all invoice formats</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Train one Custom Neural model on samples from all 15 carriers combined — neural models handle variable layouts</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Train 15 Custom Neural models (one per carrier layout) then create a Composed model — this combines all into a single endpoint that automatically routes each invoice to the correct carrier model</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Train 15 Custom Template models (one per carrier) and route documents manually based on carrier name in the file name</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The scenario describes multiple distinct layouts needing one endpoint — the exact use case for a <strong>Composed model</strong>. Each carrier has unique layouts (→ Custom Neural models), then all are composed into one model. The Composed model automatically classifies incoming documents and routes to the best component model. Option B (one neural model across all 15) is less accurate than composition — the model sees too many conflicting patterns. Prebuilt Invoice (A) may not have carrier-specific fields. Manual routing (D) defeats the purpose of a unified endpoint and adds external logic.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q8 T2 Document Intelligence -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(124,58,237,.15);color:#c4b5fd">📄 Topic 2 — Document Intelligence</div>
+              <p class="quiz-question">A developer submits a PDF to Document Intelligence using <code>begin_analyze_document("prebuilt-invoice", ...)</code>. The call returns immediately without an error. What is the correct next step to retrieve the extracted fields?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Access result.fields immediately — begin_analyze_document() processes the document synchronously</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Check response.status_code — if 200, the result JSON is in the response body</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Call .result() on the returned poller object — this waits for the async operation to complete and returns the AnalyzeResult with all extracted documents and fields</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Call poller.status() in a loop until status is "succeeded", then separately call poller.get_result()</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> <code>begin_analyze_document()</code> is asynchronous — it submits the job and returns a <code>DocumentOperationPoller</code> object immediately (not the result). To get the actual extracted data, you call <code>poller.result()</code>, which blocks until the operation completes (polling internally) and returns an <code>AnalyzeResult</code> object. You then iterate over <code>result.documents</code> and access <code>doc.fields</code> for the extracted fields. Option A is wrong — the result is not immediately available. Option B confuses REST response codes with the Python SDK pattern. Option D is manual polling — the SDK's <code>.result()</code> handles this automatically.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q9 T2 Document Intelligence -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(124,58,237,.15);color:#c4b5fd">📄 Topic 2 — Document Intelligence</div>
+              <div class="quiz-scenario">Scenario: An HR company wants to build an employee onboarding system that reads passport details (name, date of birth, passport number, expiry date) submitted by new employees as scanned images. The system should start processing within 4 weeks.</div>
+              <p class="quiz-question">What MUST the company do before using the prebuilt ID Document model in a production application?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Train a custom model on sample passport images — the prebuilt ID Document model requires custom training data</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Upgrade to the Document Intelligence S0 pricing tier to unlock the ID Document capability</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Apply for and receive Microsoft's Limited Access approval before using the prebuilt ID Document model in production — it is a gated feature requiring approval</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Use the prebuilt Layout model instead — it extracts all text including passport fields without any restrictions</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The prebuilt ID Document model (passports, driver's licences, national IDs) is a <strong>Limited Access</strong> feature — like Face API identification. Microsoft requires organisations to apply, demonstrate a legitimate use case, and receive approval before deploying in production. This policy protects personal identity information. The model doesn't require custom training (A) — it's pre-trained by Microsoft. Pricing tier (B) doesn't unlock Limited Access features. Layout model (D) extracts raw text but doesn't understand passport field semantics (doesn't know "MRZ line 1" = date of birth).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q10 T2 Document Intelligence -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(124,58,237,.15);color:#c4b5fd">📄 Topic 2 — Document Intelligence</div>
+              <p class="quiz-question">A developer discovers that their code imports <code>from azure.ai.formrecognizer import FormRecognizerClient</code>. A colleague says this needs updating. Which statement about this import is correct?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The import is correct — azure-ai-formrecognizer is still the current package name</span></button>
+                <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">This uses the deprecated package. The service was renamed to Document Intelligence in 2023. The current package is azure-ai-documentintelligence and the client is DocumentIntelligenceClient</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only the client class name changed — the package name azure-ai-formrecognizer remains correct</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Document Intelligence is a completely different service — Form Recognizer still exists separately</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> In 2023 Microsoft renamed <em>Azure Form Recognizer</em> to <em>Azure Document Intelligence</em>. Both the service name and the Python SDK changed: old package <code>azure-ai-formrecognizer</code> → new package <code>azure-ai-documentintelligence</code>; old client <code>FormRecognizerClient</code> → new client <code>DocumentIntelligenceClient</code>. The exam may use either name — they refer to the same underlying service. The old SDK still works for older API versions but is not updated with new features. New code should always use the new package.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q11 T3 Content Understanding -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(8,145,178,.15);color:#67e8f9">🎛️ Topic 3 — Content Understanding</div>
+              <div class="quiz-scenario">Scenario: A financial services company processes 300 customer support call recordings per day (WAV files). They need to: (1) transcribe each call, (2) identify the customer's account number mentioned in the conversation, (3) classify the call as "Billing Dispute", "Technical Issue", or "General Enquiry", and (4) flag calls with negative customer sentiment for supervisor review.</div>
+              <p class="quiz-question">Which Azure service and configuration handles all four requirements in a single pipeline?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Azure AI Language — analyze_sentiment() + recognize_entities() + custom text classification on the transcripts</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Azure Document Intelligence — use the prebuilt Read model to process audio files</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Azure Content Understanding with an audio scenario analyzer — field schema extracts AccountNumber, field schema + classification defines call type, and a Sentiment field extracts audio sentiment — all in one pipeline</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Azure AI Speech for transcription + Azure AI Language for NLP + custom classification model — three separate pipelines stitched together</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Content Understanding's audio modality handles the entire pipeline: (1) transcription is automatic for all audio inputs, (2) a field schema with AccountNumber extracts the account number from the transcript, (3) classification labels the call type, (4) a Sentiment field captures overall emotional tone — all in one submit-and-poll operation. Option D (three separate pipelines) works technically but is the wrong exam answer — Content Understanding's entire value proposition is consolidating this into one pipeline. Document Intelligence (B) has no audio capability. Azure AI Language (A) can do NLP on text but cannot process audio directly — you'd still need a separate transcription step.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q12 T3 Content Understanding -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(8,145,178,.15);color:#67e8f9">🎛️ Topic 3 — Content Understanding</div>
+              <p class="quiz-question">What is the purpose of the <strong>Field Schema</strong> in a custom Azure Content Understanding analyzer, and how does it work?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It defines the database schema for storing extracted results in Azure SQL</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">It sets confidence thresholds — extractions below the threshold are automatically excluded from results</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It defines the specific fields to extract — their names, data types (number, date, string, array), and plain-English descriptions that guide the AI to find the correct values in each document</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">It defines which content modalities (document, image, audio, video) the analyzer will accept</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The Field Schema is a list of named output fields you want extracted from every piece of content. Each field has: a <strong>name</strong> (what you call it in the output JSON), a <strong>type</strong> (number, date, string, array — tells the AI what format to return), and a <strong>description</strong> in plain English (e.g. "The total monetary value of the contract") that instructs the AI language model what to look for. No labelling or training required — the LLM uses your descriptions as instructions. Content modalities are defined by the "scenario" setting in the analyzer, not the field schema. There is no confidence threshold setting in the schema.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q13 T3 Content Understanding -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(8,145,178,.15);color:#67e8f9">🎛️ Topic 3 — Content Understanding</div>
+              <div class="quiz-scenario">Scenario: A developer submits a 150-page contract PDF to a Content Understanding analyzer and receives an HTTP 202 status code in the response. The response body is minimal — just an operation status. The developer expects to read the extracted summary and fields but the response contains no document data.</div>
+              <p class="quiz-question">Is this correct behaviour, and what should the developer do next?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">202 is an error — the developer should retry the request with a different API version</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The response body should contain the results — the developer's content type header is wrong</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">This is correct async behaviour — 202 Accepted means the job is queued. The developer must poll the Operation-Location URL from the response header until status becomes "succeeded", then read the full result</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">202 means partial processing — the developer should wait 30 seconds and re-call the same POST endpoint</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> HTTP 202 Accepted is the standard async response across all Azure AI document processing APIs (Document Intelligence, Content Understanding, batch translation, etc.). It means the job is queued and processing — not that something went wrong. The developer must: (1) read the <code>Operation-Location</code> header from the 202 response (this is the polling URL), (2) send GET requests to that URL periodically until the JSON body's <code>status</code> field becomes <code>"succeeded"</code>, (3) then read the full result JSON containing extracted fields, summary, and classification. Re-POSTing to the same endpoint (D) would submit a second duplicate job.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q14 T3 Content Understanding -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(8,145,178,.15);color:#67e8f9">🎛️ Topic 3 — Content Understanding</div>
+              <div class="quiz-scenario">Scenario: A legal firm needs to process 200 new contracts per week. For each contract the firm wants to: extract "ContractValue" (dollar amount) and "JurisdictionCountry" (text), produce a one-paragraph plain-English summary, and classify each contract as "Employment", "NDA", "Service Agreement", or "Licensing".</div>
+              <p class="quiz-question">Which service and configuration best meets this requirement and why?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Document Intelligence with a custom neural model — it handles field extraction, summarisation, and classification in one model</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Azure AI Search with a skillset — KeyPhraseExtractionSkill for fields, SentimentSkill for classification</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Content Understanding with one document analyzer configuring: a field schema (ContractValue, JurisdictionCountry), summarisation enabled, and classification with defined categories — returns all three in one result per document</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Three separate calls: Document Intelligence for field extraction, Azure OpenAI for summarisation, Azure AI Language for classification — stitched together in custom code</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Content Understanding's document analyzer supports all three operations simultaneously in a single submission: a <strong>field schema</strong> for structured field extraction, <strong>summarisation</strong> using an LLM backbone, and <strong>classification</strong> with defined category labels — all returned in one result JSON per document. No separate calls or code stitching needed. Document Intelligence (A) has no summarisation or classification capability — it does structured field extraction only. AI Search skillsets (B) are optimised for indexing and search, not extracting semantic named fields or summarising. Option D works but is the exact anti-pattern Content Understanding was built to replace.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q15 Synthesis -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(30,64,175,.15);color:#93c5fd">🎯 Synthesis — All Part 5 Topics</div>
+              <div class="quiz-scenario">Scenario: A global insurance company processes five types of content daily: (1) Standard insurance claim forms (always the same fixed layout — needs specific field extraction), (2) Loss assessment reports from 20 different adjusters (variable layouts — same fields, different formats), (3) 50,000 pages of policy documents that agents must search by keyword and topic, (4) Recorded phone calls from policyholders, (5) Scanned legacy PDF files containing handwritten notes with no embedded text.</div>
+              <p class="quiz-question">Which set of services and model types correctly matches each content type?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">(1) Custom Template, (2) Custom Neural, (3) Azure AI Search, (4) Content Understanding audio analyzer, (5) AI Search with OcrSkill + MergeSkill</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">(1) Prebuilt Invoice, (2) Composed model, (3) AI Search, (4) Document Intelligence Read model, (5) Content Understanding</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">(1) Custom Neural, (2) Composed model, (3) AI Search, (4) Content Understanding, (5) Layout model</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">(1) Prebuilt Layout, (2) Custom Template ×20, (3) Document Intelligence, (4) Azure AI Language, (5) AI Search</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>A is correct.</strong> (1) Fixed layout → <strong>Custom Template model</strong>. (2) Same fields, 20 different adjuster layouts → <strong>Custom Neural model</strong> (variable layouts; if each adjuster layout is sufficiently distinct, individual models + Composed is even better). (3) Agent search across 50,000 pages → <strong>Azure AI Search</strong> — indexed, queryable. (4) Phone call recordings → <strong>Content Understanding audio analyzer</strong> — transcribes, extracts fields, classifies. (5) Scanned legacy PDFs with no text → <strong>AI Search with OcrSkill + MergeSkill</strong> in a skillset — OCR extracts handwritten text, MergeSkill combines, then it's indexed for search. Option B misidentifies (1) as Invoice and (4) as Document Intelligence Read model (which handles documents/images, not audio). Option C misidentifies (1) as Neural. Option D has multiple wrong assignments.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next style="background:#dc2626">Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4);margin-top:var(--space-8)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../part6-computer-vision/index.html" class="btn btn-primary" style="background:#dc2626">Part 6 — Computer Vision →</a>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="../scripts/common.js"></script>
+<script>
+const TOTAL=15;
+const dots=document.getElementById('qdots');
+for(let i=0;i<TOTAL;i++){const d=document.createElement('div');d.className='q-dot'+(i===0?' current':'');d.textContent=i+1;d.dataset.idx=i;dots.appendChild(d);}
+function syncDots(){
+  const s=QuizEngine._state?.['main-quiz'];if(!s)return;
+  dots.querySelectorAll('.q-dot').forEach((d,i)=>{
+    d.classList.remove('current','correct','incorrect');
+    if(i===s.current)d.classList.add('current');
+    else if(s.answered[i]!==null){const q=s.questions[i];const correct=q.querySelector('[data-correct]')?.dataset.correct;d.classList.add(s.answered[i]===correct?'correct':'incorrect');}
+  });
+  document.getElementById('qc').textContent=s.current+1;
+  document.getElementById('qs').textContent=`${s.score} / ${TOTAL}`;
+  document.getElementById('qp').style.width=`${((s.current+1)/TOTAL)*100}%`;
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  QuizEngine.init('main-quiz');QuizEngine.wireOptions('main-quiz');
+  const quiz=document.getElementById('main-quiz');
+  quiz.querySelectorAll('[data-option]').forEach(btn=>btn.addEventListener('click',()=>setTimeout(syncDots,50)));
+  quiz.querySelector('[data-q-prev]')?.addEventListener('click',()=>setTimeout(syncDots,50));
+  quiz.querySelector('[data-q-next]')?.addEventListener('click',()=>setTimeout(syncDots,50));
+});
+</script>
+</body>
+</html>

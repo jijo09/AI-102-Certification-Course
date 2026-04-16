@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topic 1 — Analyze Images | AI-102 Part 6</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    #sbo { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; }
+    #sbo.show { display:block; }
+    .feature-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);
+    }
+    .feature-name {
+      font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700;
+      color: #a5b4fc; margin-bottom: var(--space-2);
+      font-family: var(--font-mono);
+    }
+    .pipeline-step {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      display: flex; gap: var(--space-4); align-items: flex-start;
+    }
+    .step-num {
+      width: 32px; height: 32px; min-width: 32px;
+      background: #6366f1; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700;
+      color: #fff; margin-top: 2px;
+    }
+    .step-title { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .step-desc  { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+    .limited-badge {
+      display: inline-block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+      background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3);
+      padding: 2px 8px; border-radius: 999px; font-family: var(--font-heading);
+    }
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+
+  <div id="app-sidebar"></div>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span><span class="current">Analyze Images</span>
+      </div>
+      <div class="topbar-actions">
+        <span style="font-size:0.75rem;color:var(--text-muted)">Exam in</span>
+        <span data-countdown style="font-family:var(--font-mono);font-size:0.85rem;color:var(--amber-400);font-weight:700">—</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header animate-fade-in">
+        <div class="topic-part-badge badge" style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)">🖼️ Part 6 · Topic 1 of 3</div>
+        <h1 class="topic-title">Analyze Images with Azure AI Vision</h1>
+        <p style="font-size:1rem;color:var(--text-secondary);max-width:680px;line-height:1.7;margin-top:var(--space-3)">
+          Azure AI Vision (Image Analysis 4.0) is Microsoft's core computer vision service — it analyses images
+          and returns structured information about what the image contains: objects, text, people, colours, faces,
+          and generated captions. It also provides the OCR Read API for extracting text from any image or document,
+          and the Face API for face detection and identification.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">🐍 <strong>Python — every line explained</strong></span>
+          <span class="topic-meta-item">⏱️ <strong>~60 min</strong></span>
+          <span class="topic-meta-item">🔥 <strong>Very high exam weight</strong></span>
+        </div>
+      </div>
+
+      <!-- SECTION 1 — VOCAB -->
+      <div class="section-block" id="vocab">
+        <div class="section-label">🔤 Section 1 — New Vocabulary</div>
+        <h2>Azure AI Vision terms — defined before code</h2>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Building on what you already know</div>
+            <p>You know REST APIs, endpoints, API keys, and async POST-then-poll from Parts 1 and 5. The OCR Read API uses that exact same async pattern. You know confidence scores from Document Intelligence. Every term below is brand new for this topic.</p>
+          </div>
+        </div>
+
+        <div class="term-grid" style="margin-top:var(--space-6)">
+          <div class="term-card">
+            <span class="term-name">Azure AI Vision (Image Analysis 4.0)</span>
+            <p class="term-definition">Microsoft's core computer vision service for analysing images. Version 4.0 (the current exam version) uses the Florence foundation model under the hood — a large vision model trained on billions of images. Accessed via the <code>azure-ai-vision-imageanalysis</code> Python SDK or REST API. Provides visual features on demand without training your own model.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Visual Feature</span>
+            <p class="term-definition">A specific type of information you request from Image Analysis. You specify which features you want analysed — you are not charged for features you don't request. Features include: <code>CAPTION</code>, <code>DENSE_CAPTIONS</code>, <code>TAGS</code>, <code>OBJECTS</code>, <code>PEOPLE</code>, <code>SMART_CROPS</code>, <code>READ</code> (OCR). Each feature adds specific data to the JSON response.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Caption</span>
+            <p class="term-definition">A single AI-generated sentence describing the entire image in natural language. Example: "A person riding a bicycle on a city street". Returned as <code>result.caption.text</code> with a <code>confidence</code> score. Enabled by requesting the <code>CAPTION</code> visual feature. New in Image Analysis 4.0 — not available in older API versions.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Dense Captions</span>
+            <p class="term-definition">Multiple captions describing different areas of the image — one overall caption plus individual captions for each detected object region. Each dense caption includes its own bounding box coordinates. Useful for accessibility (screen readers) and detailed image cataloguing. Enabled by the <code>DENSE_CAPTIONS</code> feature.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Tags</span>
+            <p class="term-definition">A list of descriptive keywords identified in the image — covering objects, living beings, scenery, actions, and colours. Example: image of a sunset → tags: [beach, sunset, ocean, orange sky, horizon]. Each tag has a confidence score. Tags are broader and more numerous than object detections. Enabled by the <code>TAGS</code> feature.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Objects (Object Detection)</span>
+            <p class="term-definition">Identifies specific physical objects in an image and returns a bounding box for each one — the rectangular coordinates of exactly where in the image the object appears. Objects are more specific than tags and include location. Example: "car at [x:120, y:80, width:340, height:200]". Enabled by the <code>OBJECTS</code> feature.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Bounding Box</span>
+            <p class="term-definition">The rectangular coordinates (x, y, width, height) of where an object or text appears in an image. x and y are the top-left corner position in pixels. Width and height are the dimensions of the rectangle. Used by object detection and OCR to tell you precisely where in the image each element was found. Essential for drawing highlight boxes on images.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">People Detection</span>
+            <p class="term-definition">Detects people in an image and returns a bounding box for each person detected. Does NOT identify who the person is — only that a person is present and where. This is distinct from Face API identification. People detection is not a Limited Access feature — anyone can detect the presence of people. Enabled by the <code>PEOPLE</code> feature.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Smart Crops</span>
+            <p class="term-definition">Suggests optimal cropping regions of an image at various aspect ratios — focusing on the most visually important content. Useful for automatically generating image thumbnails for different screen sizes (16:9 for widescreen, 1:1 for social media). You specify desired aspect ratios; the service returns recommended crop rectangles. Enabled by the <code>SMART_CROPS</code> feature.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Background Removal</span>
+            <p class="term-definition">Separates the foreground subject from the background in an image, returning either the foreground-only image (transparent background PNG) or a binary matte image (white = foreground, black = background). Useful for product photography, profile pictures. Part of the Image Analysis API — enabled via the <code>segmentationMode</code> parameter.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">OCR Read API</span>
+            <p class="term-definition">Extracts printed and handwritten text from images and multi-page PDFs. Uses an <strong>asynchronous</strong> pattern (same as Document Intelligence): POST image → receive operation URL → poll GET until "succeeded" → read text. Returns text organised as pages → lines → words, each with bounding polygon coordinates. Part of Azure AI Vision (same endpoint, different operation path).</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Read Result (OCR)</span>
+            <p class="term-definition">The structured output of the OCR Read API. Organised hierarchically: <code>result.pages</code> → <code>page.lines</code> → <code>line.words</code>. Each word has: <code>.content</code> (the word text), <code>.confidence</code> (0–1 recognition accuracy), <code>.polygon</code> (bounding coordinates as [x1,y1, x2,y2, x3,y3, x4,y4] — a quadrilateral, not necessarily a rectangle, to handle rotated text).</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Face API</span>
+            <p class="term-definition">A separate Azure AI service (distinct from Image Analysis) focused on face processing. Capabilities: <strong>detection</strong> (is there a face? where?), <strong>attribute analysis</strong> (head pose, blur, exposure, accessories — emotions were deprecated), <strong>identification</strong> (who is this person? — requires a PersonGroup with enrolled faces). Face identification is a <strong>Limited Access</strong> feature requiring Microsoft approval.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">PersonGroup (Face API)</span>
+            <p class="term-definition">A container for enrolled, known faces used for face identification. Workflow: Create PersonGroup → Add Persons (each with a name) → Add face images for each Person → Train the PersonGroup → Call Identify() with a detected face → returns the closest matching Person(s) with confidence. The PersonGroup must be re-trained whenever faces are added or removed.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Limited Access (Vision)</span>
+            <p class="term-definition">Certain high-sensitivity Azure AI Vision capabilities require Microsoft's approval before use in production: <strong>Face identification</strong> (matching faces to known people), <strong>Celebrity recognition</strong>, and features that could identify individuals. Free tier/basic usage of face detection (is a face present?) is not gated. Only features that ID specific people require approval.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2 — IMAGE ANALYSIS FEATURES -->
+      <div class="section-block" id="features">
+        <div class="section-label">🏗️ Section 2 — Image Analysis 4.0 Visual Features</div>
+        <h2>What you can ask the Vision API to detect</h2>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📚</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A specialist consultant who only bills for what you ask</div>
+            <p>
+              Imagine an image arrives at a team of consultants. You don't pay all of them — you only call in the ones you need.
+              You call the <em>tagger</em> to list what's in the image. You call the <em>object locator</em> to draw boxes
+              around specific things. You call the <em>caption writer</em> to describe it in English. You call the
+              <em>text reader</em> to extract any printed text. Each specialist returns their results, charges only for
+              their work, and gives you a confidence score for how certain they were.<br><br>
+              Azure AI Vision works exactly this way — you specify which <code>VisualFeatures</code> to include in your
+              request, and only those analyses are performed and returned.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">All visual features — what each one returns</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin-bottom:var(--space-8)">
+          <div class="feature-card">
+            <div class="feature-name">CAPTION</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary)">One natural-language sentence describing the whole image. <code>result.caption.text</code>, <code>.confidence</code>. Example: "A dog sitting on a green lawn".</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-name">DENSE_CAPTIONS</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary)">Up to 10 captions for different regions of the image. Each has text, confidence, and bounding box. First item is always the whole-image caption.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-name">TAGS</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary)">List of keyword tags covering objects, scenery, actions, colours. Each tag has name + confidence. More numerous and broader than OBJECTS.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-name">OBJECTS</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary)">Detected physical objects with bounding boxes (x, y, width, height in pixels) and confidence. More precise location than tags — tells you WHERE each object is.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-name">PEOPLE</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary)">Detects human figures — bounding box for each person. Does NOT identify WHO they are. Not Limited Access. Returns confidence per person detection.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-name">READ</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary)">Extracts printed and handwritten text from the image (OCR). Returns pages → lines → words, each with bounding polygon. Handles rotated and handwritten text.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-name">SMART_CROPS</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary)">Recommends crop rectangles at specified aspect ratios that keep the most important content. Used for generating optimised thumbnails.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-name">Background Removal*</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary)">*Separate parameter (not a VisualFeature). Returns foreground-only PNG or binary matte. Called with <code>segmentationMode="backgroundRemoval"</code> or <code>"foregroundMatting"</code>.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — Tags vs Objects vs People vs Caption</div>
+            <p>
+              <strong>Tags</strong>: keywords only, no location — "dog", "park", "sunny" — for labelling and search<br><br>
+              <strong>Objects</strong>: specific things WITH bounding boxes — for drawing boxes on images, counting items<br><br>
+              <strong>People</strong>: humans with bounding boxes — for counting people, presence detection. NOT identification<br><br>
+              <strong>Caption</strong>: one sentence description of the whole image — for accessibility alt text, image cataloguing<br><br>
+              <strong>Dense Captions</strong>: multiple descriptions for different image regions — for detailed accessibility or content cataloguing
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3 — OCR READ API -->
+      <div class="section-block" id="ocr">
+        <div class="section-label">📝 Section 3 — OCR with the Read API</div>
+        <h2>Extracting text from images and documents</h2>
+
+        <p>The <strong>Read API</strong> is Azure's most powerful OCR engine — it handles printed text, handwriting, and mixed content. It is accessed as part of Azure AI Vision (same resource, same endpoint) using the <code>READ</code> visual feature in Image Analysis 4.0.</p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📚</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A precise typist transcribing a photo</div>
+            <p>
+              Imagine photographing a handwritten recipe card. A very precise typist reads every word, records the exact
+              text, notes which line each word was on, and measures exactly where on the card each word appeared
+              (in case you need to highlight it). That typist is the Read API.<br><br>
+              The hierarchy is: <strong>Page</strong> (the full image) → <strong>Lines</strong> (each row of text) →
+              <strong>Words</strong> (each individual word with its exact position and confidence score).
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-6);margin-bottom:var(--space-4)">What makes the Read API different from simple OCR</h3>
+        <table class="compare-table">
+          <thead><tr><th>Capability</th><th>Old OCR API (v3.2)</th><th>Read API / Image Analysis 4.0</th></tr></thead>
+          <tbody>
+            <tr><td>Handwritten text</td><td>Limited support</td><td>✅ Full handwriting recognition</td></tr>
+            <tr><td>Multi-page PDFs</td><td>❌ Images only</td><td>✅ PDFs up to 2,000 pages</td></tr>
+            <tr><td>Rotated / skewed text</td><td>Limited</td><td>✅ Polygon bounding boxes handle any rotation</td></tr>
+            <tr><td>Output structure</td><td>Lines → words</td><td>Pages → lines → words (with polygon per word)</td></tr>
+            <tr><td>Speed</td><td>Faster (synchronous)</td><td>For Image Analysis 4.0: direct (not separate async polling for images)</td></tr>
+            <tr><td>Handwriting styles</td><td>Basic</td><td>✅ Multiple languages, cursive, print mix</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SECTION 4 — FACE API -->
+      <div class="section-block" id="face-api">
+        <div class="section-label">👤 Section 4 — The Face API</div>
+        <h2>Face detection, attributes, and identification</h2>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Critical Exam Trap — Detection is free, Identification is Limited Access</div>
+            <p>The exam heavily tests this distinction. <strong>Face detection</strong> (is there a face? where is it? is it blurry?) is available to everyone without approval. <strong>Face identification</strong> (who is this person? match to a PersonGroup) requires Microsoft's Limited Access approval. Many exam questions describe a face identification scenario and ask what's required — the answer always includes <strong>obtaining Limited Access approval</strong>.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-6);margin-bottom:var(--space-4)">Face detection attributes — what you get without approval</h3>
+        <table class="compare-table">
+          <thead><tr><th>Attribute</th><th>What it returns</th><th>Limited Access?</th></tr></thead>
+          <tbody>
+            <tr><td><strong>FaceRectangle</strong></td><td>Bounding box of the face: top, left, width, height</td><td>❌ No</td></tr>
+            <tr><td><strong>HeadPose</strong></td><td>Pitch, roll, yaw — the angle the head is tilted/turned</td><td>❌ No</td></tr>
+            <tr><td><strong>Blur</strong></td><td>Is the face in or out of focus — Low/Medium/High</td><td>❌ No</td></tr>
+            <tr><td><strong>Exposure</strong></td><td>Is the face correctly lit — UnderExposure/GoodExposure/OverExposure</td><td>❌ No</td></tr>
+            <tr><td><strong>Noise</strong></td><td>Graininess of the face image</td><td>❌ No</td></tr>
+            <tr><td><strong>Accessories</strong></td><td>Glasses, headwear, mask — present/absent</td><td>❌ No</td></tr>
+            <tr><td><strong>Facial Hair</strong></td><td>Beard, moustache, sideburns — confidence scores</td><td>❌ No</td></tr>
+            <tr><td><strong>Glasses</strong></td><td>NoGlasses/ReadingGlasses/Sunglasses/SwimmingGoggles</td><td>❌ No</td></tr>
+            <tr><td><strong>Emotion</strong> ⚠️</td><td>DEPRECATED — removed from the API</td><td>—</td></tr>
+            <tr><td><strong>Identification</strong></td><td>Matching face to a known person in a PersonGroup</td><td>✅ YES — Limited Access required</td></tr>
+            <tr><td><strong>Verification</strong></td><td>Are two face photos the same person?</td><td>✅ YES — Limited Access required</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Face Identification Workflow (requires Limited Access)</h3>
+        <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+          <div class="pipeline-step">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-title">Create a PersonGroup</div>
+              <p class="step-desc">A PersonGroup is a named container for all the known people you want to identify. Create it with a unique ID and name. Example: <code>person_group_id = "company-employees"</code>. One PersonGroup per use case.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-title">Add Person objects to the group</div>
+              <p class="step-desc">For each person you want to identify, create a Person object inside the PersonGroup. The Person object has a name (e.g. "Alice Johnson") and gets a unique person_id. The Person object is the container for that person's face photos.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-title">Add face images to each Person</div>
+              <p class="step-desc">Upload multiple face photos for each Person (different angles, lighting, expressions recommended — 10+ photos per person for good accuracy). Each photo must clearly show the person's face. The Face API extracts the face features from each photo and associates them with the Person.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">4</div>
+            <div>
+              <div class="step-title">Train the PersonGroup</div>
+              <p class="step-desc">Call <code>train_person_group()</code> on the PersonGroup. This builds the identification model from all the enrolled face photos. Training is async — poll for completion before calling Identify(). Must re-train every time faces are added or removed.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">5</div>
+            <div>
+              <div class="step-title">Detect + Identify faces in new images</div>
+              <p class="step-desc">First detect faces in the new image to get <code>face_ids</code>. Then call <code>identify()</code> passing the face_ids and the PersonGroup ID. Returns a list of candidates for each detected face — each candidate has a <code>person_id</code> and <code>confidence</code> score. Filter candidates above your confidence threshold.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 5 — PYTHON CODE -->
+      <div class="section-block" id="python">
+        <div class="section-label">🐍 Section 5 — Python: Azure AI Vision Image Analysis</div>
+        <h2>Analysing images, extracting text, and reading OCR results</h2>
+        <p style="margin-bottom:var(--space-4)">Install: <code>pip install azure-ai-vision-imageanalysis azure-core</code></p>
+
+<pre><code><span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> azure.ai.vision.imageanalysis <span class="token-keyword">import</span> ImageAnalysisClient
+<span class="token-keyword">from</span> azure.ai.vision.imageanalysis.models <span class="token-keyword">import</span> VisualFeatures
+<span class="token-comment"># VisualFeatures is an enum — each value requests one type of image analysis</span>
+<span class="token-keyword">from</span> azure.core.credentials <span class="token-keyword">import</span> AzureKeyCredential
+
+<span class="token-comment"># ── Connection details ─────────────────────────────────────────────────</span>
+<span class="token-comment"># From your Azure AI Vision resource in the portal: Keys and Endpoint</span>
+<span class="token-comment"># Endpoint format: https://&lt;your-resource-name&gt;.cognitiveservices.azure.com/</span>
+endpoint = os.environ.get(<span class="token-string">"VISION_ENDPOINT"</span>)
+key      = os.environ.get(<span class="token-string">"VISION_KEY"</span>)
+
+<span class="token-comment"># Create the client — wraps the endpoint and credential for all Vision operations</span>
+client = ImageAnalysisClient(
+    endpoint   = endpoint,
+    credential = AzureKeyCredential(key)
+)
+
+
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+<span class="token-comment"># EXAMPLE 1 — Full image analysis from a URL</span>
+<span class="token-comment"># Requesting multiple visual features in a single API call</span>
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+
+image_url = <span class="token-string">"https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png"</span>
+
+<span class="token-comment"># analyze() is SYNCHRONOUS for URL-based images — the result comes back immediately</span>
+<span class="token-comment"># (No polling needed for Image Analysis 4.0 with URLs — only the standalone Read API is async)</span>
+<span class="token-comment"># visual_features: a list of VisualFeatures enum values — only these are analysed and billed</span>
+result = client.analyze(
+    image_url       = image_url,
+    visual_features = [
+        VisualFeatures.CAPTION,        <span class="token-comment"># Generate a one-sentence image description</span>
+        VisualFeatures.TAGS,           <span class="token-comment"># List of descriptive keyword tags</span>
+        VisualFeatures.OBJECTS,        <span class="token-comment"># Detected objects with bounding boxes</span>
+        VisualFeatures.PEOPLE,         <span class="token-comment"># Detected human figures with bounding boxes</span>
+        VisualFeatures.READ,           <span class="token-comment"># OCR — extract any text in the image</span>
+        VisualFeatures.SMART_CROPS,    <span class="token-comment"># Suggest crop regions for thumbnails</span>
+    ],
+    <span class="token-comment"># smart_crops_aspect_ratios: list of desired width/height ratios for crop suggestions</span>
+    <span class="token-comment"># 1.0 = square crop (e.g. social media profile), 1.78 = landscape widescreen 16:9</span>
+    smart_crops_aspect_ratios = [<span class="token-number">1.0</span>, <span class="token-number">1.78</span>],
+    <span class="token-comment"># gender_neutral_caption: True = avoid gendered pronouns in captions (he/she → they)</span>
+    gender_neutral_caption    = <span class="token-keyword">True</span>
+)
+
+
+<span class="token-comment"># ── Caption ──────────────────────────────────────────────────────────</span>
+<span class="token-comment"># result.caption is None if CAPTION was not in visual_features</span>
+<span class="token-keyword">if</span> result.caption:
+    <span class="token-comment"># .text: the generated sentence — .confidence: how confident the model is (0.0 to 1.0)</span>
+    <span class="token-keyword">print</span>(<span class="token-string">f"Caption: {result.caption.text}  (confidence: {result.caption.confidence:.2f})"</span>)
+
+
+<span class="token-comment"># ── Tags ──────────────────────────────────────────────────────────────</span>
+<span class="token-keyword">if</span> result.tags:
+    <span class="token-keyword">print</span>(<span class="token-string">"\nTags:"</span>)
+    <span class="token-comment"># result.tags.list: a list of ImageTag objects, sorted by confidence descending</span>
+    <span class="token-keyword">for</span> tag <span class="token-keyword">in</span> result.tags.list:
+        <span class="token-comment"># tag.name: the keyword (e.g. "car", "outdoor") — tag.confidence: certainty score</span>
+        <span class="token-keyword">print</span>(<span class="token-string">f"  {tag.name}: {tag.confidence:.2f}"</span>)
+
+
+<span class="token-comment"># ── Objects with bounding boxes ────────────────────────────────────────</span>
+<span class="token-keyword">if</span> result.objects:
+    <span class="token-keyword">print</span>(<span class="token-string">"\nObjects:"</span>)
+    <span class="token-comment"># result.objects.list: each item is a DetectedObject</span>
+    <span class="token-keyword">for</span> obj <span class="token-keyword">in</span> result.objects.list:
+        <span class="token-comment"># obj.tags: what type of object — obj.bounding_box: where in the image it is</span>
+        name = obj.tags[<span class="token-number">0</span>].name <span class="token-keyword">if</span> obj.tags <span class="token-keyword">else</span> <span class="token-string">"unknown"</span>
+        bb   = obj.bounding_box
+        <span class="token-comment"># bb.x, bb.y: top-left corner pixel position</span>
+        <span class="token-comment"># bb.width, bb.height: dimensions of the rectangle in pixels</span>
+        <span class="token-keyword">print</span>(<span class="token-string">f"  {name}: x={bb.x}, y={bb.y}, w={bb.width}, h={bb.height}"</span>)
+
+
+<span class="token-comment"># ── People detection ──────────────────────────────────────────────────</span>
+<span class="token-keyword">if</span> result.people:
+    <span class="token-keyword">print</span>(<span class="token-string">f"\nPeople detected: {len(result.people.list)}"</span>)
+    <span class="token-keyword">for</span> person <span class="token-keyword">in</span> result.people.list:
+        bb = person.bounding_box
+        <span class="token-comment"># person.confidence: how confident the model is this is a human figure</span>
+        <span class="token-keyword">print</span>(<span class="token-string">f"  Person at x={bb.x}, y={bb.y} — confidence: {person.confidence:.2f}"</span>)
+
+
+<span class="token-comment"># ── OCR text extraction (READ feature) ────────────────────────────────</span>
+<span class="token-keyword">if</span> result.read:
+    <span class="token-keyword">print</span>(<span class="token-string">"\nExtracted Text:"</span>)
+    <span class="token-comment"># result.read.blocks: list of text blocks (logical groups of text)</span>
+    <span class="token-comment"># Each block has .lines; each line has .words</span>
+    <span class="token-keyword">for</span> block <span class="token-keyword">in</span> result.read.blocks:
+        <span class="token-keyword">for</span> line <span class="token-keyword">in</span> block.lines:
+            <span class="token-comment"># line.text: the full text of this line (all words concatenated)</span>
+            <span class="token-keyword">print</span>(<span class="token-string">f"  Line: '{line.text}'"</span>)
+            <span class="token-keyword">for</span> word <span class="token-keyword">in</span> line.words:
+                <span class="token-comment"># word.text: the individual word — word.confidence: OCR confidence</span>
+                <span class="token-comment"># word.bounding_polygon: list of {x, y} points forming the word's quadrilateral</span>
+                <span class="token-comment"># (4 points, not necessarily rectangular — handles rotated/slanted text)</span>
+                pts = [(p.x, p.y) <span class="token-keyword">for</span> p <span class="token-keyword">in</span> word.bounding_polygon]
+                <span class="token-keyword">print</span>(<span class="token-string">f"    Word: '{word.text}' conf={word.confidence:.2f} at {pts}"</span>)
+
+
+<span class="token-comment"># ── Smart crop suggestions ─────────────────────────────────────────────</span>
+<span class="token-keyword">if</span> result.smart_crops:
+    <span class="token-keyword">print</span>(<span class="token-string">"\nSmart Crop Suggestions:"</span>)
+    <span class="token-keyword">for</span> crop <span class="token-keyword">in</span> result.smart_crops.list:
+        <span class="token-comment"># crop.aspect_ratio: the ratio you requested (e.g. 1.0 for square)</span>
+        <span class="token-comment"># crop.bounding_box: the suggested crop rectangle</span>
+        bb = crop.bounding_box
+        <span class="token-keyword">print</span>(<span class="token-string">f"  Ratio {crop.aspect_ratio}: x={bb.x}, y={bb.y}, w={bb.width}, h={bb.height}"</span>)
+
+
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+<span class="token-comment"># EXAMPLE 2 — Analysing a LOCAL IMAGE FILE</span>
+<span class="token-comment"># Use analyze_from_url() for URLs, analyze() with image_data for local files</span>
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+
+<span class="token-comment"># Read the local image file as binary bytes</span>
+<span class="token-keyword">with</span> <span class="token-keyword">open</span>(<span class="token-string">"local-photo.jpg"</span>, <span class="token-string">"rb"</span>) <span class="token-keyword">as</span> f:
+    image_bytes = f.read()  <span class="token-comment"># Read the entire file as raw binary</span>
+
+<span class="token-comment"># analyze() also accepts image_data (bytes) instead of image_url</span>
+<span class="token-comment"># image_data: pass the binary content and specify the MIME type</span>
+result_local = client.analyze(
+    image_data      = image_bytes,   <span class="token-comment"># The image as raw bytes</span>
+    visual_features = [VisualFeatures.CAPTION, VisualFeatures.TAGS]
+)
+
+<span class="token-keyword">if</span> result_local.caption:
+    <span class="token-keyword">print</span>(<span class="token-string">f"\nLocal image caption: {result_local.caption.text}"</span>)</code></pre>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Python — Face API: Detection and Identification</h3>
+        <p style="margin-bottom:var(--space-4)">Install: <code>pip install azure-ai-vision-face</code> &nbsp;·&nbsp; Note: requires <strong>Limited Access approval</strong> for identification and verification.</p>
+
+<pre><code><span class="token-keyword">from</span> azure.ai.vision.face <span class="token-keyword">import</span> FaceClient
+<span class="token-keyword">from</span> azure.ai.vision.face.models <span class="token-keyword">import</span> (
+    FaceDetectionModel,   <span class="token-comment"># Which version of the face detection model to use</span>
+    FaceRecognitionModel, <span class="token-comment"># Which version of the face recognition model for identification</span>
+    FaceAttributeTypeDetection01,  <span class="token-comment"># Attributes available in the detection model</span>
+)
+<span class="token-keyword">from</span> azure.core.credentials <span class="token-keyword">import</span> AzureKeyCredential
+
+<span class="token-comment"># Face API uses its OWN endpoint — different from Image Analysis</span>
+<span class="token-comment"># Face API endpoint format: https://&lt;region&gt;.api.cognitive.microsoft.com/</span>
+FACE_ENDPOINT = os.environ.get(<span class="token-string">"FACE_ENDPOINT"</span>)
+FACE_KEY      = os.environ.get(<span class="token-string">"FACE_KEY"</span>)
+
+face_client = FaceClient(endpoint=FACE_ENDPOINT, credential=AzureKeyCredential(FACE_KEY))
+
+
+<span class="token-comment"># ── STEP 1: Detect faces in an image ──────────────────────────────────</span>
+<span class="token-comment"># This does NOT identify anyone — just finds where faces are and which attributes they have</span>
+<span class="token-comment"># No Limited Access approval needed for this step</span>
+
+detected_faces = face_client.detect_from_url(
+    url               = <span class="token-string">"https://example.com/team-photo.jpg"</span>,
+    <span class="token-comment"># detection_model: DETECTION_03 is latest — best for small faces and masks</span>
+    detection_model   = FaceDetectionModel.DETECTION_03,
+    <span class="token-comment"># recognition_model: needed if you plan to identify or verify — must match training</span>
+    recognition_model = FaceRecognitionModel.RECOGNITION_04,
+    <span class="token-comment"># return_face_id: needed for identification — face IDs expire after 24 hours</span>
+    return_face_id    = <span class="token-keyword">True</span>,
+    <span class="token-comment"># return_face_attributes: which detection attributes to analyse</span>
+    return_face_attributes = [
+        FaceAttributeTypeDetection01.HEAD_POSE,   <span class="token-comment"># Pitch, roll, yaw angles</span>
+        FaceAttributeTypeDetection01.BLUR,         <span class="token-comment"># Focus quality</span>
+        FaceAttributeTypeDetection01.EXPOSURE,     <span class="token-comment"># Lighting quality</span>
+        FaceAttributeTypeDetection01.GLASSES,      <span class="token-comment"># Eyewear type</span>
+    ]
+)
+
+<span class="token-keyword">print</span>(<span class="token-string">f"Found {len(detected_faces)} face(s)"</span>)
+<span class="token-keyword">for</span> face <span class="token-keyword">in</span> detected_faces:
+    <span class="token-comment"># face.face_id: a temporary ID used for identification (expires after 24 hours)</span>
+    <span class="token-keyword">print</span>(<span class="token-string">f"\nFace ID: {face.face_id}"</span>)
+
+    <span class="token-comment"># face_rectangle: where on the image the face appears</span>
+    r = face.face_rectangle
+    <span class="token-keyword">print</span>(<span class="token-string">f"  Location: top={r.top}, left={r.left}, width={r.width}, height={r.height}"</span>)
+
+    <span class="token-comment"># face_attributes: the attributes we requested above</span>
+    attrs = face.face_attributes
+    <span class="token-keyword">if</span> attrs:
+        <span class="token-comment"># head_pose: how the head is oriented</span>
+        <span class="token-keyword">if</span> attrs.head_pose:
+            <span class="token-keyword">print</span>(<span class="token-string">f"  Head Pose: pitch={attrs.head_pose.pitch:.1f} roll={attrs.head_pose.roll:.1f} yaw={attrs.head_pose.yaw:.1f}"</span>)
+        <span class="token-comment"># blur: is the face in focus? .blur_level = LOW / MEDIUM / HIGH</span>
+        <span class="token-keyword">if</span> attrs.blur:
+            <span class="token-keyword">print</span>(<span class="token-string">f"  Blur: {attrs.blur.blur_level}"</span>)
+        <span class="token-comment"># glasses: what eyewear is the person wearing (if any)</span>
+        <span class="token-keyword">if</span> attrs.glasses:
+            <span class="token-keyword">print</span>(<span class="token-string">f"  Glasses: {attrs.glasses}"</span>)
+
+
+<span class="token-comment"># ── STEP 2: IDENTIFICATION (requires Limited Access approval) ──────────</span>
+<span class="token-comment"># The code below demonstrates PersonGroup creation and identification</span>
+<span class="token-comment"># This will NOT work without Microsoft Limited Access approval</span>
+
+GROUP_ID = <span class="token-string">"company-employees"</span>
+
+<span class="token-comment"># Create the PersonGroup (only done once — reuse for all identifications)</span>
+face_client.person_group.create(
+    person_group_id = GROUP_ID,        <span class="token-comment"># Unique ID for this group (lowercase, no spaces)</span>
+    name            = <span class="token-string">"Company Employees"</span>,  <span class="token-comment"># Human-readable name</span>
+    recognition_model = FaceRecognitionModel.RECOGNITION_04  <span class="token-comment"># Must match detection model</span>
+)
+
+<span class="token-comment"># Add a Person (Alice) to the group — returns a person_id</span>
+alice = face_client.person_group_person.create(
+    person_group_id = GROUP_ID,
+    name            = <span class="token-string">"Alice Johnson"</span>   <span class="token-comment"># The person's name — stored for reference</span>
+)
+<span class="token-comment"># alice.person_id is a UUID that uniquely identifies Alice in this group</span>
+
+<span class="token-comment"># Add face images for Alice (multiple photos from different angles recommended)</span>
+<span class="token-keyword">for</span> photo_url <span class="token-keyword">in</span> [<span class="token-string">"https://example.com/alice1.jpg"</span>, <span class="token-string">"https://example.com/alice2.jpg"</span>]:
+    face_client.person_group_person.add_face_from_url(
+        person_group_id = GROUP_ID,
+        person_id       = alice.person_id,  <span class="token-comment"># Link this photo to Alice</span>
+        url             = photo_url
+    )
+
+<span class="token-comment"># Train the PersonGroup — must be done before identification</span>
+<span class="token-comment"># This is also async — call get_training_status() until status is "succeeded"</span>
+face_client.person_group.train(person_group_id=GROUP_ID)
+<span class="token-keyword">print</span>(<span class="token-string">"PersonGroup training initiated — poll get_training_status() until succeeded"</span>)
+
+<span class="token-comment"># Identify a detected face against the PersonGroup</span>
+<span class="token-comment"># detected_faces[0].face_id is the temporary face_id from the DETECT step above</span>
+identify_results = face_client.identify(
+    face_ids        = [detected_faces[<span class="token-number">0</span>].face_id],  <span class="token-comment"># Which faces to identify</span>
+    person_group_id = GROUP_ID,                    <span class="token-comment"># Which group to search against</span>
+)
+
+<span class="token-keyword">for</span> id_result <span class="token-keyword">in</span> identify_results:
+    <span class="token-keyword">if</span> id_result.candidates:
+        <span class="token-comment"># candidates: sorted by confidence descending — first candidate is the best match</span>
+        best = id_result.candidates[<span class="token-number">0</span>]
+        <span class="token-comment"># best.person_id: the UUID of the matched person — look up Alice by this ID</span>
+        <span class="token-comment"># best.confidence: 0.0 to 1.0 — typically use 0.5+ as threshold for a match</span>
+        <span class="token-keyword">print</span>(<span class="token-string">f"Identified: {best.person_id} with confidence {best.confidence:.2f}"</span>)
+    <span class="token-keyword">else</span>:
+        <span class="token-keyword">print</span>(<span class="token-string">"No match found in PersonGroup"</span>)</code></pre>
+      </div>
+
+      <!-- SECTION 6 — EXAM TIPS -->
+      <div class="section-block" id="exam-tips">
+        <div class="section-label">🎯 Section 6 — Exam Tips</div>
+        <h2>Azure AI Vision — what the exam tests</h2>
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Top 7 Tested Facts</div>
+            <p>
+              <strong>1. Face detection ≠ Face identification</strong> — Detection (where is the face? is it blurry?) is free and available to all. Identification (who is this person?) requires Limited Access approval. The most common exam trap in this topic.<br><br>
+              <strong>2. Emotion attributes were deprecated</strong> — The exam may try to trick you into selecting "Emotion" as a Face API attribute. Emotion detection was removed from the API. Don't select it.<br><br>
+              <strong>3. PersonGroup must be trained before identification</strong> — You cannot call Identify() on an untrained PersonGroup. Adding new faces requires re-training. Training is asynchronous — poll for completion.<br><br>
+              <strong>4. Tags vs Objects vs People — distinct features</strong> — Tags are keywords (no location). Objects are specific things with bounding boxes. People are human figures with bounding boxes but no identity. Know exactly when to use each.<br><br>
+              <strong>5. CAPTION is new in Image Analysis 4.0</strong> — Older API versions (v3.2) don't have the Caption feature. If the exam mentions needing a natural-language image description, the answer uses Image Analysis 4.0 with the CAPTION feature.<br><br>
+              <strong>6. OCR polygon vs bounding box</strong> — Object detection uses bounding_box (rectangles: x, y, width, height). OCR word positions use bounding_polygon (4 points: handles rotated/skewed text). Different structures — don't confuse them in code questions.<br><br>
+              <strong>7. Face identification needs a PersonGroup</strong> — No PersonGroup = no identification. The workflow is always: Create Group → Add Persons → Add Faces → Train → Detect → Identify. All 5 steps in order.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 7 — QUIZ -->
+      <div class="section-block" id="quiz">
+        <div class="section-label">✅ Section 7 — Quick Quiz</div>
+        <h2>Test your understanding</h2>
+
+        <div class="quiz-container" id="p6t1-quiz" data-quiz="p6-analyze-images">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Topic 1 — Analyze Images</span>
+            <span class="quiz-question-count" data-q-counter>1 / 5</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:#6366f1;transition:width 0.4s ease;width:20%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <div data-question>
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A retail company wants to automatically generate descriptive captions for thousands of product images on their website — e.g. "A blue ceramic coffee mug with a white handle on a wooden table." These captions will be used as accessibility alt-text for visually impaired users.</div>
+                <p class="quiz-question">Which Azure AI Vision feature should be used, and with which API version?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Image Analysis v3.2 with the Description feature — generates natural language captions</span></button>
+                  <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Image Analysis 4.0 with the CAPTION visual feature — generates a single natural-language sentence describing the image (new in v4.0)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Image Analysis 4.0 with the TAGS visual feature — tags describe the image content in keywords</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Face API — detects objects and describes them in natural language</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The <code>CAPTION</code> visual feature in <strong>Image Analysis 4.0</strong> generates a single natural-language sentence describing the full image — exactly what's needed for alt-text. This feature was introduced in v4.0 and is not available in v3.2. v3.2 had a "Description" feature, but Content captions are the v4.0 equivalent and use the Florence foundation model for higher quality output. <code>TAGS</code> returns keywords, not sentences. Face API analyses faces, not image content generally.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A security company uses Azure AI Vision to analyse CCTV footage. They need to know: (1) how many people are visible in each frame, (2) where each person is located in the frame (to draw bounding boxes), but they do NOT need to know who those people are.</div>
+                <p class="quiz-question">Which visual feature meets both requirements, and does it require Limited Access approval?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Face API Identification — detects and identifies people; requires Limited Access</span></button>
+                  <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">PEOPLE visual feature — detects human figures and returns bounding boxes; does NOT require Limited Access because it only detects presence, not identity</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">OBJECTS visual feature — returns all detected objects including people with locations</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">TAGS visual feature — returns "person" as a tag if people are present</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The <code>PEOPLE</code> visual feature detects human figures and returns a bounding box for each person — satisfying both requirements (count + location). Crucially, it does NOT identify who the people are, so it does NOT require Limited Access approval. Face API Identification (A) would require Limited Access and is overkill since identity isn't needed. OBJECTS (C) can detect "Person" as an object category with bounding boxes, but PEOPLE is the dedicated and more accurate feature for human detection. TAGS (D) only tells you "person is present" — no count, no location.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A developer uses the Face API and includes <code>FaceAttributeTypeDetection01.EMOTION</code> in the return_face_attributes list. What will happen?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The API returns emotion scores (happiness, sadness, anger, surprise, etc.) for each detected face</span></button>
+                  <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">This will cause an error or return no emotion data — emotion attributes were deprecated and removed from the Face API</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">This requires Limited Access approval — emotion detection is a gated feature</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Emotion is only available in Image Analysis 4.0, not the Face API</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Emotion attributes (happiness, sadness, anger, surprise, fear, disgust, contempt, neutral) were <strong>deprecated and removed</strong> from the Azure Face API due to concerns about fairness, accuracy, and potential misuse of emotion inference. Requesting emotion attributes will result in an error or the attribute being silently ignored. This is a known exam trap — the question lists emotion as an option expecting you to know it no longer exists. The Face API now focuses on detection, geometry (head pose, blur, exposure), and identification.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A company builds a visitor management system that captures photos of visitors at reception and automatically identifies which of the 500 registered employees the visitor might be visiting (by recognising employee faces in photos they uploaded during registration). The system needs to match a visitor's photo against all 500 employee face profiles.</div>
+                <p class="quiz-question">Which Face API workflow, and which MANDATORY pre-requisite, is required?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Face detection only; no prerequisites needed — detect() can match faces without training</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">PersonGroup + Identify(); no special prerequisites — this is standard functionality available to all users</span></button>
+                  <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">PersonGroup (with all 500 employees enrolled and trained) + Identify(); PLUS Microsoft Limited Access approval — face identification is a gated feature</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Custom Vision image classification model trained on employee photos; no Face API needed</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> This scenario requires face identification (matching a face to known people) — which requires two things: (1) a trained <strong>PersonGroup</strong> with all 500 employees enrolled (each Person has face photos, and the group is trained), and (2) <strong>Microsoft Limited Access approval</strong> for the face identification feature. Without approval, the identify() call will fail. Detection (A) doesn't match faces to people. Identification (B) is not freely available without approval. Custom Vision (D) could classify images but would not match faces reliably to 500 specific people.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">In the Azure AI Vision OCR Read result, individual words are returned with a <strong>bounding_polygon</strong> (4 coordinate points) rather than a simple bounding box (x, y, width, height). Why?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Bounding polygons are less accurate but cheaper to compute than rectangles</span></button>
+                  <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Text in real images is often rotated, slanted, or curved — a 4-point polygon can represent any quadrilateral shape, accurately outlining angled text that a fixed rectangle would miss</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Bounding polygons were required for legacy compatibility with older OCR models</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Polygons enable the API to return more words per line than rectangular bounding boxes allow</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Real-world images contain text that isn't perfectly horizontal — text on signage is often angled, handwritten text may be curved or slanted, scanned documents may be slightly rotated. A traditional axis-aligned bounding box (rectangle with horizontal/vertical sides) can only approximate the position of rotated text — it either cuts off parts of the word or includes too much background. A 4-point polygon (quadrilateral) can follow any orientation, precisely outlining even severely rotated text. This is especially useful when you need to highlight exactly where text appears in the original image.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 5</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next style="background:#6366f1">Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="completion-bar">
+        <div class="completion-checkbox" data-complete-toggle="p6-analyze-images"><span class="check-icon">✓</span></div>
+        <span class="completion-label" data-complete-label>Mark this topic as complete</span>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="../index.html" class="topic-nav-prev">
+          <span style="color:var(--text-muted)">←</span>
+          <div><div class="topic-nav-label">Back to</div><div class="topic-nav-title">Part 6 Overview</div></div>
+        </a>
+        <a href="02-custom-vision-models.html" class="topic-nav-next">
+          <div><div class="topic-nav-label">Next topic</div><div class="topic-nav-title">Custom Vision Models →</div></div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../scripts/common.js"></script>
+</body>
+</html>

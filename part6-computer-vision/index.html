@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 6 — Computer Vision | AI-102 Study Hub</title>
+  <link rel="stylesheet" href="../styles/main.css" />
+  <style>
+    .part-hero {
+      background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, var(--navy-900) 60%);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-10) var(--space-12);
+      margin-bottom: var(--space-8);
+      position: relative; overflow: hidden;
+    }
+    .part-hero::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+    }
+    .part-hero-title {
+      font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 800; line-height: 1.15;
+      margin-bottom: var(--space-4);
+      background: linear-gradient(135deg, #f0f6ff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .topic-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: var(--space-6);
+      display: flex; gap: var(--space-6); align-items: flex-start;
+      text-decoration: none; transition: all var(--transition-normal);
+      position: relative; overflow: hidden;
+    }
+    .topic-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: #6366f1; border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    }
+    .topic-card:hover { border-color: rgba(99,102,241,0.4); transform: translateX(4px); }
+    .topic-tag { font-size: 0.68rem; font-family: var(--font-mono); background: var(--bg-secondary); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: var(--radius-sm); }
+    .prereq-item { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border-subtle); }
+    .prereq-item:last-child { border-bottom: none; }
+    #sbo { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sbo.show { display: block; }
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+
+  <div id="app-sidebar"></div>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span><span class="current">Part 6 — Computer Vision</span>
+      </div>
+      <div class="topbar-actions">
+        <span style="font-size:0.75rem;color:var(--text-muted)">Exam in</span>
+        <span data-countdown style="font-family:var(--font-mono);font-size:0.85rem;color:var(--amber-400);font-weight:700">—</span>
+      </div>
+    </header>
+
+    <div class="page-content stagger">
+
+      <div class="part-hero animate-fade-in">
+        <div style="display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#a5b4fc;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);padding:var(--space-1) var(--space-3);border-radius:var(--radius-sm);margin-bottom:var(--space-4);font-family:var(--font-heading)">👁️ Part 6 of 6</div>
+        <h1 class="part-hero-title">Implement Computer Vision<br>Solutions on Azure</h1>
+        <p style="font-size:0.975rem;color:var(--text-secondary);max-width:600px;line-height:1.75;margin-bottom:var(--space-8)">
+          Computer Vision covers making machines understand visual content — images and video.
+          This part covers Azure AI Vision (Image Analysis 4.0, OCR Read API, smart cropping),
+          the Face API, Custom Vision for training image classifiers and object detectors,
+          and Azure AI Video Indexer with Spatial Analysis for real-time video intelligence.
+        </p>
+        <div style="display:flex;gap:var(--space-6);flex-wrap:wrap">
+          <div><div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:#a5b4fc;line-height:1">15–20%</div><div style="font-size:0.7rem;color:var(--text-muted)">of exam questions</div></div>
+          <div><div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:#a5b4fc;line-height:1">3</div><div style="font-size:0.7rem;color:var(--text-muted)">topic files</div></div>
+          <div><div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:#a5b4fc;line-height:1">~20</div><div style="font-size:0.7rem;color:var(--text-muted)">exam sub-skills</div></div>
+          <div><div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:#a5b4fc;line-height:1">🔒 2</div><div style="font-size:0.7rem;color:var(--text-muted)">Limited Access features</div></div>
+        </div>
+      </div>
+
+      <div class="callout callout-concept">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+          <div class="callout-title">What This Part Covers</div>
+          <p>
+            Computer Vision is about teaching machines to see. <strong>Azure AI Vision</strong> (Image Analysis 4.0)
+            analyses images for tags, objects, captions, people, and text (via the Read OCR API) — no training required.
+            <strong>Azure Custom Vision</strong> lets you train your own image classifier or object detector using your
+            own labelled photos. <strong>Azure AI Video Indexer</strong> extracts rich insights from video: transcripts,
+            faces, labels, scenes, and topics. <strong>Spatial Analysis</strong> uses camera feeds to detect and track
+            people movement in physical spaces.
+          </p>
+        </div>
+      </div>
+
+      <!-- Prerequisites -->
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-6) var(--space-8);margin-bottom:var(--space-8)">
+        <div style="font-family:var(--font-heading);font-size:0.95rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)">📋 Prerequisites — What to know before starting Part 6</div>
+        <div>
+          <div class="prereq-item">
+            <span style="font-size:1.1rem">✅</span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:600;color:var(--text-primary)">REST APIs and endpoints (Part 1)</div>
+              <div style="font-size:0.8rem;color:var(--text-muted)">Every Vision service is called via a REST API with an endpoint URL and key. You already know this pattern.</div>
+            </div>
+          </div>
+          <div class="prereq-item">
+            <span style="font-size:1.1rem">✅</span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:600;color:var(--text-primary)">Async POST-then-poll pattern (Part 5)</div>
+              <div style="font-size:0.8rem;color:var(--text-muted)">The OCR Read API uses this same pattern — POST image → get operation URL → poll for results.</div>
+            </div>
+          </div>
+          <div class="prereq-item">
+            <span style="font-size:1.1rem">✅</span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:600;color:var(--text-primary)">Confidence scores (Part 5)</div>
+              <div style="font-size:0.8rem;color:var(--text-muted)">Every Vision result comes with confidence scores on tags, objects, captions, and OCR words — same concept as Document Intelligence.</div>
+            </div>
+          </div>
+          <div class="prereq-item">
+            <span style="font-size:1.1rem">✅</span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:600;color:var(--text-primary)">Limited Access gating (Part 1 & 5)</div>
+              <div style="font-size:0.8rem;color:var(--text-muted)">Face API identification and the Custom Vision face features require Microsoft approval. Same policy as ID Document model — applies even more here.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="margin-bottom:var(--space-2)">Topics in this Part</h2>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-6)">Study in order — Topic 1 (Image Analysis) introduces the core Vision building blocks that Topics 2 and 3 extend.</p>
+
+      <div style="display:flex;flex-direction:column;gap:var(--space-4);margin-bottom:var(--space-10)">
+
+        <a href="topics/01-analyze-images.html" class="topic-card">
+          <div style="width:44px;height:44px;min-width:44px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.85rem;font-weight:700;color:#a5b4fc;margin-top:2px">01</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-2)">
+              <div style="font-family:var(--font-heading);font-size:1rem;font-weight:700;color:var(--text-primary)">🖼️ Analyze Images with Azure AI Vision</div>
+              <span style="color:var(--text-muted);font-size:1.2rem;flex-shrink:0">→</span>
+            </div>
+            <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;margin-bottom:var(--space-4)">
+              Azure AI Vision Image Analysis 4.0 — visual features (tags, objects, captions, people, brands),
+              the OCR Read API (async text extraction from images and PDFs), handwriting recognition,
+              smart cropping, background removal, the Face API (detection, identification, Limited Access),
+              and Python code with every line explained.
+            </p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+              <span class="topic-tag">Image Analysis 4.0</span>
+              <span class="topic-tag">Visual Features</span>
+              <span class="topic-tag">OCR Read API</span>
+              <span class="topic-tag">Face API</span>
+              <span class="topic-tag">Smart Crop</span>
+              <span class="topic-tag">Limited Access</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="topics/02-custom-vision-models.html" class="topic-card">
+          <div style="width:44px;height:44px;min-width:44px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.85rem;font-weight:700;color:#a5b4fc;margin-top:2px">02</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-2)">
+              <div style="font-family:var(--font-heading);font-size:1rem;font-weight:700;color:var(--text-primary)">🎯 Custom Vision Models</div>
+              <span style="color:var(--text-muted);font-size:1.2rem;flex-shrink:0">→</span>
+            </div>
+            <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;margin-bottom:var(--space-4)">
+              Training your own image classifier and object detector. Image classification vs object detection,
+              labelling with bounding boxes, Quick vs Advanced Training, evaluation metrics (Precision, Recall, mAP,
+              probability threshold), publishing iterations, consuming via the prediction endpoint.
+              Includes the Custom Vision retirement warning.
+            </p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+              <span class="topic-tag">Classification vs Detection</span>
+              <span class="topic-tag">Bounding Boxes</span>
+              <span class="topic-tag">Precision &amp; Recall</span>
+              <span class="topic-tag">mAP</span>
+              <span class="topic-tag">Probability Threshold</span>
+              <span class="topic-tag">Prediction API</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="topics/03-video-analysis.html" class="topic-card">
+          <div style="width:44px;height:44px;min-width:44px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.85rem;font-weight:700;color:#a5b4fc;margin-top:2px">03</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-2)">
+              <div style="font-family:var(--font-heading);font-size:1rem;font-weight:700;color:var(--text-primary)">🎥 Video Analysis & Spatial Intelligence</div>
+              <span style="color:var(--text-muted);font-size:1.2rem;flex-shrink:0">→</span>
+            </div>
+            <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;margin-bottom:var(--space-4)">
+              Azure AI Video Indexer — indexing videos for faces, transcripts, labels, scenes, keywords, and topics.
+              Trial vs ARM-connected account types. Querying video insights via API.
+              Spatial Analysis with Azure Vision — detecting and tracking people in physical spaces using camera feeds,
+              operations (PersonCount, PersonCrossingLine, PersonZoneCrossing) and edge deployment via containers.
+            </p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+              <span class="topic-tag">Video Indexer</span>
+              <span class="topic-tag">Transcripts</span>
+              <span class="topic-tag">Scenes &amp; Shots</span>
+              <span class="topic-tag">Spatial Analysis</span>
+              <span class="topic-tag">PersonCount</span>
+              <span class="topic-tag">Edge Container</span>
+            </div>
+          </div>
+        </a>
+
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-6) var(--space-8);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap;margin-bottom:var(--space-8); --part-theme: #6366f1;">
+        <div>
+          <div style="font-family:var(--font-heading);font-size:0.95rem;font-weight:700;color:var(--text-primary)">Ready to start Part 6?</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">Start with Topic 1 — Image Analysis is the foundation all Computer Vision builds on.</div>
+        </div>
+        <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+          <a href="flashcards.html" class="btn-study-flashcards">Study Flashcards</a>
+          <a href="quiz.html" class="btn-study-quiz">Take Part Quiz</a>
+          <a href="topics/01-analyze-images.html" class="btn" style="background:#6366f1; color: #fff; padding: 0.8rem 1.5rem; border-radius: 12px; font-weight: 600;">Start Topic 1 →</a>
+        </div>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="../part5-knowledge-mining/index.html" class="topic-nav-prev">
+          <span style="color:var(--text-muted)">←</span>
+          <div><div class="topic-nav-label">Previous Part</div><div class="topic-nav-title">Part 5 — Knowledge Mining</div></div>
+        </a>
+        <a href="topics/01-analyze-images.html" class="topic-nav-next">
+          <div><div class="topic-nav-label">First topic</div><div class="topic-nav-title">Analyze Images →</div></div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../scripts/common.js"></script>
+</body>
+</html>
