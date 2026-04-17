@@ -1427,6 +1427,7 @@ const SidebarTemplate = (p) => `
     <!-- Nav -->
     <nav class="sidebar-nav">
       <a href="${p}index.html" class="sidebar-item">Dashboard</a>
+      <a href="${p}revision.html" class="sidebar-item">Revision Center</a>
       <div class="sidebar-group" data-part-group="1">
         <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span><span class="item-badge" data-part-progress="1">0/5</span></button>
         <div class="sidebar-group-body">

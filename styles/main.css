@@ -9,16 +9,16 @@
 /* ── CSS Variables ────────────────────────────────────────── */
 :root {
   /* Monochrome dark base */
-  --mono-950:  #05060a;
-  --mono-900:  #0b0d12;
-  --mono-800:  #111318;
-  --mono-750:  #16181f;
-  --mono-700:  #1a1d26;
-  --mono-600:  #222530;
-  --mono-500:  #2c303d;
-  --mono-400:  #3c4152;
-  --mono-300:  #545a6e;
-  --mono-200:  #6e7589;
+  --mono-950:  #1a1f2e; /* Softer Dark Background */
+  --mono-900:  #252b3d; /* Lighter Surface */
+  --mono-800:  #2d334a; 
+  --mono-750:  #343b57;
+  --mono-700:  #3d4566;
+  --mono-600:  #4f5982;
+  --mono-500:  #6e7681;
+  --mono-400:  #8b949e;
+  --mono-300:  #cbd5e0;
+  --mono-200:  #e2e8f0;
 
   /* Emerald accent — single vibrant colour */
   --emerald-700: #047857;
@@ -52,8 +52,8 @@
   --bg-card-hover:   var(--glass-3);
   --bg-elevated:     var(--glass-1);
 
-  --text-primary:    #f0f4ff;
-  --text-secondary:  #8b92a8;
+  --text-primary:    #ffffff;
+  --text-secondary:  #c9d1d9;
   --text-muted:      var(--mono-300);
   --text-accent:     var(--emerald-400);
 
@@ -157,6 +157,14 @@
   --blur-lg:  24px;
   --blur-xl:  40px;
 }
+
+/* ── Global Contrast Fixes ── */
+.btn, .part-btn, .topic-btn, .rating-btn, .part-btn-title, .topic-btn-title {
+  color: #ffffff !important;
+}
+
+.text-primary { color: #ffffff !important; }
+.text-secondary { color: #e2e8f0 !important; }
 
 body.sidebar-collapsed {
   --sidebar-width: var(--sidebar-collapsed-width);

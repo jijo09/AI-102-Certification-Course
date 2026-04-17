@@ -105,43 +105,12 @@
     </div>
   </main>
 </div>
+<script src="../scripts/study-data.js"></script>
 <script src="../scripts/common.js"></script>
 <script>
 const cats={t1:{bg:'rgba(16,185,129,.15)',c:'var(--green-400)',l:'T1 Language'},t2:{bg:'rgba(59,130,246,.15)',c:'var(--blue-300)',l:'T2 Speech'},t3:{bg:'rgba(245,158,11,.15)',c:'var(--amber-400)',l:'T3 Custom'}};
-const ALL=[
-  {k:'t1',t:'Sentiment Analysis',d:'Determines whether text is positive/negative/neutral/mixed. Returns document-level + sentence-level sentiment with confidence scores. Use for customer reviews and social media monitoring.'},
-  {k:'t1',t:'Named Entity Recognition (NER)',d:'Identifies and categorises real-world objects in text: Person, Location, Organisation, DateTime, phone numbers. Returns entity text, category, sub-category, confidence, and offset (position).'},
-  {k:'t1',t:'Key Phrase Extraction',d:'Returns a list of the main topics/concepts in a document as phrases. "The food was excellent and service prompt" → ["excellent food","prompt service"]. Use for tagging, search indexing, summarisation.'},
-  {k:'t1',t:'Language Detection',d:'Identifies what language text is written in. Returns: language name, ISO 639-1 code (en/fr/de), confidence score. Handles 120+ languages. Returns dominant language for mixed-language documents.'},
-  {k:'t1',t:'PII Detection',d:'Finds and redacts personally identifiable information: names, emails, phones, credit cards, SSNs, addresses. Returns both found entities AND result.redacted_text with PII replaced by asterisks.'},
-  {k:'t1',t:'Opinion Mining (Aspect Sentiment)',d:'Granular sentiment analysis identifying sentiment towards specific aspects. "Battery great, camera poor" → {battery: positive}, {camera: negative}. Enabled via show_opinion_mining=True in Python.'},
-  {k:'t1',t:'Entity Linking',d:'Links entities in text to their Wikipedia entries. Disambiguates same-name entities: "Mars" in space article → planet Mars Wikipedia entry. Returns entity name, Wikipedia URL, confidence.'},
-  {k:'t1',t:'Azure AI Language endpoint',d:'https://your-name.cognitiveservices.azure.com/ — resource-specific endpoint used for all Language features (NER, sentiment, CLU, Q&A). Different from OpenAI (openai.azure.com) and Translator (api.cognitive.microsofttranslator.com).'},
-  {k:'t1',t:'Azure AI Translator endpoint',d:'https://api.cognitive.microsofttranslator.com — GLOBAL endpoint, same for all customers. Authenticated via Ocp-Apim-Subscription-Key and Ocp-Apim-Subscription-Region headers.'},
-  {k:'t1',t:'Text Translation (Translator)',d:'Translates text strings to one or more target languages in a single API call. /translate endpoint. Can translate to multiple languages simultaneously ("to":["fr","es","de"]). Auto-detects source language if not specified.'},
-  {k:'t1',t:'Transliteration',d:'Converts text from one script to another while preserving pronunciation — e.g. Japanese kanji to Latin alphabet without translating meaning. /transliterate endpoint on Azure AI Translator.'},
-  {k:'t1',t:'Document Translation',d:'Async batch translation of entire document files (PDF, DOCX, XLSX, PPTX) stored in Azure Blob Storage. Preserves formatting. Submit job → poll for completion → translated documents appear in target container.'},
-  {k:'t2',t:'Speech-to-Text (STT)',d:'Converts spoken audio to written text. Real-time: streaming from microphone or live source. Batch Transcription: async processing of recorded audio files in Blob Storage. Azure AI Speech SDK.'},
-  {k:'t2',t:'Text-to-Speech (TTS)',d:'Converts text to natural-sounding spoken audio using neural voices. SpeechSynthesizer with speak_text_async() for plain text, speak_ssml_async() for SSML markup with prosody control.'},
-  {k:'t2',t:'SSML',d:'Speech Synthesis Markup Language. XML-based markup controlling TTS output. Key elements: <voice name="..."> (select voice), <prosody rate/pitch/volume>, <break time="1s"/>, <emphasis level="strong">, <say-as interpret-as="date">.'},
-  {k:'t2',t:'Speech Translation',d:'Real-time translation of spoken audio from one language to another. Audio in → translated text (or audio) out. Uses TranslationRecognizer. result.translations is a dict: {"fr":"Bonjour","es":"Hola"}.'},
-  {k:'t2',t:'Speaker Verification',d:'Verifies that a voice matches a previously enrolled voice profile. Answers: "Is this the person they claim to be?" Returns Accept/Reject + confidence. Use for voice-based authentication.'},
-  {k:'t2',t:'Speaker Identification',d:'Determines which of a set of enrolled speakers is speaking. Answers: "Which of our known speakers is this?" Returns best matching speaker + confidence. Use for meeting transcription with speaker attribution.'},
-  {k:'t2',t:'Custom Speech Model',d:'STT model fine-tuned for your domain. Train with: Acoustic Data (recordings + transcripts), Language Data (domain text), Pronunciation Data (phonetics for misrecognised terms). Use when standard STT misrecognises technical terms or proper nouns.'},
-  {k:'t2',t:'Batch Transcription',d:'Processing large volumes of pre-recorded audio files stored in Azure Blob Storage. Submit async job → poll for completion → results written to output storage. Cheaper and more scalable than real-time for archival processing.'},
-  {k:'t2',t:'SpeechConfig',d:'Python SDK object configuring Speech service: SpeechConfig(subscription=key, region=region). Sets speech_recognition_language, speech_synthesis_voice_name. Starting point for all Speech operations.'},
-  {k:'t2',t:'ResultReason (Speech)',d:'Status of a speech recognition result. RecognizedSpeech: success — read result.text. NoMatch: audio detected but no recognisable speech (wrong language, noise). Canceled: error — check CancellationDetails.'},
-  {k:'t3',t:'CLU — Conversational Language Understanding',d:'LUIS replacement in Azure AI Language. Identifies user intent (what they want) and extracts entities (key info) from natural language. Trained on your labelled utterances. Same Language endpoint. Part of azure-ai-language-conversations SDK.'},
-  {k:'t3',t:'Intent (CLU)',d:'What the user wants to accomplish. "Book a flight to Paris" → intent: BookFlight. Each utterance maps to exactly one intent. Define intents based on actions your application supports.'},
-  {k:'t3',t:'Entity (CLU)',d:'Key information extracted from the utterance. In "Book flight to Paris on March 15" → {destination:"Paris"}, {date:"March 15"}. Entities are the "slots" an intent needs filled to take action.'},
-  {k:'t3',t:'None Intent',d:'Special CLU intent for out-of-scope utterances. Always include with diverse examples of irrelevant inputs. Without it the model forces all utterances into defined intents even when none match.'},
-  {k:'t3',t:'Utterance (CLU training)',d:'A sample sentence used to train CLU. Provide 15–30+ labelled utterances per intent. The model learns to generalise from these examples to new unseen inputs. Minimum 5 per intent.'},
-  {k:'t3',t:'Custom Question Answering',d:'QnA Maker replacement in Azure AI Language. Build a knowledge base from FAQ documents, manual entries, or web URLs. At runtime finds best matching answer using semantic similarity. Returns answer + confidence score.'},
-  {k:'t3',t:'Knowledge Base (Custom Q&A)',d:'Collection of Q&A pairs in a Custom Q&A project. Sources: manual entry, imported files (Word/PDF/Excel), or URL crawling. The model indexes pairs and returns relevant answers via semantic similarity.'},
-  {k:'t3',t:'Custom NER',d:'When prebuilt NER categories are too generic. Define your own entity types (LegalCase, ContractClause, RegulatoryBody) and train on labelled documents. Follows: create → label → train → evaluate → deploy workflow.'},
-  {k:'t3',t:'Custom Text Classification',d:'Classify documents into your categories. Single-label: exactly one label per document (Spam/NotSpam). Multi-label: multiple labels allowed (article can be Technology AND Business). Train on labelled document examples.'},
-  {k:'t3',t:'Azure Bot Service',d:'Platform for hosting and deploying conversational bots. Connects bot logic to messaging channels: Teams, webchat, Slack, SMS. Works with Bot Framework SDK for logic and CLU/Q&A for understanding.'},
-];
+const ALL = STUDY_DATA.cards.filter(c => c.p === 'p4').map(c => ({ k: c.t, t: c.term, d: c.def }));
+
 let deck=[...ALL],ptr=0,flipped=false,rated={};
 const s=id=>document.getElementById(id),se=(id,d)=>{s(id).style.display=d};
 function buildDeck(cat){deck=cat==='all'?[...ALL]:ALL.filter(c=>c.k===cat);ptr=0;flipped=false;rated={};['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}

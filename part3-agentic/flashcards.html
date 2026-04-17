@@ -95,30 +95,9 @@
     </div>
   </main>
 </div>
-<script src="../scripts/common.js"></script>
+<script src="../scripts/study-data.js"></script>
 <script>
-const C=[
-  {t:'AI Agent',d:'AI system that autonomously plans and executes multi-step tasks. Reasons about steps, uses tools to take actions, evaluates results, and loops until goal is achieved. Unlike a single LLM call.'},
-  {t:'Agentic Loop (ReAct)',d:'Reason → Act → Observe → repeat. Ask "what next?" → call a tool → process result → reason again. Loops until task is complete. ReAct = Reason + Act.'},
-  {t:'Tool (Agent Tool)',d:'Capability the agent can invoke: web search, code execution, database query, email. Agent decides which tool to use based on reasoning. Tools let agents act on the world, not just reason.'},
-  {t:'Function Calling',d:'GPT-4o capability to output a structured JSON request to call a specific function instead of plain text. Your code executes the function, returns result to LLM for further reasoning.'},
-  {t:'Thread',d:'Persistent conversation container in Azure AI Agent Service. Stores all messages (user, agent, tool results). One thread per session. Persists across multiple runs — agent remembers everything in it.'},
-  {t:'Run',d:'Single execution of an agent against a thread. Agent reads all messages, reasons, calls tools, adds response. Asynchronous — poll for status: queued → in_progress → completed / failed.'},
-  {t:'Azure AI Agent Service',d:"Microsoft's managed agent runtime in Foundry. Define agent + tools, interact via threads and runs. Azure manages the agentic loop. Accessed via azure-ai-projects SDK. Minimal infrastructure code."},
-  {t:'Semantic Kernel',d:"Microsoft's open-source SDK for agents in Python/C#/Java. Components: Kernel (coordinator), Plugins (tool sets), @kernel_function decorator, Planners (sequential/stepwise/handlebars), Memory. More customisable than managed service."},
-  {t:'Plugin (Semantic Kernel)',d:'Python class containing tool functions decorated with @kernel_function. Example: FinancePlugin with compound_interest() and convert_currency(). Added to kernel with kernel.add_plugin().'},
-  {t:'@kernel_function',d:'Semantic Kernel decorator on Python methods. Registers method as callable tool. description= parameter tells the LLM when to use it — critical for the LLM to invoke the right function.'},
-  {t:'Planner (Semantic Kernel)',d:'Automatically creates a plan (sequence of function calls) to achieve a goal. Three types: Sequential (fixed order), Stepwise (re-plans after each step), Handlebars (template-based).'},
-  {t:'AutoGen',d:"Microsoft's open-source multi-agent framework. Multiple AI agents converse with each other, each with a role. Agents pass messages until task is complete. AgentChat API and GroupChat support."},
-  {t:'Orchestrator Agent',d:'Multi-agent role: receives overall goal → decomposes into sub-tasks → assigns to specialists → collects results → synthesises final answer. Coordinates — does not specialise in any domain.'},
-  {t:'Specialist Agent',d:'Agent with a specific role, tools, instructions for one domain: ResearchAgent (web search), CodeAgent (writes/runs code), ReviewAgent (quality checking). Receives tasks from orchestrator.'},
-  {t:'Orchestrator→Specialists Pattern',d:'Orchestrator receives goal → assigns sub-tasks to specialists → collects results → synthesises answer. Specialists do not communicate directly. Most common enterprise multi-agent pattern.'},
-  {t:'Group Chat Pattern',d:'All agents share a conversation and contribute when their expertise is relevant. Manager decides who speaks next. Good for collaborative debate, code review, consensus decisions.'},
-  {t:'Sequential Pipeline Pattern',d:'Agents run in fixed linear order — Agent 1 output → Agent 2 input → Agent 3 input. Simple and predictable. Good for collect → clean → analyse → report workflows.'},
-  {t:'Human-in-the-Loop (Agentic)',d:'Safety mechanism requiring human approval before irreversible actions (payments, deletions, bulk emails). In AutoGen: human_input_mode="ALWAYS". #1 safety answer for high-stakes autonomous actions.'},
-  {t:'Indirect Prompt Injection',d:"Malicious instructions hidden inside documents the agent processes. Agent unknowingly follows attacker's instructions. Mitigation: Prompt Shields (Document Attack detection) on all external content before processing."},
-  {t:'Max Iteration Limits',d:'max_round or max_consecutive_auto_reply. Prevents infinite loops when agent gets stuck. Both cost control and safety. Always set explicitly — no automatic protection without these limits.'},
-];
+const C = STUDY_DATA.cards.filter(c => c.p === 'p3').map(c => ({ t: c.term, d: c.def }));
 let deck=[...C],ptr=0,flipped=false,rated={};
 const s=id=>document.getElementById(id),se=(id,d)=>{ s(id).style.display=d; };
 function render(){
