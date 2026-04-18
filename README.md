@@ -6,7 +6,7 @@ No build tools. No dependencies. Open `index.html` in any browser and start stud
 
 ---
 
-## Overview
+## Overview 
 
 The AI-102 Study Hub is a static web app that organises all six exam domains into structured topic pages, interactive flashcards, and practice quizzes — all tied together through a central Revision Center with exam-day countdown.
 
