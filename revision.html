@@ -62,6 +62,15 @@
     .score-fill { fill: none; stroke: var(--emerald-500); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 251.2; stroke-dashoffset: 251.2; transition: stroke-dashoffset 1s ease-out; }
     .score-text { position: absolute; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: var(--text-primary); }
 
+    /* Recap Panel */
+    .recap-card { background: var(--glass-1); border: 1px solid var(--gb-white); border-radius: var(--radius-xl); padding: var(--space-6); margin-top: var(--space-6); }
+    .recap-item { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.88rem; line-height: 1.6; color: var(--text-secondary); }
+    .recap-item:last-child { border-bottom: none; }
+    .recap-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-500); flex-shrink: 0; margin-top: 7px; }
+    .recap-item.recap-trap { color: var(--amber-300); }
+    .recap-item.recap-trap .recap-dot { background: var(--amber-400); }
+    .recap-trap-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; background: rgba(251,191,36,0.15); color: var(--amber-400); border-radius: 4px; padding: 1px 5px; margin-right: var(--space-2); flex-shrink: 0; white-space: nowrap; align-self: flex-start; margin-top: 3px; }
+
     .hidden { display: none !important; }
 
     /* Transitions */
@@ -126,10 +135,22 @@
         </div>
       </div>
 
+      <!-- ── STEP 2b: Recap Panel ── -->
+      <div id="step-recap" class="view-step hidden">
+        <button class="btn btn-ghost btn-sm" onclick="showStep('topic')" style="margin-bottom:var(--space-6)">← Back to Topics</button>
+        <div id="recap-header"></div>
+        <div class="recap-card" id="recap-content">
+          <p style="color:var(--text-muted); font-size:0.85rem">No summary available for this topic yet.</p>
+        </div>
+        <div style="display:flex; justify-content:flex-end; margin-top:var(--space-6)">
+          <button class="btn btn-primary" onclick="startRevision(currentTopic)">Start Flashcards →</button>
+        </div>
+      </div>
+
       <!-- ── STEP 3: Revision View ── -->
       <div id="step-revision" class="view-step hidden">
         <div class="rev-header">
-          <button class="btn btn-ghost btn-sm" onclick="showStep('topic')">← Back to Topics</button>
+          <button class="btn btn-ghost btn-sm" onclick="currentTopic === 'all' || currentTopic === 'memorize' ? showStep('topic') : showStep('recap')">← Back</button>
           <div class="rev-stats">
             <div class="stat-pill" style="color:var(--text-primary)"><span id="stat-total">0</span> Cards</div>
             <div class="stat-pill" style="color:var(--green-400)"><span id="stat-known">0</span> Known</div>
@@ -213,6 +234,7 @@
     steps: {
       part: document.getElementById('step-part'),
       topic: document.getElementById('step-topic'),
+      recap: document.getElementById('step-recap'),
       rev: document.getElementById('step-revision')
     },
     partGrid: document.getElementById('part-grid'),
@@ -287,7 +309,7 @@
     `;
     
     topicsHtml += Object.values(currentPart.topics).map(t => `
-      <button class="topic-btn" onclick="startRevision('${t.id}')">
+      <button class="topic-btn" onclick="showRecap('${t.id}')">
         <div class="topic-btn-icon">${t.icon}</div>
         <div class="topic-btn-title">${t.title}</div>
       </button>
@@ -295,6 +317,40 @@
     
     els.topicList.innerHTML = topicsHtml;
     showStep('topic');
+  }
+
+  function showRecap(tid) {
+    currentTopic = tid;
+    const topic = Object.values(currentPart.topics).find(t => t.id === tid);
+    const key = currentPart.id + '_' + tid;
+    const bullets = STUDY_DATA.summaries && STUDY_DATA.summaries[key];
+
+    document.getElementById('recap-header').innerHTML = `
+      <div style="display:flex; align-items:center; gap:var(--space-4); margin-bottom:var(--space-2)">
+        <div style="font-size:1.5rem">${topic ? topic.icon : '📋'}</div>
+        <div>
+          <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:2px">Section Recap</div>
+          <h2 style="color:${currentPart.color}">${topic ? topic.title : tid}</h2>
+        </div>
+      </div>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0">Review key points before drilling flashcards.</p>
+    `;
+
+    if (bullets && bullets.length) {
+      document.getElementById('recap-content').innerHTML = bullets.map(b => {
+        const isTrap = b.startsWith('[TRAP]');
+        const text = isTrap ? b.replace('[TRAP]', '').trim() : b;
+        return `<div class="recap-item${isTrap ? ' recap-trap' : ''}">
+          <div class="recap-dot"></div>
+          ${isTrap ? '<span class="recap-trap-label">TRAP</span>' : ''}
+          <span>${text}</span>
+        </div>`;
+      }).join('');
+    } else {
+      document.getElementById('recap-content').innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem">No summary available for this topic yet.</p>';
+    }
+
+    showStep('recap');
   }
 
   function startRevision(tid) {

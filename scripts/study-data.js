@@ -206,5 +206,162 @@ const STUDY_DATA = {
     { p:'p6', t:'t3', term:'Azure AI Video Indexer', def:'Service that extracts deep insights from video: transcripts, faces, keywords, brands, visual text, and even sentiment/emotions.' },
     { p:'p6', t:'t3', term:'Spatial Analysis (Vision)', def:'Uses real-time camera feeds to track people movement, count people in zones, and measure distances at the edge (on local hardware).' },
     { p:'p6', t:'t3', type:'tip', term:'ARM Account', def:'An ARM-connected Video Indexer account is required for production, as it uses your own Azure Storage and supports unlimited video volume.' },
-  ]
+  ],
+
+  // ── SECTION SUMMARIES ────────────────────────────────────────────────────
+  // Items prefixed [TRAP] render as amber exam-trap callouts in the recap panel.
+  summaries: {
+    'p1_t1': [
+      'Endpoint pattern: <code>https://&lt;name&gt;.cognitiveservices.azure.com/</code> — found under Keys and Endpoint in portal',
+      '[TRAP] Old name traps: Form Recognizer → Doc Intelligence | LUIS → CLU | QnA Maker → Custom QA | Text Analytics → AI Language | Cognitive Search → AI Search | Azure AI Studio → Foundry. Exam uses BOTH names.',
+      'Foundry portal <code>ai.azure.com</code> = models, prompts, deployments | Azure portal <code>portal.azure.com</code> = infra, RBAC, billing, networking',
+      'Foundry hierarchy: Hub → Project → Services (top to bottom)',
+      'Decision by input type: image → Vision | audio → Speech | doc with fields/tables → Doc Intelligence | generate text → OpenAI | search large corpus → AI Search | video insights → Video Indexer',
+      '[TRAP] CLU vs Custom QA: CLU understands commands and intents ("Book a flight"). Custom QA answers factual questions from a knowledge base ("What are your hours?"). Completely different services.',
+      'F0 = free, limited calls, NO private endpoints, 1 per subscription per service. S0 = paid, private endpoints supported, SLA guaranteed.',
+      'Azure OpenAI vs public OpenAI: same GPT models, but Azure keeps data in your tenant with RBAC and compliance guarantees.'
+    ],
+    'p1_t2': [
+      '[TRAP] Doc Intelligence pip package is still <code>pip install azure-ai-formrecognizer</code> — old name persists despite service rename to Document Intelligence.',
+      'SDK packages: Language = <code>azure-ai-textanalytics</code> | Vision = <code>azure-ai-vision-imageanalysis</code> | Speech = <code>azure-cognitiveservices-speech</code> | OpenAI = <code>openai</code> (import AzureOpenAI) | Search = <code>azure-search-documents</code> | Identity = <code>azure-identity</code>',
+      '[TRAP] Container mandatory params — ALL required even when running completely offline: <code>Eula=accept</code>, <code>Billing=&lt;endpoint&gt;</code>, <code>ApiKey=&lt;key&gt;</code>. Container will NOT start without all three.',
+      'Embedding model name: <code>text-embedding-ada-002</code> — for RAG pipelines, semantic search, and similarity comparisons.',
+      'Deployment options: ACI = dev/test, manual scaling | AKS = production, auto-scale + self-heal | Edge = no internet, IoT/factory floor',
+      'Endpoint domains: OpenAI → <code>.openai.azure.com</code> | AI Search → <code>.search.windows.net</code> | Everything else → <code>.cognitiveservices.azure.com</code>',
+      'Azure Traffic Manager + active-active multi-region = high availability pattern for AI services',
+      'ARM template = JSON infrastructure blueprint | Bicep = cleaner DSL that compiles to ARM JSON automatically'
+    ],
+    'p1_t3': [
+      '3 security layers: Authentication (who you are) → RBAC (what you can do) → Network (where you connect from)',
+      '[TRAP] Owner and Contributor roles do NOT grant API endpoint access. You must separately assign <code>Cognitive Services User</code> role to call the AI service endpoint.',
+      'Auth method choice: Managed Identity = Azure-to-Azure (no credentials in code) | Service Principal = outside Azure (CI/CD, GitHub Actions, on-prem) | API Key = simple dev/testing',
+      'System-assigned MI = tied to one resource, auto-deleted when resource is deleted | User-assigned MI = independent, shareable across multiple resources simultaneously',
+      '<code>DefaultAzureCredential</code> tries in order: environment variables → managed identity → Azure CLI. Works in both dev (CLI) and production (managed identity).',
+      '[TRAP] Private endpoint requires S0 tier (F0 blocked). Speech service additionally requires custom subdomain enabled BEFORE creating private endpoint — unique to Speech.',
+      'Key rotation zero-downtime procedure: switch apps to Key2 → regenerate Key1 → switch apps back to Key1',
+      '[TRAP] Customer-Managed Keys (CMK): Key Vault must have Soft Delete AND Purge Protection ENABLED — the exam often says "disable" as a wrong answer trap.',
+      '<code>{"keyName": "Key2"}</code> in regenerateKey API = resets Key2 only. Key1 is completely untouched.'
+    ],
+    'p1_t4': [
+      '[TRAP] Metrics are collected automatically. Logs are NOT stored by default — you must configure Diagnostic Settings to route them to a destination.',
+      'Log destinations: Log Analytics Workspace = KQL queries and alerting | Storage Account = cheap long-term archive (rarely queried) | Event Hub = stream to Splunk/SIEM/external systems',
+      'KQL pattern: <code>AzureDiagnostics | where TimeGenerated > ago(24h) | where ResourceProvider == "MICROSOFT.COGNITIVESERVICES" | where ResultType == "Failed" | order by TimeGenerated desc</code>',
+      'Alert severity: 0 = Critical, 1 = Error, 2 = Warning, 3 = Informational, 4 = Verbose. Lower number = higher severity.',
+      '[TRAP] Azure Cost Management budgets send email notifications ONLY — services NEVER stop automatically when budget is hit. Overspending continues.',
+      'Azure Monitor = service-level metrics (total calls, latency, error counts) | Application Insights = inside-app tracking (exceptions, custom events, user flows in your Python code)',
+      'HTTP 429 = rate limit exceeded (quota hit). Monitor Client Errors metric. Request quota increase in portal if consistently hitting this.',
+      'Default Log Analytics retention = 30 days. Extend to up to 730 days (extra cost) for compliance requirements.'
+    ],
+    'p1_t5': [
+      '6 RAI principles — memorise all by name: Fairness · Reliability & Safety · Inclusiveness · Privacy & Security · Accountability · Transparency',
+      '[TRAP] Fairness ≠ Inclusiveness: Fairness = equal treatment, no discrimination based on protected characteristics. Inclusiveness = actively designing for marginalised groups, disabilities, diverse backgrounds. Related but different.',
+      'Content Safety severity: 0 (safe) | 2 (low) | 4 (medium) | 6 (high) — even numbers ONLY. Four harm categories: Hate, Sexual, Violence, Self-Harm.',
+      '[TRAP] Azure OpenAI content filters apply to BOTH input (user prompt) and output (model response), and CANNOT be fully disabled — only thresholds adjusted.',
+      'Three safety mechanisms: Content Filter = automatic severity scoring per category | Blocklist = exact term blocking (competitor names, specific words) | Prompt Shield = attack detection',
+      'Prompt Shield types: Type 1 = jailbreak (user prompt tries to override system instructions) | Type 2 = indirect injection (malicious instructions hidden inside a document the model reads)',
+      'Transparency = disclose it is AI, explain decisions. Accountability = humans responsible, human oversight, appeal process must exist.'
+    ],
+
+    'p2_t1': [
+      '[TRAP] 1,000 tokens ≈ 750 words — tokens are NOT words. Roughly 4 characters per token. All costs billed per token, not per word or character.',
+      'RAG pipeline steps: 1) Chunk documents (256–1024 tokens each) 2) Embed chunks → store in vector index 3) Embed user query 4) Find similar chunks 5) Add chunks to prompt 6) LLM generates grounded answer',
+      'Grounding = inserting verified real documents into the prompt before calling the LLM. Reduces hallucination by giving the model facts to reference.',
+      'Embedding model for Azure OpenAI: <code>text-embedding-ada-002</code> — converts text to numerical vectors that capture semantic meaning.',
+      'LLMs predict likely next tokens based on training patterns — they do NOT retrieve facts, have internet access, or know current events. All outputs are probabilistic.',
+      'Context window = total tokens per single API call (prompt + output combined). GPT-4o = 128K tokens max. Exceeding it causes an error.',
+      'Hallucination mitigation: RAG grounds the model in real documents. Fine-tuning does NOT fix hallucination — it only teaches style.'
+    ],
+    'p2_t2': [
+      '[TRAP] The <code>model</code> parameter must be your DEPLOYMENT NAME (e.g. "my-gpt4o"), NOT the actual model name ("gpt-4o"). Using the model name causes a 404 error.',
+      'Always specify <code>api_version</code> (e.g. "2024-02-01") in every Azure OpenAI call. Missing it causes errors.',
+      'Endpoint domain: <code>https://&lt;name&gt;.openai.azure.com/</code> — note <code>.openai</code> not <code>.cognitiveservices</code>.',
+      'Message roles: <strong>system</strong> = developer instructions (user never sees) | <strong>user</strong> = human turn | <strong>assistant</strong> = AI previous response',
+      '[TRAP] Multi-turn conversations: you MUST include the full message history (all previous user + assistant turns) in every API call — the model has NO memory between separate calls.',
+      'DALL-E 3: always n=1 per request. Image URLs are TEMPORARY — download immediately or they expire.',
+      'DALL-E 3 image sizes: 1024×1024 (square) | 1792×1024 (landscape) | 1024×1792 (portrait)',
+      'Whisper = high-accuracy batch transcription of audio files (57 languages) | Azure AI Speech = real-time streaming + custom vocabulary + speaker recognition'
+    ],
+    'p2_t3': [
+      'Temperature: 0.0 = fully deterministic | 2.0 = very random/creative. Use low (0–0.3) for factual tasks, high (0.8–1.5) for creative writing.',
+      '[TRAP] Never set both <code>temperature</code> AND <code>top_p</code> simultaneously — they conflict. Use one or the other.',
+      'Fine-tuning = trains a model on your data to learn a specific style, format, or persona. Does NOT eliminate hallucination or teach new facts.',
+      'RAG = factual accuracy (anchor in real documents) | Fine-tuning = consistent style/format/voice. Know when to use which.',
+      'Chain-of-Thought (CoT): add "Think step by step" to prompt → model externalizes reasoning before answering → dramatically better accuracy on logic, math, and multi-step tasks.'
+    ],
+
+    'p3_t1': [
+      'Agentic loop (ReAct pattern): Reason ("what should I do next?") → Act (call a tool) → Observe (read result) → Reason again → Repeat until goal achieved',
+      'Function calling: model outputs structured JSON describing which function to call and with what arguments. YOUR code runs the function and returns result to the model.',
+      'AI Agent Service in Foundry: define agent + tools → create thread → create run → Azure manages the loop. You define, Azure executes.',
+      '[TRAP] Agent vs single LLM call: LLM = one request, one response. Agent = autonomous multi-step loop that uses tools to complete complex goals across multiple turns.',
+      'Tool types agents can use: web search, code execution, file I/O, database query, email, calendar — tools let agents ACT on the world, not just reason about it.'
+    ],
+
+    'p4_t1': [
+      'Azure AI Language SDK: <code>pip install azure-ai-textanalytics</code> | import <code>TextAnalyticsClient</code> from <code>azure.ai.textanalytics</code>',
+      '[TRAP] Translator endpoint is GLOBAL and fixed: <code>https://api.cognitive.microsofttranslator.com</code> — NO custom subdomain, unlike every other Azure AI service.',
+      'Translate TEXT → Azure AI Translator | Translate SPOKEN AUDIO → Azure AI Speech (has translation built in, do NOT use Translator for audio).',
+      '[TRAP] CLU vs Custom QA: CLU understands commands and intents ("Turn on lights in kitchen"). Custom QA answers factual questions from a document knowledge base ("What are your hours?").',
+      'Sentiment analysis: returns positive/negative/neutral/mixed at both document level AND sentence level with confidence scores.',
+      'NER entity categories: Person, Location, Organization, DateTime, Quantity, URL, email, phone number.',
+      'PII detection identifies AND can redact: names, emails, addresses, phone numbers, SSNs, credit card numbers.'
+    ],
+    'p4_t2': [
+      'Speech SDK: <code>pip install azure-cognitiveservices-speech</code> | import as <code>import azure.cognitiveservices.speech as speechsdk</code>',
+      'SSML (Speech Synthesis Markup Language) = XML markup controlling TTS output: voice selection, pitch, speaking rate, pauses, word emphasis.',
+      'STT modes: real-time continuous recognition (streaming) AND batch transcription (upload large audio files asynchronously).',
+      'Speaker Verification = confirms a voice sample matches an enrolled voice profile ("is this the same person as the enrolled user?").',
+      '[TRAP] Speech service requires a custom subdomain enabled BEFORE creating a private endpoint. No other Azure AI service has this prerequisite.',
+      'Speech + intent: use Azure AI Speech to transcribe audio → then pass transcribed text to Azure AI Language CLU to extract intent and entities.'
+    ],
+    'p4_t3': [
+      'Custom NER: label your own entity types in training documents (e.g. product codes, internal department names) — for domains not covered by standard NER.',
+      'Custom Text Classification: single-label (one category per document) or multi-label (document can belong to multiple categories).',
+      'CLU (Conversational Language Understanding): label utterances with intents + entity slots. Replaces LUIS. Train on your specific command patterns.',
+      'Custom QA: import FAQ document or URL → system builds knowledge base → matches user questions to best answers. Replaces QnA Maker.',
+      'All custom language capabilities (CLU, Custom QA, Custom NER, Custom Classification) are part of the same Azure AI Language resource.'
+    ],
+
+    'p5_t1': [
+      'AI Search endpoint domain: <code>https://&lt;name&gt;.search.windows.net</code> — different from <code>.cognitiveservices.azure.com</code>.',
+      'Indexing pipeline: Data Source → Indexer (crawls data) → Skillset (AI enrichment: OCR, NER, translation) → Search Index → Query',
+      '[TRAP] OcrSkill + MergeSkill: OcrSkill extracts text from embedded images. MergeSkill joins it back into the parent document. BOTH are needed to make image text searchable.',
+      'Semantic ranking = second-pass LLM re-scoring of initial keyword/vector results for true semantic relevance. Improves result quality significantly.',
+      '[TRAP] AI Search vs Doc Intelligence: Search = make content findable and queryable across a corpus. Doc Intelligence = extract structured named fields from individual documents. Different tools, different purposes.',
+      'Vector search: store text embeddings as vectors in the index. Query by embedding the user\'s question and finding nearest (most similar) vectors.'
+    ],
+    'p5_t2': [
+      '[TRAP] SDK package: <code>pip install azure-ai-formrecognizer</code> (old service name). Import class: <code>DocumentAnalysisClient</code>.',
+      'Prebuilt models require no training: Invoice, Receipt, ID Document, Business Card, W2, Tax Form — Microsoft trained these on millions of real documents.',
+      'Custom model: label minimum examples per document type in Document Intelligence Studio → train → model learns YOUR specific field layout.',
+      'Composed model: combine multiple custom models into one → incoming document is automatically routed to the best-matching sub-model.',
+      '[TRAP] Doc Intelligence vs AI Vision OCR: Doc Intelligence understands document structure and extracts named fields (VendorName, Total, Date). OCR just extracts raw text without understanding what any of it means.'
+    ],
+    'p5_t3': [
+      'Content Understanding = new 2024 service for unified multimodal pipelines. Processes documents, images, video, and audio in a single workflow.',
+      'More flexible than Document Intelligence when you need to analyze mixed content types together (e.g. a PDF with embedded images and a linked video).',
+      'Use Content Understanding when the scenario describes processing multiple media types in one pipeline. Use Doc Intelligence when the scenario is specifically about extracting fields from forms/documents.'
+    ],
+
+    'p6_t1': [
+      'Vision SDK: <code>pip install azure-ai-vision-imageanalysis</code> | import <code>ImageAnalysisClient</code> from <code>azure.ai.vision.imageanalysis</code>',
+      '[TRAP] Face API approval: biometric MATCHING and IDENTIFICATION requires Microsoft Limited Access approval. Simple face DETECTION (does a face exist in this image?) does NOT require approval.',
+      'OCR = extracts text from images and documents | Object Detection = identifies objects AND their locations (returns bounding box x, y, width, height) | Image Classification = identifies what category the whole image is (no location)',
+      '[TRAP] Azure AI Vision vs Custom Vision: Vision = prebuilt general-purpose models (no training). Custom Vision = YOU provide labeled training images to train for YOUR specific objects or categories.',
+      'Vision Studio full feature set (including certain vision models) requires East US 2 or West US 2 region.'
+    ],
+    'p6_t2': [
+      'Image Classification training: label entire images with class tags. Single-label = one tag per image. Multi-label = image can have multiple tags.',
+      'Object Detection training: draw bounding box regions on training images and label each region. Model learns to locate AND classify.',
+      'Minimum images per tag required before training begins (Vision Studio enforces this threshold before enabling training).',
+      'Export trained models for edge deployment: ONNX (Windows ML), CoreML (iOS), TensorFlow/TensorFlow Lite (Android), Docker container.',
+      'Custom Vision portal: accessible at customvision.ai or through the Azure AI Foundry portal.'
+    ],
+    'p6_t3': [
+      '[TRAP] Video Indexer vs Spatial Analysis: Video Indexer = process RECORDED video files for deep insights (transcripts, faces, keywords, brands, emotions). Spatial Analysis = REAL-TIME camera feeds (people counting, zone entry, distance measurement at edge).',
+      '[TRAP] ARM-connected account required for production Video Indexer. Uses your own Azure Storage, supports unlimited video. Trial account has strict volume limits.',
+      'Video Indexer extracts from video: transcript, speaker identities, keyframes, visual text (OCR), brands mentioned, topics, emotions, face thumbnails.',
+      'Spatial Analysis runs AT THE EDGE — processes live camera feeds locally on edge hardware with very low latency. Does not require cloud round-trip per frame.'
+    ]
+  }
 };
