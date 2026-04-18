@@ -14,14 +14,45 @@ The AI-102 Study Hub is a static web app that organises all six exam domains int
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| **Topic Pages** | Structured notes for each exam objective, with key concepts and Azure service details |
-| **Flashcards** | Flip-card UI with category filtering and progress tracking per topic |
-| **Practice Quizzes** | Multi-choice questions with instant feedback, score tracking, and question navigator dots |
-| **Revision Center** | Cross-part flashcard session — pick any part + topic without navigating away |
-| **Exam Countdown** | Set your exam date; dashboard shows days remaining |
-| **Dark Glassmorphism UI** | Consistent dark theme with blur/glass effects across all pages |
+### 📖 Topic Study Pages
+Each exam objective gets a dedicated page structured for retention, not just reference:
+- **Real-world analogies** — concepts explained through hospital systems, restaurants, and other relatable comparisons before going technical
+- **Python code examples** — SDK snippets alongside every key service
+- **Term cards** — scannable definitions for every Azure service and concept
+- **Decision trees** — step-by-step guidance for choosing between services (e.g. when to use Document Intelligence vs AI Search)
+- **Exam Tips** — clearly marked callout boxes flagging exactly what the exam tests on each topic
+- **Common traps** — highlighted warnings for renamed services, legacy package names, and gotchas that trip up candidates (e.g. `azure-ai-formrecognizer` is still the pip package for Document Intelligence)
+- **Read-time estimates and exam weight indicators** per topic
+
+### 🃏 Flashcards
+- **3D flip animation** — click to reveal definition
+- **Category filter pills** — narrow cards to a specific sub-topic
+- **Self-rating** — mark each card as "Got It" or "Need Review" to track weak spots
+- **Exam Tip card type** — dedicated tip cards mixed in with term cards
+
+### ✅ Practice Quizzes
+- **20 scenario-based questions per part** — written in the same style as real AI-102 exam questions
+- **Instant answer reveal** — selecting an option immediately shows whether you're right and why, with a full explanation
+- **Question navigator dots** — colour-coded (current / correct / incorrect / answered) so you can jump to any question
+- **Live score + progress bar** — updates as you answer
+- **Per-topic score breakdown** — end screen shows your score split by topic so you know exactly where to focus
+
+### 🧠 Revision Center
+A unified study session without page-hopping:
+1. **Pick a domain** → select from all 6 parts
+2. **Pick a topic** → drill into a specific objective
+3. **Read the recap** — a bullet-point summary of key facts with amber-highlighted **TRAP** items for common exam mistakes
+4. **Run the flashcards** — Known / Review rating with progress stats (total cards, known count, review count)
+5. **See your score** — animated SVG score circle on completion
+
+### ⏱️ Exam Countdown
+- Set your exam date once; the dashboard and every topic page show days remaining
+- Persisted to `localStorage` — survives page refreshes
+
+### 🎨 Dark Glassmorphism UI
+- Consistent dark theme with glass/blur effects across all pages
+- CSS custom property design token system — colours, spacing, typography all centralised in `main.css`
+- Responsive sidebar navigation with mobile hamburger menu
 
 ---
 
