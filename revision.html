@@ -109,16 +109,7 @@
         <h1 style="margin-bottom:var(--space-2)">Revision Center</h1>
         <p style="margin-bottom:var(--space-8)">Choose a domain to start memorising key terms and concepts.</p>
         
-        <div class="must-memorize-card" onclick="selectMemorizeOnly()" style="margin-top: var(--space-8); background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(220, 38, 38, 0.1)); border: 2px solid var(--accent-amber); border-radius: var(--radius-xl); padding: var(--space-6); cursor:pointer; display:flex; align-items:center; gap:var(--space-6); transition: transform 0.2s;">
-          <div style="font-size: 2.5rem;">🔥</div>
-          <div>
-            <h3 style="color:var(--accent-amber); margin-bottom:4px;">Must-Memorize Deck</h3>
-            <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Critical Exam Tips, API Keys, APKs, and Technical Specs across ALL domains.</p>
-          </div>
-          <div style="margin-left:auto; font-weight:800; color:var(--accent-amber)">START →</div>
-        </div>
-
-        <div class="part-grid" id="part-grid" style="margin-top: var(--space-6)">
+<div class="part-grid" id="part-grid" style="margin-top: var(--space-6)">
           <!-- Populated by JS -->
         </div>
       </div>
@@ -357,8 +348,6 @@
     currentTopic = tid;
     if (tid === 'all') {
       deck = STUDY_DATA.cards.filter(c => c.p === currentPart.id);
-    } else if (tid === 'memorize') {
-      deck = STUDY_DATA.cards.filter(c => c.type === 'tip' || (c.term && c.term.toLowerCase().includes('tip')));
     } else {
       deck = STUDY_DATA.cards.filter(c => c.p === currentPart.id && c.t === tid);
     }
@@ -527,13 +516,7 @@
     });
   }
 
-  function selectMemorizeOnly() {
-    currentPart = 'global';
-    currentTopic = 'memorize';
-    startRevision('memorize');
-  }
-
-  // Start initialization
+// Start initialization
   init();
 </script>
 

@@ -1426,8 +1426,8 @@ const SidebarTemplate = (p) => `
 
     <!-- Nav -->
     <nav class="sidebar-nav">
-      <a href="${p}index.html" class="sidebar-item">Dashboard</a>
-      <a href="${p}revision.html" class="sidebar-item">Revision Center</a>
+      <a href="${p}index.html" class="sidebar-item"><span class="item-icon">⌂</span><span>Dashboard</span></a>
+      <a href="${p}revision.html" class="sidebar-item"><span class="item-icon">🧠</span><span>Revision Center</span></a>
       <div class="sidebar-group" data-part-group="1">
         <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span><span class="item-badge" data-part-progress="1">0/5</span></button>
         <div class="sidebar-group-body">
@@ -1488,8 +1488,8 @@ const SidebarTemplate = (p) => `
           <a href="${p}part6-computer-vision/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
         </div>
       </div>
-      <a href="#" onclick="openExamDateModal()" class="sidebar-item">Set Exam Date</a>
-      <a href="#" onclick="ProgressManager.reset()" class="sidebar-item">Reset Progress</a>
+      <a href="#" onclick="openExamDateModal()" class="sidebar-item"><span class="item-icon">📅</span><span>Set Exam Date</span></a>
+      <a href="#" onclick="ProgressManager.reset()" class="sidebar-item"><span class="item-icon">↺</span><span>Reset Progress</span></a>
     </nav>
 
     <!-- Sidebar Footer — Overall Progress -->
