@@ -1075,7 +1075,8 @@ function initProgressBars() {
     const prog = ProgressManager.getPartProgress(part);
     const fill = el.querySelector('.progress-fill');
     const pct  = el.querySelector('[data-progress-pct]') ||
-                 el.closest('.part-hero')?.querySelector('[data-progress-pct]');
+                 el.closest('.part-hero')?.querySelector('[data-progress-pct]') ||
+                 el.parentElement?.querySelector('[data-progress-pct]');
     if (fill) fill.style.width = `${prog.pct}%`;
     if (pct)  pct.textContent  = `${prog.pct}%`;
   });

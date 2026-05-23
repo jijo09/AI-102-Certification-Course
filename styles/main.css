@@ -211,6 +211,11 @@ body.light-mode .sidebar-item { color: #334155; }
 body.light-mode .sidebar-item:hover { background: rgba(0,0,0,0.04); color: #0f172a; }
 body.light-mode .sidebar-item.active { background: rgba(16,185,129,0.1); color: var(--emerald-600); }
 
+body.light-mode .progress-bar {
+  background: rgba(0,0,0,0.1);
+  border-color: rgba(0,0,0,0.08);
+}
+
 /* Retirement warning banner */
 .retirement-banner {
   background: linear-gradient(90deg, rgba(239,68,68,0.12), rgba(245,158,11,0.08));
@@ -1436,10 +1441,10 @@ table.comparison-table tr:hover td { background: rgba(16,185,129,0.04); }
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.12);
   border-radius: 3px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .progress-fill {
