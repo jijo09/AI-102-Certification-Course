@@ -1,0 +1,662 @@
+{
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\.claude\\settings.local.json": {
+    "mtime": 1779447086.8334596,
+    "ast_hash": "e27d44b619caca9e74239a2468109589",
+    "semantic_hash": "e27d44b619caca9e74239a2468109589"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\scripts\\common.js": {
+    "mtime": 1779406211.7349446,
+    "ast_hash": "dfe44eb263f283a1949a1c9611b8e527",
+    "semantic_hash": "dfe44eb263f283a1949a1c9611b8e527"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\scripts\\study-data.js": {
+    "mtime": 1776468195.8324497,
+    "ast_hash": "a71557c9ca3a206778b8e69eacd16332",
+    "semantic_hash": "a71557c9ca3a206778b8e69eacd16332"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\courses\\manifest.json": {
+    "mtime": 1779388440.737543,
+    "ast_hash": "cb3e1a536b7463260e6547ce99c5073c",
+    "semantic_hash": "cb3e1a536b7463260e6547ce99c5073c"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\courses\\ai-102\\config.json": {
+    "mtime": 1779388445.4743993,
+    "ast_hash": "52efa2640a89a144f8e3e4db76c51ef1",
+    "semantic_hash": "52efa2640a89a144f8e3e4db76c51ef1"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\courses\\servicenow-csa\\config.json": {
+    "mtime": 1779388449.8078787,
+    "ast_hash": "b89a7d65d80b6deb1b93563a78339dbf",
+    "semantic_hash": "b89a7d65d80b6deb1b93563a78339dbf"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\courses\\_template\\config.js": {
+    "mtime": 1779388463.5225792,
+    "ast_hash": "7bfb8ecbb847abf680beb1dc558a53b5",
+    "semantic_hash": "7bfb8ecbb847abf680beb1dc558a53b5"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\courses\\_template\\config.json": {
+    "mtime": 1779388465.2154036,
+    "ast_hash": "e4a386ed3a8bbaead95417c2042c7432",
+    "semantic_hash": "e4a386ed3a8bbaead95417c2042c7432"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\scripts\\common.js": {
+    "mtime": 1779406211.7349446,
+    "ast_hash": "dfe44eb263f283a1949a1c9611b8e527",
+    "semantic_hash": "dfe44eb263f283a1949a1c9611b8e527"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\scripts\\engine.js": {
+    "mtime": 1779388634.2551818,
+    "ast_hash": "d8f24c493e2aafc7b8c7cb51a20dec36",
+    "semantic_hash": "d8f24c493e2aafc7b8c7cb51a20dec36"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\scripts\\study-data.js": {
+    "mtime": 1776468195.8324497,
+    "ast_hash": "a71557c9ca3a206778b8e69eacd16332",
+    "semantic_hash": "a71557c9ca3a206778b8e69eacd16332"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\scripts\\common.js": {
+    "mtime": 1779406270.1483407,
+    "ast_hash": "979bbb574dde166de03ea5f3ae0e1526",
+    "semantic_hash": "979bbb574dde166de03ea5f3ae0e1526"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\scripts\\study-data.js": {
+    "mtime": 1779307709.7922432,
+    "ast_hash": "6c347657066fd0ca67d513ea1446754e",
+    "semantic_hash": "6c347657066fd0ca67d513ea1446754e"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\index.html": {
+    "mtime": 1779407058.0453203,
+    "ast_hash": "592bb24b7b042e9ad7d9241c499a58e8",
+    "semantic_hash": "592bb24b7b042e9ad7d9241c499a58e8"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\README.md": {
+    "mtime": 1776515800.8290517,
+    "ast_hash": "bf42717a49479f5dae964b31218724b3",
+    "semantic_hash": "bf42717a49479f5dae964b31218724b3"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\revision.html": {
+    "mtime": 1779405990.9168556,
+    "ast_hash": "2896325e4c8ae27d7c91468d3f152e38",
+    "semantic_hash": "2896325e4c8ae27d7c91468d3f152e38"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\revision.html": {
+    "mtime": 1779407271.3401673,
+    "ast_hash": "0c4f9e92d47fa4ec96e50b478d570215",
+    "semantic_hash": "0c4f9e92d47fa4ec96e50b478d570215"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part1-plan-manage\\flashcards.html": {
+    "mtime": 1779407352.400018,
+    "ast_hash": "821e5586f869122d342e5b83ba2b5fc4",
+    "semantic_hash": "821e5586f869122d342e5b83ba2b5fc4"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part1-plan-manage\\index.html": {
+    "mtime": 1779407352.4964826,
+    "ast_hash": "d3ede1a59cacecdc59ea13c72cd5cd55",
+    "semantic_hash": "d3ede1a59cacecdc59ea13c72cd5cd55"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part1-plan-manage\\quiz.html": {
+    "mtime": 1779407352.499481,
+    "ast_hash": "66c954b79b218e5a9c351032d6ad6b97",
+    "semantic_hash": "66c954b79b218e5a9c351032d6ad6b97"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part1-plan-manage\\topics\\01-foundry-services.html": {
+    "mtime": 1779407352.6540737,
+    "ast_hash": "bf6f395f33fd616fa2b83c5205fce180",
+    "semantic_hash": "bf6f395f33fd616fa2b83c5205fce180"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part1-plan-manage\\topics\\02-plan-create-deploy.html": {
+    "mtime": 1779407352.6600032,
+    "ast_hash": "7d265ae8e0c003fd37a57a32caae76af",
+    "semantic_hash": "7d265ae8e0c003fd37a57a32caae76af"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part1-plan-manage\\topics\\03-security.html": {
+    "mtime": 1779407352.666154,
+    "ast_hash": "2e5c8f90ddf758970dad02eeeed5930f",
+    "semantic_hash": "2e5c8f90ddf758970dad02eeeed5930f"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part1-plan-manage\\topics\\04-monitor.html": {
+    "mtime": 1779407352.6746736,
+    "ast_hash": "e6009183a7aff21eb0f847584407f726",
+    "semantic_hash": "e6009183a7aff21eb0f847584407f726"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part1-plan-manage\\topics\\05-responsible-ai.html": {
+    "mtime": 1779407352.6976132,
+    "ast_hash": "81a8c34fb77b00d3f94cb23f7f6d45dc",
+    "semantic_hash": "81a8c34fb77b00d3f94cb23f7f6d45dc"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part2-generative-ai\\flashcards.html": {
+    "mtime": 1779407352.5053856,
+    "ast_hash": "94944dcc18a9d846b80e871cfbe7ff1a",
+    "semantic_hash": "94944dcc18a9d846b80e871cfbe7ff1a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part2-generative-ai\\index.html": {
+    "mtime": 1779407352.5096562,
+    "ast_hash": "1dea2f7dab3aa86c258fef2c18c66166",
+    "semantic_hash": "1dea2f7dab3aa86c258fef2c18c66166"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part2-generative-ai\\quiz.html": {
+    "mtime": 1779407352.513172,
+    "ast_hash": "8e1ff8a246c9fdb7282381e431587715",
+    "semantic_hash": "8e1ff8a246c9fdb7282381e431587715"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part2-generative-ai\\topics\\01-foundry-build.html": {
+    "mtime": 1779407352.704635,
+    "ast_hash": "deba0e34994fdbaeee7fce608c079886",
+    "semantic_hash": "deba0e34994fdbaeee7fce608c079886"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part2-generative-ai\\topics\\02-azure-openai.html": {
+    "mtime": 1779407352.7095447,
+    "ast_hash": "7bfe7c2101e2805feff017f5bee5429a",
+    "semantic_hash": "7bfe7c2101e2805feff017f5bee5429a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part2-generative-ai\\topics\\03-optimize-operationalize.html": {
+    "mtime": 1779407352.7131994,
+    "ast_hash": "42799af47ea6fe41f2019ad93d645bc4",
+    "semantic_hash": "42799af47ea6fe41f2019ad93d645bc4"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part3-agentic\\flashcards.html": {
+    "mtime": 1779407352.520194,
+    "ast_hash": "6135ea2a7c607b8553bb8c6d948bc338",
+    "semantic_hash": "6135ea2a7c607b8553bb8c6d948bc338"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part3-agentic\\index.html": {
+    "mtime": 1779407352.5257168,
+    "ast_hash": "34ada0a6f277c3e5ea3d456371b3b906",
+    "semantic_hash": "34ada0a6f277c3e5ea3d456371b3b906"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part3-agentic\\quiz.html": {
+    "mtime": 1779407352.5342388,
+    "ast_hash": "d023cd47e3e95ea98b36640b0b7cae09",
+    "semantic_hash": "d023cd47e3e95ea98b36640b0b7cae09"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part3-agentic\\topics\\01-custom-agents.html": {
+    "mtime": 1779407352.7207553,
+    "ast_hash": "0367805ad14e8d662283c63bff12e288",
+    "semantic_hash": "0367805ad14e8d662283c63bff12e288"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part4-nlp\\flashcards.html": {
+    "mtime": 1779407352.5483584,
+    "ast_hash": "cd214af2d6f79ebd456aeed3640e00c5",
+    "semantic_hash": "cd214af2d6f79ebd456aeed3640e00c5"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part4-nlp\\index.html": {
+    "mtime": 1779407352.553881,
+    "ast_hash": "0655fd5772bc459d59801305a42927d1",
+    "semantic_hash": "0655fd5772bc459d59801305a42927d1"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part4-nlp\\quiz.html": {
+    "mtime": 1779407352.5613067,
+    "ast_hash": "4ec0fa35126f334b12970bca15e63dc5",
+    "semantic_hash": "4ec0fa35126f334b12970bca15e63dc5"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part4-nlp\\topics\\01-analyze-translate-text.html": {
+    "mtime": 1779407352.729291,
+    "ast_hash": "fb46db814716c2706ec25861ff7c0110",
+    "semantic_hash": "fb46db814716c2706ec25861ff7c0110"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part4-nlp\\topics\\02-speech.html": {
+    "mtime": 1779407352.7363787,
+    "ast_hash": "ea3c7db3d35790453303c2657250c44f",
+    "semantic_hash": "ea3c7db3d35790453303c2657250c44f"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part4-nlp\\topics\\03-custom-language-models.html": {
+    "mtime": 1779407352.741623,
+    "ast_hash": "44d6f348162e8c6c703405d9d960b8b1",
+    "semantic_hash": "44d6f348162e8c6c703405d9d960b8b1"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part5-knowledge-mining\\flashcards.html": {
+    "mtime": 1779407352.5668325,
+    "ast_hash": "d757b6d363673e283d0cab01eb98a23a",
+    "semantic_hash": "d757b6d363673e283d0cab01eb98a23a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part5-knowledge-mining\\index.html": {
+    "mtime": 1779407352.5718331,
+    "ast_hash": "7a2ad0d8b2d3d6a7d9cd697025418db4",
+    "semantic_hash": "7a2ad0d8b2d3d6a7d9cd697025418db4"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part5-knowledge-mining\\quiz.html": {
+    "mtime": 1779407352.580359,
+    "ast_hash": "e1dccce37b01018ccb80ce9b9049c4f8",
+    "semantic_hash": "e1dccce37b01018ccb80ce9b9049c4f8"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part5-knowledge-mining\\topics\\01-ai-search.html": {
+    "mtime": 1779407352.7515793,
+    "ast_hash": "4b50c8eac71d1b1cb569a9fb77ee6c2f",
+    "semantic_hash": "4b50c8eac71d1b1cb569a9fb77ee6c2f"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part5-knowledge-mining\\topics\\02-document-intelligence.html": {
+    "mtime": 1779407352.7574193,
+    "ast_hash": "3f29019760f54b3a9bd69a59a3f90afb",
+    "semantic_hash": "3f29019760f54b3a9bd69a59a3f90afb"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part5-knowledge-mining\\topics\\03-content-understanding.html": {
+    "mtime": 1779407352.7629275,
+    "ast_hash": "0ecc458c10d640c6405ad3c9d2369fc5",
+    "semantic_hash": "0ecc458c10d640c6405ad3c9d2369fc5"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part6-computer-vision\\flashcards.html": {
+    "mtime": 1779407352.58889,
+    "ast_hash": "9696df0590c170aa5896b00c53827525",
+    "semantic_hash": "9696df0590c170aa5896b00c53827525"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part6-computer-vision\\index.html": {
+    "mtime": 1779407352.600416,
+    "ast_hash": "de5eba548688d7a66acc2232ea6c616f",
+    "semantic_hash": "de5eba548688d7a66acc2232ea6c616f"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part6-computer-vision\\quiz.html": {
+    "mtime": 1779407352.6069465,
+    "ast_hash": "d49ecf695b631468506b33a253d14ccf",
+    "semantic_hash": "d49ecf695b631468506b33a253d14ccf"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part6-computer-vision\\topics\\01-analyze-images.html": {
+    "mtime": 1779407352.769948,
+    "ast_hash": "81bac8c2e2778ed9a73676b95104a3e5",
+    "semantic_hash": "81bac8c2e2778ed9a73676b95104a3e5"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part6-computer-vision\\topics\\02-custom-vision-models.html": {
+    "mtime": 1779407352.7754772,
+    "ast_hash": "ff1fd33cc2bb5c2d9c1454eb03cf86f4",
+    "semantic_hash": "ff1fd33cc2bb5c2d9c1454eb03cf86f4"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\ai-102\\part6-computer-vision\\topics\\03-video-analysis.html": {
+    "mtime": 1779407352.7800214,
+    "ast_hash": "514fa395e5e8b3f897b780cee812906e",
+    "semantic_hash": "514fa395e5e8b3f897b780cee812906e"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part1-plan-manage\\flashcards.html": {
+    "mtime": 1779405989.7902374,
+    "ast_hash": "66eed20457fcc96db8f92e9ed0fb955d",
+    "semantic_hash": "66eed20457fcc96db8f92e9ed0fb955d"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part1-plan-manage\\index.html": {
+    "mtime": 1779405989.7987616,
+    "ast_hash": "acddf25ea5e4ced72a153f56a0febba7",
+    "semantic_hash": "acddf25ea5e4ced72a153f56a0febba7"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part1-plan-manage\\quiz.html": {
+    "mtime": 1779405989.8150046,
+    "ast_hash": "388eb8b13b267d887a25d4795e8b248d",
+    "semantic_hash": "388eb8b13b267d887a25d4795e8b248d"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part1-plan-manage\\topics\\01-foundry-services.html": {
+    "mtime": 1779405989.5546308,
+    "ast_hash": "427b67099aeb6043590d13996553cb3a",
+    "semantic_hash": "427b67099aeb6043590d13996553cb3a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part1-plan-manage\\topics\\02-plan-create-deploy.html": {
+    "mtime": 1779405989.6881082,
+    "ast_hash": "ada87740fb90d2c73e17158676ed4975",
+    "semantic_hash": "ada87740fb90d2c73e17158676ed4975"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part1-plan-manage\\topics\\03-security.html": {
+    "mtime": 1779405989.7363498,
+    "ast_hash": "feadfb62b4539bf765d6a938119886ce",
+    "semantic_hash": "feadfb62b4539bf765d6a938119886ce"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part1-plan-manage\\topics\\04-monitor.html": {
+    "mtime": 1779405989.7560277,
+    "ast_hash": "53011909cfd2ba7ac70ef7293039d65b",
+    "semantic_hash": "53011909cfd2ba7ac70ef7293039d65b"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part1-plan-manage\\topics\\05-responsible-ai.html": {
+    "mtime": 1779405989.7827077,
+    "ast_hash": "223765b5f8f3d29a1b9cac1b00a5de50",
+    "semantic_hash": "223765b5f8f3d29a1b9cac1b00a5de50"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part2-generative-ai\\flashcards.html": {
+    "mtime": 1779405989.9265754,
+    "ast_hash": "59a78c5e92c611d719641ba357bf3b4d",
+    "semantic_hash": "59a78c5e92c611d719641ba357bf3b4d"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part2-generative-ai\\index.html": {
+    "mtime": 1779405989.9401023,
+    "ast_hash": "6069063ca7da93b3840aaf05b277afa7",
+    "semantic_hash": "6069063ca7da93b3840aaf05b277afa7"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part2-generative-ai\\quiz.html": {
+    "mtime": 1779405989.9536614,
+    "ast_hash": "e6ab47fac32203c7e0fcf5140d0e390f",
+    "semantic_hash": "e6ab47fac32203c7e0fcf5140d0e390f"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part2-generative-ai\\topics\\01-foundry-build.html": {
+    "mtime": 1779405989.868887,
+    "ast_hash": "3c71bf398ff5d3b656349e7f0e3a24aa",
+    "semantic_hash": "3c71bf398ff5d3b656349e7f0e3a24aa"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part2-generative-ai\\topics\\02-azure-openai.html": {
+    "mtime": 1779405989.884609,
+    "ast_hash": "c61101eed0db7598b4d846d83c95fcf0",
+    "semantic_hash": "c61101eed0db7598b4d846d83c95fcf0"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part2-generative-ai\\topics\\03-optimize-operationalize.html": {
+    "mtime": 1779405989.9085445,
+    "ast_hash": "d13759c8a36cbeafc1a314ec7a86dd73",
+    "semantic_hash": "d13759c8a36cbeafc1a314ec7a86dd73"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part3-agentic\\flashcards.html": {
+    "mtime": 1779405989.995965,
+    "ast_hash": "82a39ac6d35b425964d3302e1b996260",
+    "semantic_hash": "82a39ac6d35b425964d3302e1b996260"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part3-agentic\\index.html": {
+    "mtime": 1779405990.0125098,
+    "ast_hash": "4d2f245860439260d3b1ffeb43264eaf",
+    "semantic_hash": "4d2f245860439260d3b1ffeb43264eaf"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part3-agentic\\quiz.html": {
+    "mtime": 1779405990.0351145,
+    "ast_hash": "515085164ac65b23670822d932218198",
+    "semantic_hash": "515085164ac65b23670822d932218198"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part3-agentic\\topics\\01-custom-agents.html": {
+    "mtime": 1779405989.9822383,
+    "ast_hash": "887a329f4e545ecf35b92281af1f1ab8",
+    "semantic_hash": "887a329f4e545ecf35b92281af1f1ab8"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part4-nlp\\flashcards.html": {
+    "mtime": 1779405990.1000397,
+    "ast_hash": "90ec65b1fdf7f4a535f8df8993546cac",
+    "semantic_hash": "90ec65b1fdf7f4a535f8df8993546cac"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part4-nlp\\index.html": {
+    "mtime": 1779405990.1086593,
+    "ast_hash": "4fb6130c29025edda70262d978fc8b59",
+    "semantic_hash": "4fb6130c29025edda70262d978fc8b59"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part4-nlp\\quiz.html": {
+    "mtime": 1779405990.1259515,
+    "ast_hash": "f637648c98baee13e5f36f30db5b0ebb",
+    "semantic_hash": "f637648c98baee13e5f36f30db5b0ebb"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part4-nlp\\topics\\01-analyze-translate-text.html": {
+    "mtime": 1779405990.0541258,
+    "ast_hash": "466952348058f9eb027215d9e31e5526",
+    "semantic_hash": "466952348058f9eb027215d9e31e5526"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part4-nlp\\topics\\02-speech.html": {
+    "mtime": 1779405990.0656784,
+    "ast_hash": "bbcf6c09782c86655e1a1a07fbae83a7",
+    "semantic_hash": "bbcf6c09782c86655e1a1a07fbae83a7"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part4-nlp\\topics\\03-custom-language-models.html": {
+    "mtime": 1779405990.090955,
+    "ast_hash": "6798824e39f0a68eaa2a792c38239568",
+    "semantic_hash": "6798824e39f0a68eaa2a792c38239568"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part5-knowledge-mining\\flashcards.html": {
+    "mtime": 1779405990.177545,
+    "ast_hash": "b691530decf4c85d70f9561197fc1134",
+    "semantic_hash": "b691530decf4c85d70f9561197fc1134"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part5-knowledge-mining\\index.html": {
+    "mtime": 1779405990.1920657,
+    "ast_hash": "5bc7a47d87762fc8df168ed4e2457003",
+    "semantic_hash": "5bc7a47d87762fc8df168ed4e2457003"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part5-knowledge-mining\\quiz.html": {
+    "mtime": 1779405990.207235,
+    "ast_hash": "b08a845b6f77f08d4535e8514f5c614c",
+    "semantic_hash": "b08a845b6f77f08d4535e8514f5c614c"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part5-knowledge-mining\\topics\\01-ai-search.html": {
+    "mtime": 1779405990.1398952,
+    "ast_hash": "093b9aa9e571fee0791eeddf3adb258a",
+    "semantic_hash": "093b9aa9e571fee0791eeddf3adb258a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part5-knowledge-mining\\topics\\02-document-intelligence.html": {
+    "mtime": 1779405990.1548376,
+    "ast_hash": "864affa214eef2dc192338c0c2243531",
+    "semantic_hash": "864affa214eef2dc192338c0c2243531"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part5-knowledge-mining\\topics\\03-content-understanding.html": {
+    "mtime": 1779405990.169831,
+    "ast_hash": "9cbcb4e16db1328fd47058ae0c95f52e",
+    "semantic_hash": "9cbcb4e16db1328fd47058ae0c95f52e"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part6-computer-vision\\flashcards.html": {
+    "mtime": 1779405990.275504,
+    "ast_hash": "8d3597849635f8c3d830d0bdfc85dd3a",
+    "semantic_hash": "8d3597849635f8c3d830d0bdfc85dd3a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part6-computer-vision\\index.html": {
+    "mtime": 1779405990.2850366,
+    "ast_hash": "4f7d1fb6b5158421dee31ecf893112f3",
+    "semantic_hash": "4f7d1fb6b5158421dee31ecf893112f3"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part6-computer-vision\\quiz.html": {
+    "mtime": 1779405990.3000095,
+    "ast_hash": "df8ac3ca08443935b3c6aadb045f19ea",
+    "semantic_hash": "df8ac3ca08443935b3c6aadb045f19ea"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part6-computer-vision\\topics\\01-analyze-images.html": {
+    "mtime": 1779405990.2328577,
+    "ast_hash": "852f5db75db54e4c3d0bf6be032d51df",
+    "semantic_hash": "852f5db75db54e4c3d0bf6be032d51df"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part6-computer-vision\\topics\\02-custom-vision-models.html": {
+    "mtime": 1779405990.2519035,
+    "ast_hash": "c6a37fc76851c32614c40cc72b411cf0",
+    "semantic_hash": "c6a37fc76851c32614c40cc72b411cf0"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\part6-computer-vision\\topics\\03-video-analysis.html": {
+    "mtime": 1779405990.269698,
+    "ast_hash": "a2574bf7fdf3af2fdbe05bdeeca2c3f6",
+    "semantic_hash": "a2574bf7fdf3af2fdbe05bdeeca2c3f6"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\flashcards.html": {
+    "mtime": 1779403526.4045167,
+    "ast_hash": "76499a1edd085a39a1214e5be7277998",
+    "semantic_hash": "76499a1edd085a39a1214e5be7277998"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\index.html": {
+    "mtime": 1779406407.8413596,
+    "ast_hash": "f7ba5b4e9265c0eeb26f83f8489209ea",
+    "semantic_hash": "f7ba5b4e9265c0eeb26f83f8489209ea"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\revision.html": {
+    "mtime": 1779405990.9072251,
+    "ast_hash": "2ba038d01d80be350a3ab5f00e2777ad",
+    "semantic_hash": "2ba038d01d80be350a3ab5f00e2777ad"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part1-navigation\\flashcards.html": {
+    "mtime": 1779407057.5478885,
+    "ast_hash": "e9132aa683b7daa02e6e369bc3be435d",
+    "semantic_hash": "e9132aa683b7daa02e6e369bc3be435d"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part1-navigation\\index.html": {
+    "mtime": 1779407057.6412675,
+    "ast_hash": "31855285f40fb93913adf625a0524d85",
+    "semantic_hash": "31855285f40fb93913adf625a0524d85"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part1-navigation\\quiz.html": {
+    "mtime": 1779407057.6447928,
+    "ast_hash": "6ba29f129ec6b0846d70a6e7ce6f9a26",
+    "semantic_hash": "6ba29f129ec6b0846d70a6e7ce6f9a26"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part1-navigation\\topics\\01-ui-navigation.html": {
+    "mtime": 1779405990.315807,
+    "ast_hash": "77ef64def14ed94f18be17a03ce5435d",
+    "semantic_hash": "77ef64def14ed94f18be17a03ce5435d"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part1-navigation\\topics\\02-lists-filters-forms.html": {
+    "mtime": 1779405990.3296235,
+    "ast_hash": "73fd91be9af54144343b9487a5706c5c",
+    "semantic_hash": "73fd91be9af54144343b9487a5706c5c"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part1-navigation\\topics\\03-branding-properties.html": {
+    "mtime": 1779405990.3453844,
+    "ast_hash": "90c3266a9c7cd571a43ba05fda204310",
+    "semantic_hash": "90c3266a9c7cd571a43ba05fda204310"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part1-navigation\\topics\\04-mobile-portal.html": {
+    "mtime": 1779405990.3602967,
+    "ast_hash": "48f8a34e5d10d4ae45481db149ba0cbe",
+    "semantic_hash": "48f8a34e5d10d4ae45481db149ba0cbe"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part2-configuration\\flashcards.html": {
+    "mtime": 1779407057.6517515,
+    "ast_hash": "7fc425d40a813c77c66724767d7b5965",
+    "semantic_hash": "7fc425d40a813c77c66724767d7b5965"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part2-configuration\\index.html": {
+    "mtime": 1779407057.656754,
+    "ast_hash": "78ceea13538da66b100b5be84a91fa92",
+    "semantic_hash": "78ceea13538da66b100b5be84a91fa92"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part2-configuration\\quiz.html": {
+    "mtime": 1779407057.66228,
+    "ast_hash": "34533c91bb4238f301f00c1aeb61735b",
+    "semantic_hash": "34533c91bb4238f301f00c1aeb61735b"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part2-configuration\\topics\\01-users-groups-roles.html": {
+    "mtime": 1779405990.4109433,
+    "ast_hash": "61ed1a25f996b0977e5f5c5341e63a4a",
+    "semantic_hash": "61ed1a25f996b0977e5f5c5341e63a4a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part2-configuration\\topics\\02-tables-dictionary.html": {
+    "mtime": 1779405990.423896,
+    "ast_hash": "4abd06f9a06b2a06f97802d801d0a27f",
+    "semantic_hash": "4abd06f9a06b2a06f97802d801d0a27f"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part2-configuration\\topics\\03-instance-security.html": {
+    "mtime": 1779405990.4352806,
+    "ast_hash": "8ec813fadfe72bec4968b1e6a0254127",
+    "semantic_hash": "8ec813fadfe72bec4968b1e6a0254127"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part3-collaboration\\flashcards.html": {
+    "mtime": 1779407057.6737058,
+    "ast_hash": "725fbef55d2badcbb71fb473deeb8ff0",
+    "semantic_hash": "725fbef55d2badcbb71fb473deeb8ff0"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part3-collaboration\\index.html": {
+    "mtime": 1779407057.6877499,
+    "ast_hash": "c0713e339a206b05f3b78cd8cc860aa1",
+    "semantic_hash": "c0713e339a206b05f3b78cd8cc860aa1"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part3-collaboration\\quiz.html": {
+    "mtime": 1779407057.6937594,
+    "ast_hash": "4831a5bc61e3136b8b6c4ac6e2a0c0f2",
+    "semantic_hash": "4831a5bc61e3136b8b6c4ac6e2a0c0f2"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part3-collaboration\\topics\\01-notifications-templates.html": {
+    "mtime": 1779405990.4885259,
+    "ast_hash": "b62cfca68a799743128d200252de4a3d",
+    "semantic_hash": "b62cfca68a799743128d200252de4a3d"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part3-collaboration\\topics\\02-reporting-dashboards.html": {
+    "mtime": 1779405990.5051217,
+    "ast_hash": "b9da7a4c2ce74c6b9c29b0e54e1dcd12",
+    "semantic_hash": "b9da7a4c2ce74c6b9c29b0e54e1dcd12"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part3-collaboration\\topics\\03-knowledge-management.html": {
+    "mtime": 1779405990.5206661,
+    "ast_hash": "2a4be43e71412e5ca60c62604bc36ad4",
+    "semantic_hash": "2a4be43e71412e5ca60c62604bc36ad4"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part3-collaboration\\topics\\04-service-catalog.html": {
+    "mtime": 1779405990.5353696,
+    "ast_hash": "b107c404f4e17b0120ba6541a6a49d21",
+    "semantic_hash": "b107c404f4e17b0120ba6541a6a49d21"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part4-database-security\\flashcards.html": {
+    "mtime": 1779407057.7032678,
+    "ast_hash": "8eb2979903906a6fe06634cf4610d2b8",
+    "semantic_hash": "8eb2979903906a6fe06634cf4610d2b8"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part4-database-security\\index.html": {
+    "mtime": 1779407057.7087507,
+    "ast_hash": "7c325fe74e6e6f35b68330a6322c3105",
+    "semantic_hash": "7c325fe74e6e6f35b68330a6322c3105"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part4-database-security\\quiz.html": {
+    "mtime": 1779407057.714761,
+    "ast_hash": "a653dc275cf8cd11e4aa95649546b473",
+    "semantic_hash": "a653dc275cf8cd11e4aa95649546b473"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part4-database-security\\topics\\01-data-schema-imports.html": {
+    "mtime": 1779405990.5939314,
+    "ast_hash": "cd0c9d18c0f2274bb270be6dce4730a0",
+    "semantic_hash": "cd0c9d18c0f2274bb270be6dce4730a0"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part4-database-security\\topics\\02-cmdb-relationships.html": {
+    "mtime": 1779405990.6084116,
+    "ast_hash": "f307e48931527cea22b492df8caf7bb3",
+    "semantic_hash": "f307e48931527cea22b492df8caf7bb3"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part4-database-security\\topics\\03-access-control-rules.html": {
+    "mtime": 1779405990.6338727,
+    "ast_hash": "3f207ac57f776b450dd3178dcc6f5003",
+    "semantic_hash": "3f207ac57f776b450dd3178dcc6f5003"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part4-database-security\\topics\\04-auditing-archiving.html": {
+    "mtime": 1779405990.6576245,
+    "ast_hash": "90f42bfa34db5373dc197d807edf432a",
+    "semantic_hash": "90f42bfa34db5373dc197d807edf432a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part5-migration-integration\\flashcards.html": {
+    "mtime": 1779407057.723298,
+    "ast_hash": "17e09ed4392aef996f570c8db37b4cb5",
+    "semantic_hash": "17e09ed4392aef996f570c8db37b4cb5"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part5-migration-integration\\index.html": {
+    "mtime": 1779407057.7294917,
+    "ast_hash": "3ce3a4412f54520a977f43ad72971eba",
+    "semantic_hash": "3ce3a4412f54520a977f43ad72971eba"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part5-migration-integration\\quiz.html": {
+    "mtime": 1779407057.7372127,
+    "ast_hash": "e1395163b5ac5b41601a625b9b4b3bbd",
+    "semantic_hash": "e1395163b5ac5b41601a625b9b4b3bbd"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part5-migration-integration\\topics\\01-update-sets.html": {
+    "mtime": 1779405990.7043571,
+    "ast_hash": "ad167715209e726afd976d1bdc70f193",
+    "semantic_hash": "ad167715209e726afd976d1bdc70f193"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part5-migration-integration\\topics\\02-xml-migration.html": {
+    "mtime": 1779405990.7198973,
+    "ast_hash": "d79348fa905ab37dafc5831ca4ec1945",
+    "semantic_hash": "d79348fa905ab37dafc5831ca4ec1945"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part5-migration-integration\\topics\\03-integration-flows.html": {
+    "mtime": 1779405990.755805,
+    "ast_hash": "0b50fa259c4de782bcb7bf6f48c4528a",
+    "semantic_hash": "0b50fa259c4de782bcb7bf6f48c4528a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part6-process-automation\\flashcards.html": {
+    "mtime": 1779407057.749788,
+    "ast_hash": "5937ec441d53fc6e8a3f1a883e017f4a",
+    "semantic_hash": "5937ec441d53fc6e8a3f1a883e017f4a"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part6-process-automation\\index.html": {
+    "mtime": 1779407057.757293,
+    "ast_hash": "d593718786f7ba5117130b0bb66f2952",
+    "semantic_hash": "d593718786f7ba5117130b0bb66f2952"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part6-process-automation\\quiz.html": {
+    "mtime": 1779407057.7773578,
+    "ast_hash": "eb6bd622bd2b4fdd74d845ed1fb78131",
+    "semantic_hash": "eb6bd622bd2b4fdd74d845ed1fb78131"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part6-process-automation\\topics\\01-ui-policies-actions.html": {
+    "mtime": 1779405990.8024588,
+    "ast_hash": "09a994a30049ee68861291d72cfb1646",
+    "semantic_hash": "09a994a30049ee68861291d72cfb1646"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part6-process-automation\\topics\\02-business-rules.html": {
+    "mtime": 1779405990.820047,
+    "ast_hash": "0cf0dd8729328c39cc0c7c4a177b7da0",
+    "semantic_hash": "0cf0dd8729328c39cc0c7c4a177b7da0"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part6-process-automation\\topics\\03-client-scripts.html": {
+    "mtime": 1779405990.8395224,
+    "ast_hash": "e0c1f69deb3db2d36bf9aba143ae9b99",
+    "semantic_hash": "e0c1f69deb3db2d36bf9aba143ae9b99"
+  },
+  "C:\\Users\\jijo9\\OneDrive\\Documents\\Project\\AI-102 Certification\\servicenow-csa\\part6-process-automation\\topics\\04-flow-designer.html": {
+    "mtime": 1779405990.858348,
+    "ast_hash": "f75bf492a3a8c092e999385513b764f0",
+    "semantic_hash": "f75bf492a3a8c092e999385513b764f0"
+  }
+}

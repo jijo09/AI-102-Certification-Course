@@ -1,0 +1,814 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users, Groups & Roles | ServiceNow CSA Part 2</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+
+    /* Violet accent overrides for CSA theme */
+    .theme-csa {
+      --accent: #7c3aed;
+      --accent-light: #a78bfa;
+      --accent-glow: rgba(124,58,237,0.25);
+      --accent-subtle: rgba(124,58,237,0.08);
+    }
+
+    /* Role hierarchy diagram */
+    .access-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      padding: var(--space-6);
+      background: var(--glass-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      margin: var(--space-4) 0;
+    }
+    .diagram-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .diagram-box {
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      border: 1px solid;
+    }
+    .diagram-box.user   { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.5); color: #a5b4fc; }
+    .diagram-box.group  { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.5); color: #c4b5fd; }
+    .diagram-box.role   { background: rgba(236,72,153,0.12); border-color: rgba(236,72,153,0.4); color: #f9a8d4; }
+    .diagram-box.perm   { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.4); color: #6ee7b7; }
+    .diagram-box.table  { background: rgba(245,158,11,0.10); border-color: rgba(245,158,11,0.35); color: #fcd34d; }
+    .diagram-arrow {
+      font-size: 1.4rem;
+      color: var(--text-muted);
+      line-height: 1;
+    }
+    .diagram-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Tables related list */
+    .table-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin: var(--space-4) 0;
+    }
+    .table-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--glass-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+    }
+    .table-name {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      font-weight: 600;
+      min-width: 200px;
+    }
+    .table-desc {
+      color: var(--text-secondary);
+    }
+
+    /* Role badge row */
+    .role-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(124,58,237,0.18);
+      border: 1px solid rgba(124,58,237,0.4);
+      color: #c4b5fd;
+    }
+    .role-badge.danger {
+      background: rgba(239,68,68,0.15);
+      border-color: rgba(239,68,68,0.4);
+      color: #fca5a5;
+    }
+    .role-badge.safe {
+      background: rgba(16,185,129,0.12);
+      border-color: rgba(16,185,129,0.35);
+      color: #6ee7b7;
+    }
+
+    /* Steps numbered list */
+    .steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin: var(--space-4) 0;
+    }
+    .step-item {
+      display: flex;
+      gap: var(--space-4);
+      align-items: flex-start;
+      padding: var(--space-4);
+      background: var(--glass-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      background: var(--accent-subtle);
+      border: 1px solid rgba(124,58,237,0.4);
+      color: var(--accent-light);
+    }
+    .step-body { flex: 1; }
+    .step-title { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-1); }
+    .step-desc { font-size: 0.875rem; color: var(--text-secondary); }
+    .step-mono { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-light); }
+
+    /* Trap highlight items */
+    .trap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+    .trap-card {
+      padding: var(--space-4);
+      background: rgba(239,68,68,0.07);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+    }
+    .trap-card .trap-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #f87171;
+      margin-bottom: var(--space-2);
+    }
+    .trap-card p { color: var(--text-secondary); margin: 0; line-height: 1.6; }
+
+    /* Quick-ref summary box */
+    .quick-ref {
+      background: var(--glass-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      margin: var(--space-6) 0;
+    }
+    .quick-ref h3 {
+      font-size: 1rem;
+      color: var(--text-primary);
+      margin: 0 0 var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .quick-ref ul {
+      margin: 0;
+      padding: 0 0 0 var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .quick-ref li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; }
+    .quick-ref li strong { color: var(--text-primary); }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Users, Groups &amp; Roles</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- ── TOPIC HEADER ──────────────────────────────────────── -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🔧 Part 2 · Topic 1 of 3</div>
+        <h1 class="topic-title">Users, Groups &amp; Roles</h1>
+        <div class="topic-meta">
+          <span class="topic-meta-item">⏱ ~50 min read</span>
+          <span class="topic-meta-item">🎯 Exam weight: Part 2 = 11%</span>
+          <span class="topic-meta-item">📋 ServiceNow CSA</span>
+        </div>
+        <p style="color:var(--text-secondary);max-width:700px;margin-top:var(--space-3);line-height:1.7">
+          Access control in ServiceNow is built on three interlocking layers: Users, Groups, and Roles.
+          Understanding how these interact is fundamental to both the exam and real-world administration.
+          This topic covers how to create and manage users, organise them into groups, and use roles to
+          grant the right permissions to the right people.
+        </p>
+      </div>
+
+      <!-- ── SECTION 1 — THREE-LAYER MODEL ─────────────────────── -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>The Three-Layer Access Model</h2>
+
+        <div class="callout callout-concept">
+          <strong>Core Concept:</strong> ServiceNow uses <strong>Users → Groups → Roles</strong> for access control.
+          A user gains permissions through roles. Roles can be assigned directly to a user, or inherited
+          automatically when the user joins a group that carries that role. ACLs (Access Control Lists)
+          then evaluate those roles at runtime to decide what the user can see or do.
+        </div>
+
+        <!-- Visual Diagram -->
+        <div class="access-diagram">
+          <div class="diagram-node">
+            <div class="diagram-box user">👤 User (sys_user)</div>
+            <div class="diagram-label">Has a User ID,<br>email, active flag</div>
+          </div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node">
+            <div class="diagram-box group">👥 Group (sys_user_group)</div>
+            <div class="diagram-label">Membership via<br>sys_user_grmember</div>
+          </div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node">
+            <div class="diagram-box role">🔑 Role (sys_user_role)</div>
+            <div class="diagram-label">Assigned directly or<br>via group membership</div>
+          </div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node">
+            <div class="diagram-box perm">✅ Permissions</div>
+            <div class="diagram-label">Evaluated by ACLs<br>at runtime</div>
+          </div>
+        </div>
+
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:var(--space-4)">
+          A user can receive a role via <em>either</em> path — direct assignment or group membership —
+          and both are checked equally by the ACL engine.
+        </p>
+
+        <h3 style="font-size:1rem;margin-bottom:var(--space-3)">Key Tables in the Access Model</h3>
+        <div class="table-list">
+          <div class="table-row">
+            <span class="table-name">sys_user</span>
+            <span class="table-desc">All user accounts. One record per person (or service account).</span>
+          </div>
+          <div class="table-row">
+            <span class="table-name">sys_user_group</span>
+            <span class="table-desc">All groups. Each group has a name, manager, optional email, and parent.</span>
+          </div>
+          <div class="table-row">
+            <span class="table-name">sys_user_role</span>
+            <span class="table-desc">Role definitions. Each role may contain other roles (role inheritance).</span>
+          </div>
+          <div class="table-row">
+            <span class="table-name">sys_user_grmember</span>
+            <span class="table-desc">The join table: which user belongs to which group.</span>
+          </div>
+          <div class="table-row">
+            <span class="table-name">sys_user_has_role</span>
+            <span class="table-desc">Direct user-to-role assignments (not via group). Also records inherited roles for display.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION 2 — USERS ──────────────────────────────────── -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Users <span style="font-family:var(--font-mono);font-size:0.85rem;color:var(--text-muted);font-weight:400">(sys_user)</span></h2>
+
+        <p style="color:var(--text-secondary);line-height:1.7;margin-bottom:var(--space-4)">
+          A user record represents an individual human or service account in ServiceNow.
+          Navigate to <strong>User Administration &gt; Users &gt; New</strong> to create one.
+          Every field on the user record has a purpose — the exam tests several of them.
+        </p>
+
+        <h3 style="font-size:1rem;margin-bottom:var(--space-3)">Key Fields on the User Record</h3>
+        <div class="comparison-table" style="margin-bottom:var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Purpose</th>
+                <th>Notes / Exam Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>User ID</code></td>
+                <td>Login name — unique identifier used to sign in</td>
+                <td>Usually <em>firstname.lastname</em>. This is NOT the display name.</td>
+              </tr>
+              <tr>
+                <td><code>First / Last Name</code></td>
+                <td>Combined to form the display name shown in UI</td>
+                <td>What you see in lists and assignments.</td>
+              </tr>
+              <tr>
+                <td><code>Email</code></td>
+                <td>Used for notifications and as an alternate login</td>
+                <td>Must be unique across the instance.</td>
+              </tr>
+              <tr>
+                <td><code>Active</code></td>
+                <td>Boolean — controls whether the user can log in</td>
+                <td>Setting to <strong>false</strong> prevents login; does NOT delete records.</td>
+              </tr>
+              <tr>
+                <td><code>Locked out</code></td>
+                <td>Set automatically after 5 failed login attempts</td>
+                <td>Admin must uncheck this field to unlock the account.</td>
+              </tr>
+              <tr>
+                <td><code>Password</code></td>
+                <td>Login credential</td>
+                <td>Stored hashed. Admins can reset but never see it.</td>
+              </tr>
+              <tr>
+                <td><code>Time zone</code></td>
+                <td>User's local time zone for date/time display</td>
+                <td>Overrides the instance-level default time zone.</td>
+              </tr>
+              <tr>
+                <td><code>Language</code></td>
+                <td>UI language preference</td>
+                <td>Requires the language plugin to be activated.</td>
+              </tr>
+              <tr>
+                <td><code>Department</code></td>
+                <td>Organisational unit the user belongs to</td>
+                <td>Reference to <code>cmn_department</code> table.</td>
+              </tr>
+              <tr>
+                <td><code>Manager</code></td>
+                <td>Defines the reporting / approval hierarchy</td>
+                <td>Reference field back to <code>sys_user</code>. Used in approval flows.</td>
+              </tr>
+              <tr>
+                <td><code>Calendar integration</code></td>
+                <td>Links to Outlook or Google Calendar</td>
+                <td>Enables on-call schedule sync.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="font-size:1rem;margin-bottom:var(--space-3)">User Types</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Regular User</div>
+            <div class="term-definition">A human who logs in to use ServiceNow. Has an Active flag set to true. Requires a license if they are a fulfiller (ITSM agent).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Service Account</div>
+            <div class="term-definition">A non-human account used by integrations and scripts (e.g., a middleware tool calling the REST API). Active = true, but no human logs in with it. Often has a specific role for the integration only.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">External / Guest User</div>
+            <div class="term-definition">Users who access the Service Portal or Community but are not internal staff. Usually limited to the <code>catalog</code> or <code>itil</code> role at most.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Tip — Active Flag:</strong> Setting <code>Active = false</code> does <em>not</em> delete the user's records, assignments, or history. It simply prevents login. Always deactivate users when they leave — rarely (almost never) delete them, because deletion would break audit trails and historical records.
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>User ID vs Display Name:</strong> These are two distinct fields. <code>User ID</code> (login name) might be <code>john.smith</code>. The Display Name (First + Last) is <code>John Smith</code>. Searches in lists often use the display name; login uses the User ID. The exam will test that you know the difference.
+        </div>
+      </div>
+
+      <!-- ── SECTION 3 — GROUPS ─────────────────────────────────── -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Groups <span style="font-family:var(--font-mono);font-size:0.85rem;color:var(--text-muted);font-weight:400">(sys_user_group)</span></h2>
+
+        <p style="color:var(--text-secondary);line-height:1.7;margin-bottom:var(--space-4)">
+          Groups are collections of users who share similar responsibilities or work in the same functional area.
+          They are used everywhere in ServiceNow: routing, assignment, notifications, access control, and approval flows.
+        </p>
+
+        <h3 style="font-size:1rem;margin-bottom:var(--space-3)">What Groups Do</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Role Inheritance</div>
+            <div class="term-definition">Roles assigned to a group are automatically granted to every current and future member. This is the preferred way to manage permissions at scale.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Ticket Assignment</div>
+            <div class="term-definition">Incidents, problems, and changes are assigned to a group (the Assignment Group). Agents in that group then pick up or are assigned the work item.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Email Routing</div>
+            <div class="term-definition">A group can have a single group email address. Inbound email sent to that address creates or updates records and routes to the group.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Notifications</div>
+            <div class="term-definition">Notification rules can target a group, sending alerts to all members when specific events occur on a record assigned to that group.</div>
+          </div>
+        </div>
+
+        <h3 style="font-size:1rem;margin:var(--space-5) 0 var(--space-3)">Key Fields on the Group Record</h3>
+        <div class="comparison-table" style="margin-bottom:var(--space-5)">
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Purpose</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Name</code></td>
+                <td>Display name for the group</td>
+                <td>Should be descriptive, e.g., "IT Support - Tier 1"</td>
+              </tr>
+              <tr>
+                <td><code>Manager</code></td>
+                <td>User responsible for managing this group</td>
+                <td>Reference to <code>sys_user</code>. Gets the <code>group_manager</code> role capability.</td>
+              </tr>
+              <tr>
+                <td><code>Email</code></td>
+                <td>Group inbox for inbound email routing</td>
+                <td>Used by the inbound email action engine to route to this group.</td>
+              </tr>
+              <tr>
+                <td><code>Include members</code></td>
+                <td>Roll up members of child groups into this group</td>
+                <td>Useful for parent groups that should see all sub-group work.</td>
+              </tr>
+              <tr>
+                <td><code>Parent</code></td>
+                <td>Creates a group hierarchy (group of groups)</td>
+                <td>Enables organisational structure without duplicating membership.</td>
+              </tr>
+              <tr>
+                <td><code>Roles</code> (related list)</td>
+                <td>Roles granted to ALL members of this group</td>
+                <td>Adding a role here is the preferred, scalable approach.</td>
+              </tr>
+              <tr>
+                <td><code>Members</code> (related list)</td>
+                <td>Users in this group (<code>sys_user_grmember</code>)</td>
+                <td>Membership change is immediate — roles apply instantly.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Critical — Group Roles Scale:</strong> Adding a role to a <em>group</em> grants that role to <strong>ALL current AND future members</strong> of the group. This is the recommended approach for role management at scale — not user-by-user assignment. The exam frequently tests this distinction.
+        </div>
+
+        <div class="callout callout-analogy">
+          <strong>Analogy — Think of Groups as Job Departments:</strong> When you assign the <code>itil</code> role to the "IT Support Group", every new hire added to that group automatically gets the correct permissions from day one. When someone leaves the department, remove them from the group and all role access is revoked immediately — no manual cleanup needed.
+        </div>
+
+        <h3 style="font-size:1rem;margin:var(--space-5) 0 var(--space-3)">Assignment Groups vs Support Groups</h3>
+        <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:var(--space-3)">
+          These are not different types in the database — they are the same <code>sys_user_group</code> records used in different contexts:
+        </p>
+        <div class="comparison-table">
+          <table>
+            <thead>
+              <tr><th>Term</th><th>Where it Appears</th><th>What it Does</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Assignment Group</strong></td>
+                <td>Incident, Problem, Change, Task forms</td>
+                <td>The group responsible for resolving this specific work item. Agents in this group see it in their queue.</td>
+              </tr>
+              <tr>
+                <td><strong>Support Group</strong></td>
+                <td>Routing / assignment rules configuration</td>
+                <td>Configures <em>which</em> group receives incoming requests based on category, service, or other criteria.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="color:var(--text-secondary);font-size:0.875rem;margin-top:var(--space-3)">
+          A single group record can serve as both an Assignment Group on tickets <em>and</em> a configured Support Group in routing rules simultaneously.
+        </p>
+      </div>
+
+      <!-- ── SECTION 4 — ROLES ──────────────────────────────────── -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Roles <span style="font-family:var(--font-mono);font-size:0.85rem;color:var(--text-muted);font-weight:400">(sys_user_role)</span></h2>
+
+        <p style="color:var(--text-secondary);line-height:1.7;margin-bottom:var(--space-4)">
+          Roles are named permission sets that the ACL engine evaluates at runtime. They can be assigned
+          directly to users or via groups. Crucially, roles can <em>contain</em> other roles — this is called
+          role inheritance or role containment.
+        </p>
+
+        <h3 style="font-size:1rem;margin-bottom:var(--space-3)">Core Roles Every CSA Must Know</h3>
+        <div class="comparison-table" style="margin-bottom:var(--space-5)">
+          <table>
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>What It Grants</th>
+                <th>Access Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="role-badge danger">admin</span></td>
+                <td>Everything — full instance administration</td>
+                <td>Bypasses ALL ACL checks. Use only for admins.</td>
+              </tr>
+              <tr>
+                <td><span class="role-badge danger">security_admin</span></td>
+                <td>Manage ACLs, security policies, elevated operations</td>
+                <td>Security configuration. Required for ACL edits even for admins.</td>
+              </tr>
+              <tr>
+                <td><span class="role-badge">itil</span></td>
+                <td>Handle incidents, problems, changes, tasks</td>
+                <td>Standard ITSM agent baseline role.</td>
+              </tr>
+              <tr>
+                <td><span class="role-badge">itil_admin</span></td>
+                <td>Admin ITSM processes — configure, not just use</td>
+                <td>Contains <code>itil</code>. Manages categories, templates, etc.</td>
+              </tr>
+              <tr>
+                <td><span class="role-badge">catalog_admin</span></td>
+                <td>Create and manage all service catalog items</td>
+                <td>Full catalog configuration access.</td>
+              </tr>
+              <tr>
+                <td><span class="role-badge safe">catalog</span></td>
+                <td>Browse and submit service catalog requests</td>
+                <td>End-user access. Low privilege.</td>
+              </tr>
+              <tr>
+                <td><span class="role-badge">user_admin</span></td>
+                <td>Create, edit, and manage user accounts</td>
+                <td>User and group management (not full admin).</td>
+              </tr>
+              <tr>
+                <td><span class="role-badge safe">knowledge</span></td>
+                <td>Create, edit, and publish knowledge base articles</td>
+                <td>Knowledge management role.</td>
+              </tr>
+              <tr>
+                <td><span class="role-badge safe">report_group</span></td>
+                <td>Create reports and share with groups</td>
+                <td>Reporting access — read data, build reports.</td>
+              </tr>
+              <tr>
+                <td><span class="role-badge">survey_admin</span></td>
+                <td>Create, manage, and deploy surveys</td>
+                <td>Survey tool administration.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam — The itil Role:</strong> The <code>itil</code> role is the <strong>baseline for all IT agents</strong>. It grants access to incidents, problems, changes, and ITSM-related tasks. It does <em>not</em> grant admin access, configuration rights, or catalog management. Most frontline support users get <code>itil</code> plus a small set of additional roles.
+        </div>
+
+        <div class="callout callout-warning">
+          <strong>Warning — The admin Role:</strong> The <code>admin</code> role <strong>bypasses ACLs completely</strong>. This means a user with <code>admin</code> can read and write any table, any field, any record regardless of security rules. Never assign <code>admin</code> to regular users. Use <code>itil</code> combined with specific functional roles instead. Fewer than 5 people should hold <code>admin</code> in a production instance.
+        </div>
+
+        <h3 style="font-size:1rem;margin:var(--space-5) 0 var(--space-3)">Role Inheritance (Containment)</h3>
+        <p style="color:var(--text-secondary);font-size:0.875rem;line-height:1.7;margin-bottom:var(--space-3)">
+          A role can <em>contain</em> other roles. When a user is granted the parent role, they automatically
+          receive all the contained (child) roles. This creates a hierarchy of permissions.
+        </p>
+        <div class="access-diagram" style="justify-content:flex-start;gap:var(--space-2)">
+          <div class="diagram-node">
+            <div class="diagram-box role" style="font-size:0.9rem">itil_admin</div>
+            <div class="diagram-label">Parent role</div>
+          </div>
+          <div class="diagram-arrow">contains ▶</div>
+          <div class="diagram-node">
+            <div class="diagram-box role" style="font-size:0.9rem">itil</div>
+            <div class="diagram-label">Child role (auto-granted)</div>
+          </div>
+          <div class="diagram-arrow">contains ▶</div>
+          <div class="diagram-node">
+            <div class="diagram-box perm" style="font-size:0.85rem">ITSM permissions</div>
+            <div class="diagram-label">Effective access</div>
+          </div>
+        </div>
+        <p style="color:var(--text-secondary);font-size:0.875rem;margin-top:var(--space-3)">
+          You can view role containment on any role record in the <strong>Contains Roles</strong> related list.
+          To see the full inheritance chain, click into each contained role.
+        </p>
+      </div>
+
+      <!-- ── SECTION 5 — ASSIGNING ROLES ───────────────────────── -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Assigning Roles</h2>
+
+        <p style="color:var(--text-secondary);line-height:1.7;margin-bottom:var(--space-4)">
+          There are three paths through which a user can receive a role. Understanding each — and which is preferred — is a common exam topic.
+        </p>
+
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Direct Assignment — User Record</div>
+              <div class="step-desc">Navigate to the user record. Open the <strong>Roles</strong> tab (related list). Click <em>Edit</em> to add a role directly to this individual user.</div>
+              <div class="step-mono">Table: sys_user_has_role · Relationship: user → role</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-body">
+              <div class="step-title" style="display:flex;gap:var(--space-2);align-items:center">
+                <span style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;font-size:0.7rem;padding:2px 8px;border-radius:999px;font-weight:700">RECOMMENDED</span>
+                Via Group Membership
+              </div>
+              <div class="step-desc">Navigate to the group record. Open the <strong>Roles</strong> tab. Add the role to the group. Every current and future member automatically inherits this role — no per-user work needed.</div>
+              <div class="step-mono">Table: sys_user_grmember · Roles flow from group → all members</div>
+            </div>
+            <div class="step-num">2</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Via Role Containment (Inheritance)</div>
+              <div class="step-desc">When a user is granted a parent role (directly or via group), all roles contained within that parent role are automatically granted too. No explicit assignment needed for child roles.</div>
+              <div class="step-mono">Table: sys_user_role · Contains Roles related list on the role record</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>Best Practice — Always Prefer Groups:</strong> Assign roles to groups, not to individual users. Groups scale (add a new person to the group — done), groups are auditable (see exactly who is in each group), and group membership is easier to bulk-manage. Direct role assignment creates a maintenance burden and is harder to audit.
+        </div>
+
+        <h3 style="font-size:1rem;margin:var(--space-5) 0 var(--space-3)">Finding Who Has a Role</h3>
+        <p style="color:var(--text-secondary);font-size:0.875rem;line-height:1.7;margin-bottom:var(--space-3)">
+          You may need to audit which users hold a particular role. Two common methods:
+        </p>
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-num">A</div>
+            <div class="step-body">
+              <div class="step-title">Via the Role Record</div>
+              <div class="step-desc">Navigate to <strong>User Administration &gt; Roles</strong>, open the role record, and look at the <strong>Contains Users</strong> related list. This shows all users who currently hold this role (directly or via group).</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">B</div>
+            <div class="step-body">
+              <div class="step-title">Via Table Query</div>
+              <div class="step-desc">Navigate directly to <code>sys_user_has_role.list</code> in the URL bar. Filter by the desired role. This gives the raw join table with explicit vs. inherited flags.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION 6 — ELEVATED PRIVILEGES ───────────────────── -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Elevated Privileges &amp; security_admin</h2>
+
+        <p style="color:var(--text-secondary);line-height:1.7;margin-bottom:var(--space-4)">
+          Some operations in ServiceNow require an additional layer of access beyond standard admin — the
+          <code>security_admin</code> role. This enforces separation of duties even among administrators.
+        </p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Why security_admin Exists</div>
+            <div class="term-definition">Modifying ACL rules is a high-impact operation. Requiring a separate <code>security_admin</code> role ensures that even a compromised admin account cannot silently change security rules without an explicit, audited privilege elevation.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">What it Controls</div>
+            <div class="term-definition">Creating or editing ACL records, viewing certain security audit logs, and accessing the Security Manager module. Regular admins without this role will see these areas as read-only or hidden.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Session Elevation</div>
+            <div class="term-definition">Elevation to <code>security_admin</code> is session-based — it must be explicitly requested each session and expires when the session ends. It is not always-on even for users who hold the role.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <strong>Warning — Protect security_admin:</strong> The <code>security_admin</code> role is the most powerful role in ServiceNow beyond <code>admin</code>. Assign it to the absolute minimum number of people. Audit its use regularly via System Logs &gt; Security. Treat elevation events as sensitive security events.
+        </div>
+      </div>
+
+      <!-- ── SECTION 7 — EXAM TRAPS ─────────────────────────────── -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Common Exam Traps</h2>
+
+        <p style="color:var(--text-secondary);font-size:0.875rem;line-height:1.7;margin-bottom:var(--space-4)">
+          These are the specific scenarios the CSA exam is known to test. Read each one carefully.
+        </p>
+
+        <div class="trap-grid">
+          <div class="trap-card">
+            <div class="trap-label">Trap 1 — Dual Role Paths</div>
+            <p>A user can hold a role <em>both</em> directly and through a group simultaneously. ServiceNow checks if they have the role via <strong>either</strong> path — both count equally. The exam may ask what happens in this case.</p>
+          </div>
+          <div class="trap-card">
+            <div class="trap-label">Trap 2 — Removing from Group</div>
+            <p>Removing a user from a group <strong>immediately</strong> removes all roles they inherited through that group — unless they also have those same roles via direct assignment. The removal takes effect in real time.</p>
+          </div>
+          <div class="trap-card">
+            <div class="trap-label">Trap 3 — Active vs Deleted</div>
+            <p>Setting <code>Active = false</code> prevents login but preserves all history, records, and assignments. Deleting a user removes the record entirely. The exam almost always expects you to <em>deactivate</em>, not delete.</p>
+          </div>
+          <div class="trap-card">
+            <div class="trap-label">Trap 4 — admin Bypasses ACLs</div>
+            <p>The <code>admin</code> role does not "have" all ACLs — it <strong>bypasses</strong> them entirely. This means ACL debugging should be done with a non-admin test account that only holds the roles being tested.</p>
+          </div>
+          <div class="trap-card">
+            <div class="trap-label">Trap 5 — User ID ≠ Display Name</div>
+            <p><code>User ID</code> (e.g., <code>john.smith</code>) is the login credential. <code>Display Name</code> (First + Last Name, e.g., "John Smith") is what appears in the UI. They are separate fields and can be different.</p>
+          </div>
+          <div class="trap-card">
+            <div class="trap-label">Trap 6 — Viewing All Roles</div>
+            <p>To see all roles a user currently holds (including those from groups), go to the user record and open the <strong>Roles</strong> tab. It shows both direct and group-inherited roles clearly labelled.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Checking a User's Full Role Set:</strong> On the user record, the <strong>Roles</strong> related list tab shows every role the user has — direct assignments AND inherited group roles. Roles inherited from groups are marked with the group name in the list. This is the single best place to audit a user's access.
+        </div>
+      </div>
+
+      <!-- ── QUICK REFERENCE SUMMARY ────────────────────────────── -->
+      <div class="quick-ref">
+        <h3>📌 Quick Reference — Users, Groups &amp; Roles</h3>
+        <ul>
+          <li><strong>Three layers:</strong> User (sys_user) → Group (sys_user_group) → Role (sys_user_role)</li>
+          <li><strong>Group roles:</strong> Assigning a role to a group grants it to ALL members, current and future</li>
+          <li><strong>Best practice:</strong> Assign roles via groups, not directly to individual users</li>
+          <li><strong>Active = false:</strong> Prevents login only — does not delete records or history</li>
+          <li><strong>User ID:</strong> Login name (e.g., john.smith) — distinct from Display Name (John Smith)</li>
+          <li><strong>admin role:</strong> Bypasses ACLs entirely — never assign to regular users</li>
+          <li><strong>itil role:</strong> Baseline for ITSM agents — incidents, problems, changes access</li>
+          <li><strong>security_admin:</strong> Required to modify ACLs — session-based elevation</li>
+          <li><strong>Role containment:</strong> Parent role automatically grants all contained child roles</li>
+          <li><strong>Remove from group:</strong> Immediately removes all group-sourced roles (unless also directly assigned)</li>
+          <li><strong>Key tables:</strong> sys_user, sys_user_group, sys_user_role, sys_user_grmember, sys_user_has_role</li>
+        </ul>
+      </div>
+
+      <!-- ── COMPLETE BAR ────────────────────────────────────────── -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../part1-navigation/topics/04-mobile-portal.html" class="btn btn-secondary">← Part 1 Last Topic</a>
+          <a href="02-tables-dictionary.html" class="btn btn-secondary">Tables &amp; Dictionary →</a>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p2-users-groups-roles', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p2-users-groups-roles')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -3,766 +3,256 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI-102 Study Hub — Dashboard</title>
+  <title>Certification Study Hub</title>
   <link rel="stylesheet" href="styles/main.css" />
-  <style>
-    /* ── Dashboard-specific styles ── */
-    .hero {
-      background: linear-gradient(135deg, var(--navy-800) 0%, var(--navy-900) 60%, #0a0f1e 100%);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-2xl);
-      padding: var(--space-10) var(--space-12);
-      margin-bottom: var(--space-8);
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -80px; right: -80px;
-      width: 320px; height: 320px;
-      background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .hero::after {
-      content: '';
-      position: absolute;
-      bottom: -60px; left: -60px;
-      width: 240px; height: 240px;
-      background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .hero-eyebrow {
-      display: inline-flex; align-items: center; gap: var(--space-2);
-      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--blue-300);
-      background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25);
-      padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm);
-      margin-bottom: var(--space-4); font-family: var(--font-heading);
-    }
-    .hero-title {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 800; line-height: 1.1;
-      margin-bottom: var(--space-4);
-      background: linear-gradient(135deg, #f0f6ff 0%, var(--blue-200) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero-sub {
-      font-size: 1rem; color: var(--text-secondary);
-      max-width: 560px; margin-bottom: var(--space-8); line-height: 1.7;
-    }
-    .hero-stats {
-      display: flex; gap: var(--space-8); flex-wrap: wrap;
-    }
-    .hero-stat-item { display: flex; flex-direction: column; gap: var(--space-1); }
-    .hero-stat-value {
-      font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800;
-      color: var(--text-primary); line-height: 1;
-    }
-    .hero-stat-label { font-size: 0.75rem; color: var(--text-muted); }
-
-    /* Countdown widget */
-    .countdown-widget {
-      position: absolute; top: var(--space-8); right: var(--space-8);
-      background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6);
-      text-align: center; min-width: 160px; backdrop-filter: blur(4px);
-    }
-    .countdown-days {
-      font-family: var(--font-heading); font-size: 2.8rem; font-weight: 800;
-      color: var(--amber-400); line-height: 1;
-      text-shadow: 0 0 24px rgba(245,158,11,0.4);
-    }
-    .countdown-label { font-size: 0.7rem; color: var(--text-muted); margin-top: var(--space-1); }
-    .countdown-set {
-      margin-top: var(--space-3); font-size: 0.7rem; color: var(--blue-300);
-      cursor: pointer; text-decoration: underline; background: none; border: none;
-      font-family: var(--font-body);
-    }
-
-    /* Overall progress bar */
-    .overall-progress-card {
-      background: var(--bg-card); border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8);
-      margin-bottom: var(--space-8); display: flex; align-items: center;
-      gap: var(--space-8); flex-wrap: wrap;
-    }
-    .op-label {
-      font-family: var(--font-heading); font-size: 0.85rem; font-weight: 600;
-      color: var(--text-secondary); white-space: nowrap;
-    }
-    .op-bar-wrap { flex: 1; min-width: 200px; }
-    .op-pct {
-      font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800;
-      color: var(--blue-300); white-space: nowrap;
-    }
-    .op-done { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
-
-    /* Part cards grid */
-    .parts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: var(--space-5);
-      margin-bottom: var(--space-10);
-    }
-
-    .part-card {
-      background: var(--bg-card); border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-xl); padding: var(--space-6);
-      transition: all var(--transition-normal); cursor: pointer;
-      text-decoration: none; display: block; position: relative; overflow: hidden;
-    }
-    .part-card::before {
-      content: ''; position: absolute;
-      top: 0; left: 0; right: 0; height: 3px;
-      background: var(--part-color);
-      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    }
-    .part-card:hover {
-      border-color: var(--border-strong);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-    .part-card-head {
-      display: flex; align-items: flex-start;
-      justify-content: space-between; margin-bottom: var(--space-4); gap: var(--space-3);
-    }
-    .part-icon {
-      width: 44px; height: 44px; border-radius: var(--radius-lg);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; flex-shrink: 0;
-      background: color-mix(in srgb, var(--part-color) 15%, transparent);
-    }
-    .part-weight-badge {
-      font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700;
-      padding: var(--space-1) var(--space-3); border-radius: 20px;
-      background: color-mix(in srgb, var(--part-color) 15%, transparent);
-      color: var(--part-color);
-      border: 1px solid color-mix(in srgb, var(--part-color) 30%, transparent);
-    }
-    .part-num {
-      font-family: var(--font-mono); font-size: 0.65rem;
-      color: var(--text-muted); margin-bottom: var(--space-1);
-    }
-    .part-title {
-      font-family: var(--font-heading); font-size: 1rem; font-weight: 700;
-      color: var(--text-primary); margin-bottom: var(--space-4); line-height: 1.3;
-    }
-    .part-topics {
-      display: flex; flex-direction: column; gap: var(--space-2);
-      margin-bottom: var(--space-5);
-    }
-    .part-topic-row {
-      display: flex; align-items: center; gap: var(--space-3); font-size: 0.8rem;
-    }
-    .topic-dot {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-      background: var(--border-default); border: 1.5px solid var(--border-default);
-      transition: all var(--transition-fast);
-    }
-    .topic-dot.done { background: var(--green-500); border-color: var(--green-500); }
-    .topic-dot.current { background: var(--part-color); border-color: var(--part-color); }
-    .part-topic-name { color: var(--text-secondary); flex: 1; }
-    .part-topic-name.done { color: var(--text-muted); text-decoration: line-through; }
-
-    .part-footer {
-      border-top: 1px solid var(--border-subtle); padding-top: var(--space-4);
-      display: flex; align-items: center; gap: var(--space-4);
-    }
-    .part-action-links { display: flex; gap: var(--space-3); margin-left: auto; }
-    .part-mini-link {
-      font-size: 0.75rem; color: var(--text-muted); text-decoration: none;
-      display: flex; align-items: center; gap: var(--space-1);
-      transition: color var(--transition-fast);
-    }
-    .part-mini-link:hover { color: var(--text-primary); }
-
-    /* What to study next */
-    .next-up-card {
-      background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.05));
-      border: 1px solid var(--border-default); border-radius: var(--radius-xl);
-      padding: var(--space-6); margin-bottom: var(--space-8);
-    }
-    .next-up-title {
-      font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700;
-      color: var(--blue-300); margin-bottom: var(--space-5);
-      display: flex; align-items: center; gap: var(--space-2);
-    }
-    .next-item {
-      display: flex; align-items: center; gap: var(--space-4);
-      padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
-      text-decoration: none; transition: background var(--transition-fast);
-      color: inherit;
-    }
-    .next-item:hover { background: rgba(255,255,255,0.04); }
-    .next-item-num {
-      font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);
-      width: 20px; text-align: right; flex-shrink: 0;
-    }
-    .next-item-title {
-      font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; flex: 1;
-    }
-    .next-item-part {
-      font-size: 0.7rem; color: var(--text-muted);
-      background: var(--bg-card); padding: 2px 8px; border-radius: 10px;
-    }
-
-    /* Resources section */
-    .resources-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: var(--space-4); margin-bottom: var(--space-10);
-    }
-    .resource-card {
-      background: var(--bg-card); border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg); padding: var(--space-5);
-      text-decoration: none; transition: all var(--transition-fast); display: block;
-    }
-    .resource-card:hover {
-      border-color: var(--border-strong); background: var(--bg-card-hover);
-      transform: translateY(-2px);
-    }
-    .resource-icon { font-size: 1.5rem; margin-bottom: var(--space-3); }
-    .resource-title {
-      font-family: var(--font-heading); font-size: 0.875rem; font-weight: 600;
-      color: var(--text-primary); margin-bottom: var(--space-1);
-    }
-    .resource-desc { font-size: 0.78rem; color: var(--text-muted); }
-
-    /* Sidebar overlay for mobile */
-    #sidebar-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-      z-index: 99; backdrop-filter: blur(2px);
-    }
-    #sidebar-overlay.show { display: block; }
-
-    /* Exam date modal */
-    .modal-backdrop {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-      z-index: 200; align-items: center; justify-content: center;
-      backdrop-filter: blur(4px);
-    }
-    .modal-backdrop.open { display: flex; }
-    .modal {
-      background: var(--bg-card); border: 1px solid var(--border-default);
-      border-radius: var(--radius-2xl); padding: var(--space-8); width: 90%; max-width: 420px;
-      animation: scaleIn 0.25s ease;
-    }
-    .modal-title {
-      font-family: var(--font-heading); font-size: 1.1rem; font-weight: 700;
-      margin-bottom: var(--space-2);
-    }
-    .modal-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-6); }
-
-    @media (max-width: 700px) {
-      .hero { padding: var(--space-6); }
-      .countdown-widget { position: static; margin-bottom: var(--space-6); text-align: left; }
-      .hero-stats { gap: var(--space-5); }
-      .parts-grid { grid-template-columns: 1fr; }
-      .overall-progress-card { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
-    }
-  </style>
 </head>
-<body>
+<body class="selector-active">
 
-<!-- ── Sidebar Overlay (mobile) ── -->
-<div id="sidebar-overlay"></div>
-
-<!-- ── App Shell ── -->
-<div class="app-shell">
-
-  <!-- ════════════════════════════════════
-       SIDEBAR
-  ════════════════════════════════════ -->
-  <div id="app-sidebar"></div>
-
-  <!-- ════════════════════════════════════
-       MAIN CONTENT
-  ════════════════════════════════════ -->
-  <main class="main-content">
-
-    <!-- Top Bar -->
-    <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
-      <div class="topbar-breadcrumb">
-        <span class="current">DASHBOARD</span>
-      </div>
-      <div class="topbar-actions">
-        <span style="font-size:0.75rem;color:var(--text-muted);">Exam in</span>
-        <span data-countdown style="font-family:var(--font-mono);font-size:0.85rem;color:var(--amber-400);font-weight:700;">—</span>
-        <button class="btn btn-secondary btn-sm" onclick="openExamDateModal()">📅 Set Date</button>
-      </div>
-    </header>
-
-    <!-- Page Content -->
-    <div class="page-content stagger">
-
-      <!-- ── HERO ── -->
-      <div class="hero animate-fade-in">
-
-        <!-- Countdown Widget -->
-        <div class="countdown-widget">
-          <div class="countdown-days" data-countdown>—</div>
-          <div class="countdown-label">days to exam</div>
-          <button class="countdown-set" onclick="openExamDateModal()">Set exam date →</button>
-        </div>
-
-        <div class="hero-eyebrow">🎯 Microsoft AI-102 — Azure AI Engineer Associate</div>
-        <h1 class="hero-title">Your AI-102<br>Study Hub</h1>
-        <p class="hero-sub">
-          A complete, structured study system built from the official Microsoft exam blueprint (updated Dec 23, 2025).
-          Every concept explained plainly, every example in Python, nothing missed.
-        </p>
-
-        <div class="hero-stats">
-          <div class="hero-stat-item">
-            <span class="hero-stat-value" data-stat-done>0</span>
-            <span class="hero-stat-label">Topics Complete</span>
-          </div>
-          <div class="hero-stat-item">
-            <span class="hero-stat-value">18</span>
-            <span class="hero-stat-label">Total Topics</span>
-          </div>
-          <div class="hero-stat-item">
-            <span class="hero-stat-value">6</span>
-            <span class="hero-stat-label">Exam Domains</span>
-          </div>
-          <div class="hero-stat-item">
-            <span class="hero-stat-value">700</span>
-            <span class="hero-stat-label">Passing Score</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ── OVERALL PROGRESS BAR ── -->
-      <div class="overall-progress-card" data-progress-overall>
-        <span class="op-label">📈 Overall Exam Readiness</span>
-        <div class="op-bar-wrap">
-          <div class="progress-bar" style="height:10px;">
-            <div class="progress-fill" style="width:0%;height:10px;border-radius:5px;"></div>
-          </div>
-        </div>
-        <span class="op-pct" data-progress-pct>0%</span>
-        <span class="op-done"><span data-progress-done>0 / 18</span> topics</span>
-      </div>
-
-      <!-- ── WHAT TO STUDY NEXT ── -->
-      <div class="next-up-card" id="next-up-section">
-        <div class="next-up-title">⚡ Up Next — Continue Where You Left Off</div>
-        <div id="next-up-list">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-
-      <!-- ── EXAM DOMAIN CARDS ── -->
-      <h2 style="margin-bottom:var(--space-5);">Exam Domains</h2>
-      <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6);margin-top:calc(-1 * var(--space-3))">
-        Study in order — each part builds on the previous. Complete Part 1 before moving to Part 2.
-      </p>
-
-      <div class="parts-grid">
-
-        <!-- Part 1 -->
-        <div onclick="window.location.assign('part1-plan-manage/index.html')" class="part-card"
-          style="--part-color:var(--part1-color)" style="cursor: pointer;">
-          <div class="part-card-head">
-            <div class="part-icon">⚙️</div>
-            <span class="part-weight-badge">20–25%</span>
-          </div>
-          <div class="part-num">PART 1 · START HERE</div>
-          <div class="part-title">Plan & Manage an Azure AI Solution</div>
-          <div class="part-topics">
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p1-foundry-services"></div>
-              <span class="part-topic-name" data-topic-name="p1-foundry-services">Select Foundry Services</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p1-plan-create-deploy"></div>
-              <span class="part-topic-name" data-topic-name="p1-plan-create-deploy">Plan, Create & Deploy</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p1-security"></div>
-              <span class="part-topic-name" data-topic-name="p1-security">Security & Authentication</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p1-monitor"></div>
-              <span class="part-topic-name" data-topic-name="p1-monitor">Monitor & Manage</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p1-responsible-ai"></div>
-              <span class="part-topic-name" data-topic-name="p1-responsible-ai">Responsible AI</span>
-            </div>
-          </div>
-          <div class="part-footer">
-            <div class="progress-bar" style="flex:1;height:5px;" data-progress-part="1">
-              <div class="progress-fill" style="width:0%;background:var(--part1-color)"></div>
-            </div>
-            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--part1-color)" data-progress-pct>0%</span>
-            <div class="part-action-links">
-              <a href="part1-plan-manage/flashcards.html" class="part-mini-link" onclick="event.stopPropagation()">🃏 Cards</a>
-              <a href="part1-plan-manage/quiz.html" class="part-mini-link" onclick="event.stopPropagation()">✅ Quiz</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Part 2 -->
-        <div onclick="window.location.assign('part2-generative-ai/index.html')" class="part-card"
-          style="--part-color:var(--part2-color)" style="cursor: pointer;">
-          <div class="part-card-head">
-            <div class="part-icon">🤖</div>
-            <span class="part-weight-badge">15–20%</span>
-          </div>
-          <div class="part-num">PART 2</div>
-          <div class="part-title">Implement Generative AI Solutions</div>
-          <div class="part-topics">
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p2-foundry-build"></div>
-              <span class="part-topic-name" data-topic-name="p2-foundry-build">Build with Microsoft Foundry</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p2-azure-openai"></div>
-              <span class="part-topic-name" data-topic-name="p2-azure-openai">Azure OpenAI in Foundry</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p2-optimize"></div>
-              <span class="part-topic-name" data-topic-name="p2-optimize">Optimize & Operationalize</span>
-            </div>
-          </div>
-          <div class="part-footer">
-            <div class="progress-bar" style="flex:1;height:5px;" data-progress-part="2">
-              <div class="progress-fill" style="width:0%;background:var(--part2-color)"></div>
-            </div>
-            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--part2-color)" data-progress-pct>0%</span>
-            <div class="part-action-links">
-              <a href="part2-generative-ai/flashcards.html" class="part-mini-link" onclick="event.stopPropagation()">🃏 Cards</a>
-              <a href="part2-generative-ai/quiz.html" class="part-mini-link" onclick="event.stopPropagation()">✅ Quiz</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Part 3 -->
-        <div onclick="window.location.assign('part3-agentic/index.html')" class="part-card"
-          style="--part-color:var(--part3-color)" style="cursor: pointer;">
-          <div class="part-card-head">
-            <div class="part-icon">🕵️</div>
-            <span class="part-weight-badge">5–10%</span>
-          </div>
-          <div class="part-num">PART 3</div>
-          <div class="part-title">Implement an Agentic Solution</div>
-          <div class="part-topics">
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p3-custom-agents"></div>
-              <span class="part-topic-name" data-topic-name="p3-custom-agents">Create Custom Agents</span>
-            </div>
-          </div>
-          <div class="part-footer">
-            <div class="progress-bar" style="flex:1;height:5px;" data-progress-part="3">
-              <div class="progress-fill" style="width:0%;background:var(--part3-color)"></div>
-            </div>
-            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--part3-color)" data-progress-pct>0%</span>
-            <div class="part-action-links">
-              <a href="part3-agentic/flashcards.html" class="part-mini-link" onclick="event.stopPropagation()">🃏 Cards</a>
-              <a href="part3-agentic/quiz.html" class="part-mini-link" onclick="event.stopPropagation()">✅ Quiz</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Part 4 -->
-        <div onclick="window.location.assign('part4-nlp/index.html')" class="part-card"
-          style="--part-color:var(--part4-color)" style="cursor: pointer;">
-          <div class="part-card-head">
-            <div class="part-icon">💬</div>
-            <span class="part-weight-badge">15–20%</span>
-          </div>
-          <div class="part-num">PART 4</div>
-          <div class="part-title">Implement Natural Language Processing</div>
-          <div class="part-topics">
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p4-analyze-text"></div>
-              <span class="part-topic-name" data-topic-name="p4-analyze-text">Analyze & Translate Text</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p4-speech"></div>
-              <span class="part-topic-name" data-topic-name="p4-speech">Process & Translate Speech</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p4-custom-language"></div>
-              <span class="part-topic-name" data-topic-name="p4-custom-language">Custom Language Models</span>
-            </div>
-          </div>
-          <div class="part-footer">
-            <div class="progress-bar" style="flex:1;height:5px;" data-progress-part="4">
-              <div class="progress-fill" style="width:0%;background:var(--part4-color)"></div>
-            </div>
-            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--part4-color)" data-progress-pct>0%</span>
-            <div class="part-action-links">
-              <a href="part4-nlp/flashcards.html" class="part-mini-link" onclick="event.stopPropagation()">🃏 Cards</a>
-              <a href="part4-nlp/quiz.html" class="part-mini-link" onclick="event.stopPropagation()">✅ Quiz</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Part 5 -->
-        <div onclick="window.location.assign('part5-knowledge-mining/index.html')" class="part-card"
-          style="--part-color:var(--part5-color)" style="cursor: pointer;">
-          <div class="part-card-head">
-            <div class="part-icon">🔍</div>
-            <span class="part-weight-badge">15–20%</span>
-          </div>
-          <div class="part-num">PART 5</div>
-          <div class="part-title">Knowledge Mining & Information Extraction</div>
-          <div class="part-topics">
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p5-ai-search"></div>
-              <span class="part-topic-name" data-topic-name="p5-ai-search">Azure AI Search</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p5-document-intelligence"></div>
-              <span class="part-topic-name" data-topic-name="p5-document-intelligence">Document Intelligence</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p5-content-understanding"></div>
-              <span class="part-topic-name" data-topic-name="p5-content-understanding">Content Understanding</span>
-            </div>
-          </div>
-          <div class="part-footer">
-            <div class="progress-bar" style="flex:1;height:5px;" data-progress-part="5">
-              <div class="progress-fill" style="width:0%;background:var(--part5-color)"></div>
-            </div>
-            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--part5-color)" data-progress-pct>0%</span>
-            <div class="part-action-links">
-              <a href="part5-knowledge-mining/flashcards.html" class="part-mini-link" onclick="event.stopPropagation()">🃏 Cards</a>
-              <a href="part5-knowledge-mining/quiz.html" class="part-mini-link" onclick="event.stopPropagation()">✅ Quiz</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Part 6 -->
-        <div onclick="window.location.assign('part6-computer-vision/index.html')" class="part-card"
-          style="--part-color:var(--part6-color)" style="cursor: pointer;">
-          <div class="part-card-head">
-            <div class="part-icon">👁️</div>
-            <span class="part-weight-badge">10–15%</span>
-          </div>
-          <div class="part-num">PART 6</div>
-          <div class="part-title">Implement Computer Vision Solutions</div>
-          <div class="part-topics">
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p6-analyze-images"></div>
-              <span class="part-topic-name" data-topic-name="p6-analyze-images">Analyze Images</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p6-custom-vision"></div>
-              <span class="part-topic-name" data-topic-name="p6-custom-vision">Custom Vision Models</span>
-            </div>
-            <div class="part-topic-row">
-              <div class="topic-dot" data-topic-dot="p6-video-analysis"></div>
-              <span class="part-topic-name" data-topic-name="p6-video-analysis">Video Analysis</span>
-            </div>
-          </div>
-          <div class="part-footer">
-            <div class="progress-bar" style="flex:1;height:5px;" data-progress-part="6">
-              <div class="progress-fill" style="width:0%;background:var(--part6-color)"></div>
-            </div>
-            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--part6-color)" data-progress-pct>0%</span>
-            <div class="part-action-links">
-              <a href="part6-computer-vision/flashcards.html" class="part-mini-link" onclick="event.stopPropagation()">🃏 Cards</a>
-              <a href="part6-computer-vision/quiz.html" class="part-mini-link" onclick="event.stopPropagation()">✅ Quiz</a>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /parts-grid -->
-
-      <!-- ── QUICK RESOURCES ── -->
-      <h2 style="margin-bottom:var(--space-5)">Quick Resources</h2>
-      <div class="resources-grid">
-        <a href="https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-102"
-           target="_blank" class="resource-card">
-          <div class="resource-icon">📋</div>
-          <div class="resource-title">Official Study Guide</div>
-          <div class="resource-desc">Microsoft's official skills measured document (Dec 2025)</div>
-        </a>
-        <a href="https://learn.microsoft.com/en-us/credentials/certifications/exams/ai-102/practice/assessment?assessment-type=practice&assessmentId=61"
-           target="_blank" class="resource-card">
-          <div class="resource-icon">🧪</div>
-          <div class="resource-title">Free Practice Assessment</div>
-          <div class="resource-desc">Official Microsoft practice questions — free</div>
-        </a>
-        <a href="https://learn.microsoft.com/en-us/azure/ai-services/"
-           target="_blank" class="resource-card">
-          <div class="resource-icon">☁️</div>
-          <div class="resource-title">Azure AI Services Docs</div>
-          <div class="resource-desc">Official Microsoft documentation for all AI services</div>
-        </a>
-        <a href="https://portal.azure.com" target="_blank" class="resource-card">
-          <div class="resource-icon">🏠</div>
-          <div class="resource-title">Azure Portal</div>
-          <div class="resource-desc">Create resources and follow along with walkthroughs</div>
-        </a>
-        <a href="https://ai.azure.com" target="_blank" class="resource-card">
-          <div class="resource-icon">🤖</div>
-          <div class="resource-title">Azure AI Foundry</div>
-          <div class="resource-desc">Microsoft Foundry portal — central to the exam</div>
-        </a>
-        <a href="https://aka.ms/examdemo" target="_blank" class="resource-card">
-          <div class="resource-icon">🖥️</div>
-          <div class="resource-title">Exam Sandbox</div>
-          <div class="resource-desc">Explore the real exam UI before test day</div>
-        </a>
-      </div>
-
-      <!-- ── EXAM INFO BAR ── -->
-      <div class="card" style="margin-bottom:var(--space-8)">
-        <h3 style="margin-bottom:var(--space-5)">📌 Exam At a Glance</h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--space-5)">
-          <div>
-            <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-1)">Exam Code</div>
-            <div style="font-family:var(--font-mono);color:var(--blue-300);font-size:1rem">AI-102</div>
-          </div>
-          <div>
-            <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-1)">Passing Score</div>
-            <div style="font-family:var(--font-mono);color:var(--green-400);font-size:1rem">700 / 1000</div>
-          </div>
-          <div>
-            <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-1)">Questions</div>
-            <div style="font-family:var(--font-mono);color:var(--text-primary);font-size:1rem">~50–55</div>
-          </div>
-          <div>
-            <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-1)">Duration</div>
-            <div style="font-family:var(--font-mono);color:var(--text-primary);font-size:1rem">120 min</div>
-          </div>
-          <div>
-            <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-1)">Cost</div>
-            <div style="font-family:var(--font-mono);color:var(--text-primary);font-size:1rem">$165 USD</div>
-          </div>
-          <div>
-            <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-1)">Retires</div>
-            <div style="font-family:var(--font-mono);color:var(--amber-400);font-size:1rem">Jun 30, 2026</div>
-          </div>
-          <div>
-            <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-1)">Language</div>
-            <div style="font-family:var(--font-mono);color:var(--text-primary);font-size:1rem">Python (you)</div>
-          </div>
-          <div>
-            <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-1)">Guide Updated</div>
-            <div style="font-family:var(--font-mono);color:var(--text-primary);font-size:1rem">Dec 23, 2025</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div style="text-align:center;padding:var(--space-8) 0;color:var(--text-muted);font-size:0.75rem;border-top:1px solid var(--border-subtle);">
-        AI-102 Study Hub · Built for your exam · All content aligned to official Microsoft study guide (Dec 2025) ·
-        <a href="https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-102" target="_blank" style="color:var(--blue-300)">Source</a>
-      </div>
-
-    </div><!-- /page-content -->
-  </main>
-</div><!-- /app-shell -->
-
-<!-- ── Exam Date Modal ── -->
-<div class="modal-backdrop" id="exam-date-modal">
-  <div class="modal animate-scale-in">
-    <h3 class="modal-title">📅 Set Your Exam Date</h3>
-    <p class="modal-sub">This enables the countdown timer across the site so you can track how many days you have left.</p>
-    <div style="margin-bottom:var(--space-6)">
-      <label class="tryit-label">Your exam date</label>
-      <input type="date" id="exam-date-input"
-        style="width:100%;background:var(--bg-secondary);border:1px solid var(--border-default);
-        border-radius:var(--radius-md);color:var(--text-primary);font-family:var(--font-mono);
-        font-size:0.9rem;padding:var(--space-3) var(--space-4);outline:none;
-        color-scheme:dark;">
-    </div>
-    <div style="display:flex;gap:var(--space-3);justify-content:flex-end">
-      <button class="btn btn-ghost" onclick="closeExamDateModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveExamDate()">💾 Save Date</button>
-    </div>
-  </div>
+<!-- Animated background -->
+<div class="wh-bg">
+  <div class="wh-bg-dots"></div>
+  <div class="wh-orb wh-orb-1"></div>
+  <div class="wh-orb wh-orb-2"></div>
+  <div class="wh-orb wh-orb-3"></div>
 </div>
 
-<script src="scripts/common.js"></script>
+<div class="wh-wrap">
+
+  <header class="wh-header"></header>
+
+  <!-- Hero -->
+  <section class="wh-hero">
+    <div class="wh-eyebrow">
+      <span class="wh-eyebrow-dot"></span>
+      Certification Study Hub
+    </div>
+    <h1 class="wh-title">
+      One Hub.<br>
+      <span class="wh-title-accent">Every Cert.</span>
+    </h1>
+    <p class="wh-sub">
+      Structured study systems built from official exam blueprints.
+      Full coverage, in-depth explanations, built-in quizzes and flashcards.
+    </p>
+
+    <!-- Stats pill -->
+    <div class="wh-stats">
+      <div class="wh-stat">
+        <span class="wh-stat-val" id="total-mastered">0</span>
+        <span class="wh-stat-lbl">Topics Mastered</span>
+      </div>
+      <div class="wh-stat-sep"></div>
+      <div class="wh-stat">
+        <span class="wh-stat-val">40+</span>
+        <span class="wh-stat-lbl">Total Topics</span>
+      </div>
+      <div class="wh-stat-sep"></div>
+      <div class="wh-stat">
+        <span class="wh-stat-val">2</span>
+        <span class="wh-stat-lbl">Certifications</span>
+      </div>
+      <div class="wh-stat-sep"></div>
+      <div class="wh-stat">
+        <span class="wh-stat-val">Free</span>
+        <span class="wh-stat-lbl">No Account Needed</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section divider -->
+  <div class="wh-section-label">
+    <div class="wh-section-line"></div>
+    <span>Choose your certification path</span>
+    <div class="wh-section-line"></div>
+  </div>
+
+  <!-- Course cards -->
+  <div class="wh-courses">
+
+    <!-- AI-102 Card -->
+    <div class="wh-card wh-card-ai102" onclick="selectCourse('ai-102')">
+      <div class="wh-card-accent"></div>
+
+      <div class="wh-card-inner">
+        <div class="wh-card-left">
+          <div class="wh-ring-wrap">
+            <svg class="wh-ring-svg" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+              <circle class="wh-ring-track" cx="18" cy="18" r="15.9155"/>
+              <circle class="wh-ring-fill" cx="18" cy="18" r="15.9155"
+                id="ring-ai102" stroke-dasharray="0 100" stroke-dashoffset="25"/>
+            </svg>
+            <div class="wh-ring-icon">🎯</div>
+          </div>
+          <div class="wh-pct-label" id="ring-ai102-pct">0%</div>
+        </div>
+
+        <div class="wh-card-right">
+          <div class="wh-vendor-row">
+            <span class="wh-vendor-badge">Microsoft Azure</span>
+          </div>
+          <div class="wh-exam-code">AI-102</div>
+          <h2 class="wh-exam-name">Azure AI Engineer Associate</h2>
+          <p class="wh-exam-desc">Generative AI, custom agents, RAG pipelines, NLP, Azure AI Search, Document Intelligence, and Computer Vision — all from the official Dec 2025 blueprint.</p>
+          <div class="wh-meta-grid">
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Pass Score</span>
+              <span class="wh-meta-val">700/1000</span>
+            </div>
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Questions</span>
+              <span class="wh-meta-val">~50–55</span>
+            </div>
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Domains</span>
+              <span class="wh-meta-val">6</span>
+            </div>
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Topics</span>
+              <span class="wh-meta-val">18</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wh-card-footer">
+        <div class="wh-prog-wrap">
+          <div class="wh-prog-info">
+            <span class="wh-prog-lbl">Readiness</span>
+            <span class="wh-prog-pct" id="prog-ai102-pct">0%</span>
+          </div>
+          <div class="wh-prog-bar">
+            <div class="wh-prog-fill" id="prog-ai102-fill" style="width:0%"></div>
+          </div>
+        </div>
+        <button class="wh-cta">
+          <span id="cta-ai102-text">Start Learning</span>
+          <span class="wh-cta-arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ServiceNow CSA Card -->
+    <div class="wh-card wh-card-csa" onclick="selectCourse('servicenow-csa')">
+      <div class="wh-card-accent"></div>
+      <div class="wh-new-badge">NEW</div>
+
+      <div class="wh-card-inner">
+        <div class="wh-card-left">
+          <div class="wh-ring-wrap">
+            <svg class="wh-ring-svg" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+              <circle class="wh-ring-track" cx="18" cy="18" r="15.9155"/>
+              <circle class="wh-ring-fill" cx="18" cy="18" r="15.9155"
+                id="ring-csa" stroke-dasharray="0 100" stroke-dashoffset="25"/>
+            </svg>
+            <div class="wh-ring-icon">⚙️</div>
+          </div>
+          <div class="wh-pct-label" id="ring-csa-pct">0%</div>
+        </div>
+
+        <div class="wh-card-right">
+          <div class="wh-vendor-row">
+            <span class="wh-vendor-badge">ServiceNow</span>
+          </div>
+          <div class="wh-exam-code">CSA · Zurich Release</div>
+          <h2 class="wh-exam-name">Certified System Administrator</h2>
+          <p class="wh-exam-desc">UI navigation, instance configuration, Flow Designer automation, database & table admin, security ACLs, roles, Update Sets, and performance reporting.</p>
+          <div class="wh-meta-grid">
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Pass Score</span>
+              <span class="wh-meta-val">70%</span>
+            </div>
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Questions</span>
+              <span class="wh-meta-val">~60</span>
+            </div>
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Domains</span>
+              <span class="wh-meta-val">6</span>
+            </div>
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Topics</span>
+              <span class="wh-meta-val">22+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wh-card-footer">
+        <div class="wh-prog-wrap">
+          <div class="wh-prog-info">
+            <span class="wh-prog-lbl">Readiness</span>
+            <span class="wh-prog-pct" id="prog-csa-pct">0%</span>
+          </div>
+          <div class="wh-prog-bar">
+            <div class="wh-prog-fill" id="prog-csa-fill" style="width:0%"></div>
+          </div>
+        </div>
+        <button class="wh-cta">
+          <span id="cta-csa-text">Start Learning</span>
+          <span class="wh-cta-arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /wh-courses -->
+
+  <footer class="wh-footer">
+    Content aligned to official exam blueprints · Progress saved locally in your browser
+  </footer>
+
+</div><!-- /wh-wrap -->
+
 <script>
-  /* ── Dashboard-specific JS ── */
+  function setProgressRing(id, pct) {
+    const ring = document.getElementById(id);
+    if (!ring) return;
+    setTimeout(() => {
+      ring.setAttribute('stroke-dasharray', `${pct} ${100 - pct}`);
+    }, 80);
+  }
 
-  function openExamDateModal() {
-    document.getElementById('exam-date-modal').classList.add('open');
-    // Pre-fill if date already set
-    const existing = ExamCountdown.getDate();
-    if (existing) {
-      document.getElementById('exam-date-input').value =
-        existing.toISOString().split('T')[0];
+  function selectCourse(courseId) {
+    localStorage.setItem('active_course', courseId);
+    window.location.assign(courseId === 'servicenow-csa' ? 'servicenow-csa/index.html' : 'ai-102/index.html');
+  }
+
+  (function init() {
+    // AI-102 progress
+    let aiDone = 0;
+    try {
+      const aiProgress = JSON.parse(localStorage.getItem('ai102_progress') || '{}');
+      aiDone = Object.values(aiProgress).filter(p => p.complete === true).length;
+    } catch(e){}
+    const aiPct = Math.round((aiDone / 18) * 100) || 0;
+    document.getElementById('prog-ai102-pct').textContent = `${aiPct}%`;
+    document.getElementById('prog-ai102-fill').style.width = `${aiPct}%`;
+    document.getElementById('ring-ai102-pct').textContent = `${aiPct}%`;
+    setProgressRing('ring-ai102', aiPct);
+    if (aiDone > 0) {
+      const el = document.getElementById('cta-ai102-text');
+      if (el) el.textContent = 'Resume Study';
     }
-  }
 
-  function closeExamDateModal() {
-    document.getElementById('exam-date-modal').classList.remove('open');
-  }
-
-  function saveExamDate() {
-    const val = document.getElementById('exam-date-input').value;
-    if (!val) { alert('Please pick a date.'); return; }
-    ExamCountdown.setDate(val);
-    closeExamDateModal();
-  }
-
-  // Close modal on backdrop click
-  document.getElementById('exam-date-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeExamDateModal();
-  });
-
-  /* ── Populate topic dots from progress ── */
-  function renderTopicDots() {
-    document.querySelectorAll('[data-topic-dot]').forEach(dot => {
-      const id = dot.dataset.topicDot;
-      const done = ProgressManager.isComplete(id);
-      dot.classList.toggle('done', done);
-      const nameEl = dot.closest('.part-topic-row')?.querySelector('[data-topic-name]');
-      if (nameEl) nameEl.classList.toggle('done', done);
-    });
-  }
-
-  /* ── Populate "Up Next" list ── */
-  function renderNextUp() {
-    const list = document.getElementById('next-up-list');
-    if (!list) return;
-    const next = PageHelpers.getNextTopics(4);
-    if (!next.length) {
-      list.innerHTML = `<p style="color:var(--green-400);font-size:0.875rem;padding:var(--space-2) var(--space-4)">
-        🎉 All topics complete! You're exam-ready.
-      </p>`;
-      return;
+    // CSA progress
+    let csaDone = 0;
+    try {
+      const csaProgress = JSON.parse(localStorage.getItem('csa_progress') || '{}');
+      csaDone = Object.values(csaProgress).filter(p => p.complete === true).length;
+    } catch(e){}
+    const csaPct = Math.round((csaDone / 22) * 100) || 0;
+    document.getElementById('prog-csa-pct').textContent = `${csaPct}%`;
+    document.getElementById('prog-csa-fill').style.width = `${csaPct}%`;
+    document.getElementById('ring-csa-pct').textContent = `${csaPct}%`;
+    setProgressRing('ring-csa', csaPct);
+    if (csaDone > 0) {
+      const el = document.getElementById('cta-csa-text');
+      if (el) el.textContent = 'Resume Study';
     }
-    list.innerHTML = next.map((t, i) => `
-      <a href="${t.file}" class="next-item">
-        <span class="next-item-num">${String(i+1).padStart(2,'0')}</span>
-        <span class="next-item-title">${t.title}</span>
-        <span class="next-item-part">Part ${t.part}</span>
-        <span style="color:var(--text-muted);font-size:0.8rem">→</span>
-      </a>`).join('');
-  }
 
-  /* ── Update hero stat counter ── */
-  function renderHeroStats() {
-    const ov = ProgressManager.getOverallProgress();
-    const doneEl = document.querySelector('[data-stat-done]');
-    if (doneEl) doneEl.textContent = ov.done;
-  }
-
-  /* ── Run on load and on progress update ── */
-  document.addEventListener('DOMContentLoaded', () => {
-    renderTopicDots();
-    renderNextUp();
-    renderHeroStats();
-  });
-
-  document.addEventListener('progressUpdated', () => {
-    renderTopicDots();
-    renderNextUp();
-    renderHeroStats();
-    initProgressBars();
-  });
+    // Total mastered counter
+    const totalEl = document.getElementById('total-mastered');
+    if (totalEl) totalEl.textContent = aiDone + csaDone;
+  })();
 </script>
 </body>
 </html>

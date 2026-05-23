@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topic 3 — Custom Language Models | AI-102 Part 4</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sbo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;backdrop-filter:blur(2px)}
+    #sbo.show{display:block}
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb"><a href="../../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a><span class="sep">›</span><a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 4</a><span class="sep">›</span><span class="current">Custom Language Models</span></div>
+    </header>
+    <div class="page-content">
+
+      <div class="topic-header animate-fade-in">
+        <div class="topic-part-badge badge" style="background:rgba(16,185,129,.15);color:var(--green-400);border:1px solid rgba(16,185,129,.3)">💬 Part 4 · Topic 3 of 3</div>
+        <h1 class="topic-title">Custom Language Models</h1>
+        <p style="font-size:1rem;color:var(--text-secondary);max-width:680px;line-height:1.7;margin-top:var(--space-3)">When prebuilt NLP features aren't specific enough for your domain, you build custom models. This topic covers CLU (Conversational Language Understanding — the LUIS replacement), Custom NER, Custom Text Classification, Custom Question Answering, and Azure Bot Service integration.</p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">🐍 <strong>Python — every line explained</strong></span>
+          <span class="topic-meta-item">⏱️ <strong>~45 min</strong></span>
+          <span class="topic-meta-item">🔥 <strong>High exam weight</strong></span>
+        </div>
+      </div>
+
+      <!-- SECTION 1 — VOCAB -->
+      <div class="section-block" id="vocab">
+        <div class="section-label">🔤 Section 1 — New Vocabulary</div>
+        <h2>Custom model terms — defined before code</h2>
+        <div class="term-grid">
+          <div class="term-card"><span class="term-name">Conversational Language Understanding (CLU)</span><p class="term-definition">The replacement for LUIS (Language Understanding). A custom model that identifies the user's intent (what they want to do) and extracts entities (key information) from natural language utterances. Trained on your labelled examples. Available in Azure AI Language.</p></div>
+          <div class="term-card"><span class="term-name">Intent</span><p class="term-definition">What the user wants to accomplish. "Book me a flight to Paris" → intent: BookFlight. "What's the weather like?" → intent: GetWeather. CLU classifies user utterances into your defined intents. Each utterance maps to exactly one intent.</p></div>
+          <div class="term-card"><span class="term-name">Entity (CLU)</span><p class="term-definition">Key information extracted from the utterance. In "Book a flight to Paris on March 15th" — entities: {destination: "Paris"}, {date: "March 15th"}. Entities have types you define. They are the "slots" the intent needs filled to take action.</p></div>
+          <div class="term-card"><span class="term-name">Utterance</span><p class="term-definition">A sample input sentence used to train CLU. You provide many example utterances per intent, each labelled with the correct intent and any entities. The model learns to generalise from these examples to new, unseen utterances.</p></div>
+          <div class="term-card"><span class="term-name">None Intent</span><p class="term-definition">A special CLU intent for utterances that don't match any of your defined intents. Always add a None intent with examples of out-of-scope or irrelevant utterances. Without it, the model may incorrectly classify everything into one of your defined intents.</p></div>
+          <div class="term-card"><span class="term-name">Custom NER</span><p class="term-definition">A custom model for Named Entity Recognition. When the prebuilt NER categories (Person, Location, etc.) are not specific enough — you define your own entity types and train on labelled documents. Example: LegalCase, ContractClause, RegulatoryBody for legal documents.</p></div>
+          <div class="term-card"><span class="term-name">Custom Text Classification</span><p class="term-definition">A custom model for classifying documents into your own categories. Two modes: single-label (each document belongs to exactly one category) and multi-label (a document can belong to multiple categories). Trained on your labelled document examples.</p></div>
+          <div class="term-card"><span class="term-name">Custom Question Answering</span><p class="term-definition">A custom knowledge base that answers questions in natural language. You provide question-answer pairs (from FAQs, manuals, or web URLs). The model uses semantic similarity to find the best matching answer to a user's question. Replaced QnA Maker.</p></div>
+          <div class="term-card"><span class="term-name">Knowledge Base (Custom Q&A)</span><p class="term-definition">The collection of question-answer pairs in a Custom Q&A project. Sources: manually entered pairs, imported FAQ documents, or URLs of web pages with Q&A content. The model indexes these and finds relevant answers at runtime.</p></div>
+          <div class="term-card"><span class="term-name">Azure Bot Service</span><p class="term-definition">Azure's platform for building, deploying, and managing conversational bots. Bots are logic applications that connect to messaging channels (Teams, webchat, Slack, etc.). Usually connected to CLU for intent recognition and Custom Q&A for answering FAQs.</p></div>
+          <div class="term-card"><span class="term-name">Bot Framework SDK</span><p class="term-definition">The programming SDK for building bots in Python, C#, JavaScript, or Java. You write dialog logic, state management, and channel integration code. Works with Azure Bot Service for hosting and channels.</p></div>
+          <div class="term-card"><span class="term-name">Dialog (Bot Framework)</span><p class="term-definition">A modular conversation flow component. A bot is composed of dialogs — each dialog handles a specific conversation scenario. Dialogs can stack, call each other, and return results. Types: WaterfallDialog (step-by-step), ComponentDialog (reusable), AdaptiveDialog.</p></div>
+        </div>
+      </div>
+
+      <!-- SECTION 2 — CLU -->
+      <div class="section-block" id="clu">
+        <div class="section-label">🗣️ Section 2 — Conversational Language Understanding (CLU)</div>
+        <h2>Understanding what users want to do</h2>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">CLU = LUIS replacement — key exam fact</div>
+            <p>LUIS (Language Understanding) was deprecated. The exam refers to <strong>CLU (Conversational Language Understanding)</strong> for all intent/entity recognition tasks. CLU is part of the Azure AI Language service — same endpoint, same SDK. If you see a question about building a chatbot that understands user intents → CLU.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-analogy" style="margin-top:var(--space-6)">
+          <span class="callout-icon">📞</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A smart telephone operator</div>
+            <p>A telephone operator hears "I need to cancel my subscription" and routes the call to the cancellation team. They don't need to understand everything — just the intent (cancel) and who it affects (subscription). CLU is that operator — it classifies user messages into intents and extracts key information (entities) so your code can take the right action.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Building a CLU model — the process</h3>
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-8)">
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:26px;height:26px;min-width:26px;background:var(--green-600);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:.72rem;font-weight:700;color:#fff;margin-top:2px">1</div>
+            <div><div style="font-family:var(--font-heading);font-size:.88rem;font-weight:600;color:var(--text-primary);margin-bottom:3px">Define intents and entities</div><p style="font-size:.83rem;color:var(--text-secondary);margin:0">Language Studio (language.cognitive.azure.com) → Create CLU project → Add intents (BookFlight, GetWeather, Cancel, None) → Add entity types (destination, date, duration).</p></div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:26px;height:26px;min-width:26px;background:var(--green-600);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:.72rem;font-weight:700;color:#fff;margin-top:2px">2</div>
+            <div><div style="font-family:var(--font-heading);font-size:.88rem;font-weight:600;color:var(--text-primary);margin-bottom:3px">Add labelled utterances</div><p style="font-size:.83rem;color:var(--text-secondary);margin:0">For each intent, add 15–30+ example utterances and label entities within them. "Book a flight to [Paris]destination for [next Monday]date" → intent: BookFlight. Minimum 5 utterances per intent recommended.</p></div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:26px;height:26px;min-width:26px;background:var(--green-600);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:.72rem;font-weight:700;color:#fff;margin-top:2px">3</div>
+            <div><div style="font-family:var(--font-heading);font-size:.88rem;font-weight:600;color:var(--text-primary);margin-bottom:3px">Train the model</div><p style="font-size:.83rem;color:var(--text-secondary);margin:0">Language Studio → Train model → Select training type (standard or advanced). The service trains on your labelled examples. Evaluation metrics: Precision, Recall, F1 score per intent.</p></div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-4)">
+            <div style="width:26px;height:26px;min-width:26px;background:var(--green-600);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:.72rem;font-weight:700;color:#fff;margin-top:2px">4</div>
+            <div><div style="font-family:var(--font-heading);font-size:.88rem;font-weight:600;color:var(--text-primary);margin-bottom:3px">Evaluate and deploy</div><p style="font-size:.83rem;color:var(--text-secondary);margin:0">Review confusion matrix — which intents are being confused with each other? Add more utterances to low-scoring intents. Deploy to production slot when satisfied.</p></div>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:var(--space-4)">Python — Calling CLU from Python</h3>
+        <p style="margin-bottom:var(--space-4)">Install: <code>pip install azure-ai-language-conversations</code></p>
+
+<pre><code><span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> azure.ai.language.conversations <span class="token-keyword">import</span> ConversationAnalysisClient
+<span class="token-keyword">from</span> azure.core.credentials <span class="token-keyword">import</span> AzureKeyCredential
+
+<span class="token-comment"># ── Create the CLU client ──────────────────────────────────────────────</span>
+<span class="token-comment"># CLU is part of Azure AI Language — same cognitiveservices.azure.com endpoint</span>
+clu_client = ConversationAnalysisClient(
+    endpoint   = os.environ.get(<span class="token-string">"LANGUAGE_ENDPOINT"</span>),  <span class="token-comment"># cognitiveservices.azure.com</span>
+    credential = AzureKeyCredential(os.environ.get(<span class="token-string">"LANGUAGE_KEY"</span>))
+)
+
+<span class="token-comment"># ── Analyse an utterance ───────────────────────────────────────────────</span>
+user_utterance = <span class="token-string">"I'd like to book a flight to Paris for next Friday"</span>
+
+<span class="token-comment"># analyze_conversation() sends the utterance to your CLU model for classification</span>
+<span class="token-keyword">with</span> clu_client:  <span class="token-comment"># "with" ensures the client is properly closed</span>
+    result = clu_client.analyze_conversation(
+        task = {
+            <span class="token-string">"kind"</span>: <span class="token-string">"Conversation"</span>,   <span class="token-comment"># Task type for CLU</span>
+            <span class="token-string">"analysisInput"</span>: {
+                <span class="token-string">"conversationItem"</span>: {
+                    <span class="token-string">"id"</span>          : <span class="token-string">"1"</span>,
+                    <span class="token-string">"participantId"</span>: <span class="token-string">"user1"</span>,
+                    <span class="token-string">"text"</span>        : user_utterance   <span class="token-comment"># The user's message</span>
+                }
+            },
+            <span class="token-string">"parameters"</span>: {
+                <span class="token-string">"projectName"</span>   : <span class="token-string">"FlightBookingCLU"</span>,  <span class="token-comment"># Your CLU project name</span>
+                <span class="token-string">"deploymentName"</span>: <span class="token-string">"production"</span>,        <span class="token-comment"># Your deployment slot</span>
+                <span class="token-string">"verbose"</span>       : <span class="token-keyword">True</span>                 <span class="token-comment"># Return all intent scores</span>
+            }
+        }
+    )
+
+<span class="token-comment"># ── Extract the prediction ─────────────────────────────────────────────</span>
+prediction = result[<span class="token-string">"result"</span>][<span class="token-string">"prediction"</span>]
+
+<span class="token-comment"># Top intent — the intent with the highest confidence score</span>
+<span class="token-comment"># This is what you act on in your application</span>
+top_intent    = prediction[<span class="token-string">"topIntent"</span>]            <span class="token-comment"># e.g. "BookFlight"</span>
+top_score     = prediction[<span class="token-string">"intents"</span>][<span class="token-number">0</span>][<span class="token-string">"confidence"</span>] <span class="token-comment"># e.g. 0.97</span>
+<span class="token-keyword">print</span>(<span class="token-string">f"Intent: {top_intent} (confidence: {top_score:.2f})"</span>)
+
+<span class="token-comment"># Entities — key information extracted from the utterance</span>
+<span class="token-keyword">for</span> entity <span class="token-keyword">in</span> prediction.get(<span class="token-string">"entities"</span>, []):
+    <span class="token-comment"># entity["category"]: the entity type you defined (e.g. "destination")</span>
+    <span class="token-comment"># entity["text"]: the actual text extracted (e.g. "Paris")</span>
+    <span class="token-comment"># entity["confidenceScore"]: how confident (0-1)</span>
+    <span class="token-keyword">print</span>(<span class="token-string">f"  Entity: {entity['category']} = '{entity['text']}' "
+          f"({entity['confidenceScore']:.2f})"</span>)
+
+<span class="token-comment"># ── Use the result in your application ────────────────────────────────</span>
+<span class="token-comment"># Route to the right action based on the top intent</span>
+<span class="token-keyword">if</span> top_intent == <span class="token-string">"BookFlight"</span>:
+    <span class="token-keyword">print</span>(<span class="token-string">"→ Routing to flight booking handler"</span>)
+<span class="token-keyword">elif</span> top_intent == <span class="token-string">"GetWeather"</span>:
+    <span class="token-keyword">print</span>(<span class="token-string">"→ Routing to weather information handler"</span>)
+<span class="token-keyword">elif</span> top_intent == <span class="token-string">"None"</span>:
+    <span class="token-keyword">print</span>(<span class="token-string">"→ Utterance not understood — show help menu"</span>)</code></pre>
+      </div>
+
+      <!-- SECTION 3 — CUSTOM Q&A -->
+      <div class="section-block" id="custom-qa">
+        <div class="section-label">❓ Section 3 — Custom Question Answering</div>
+        <h2>Building knowledge bases for FAQ bots</h2>
+        <p>Custom Question Answering (the replacement for QnA Maker) lets you build a knowledge base from FAQ documents and web pages. Users ask questions in natural language and the service finds the best matching answer.</p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📚</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A very well-indexed FAQ librarian</div>
+            <p>Custom Q&A is like a librarian who has memorised your entire FAQ document. When a customer asks "How do I reset my password?" — even if they phrase it as "I forgot my password" or "Can't log in, need password help" — the librarian finds the right answer because they understand the question's meaning, not just the exact words.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-6);margin-bottom:var(--space-4)">Building a Custom Q&A knowledge base</h3>
+        <table class="compare-table">
+          <thead><tr><th>Source Type</th><th>What it is</th><th>Best for</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Manual entry</strong></td><td>You type Q&A pairs directly in Language Studio</td><td>Small knowledge bases, frequently updated content</td></tr>
+            <tr><td><strong>File import</strong></td><td>Upload Word/PDF/Excel/TSV files containing Q&A pairs</td><td>Existing FAQ documents, product manuals</td></tr>
+            <tr><td><strong>URL import</strong></td><td>Provide URLs of web pages with FAQ content — the service extracts Q&A pairs</td><td>Websites with existing FAQ pages (extracts automatically)</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:var(--space-6);margin-bottom:var(--space-4)">Python — Calling Custom Q&A</h3>
+<pre><code><span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> azure.ai.language.questionanswering <span class="token-keyword">import</span> QuestionAnsweringClient
+<span class="token-keyword">from</span> azure.core.credentials <span class="token-keyword">import</span> AzureKeyCredential
+
+<span class="token-comment"># QuestionAnsweringClient connects to your Custom Q&A knowledge base</span>
+qa_client = QuestionAnsweringClient(
+    endpoint   = os.environ.get(<span class="token-string">"LANGUAGE_ENDPOINT"</span>),
+    credential = AzureKeyCredential(os.environ.get(<span class="token-string">"LANGUAGE_KEY"</span>))
+)
+
+user_question = <span class="token-string">"How do I cancel my subscription?"</span>
+
+<span class="token-keyword">with</span> qa_client:
+    result = qa_client.get_answers(
+        question        = user_question,
+        project_name    = <span class="token-string">"CustomerSupportKB"</span>,    <span class="token-comment"># Your Q&A project name</span>
+        deployment_name = <span class="token-string">"production"</span>,          <span class="token-comment"># Deployed slot</span>
+        top             = <span class="token-number">3</span>                       <span class="token-comment"># Return top 3 matching answers</span>
+    )
+
+<span class="token-comment"># result.answers is a list sorted by confidence (highest first)</span>
+<span class="token-keyword">for</span> answer <span class="token-keyword">in</span> result.answers:
+    <span class="token-keyword">print</span>(<span class="token-string">f"Confidence: {answer.confidence:.2f}"</span>)
+    <span class="token-keyword">print</span>(<span class="token-string">f"Answer: {answer.answer}"</span>)
+    <span class="token-keyword">print</span>(<span class="token-string">f"Source: {answer.source}"</span>)
+    <span class="token-keyword">print</span>()
+
+<span class="token-comment"># Use the top answer if confidence is above a threshold</span>
+<span class="token-comment"># Confidence below 0.3-0.4 usually means no good match was found</span>
+<span class="token-keyword">if</span> result.answers[<span class="token-number">0</span>].confidence > <span class="token-number">0.4</span>:
+    <span class="token-keyword">print</span>(<span class="token-string">f"Bot response: {result.answers[0].answer}"</span>)
+<span class="token-keyword">else</span>:
+    <span class="token-keyword">print</span>(<span class="token-string">"Bot response: I'm not sure I have an answer for that. Can I connect you with a human agent?"</span>)</code></pre>
+      </div>
+
+      <!-- SECTION 4 — CUSTOM NER & CLASSIFICATION -->
+      <div class="section-block" id="custom-ner">
+        <div class="section-label">🏷️ Section 4 — Custom NER & Custom Text Classification</div>
+        <h2>Building custom extractors and classifiers</h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);margin-bottom:var(--space-6)">
+          <div>
+            <h3 style="margin-bottom:var(--space-3)">Custom NER</h3>
+            <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.65">When you need to extract entity types not in the prebuilt NER model. Define your own categories (LegalCase, ContractDate, RegulatoryBody) and train on labelled documents. Follow the standard Azure AI Language custom model workflow: create → label → train → evaluate → deploy.</p>
+          </div>
+          <div>
+            <h3 style="margin-bottom:var(--space-3)">Custom Text Classification</h3>
+            <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.65">Classify documents into your own categories. Two modes:<br><br><strong>Single-label</strong>: each document gets exactly one label (Spam / Not Spam, or Positive / Negative / Neutral).<br><br><strong>Multi-label</strong>: a document can have multiple labels (a news article can be both "Technology" and "Business").</p>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — Prebuilt vs Custom Decision</div>
+            <p>
+              <em>"Company wants to extract person names and dates from emails."</em> → <strong>Prebuilt NER</strong> (already handles these)<br><br>
+              <em>"Company wants to extract contract clause numbers and party names from legal documents."</em> → <strong>Custom NER</strong> (domain-specific entities)<br><br>
+              <em>"Company wants to classify support tickets as billing, technical, or account."</em> → <strong>Custom Text Classification (single-label)</strong><br><br>
+              <em>"Company wants to tag news articles with all relevant categories."</em> → <strong>Custom Text Classification (multi-label)</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 5 — BOT FRAMEWORK -->
+      <div class="section-block" id="bot">
+        <div class="section-label">🤖 Section 5 — Azure Bot Service & Bot Framework</div>
+        <h2>Building conversational bots</h2>
+        <p>Azure Bot Service is the platform for hosting and deploying bots. The Bot Framework SDK is used to write the bot logic. Together they integrate with CLU, Custom Q&A, and messaging channels like Teams, webchat, Slack, and email.</p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🏗️</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — Bot framework is the building, CLU is the receptionist's knowledge</div>
+            <p>The Bot Framework SDK is the entire building — floor plan, rooms, communication systems, reception desk. CLU is the knowledge in the receptionist's head — which department handles what, what customer requests mean. Custom Q&A is the FAQ manual on the desk. Together they create a complete customer service experience. The building alone doesn't know what visitors want; the knowledge alone has no building to operate in.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Bot architecture — how the pieces connect</h3>
+        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-6);margin-bottom:var(--space-6)">
+          <div style="display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;justify-content:center">
+            <div style="text-align:center;padding:var(--space-4);background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:var(--radius-lg);min-width:110px"><div style="font-size:1.2rem;margin-bottom:var(--space-2)">💬</div><div style="font-family:var(--font-heading);font-size:.72rem;font-weight:700;color:var(--blue-300)">CHANNEL</div><div style="font-size:.65rem;color:var(--text-muted);margin-top:3px">Teams/Web/Slack</div></div>
+            <div style="font-size:1.2rem;color:var(--text-muted)">→</div>
+            <div style="text-align:center;padding:var(--space-4);background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius-lg);min-width:110px"><div style="font-size:1.2rem;margin-bottom:var(--space-2)">☁️</div><div style="font-family:var(--font-heading);font-size:.72rem;font-weight:700;color:var(--amber-400)">BOT SERVICE</div><div style="font-size:.65rem;color:var(--text-muted);margin-top:3px">Routes messages</div></div>
+            <div style="font-size:1.2rem;color:var(--text-muted)">→</div>
+            <div style="text-align:center;padding:var(--space-4);background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);border-radius:var(--radius-lg);min-width:110px"><div style="font-size:1.2rem;margin-bottom:var(--space-2)">🐍</div><div style="font-family:var(--font-heading);font-size:.72rem;font-weight:700;color:var(--purple-400)">BOT CODE</div><div style="font-size:.65rem;color:var(--text-muted);margin-top:3px">Framework SDK</div></div>
+            <div style="font-size:1.2rem;color:var(--text-muted)">→</div>
+            <div style="text-align:center;padding:var(--space-4);background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:var(--radius-lg);min-width:110px"><div style="font-size:1.2rem;margin-bottom:var(--space-2)">🗣️</div><div style="font-family:var(--font-heading);font-size:.72rem;font-weight:700;color:var(--green-400)">CLU / Q&A</div><div style="font-size:.65rem;color:var(--text-muted);margin-top:3px">Intent + answers</div></div>
+          </div>
+        </div>
+
+        <table class="compare-table">
+          <thead><tr><th>Component</th><th>Role</th><th>Where it lives</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Channel</strong></td><td>Where users interact — Teams, webchat, Slack, SMS</td><td>Configured in Azure Bot Service</td></tr>
+            <tr><td><strong>Azure Bot Service</strong></td><td>Hosted endpoint that receives messages from channels and forwards to your bot code</td><td>Azure portal resource</td></tr>
+            <tr><td><strong>Bot Framework SDK</strong></td><td>Your Python code — handles turns, dialogs, state, responses</td><td>Azure App Service (or Container)</td></tr>
+            <tr><td><strong>CLU</strong></td><td>Classifies user utterances into intents and extracts entities</td><td>Azure AI Language resource</td></tr>
+            <tr><td><strong>Custom Q&A</strong></td><td>Answers FAQ-style questions from knowledge base</td><td>Azure AI Language resource</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SECTION 6 — EXAM TIPS -->
+      <div class="section-block" id="exam-tips">
+        <div class="section-label">🎯 Section 6 — Exam Tips</div>
+        <h2>Custom Language Models — what the exam tests</h2>
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Top 5 Tested Facts</div>
+            <p>
+              <strong>1. CLU = LUIS replacement</strong> — If the exam mentions LUIS or asks about intent/entity recognition for a chatbot → CLU (in Azure AI Language). No more separate LUIS resource.<br><br>
+              <strong>2. Custom Q&A = QnA Maker replacement</strong> — Same concept, now inside Azure AI Language. Both CLU and Custom Q&A use the same Language endpoint.<br><br>
+              <strong>3. Always include a None intent in CLU</strong> — Without it the model classifies all utterances into your defined intents even when none match.<br><br>
+              <strong>4. Single-label vs multi-label classification</strong> — Exam scenario: "an article can belong to both Technology and Business" → multi-label. "Each ticket is either billing or technical, never both" → single-label.<br><br>
+              <strong>5. Custom Q&A confidence threshold</strong> — Always check the confidence score before presenting an answer. Below ~0.4 typically means no good match — offer escalation to a human agent instead.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="section-block" id="quiz">
+        <div class="section-label">✅ Section 7 — Quick Quiz</div>
+        <h2>Test your understanding</h2>
+        <div class="quiz-container" id="p4t3-quiz">
+          <div class="quiz-header"><span class="font-heading" style="font-size:.875rem;font-weight:600">Topic 3 Quiz — Custom Language Models</span><span class="quiz-question-count" data-q-counter>1 / 5</span></div>
+          <div style="height:3px;background:var(--navy-800)"><div style="height:3px;background:var(--green-500);transition:width .4s ease;width:20%" data-q-progress></div></div>
+          <div data-quiz-body>
+
+            <div data-question>
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A retail company wants to build a chatbot that understands customer requests like "I want to return my order", "Track my delivery", "Change my address", and "Speak to a person". The bot needs to identify what the customer wants and extract relevant details like order numbers.</div>
+                <p class="quiz-question">Which Azure AI Language feature should be used to identify what the customer wants?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Custom Text Classification — classify each message into a support category</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Conversational Language Understanding (CLU) — identifies intents (ReturnOrder, TrackDelivery, ChangeAddress, HumanAgent) and extracts entities (order number)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Custom Q&A — build a knowledge base of FAQ answers for each scenario</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Named Entity Recognition (prebuilt) — extracts order numbers and addresses</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> CLU is designed exactly for this scenario — identifying user intents and extracting entities in a conversational context. You define intents (ReturnOrder, TrackDelivery, etc.), provide labelled utterance examples, and train the model to classify new messages. It also extracts entities (like order numbers) from those messages. Custom Text Classification (A) classifies documents into categories but doesn't extract entities. Custom Q&A (C) answers questions from a knowledge base — not for routing/intent detection. Prebuilt NER (D) would find order numbers but not identify the overall intent/action.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A developer trains a CLU model and notices that when users say things outside the defined intents (like "What time is it?"), the model incorrectly classifies them as existing intents with low confidence. What is the most likely cause?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The training dataset is too large — reduce utterances per intent</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The None intent is missing — without it, all utterances are forced into defined intents even when they don't match</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The model needs to be deployed to a staging slot before production</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">CLU cannot handle out-of-scope utterances — switch to LUIS instead</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The None intent is specifically for out-of-scope utterances — things the bot is not designed to handle. Without it, the model must classify every utterance into one of the defined intents, even if none match well — resulting in low-confidence misclassifications. Adding a None intent with diverse examples of irrelevant utterances gives the model a "none of the above" category to use. LUIS (D) is deprecated and replaced by CLU, so switching is not the answer.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A news publishing company wants to automatically tag incoming articles so they can be surfaced in the right sections. An article about a tech company's quarterly results should appear in both the "Technology" and "Business" sections. Another article about a merger should appear in "Business", "Finance", and "Legal".</div>
+                <p class="quiz-question">Which type of Custom Text Classification should be used?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Single-label classification — assign the primary category for each article</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Multi-label classification — each article can be assigned multiple categories simultaneously</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">CLU — classify the article's intent to determine the section</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Prebuilt sentiment analysis — positive articles go to Business, negative to Technology</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Multi-label classification allows each document to be assigned multiple labels simultaneously — exactly what's needed here (Technology AND Business, or Business AND Finance AND Legal). Single-label (A) forces each article into exactly one category — it can't handle the overlap required. CLU (C) identifies user intents in conversation — not document categorisation. Sentiment analysis (D) measures emotional tone — irrelevant to section routing.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A customer service team has a 500-page FAQ document. They want to deploy a chatbot that can answer customer questions by finding relevant answers in that document — without building complex NLP logic. When a customer asks "Can I get a refund for a digital product?" the bot should find and return the relevant policy text.</div>
+                <p class="quiz-question">Which is the most appropriate Azure service for this scenario?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">CLU — train on intents derived from common FAQ questions</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Custom Question Answering — import the FAQ document and let the service find matching answers using semantic similarity</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Azure AI Search — index the FAQ document for keyword search</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Custom Text Classification — classify each FAQ entry as a question or answer</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Custom Question Answering is specifically designed for FAQ-style knowledge bases. You import the 500-page FAQ document (or web URL) and the service automatically extracts Q&A pairs. At runtime it uses semantic similarity to find the best matching answer to natural language questions — no need to define intents or write complex logic. CLU (A) would require manually defining intents for hundreds of topics. Azure AI Search (C) does keyword search — it returns document chunks, not direct answers. Custom Text Classification (D) categorises documents — not relevant to answering questions.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A legal firm's documents contain references to parties like "Defendant", "Plaintiff", "Presiding Judge", and specific entity types like "Case Reference" numbers and "Court Location" — none of which exist in the prebuilt Azure AI Language NER model. What should they use?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Prebuilt NER — the Person and Location categories can capture these</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Custom NER — define domain-specific entity types (Defendant, CaseReference, CourtLocation) and train on labelled legal documents</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">CLU — define entities for each legal concept</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Key Phrase Extraction — extracts important legal terms automatically</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Custom NER is designed exactly for this scenario — when the prebuilt NER entity categories are too generic for your domain. You define your own entity types (Defendant, CaseReference, CourtLocation), label these entities in sample legal documents, and train a custom model that recognises them. Prebuilt NER (A) might classify "Defendant" as a Person and "Court Location" as a Location, but lacks the legal precision and won't recognise Case References at all. CLU (C) is for intent/entity extraction in conversational scenarios, not document extraction at scale. Key Phrase Extraction (D) finds key topics as phrases — it doesn't categorise entities.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 5</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next style="background:var(--green-600)">Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="completion-bar">
+        <div class="completion-checkbox" data-complete-toggle="p4-custom-language"><span class="check-icon">✓</span></div>
+        <span class="completion-label" data-complete-label>Mark this topic as complete</span>
+      </div>
+
+      <!-- PART 4 COMPLETE -->
+      <div style="background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(59,130,246,.08));border:1px solid rgba(16,185,129,.3);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);text-align:center;margin-bottom:var(--space-8)">
+        <div style="font-size:3rem;margin-bottom:var(--space-4)">🎉</div>
+        <div style="font-family:var(--font-heading);font-size:clamp(1.4rem,3vw,2rem);font-weight:800;color:var(--green-400);margin-bottom:var(--space-3)">Part 4 Complete!</div>
+        <p style="font-size:.975rem;color:var(--text-secondary);max-width:500px;margin:0 auto var(--space-6);line-height:1.7">You've finished <strong>Implement Natural Language Processing Solutions</strong> (15–20% of exam). Reinforce with flashcards and quiz, then move to Part 5.</p>
+        <div style="display:flex;gap:var(--space-4);justify-content:center;flex-wrap:wrap">
+          <a href="../flashcards.html" class="btn btn-secondary">🃏 Flashcards</a>
+          <a href="../quiz.html" class="btn btn-secondary">📝 Part 4 Quiz</a>
+          <a href="../../part5-knowledge-mining/index.html" class="btn btn-primary">Start Part 5 — Knowledge Mining →</a>
+        </div>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="02-speech.html" class="topic-nav-prev"><span style="color:var(--text-muted)">←</span><div><div class="topic-nav-label">Previous</div><div class="topic-nav-title">Speech Services</div></div></a>
+        <a href="../../part5-knowledge-mining/index.html" class="topic-nav-next"><div><div class="topic-nav-label">Next — Part 5</div><div class="topic-nav-title">Knowledge Mining →</div></div></a>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/common.js"></script>
+</body>
+</html>

@@ -1,0 +1,475 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 5 – Data Migration &amp; Integration Quiz · CSA</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #a78bfa; color: #c4b5fd; background: rgba(139,92,246,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(139,92,246,0.15);color:#c4b5fd;border:1px solid rgba(167,139,250,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 5 · All 3 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 5 Full Quiz</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions covering all topics in Part 5. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#a78bfa">0 / 15</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#a78bfa"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 5 — Data Migration &amp; Integration</span>
+          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#a78bfa;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📦 Topic 1 — System Update Sets</div>
+              <div class="quiz-scenario">Scenario: A developer creates a new Business Rule and several UI Policies in the Development instance. She wants to move these configurations to the Test instance.</div>
+              <p class="quiz-question">What is the correct sequence of steps to migrate these configurations using Update Sets?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Export the Update Set to XML → Load it on Test → Preview → Resolve collisions → Commit</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Mark the Update Set as Complete → Export to XML → Load it on Test → Preview → Resolve collisions → Commit</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Commit on Dev → the system automatically pushes to Test → Preview on Test</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Export the Update Set to XML → Commit directly on Dev → Load on Test</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The full Update Set lifecycle is: (1) Mark "In Progress" Update Set as Complete on the source instance, (2) Export the completed Update Set to an XML file, (3) Load (import) the XML on the target instance — set moves to "Loaded" state, (4) Preview — ServiceNow checks for collisions, (5) Resolve any collisions, (6) Commit — applies all changes. A skips marking it Complete first. C is wrong — Update Sets are never automatically pushed. D puts commit in the wrong place on the wrong instance.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📦 Topic 1 — System Update Sets</div>
+              <div class="quiz-scenario">Scenario: A developer leaves a company mid-project. An admin discovers the developer had been making form and business rule changes but never switched away from the Default Update Set. [TRAP]</div>
+              <p class="quiz-question">What happens to changes made in the Default Update Set?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">They are automatically discarded after 30 days</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">They are captured in the Default Update Set and can still be exported and migrated like any other Update Set</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Changes in the Default Update Set cannot be exported</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Default Update Set is locked and prevents all changes</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The Default Update Set is a real, functional Update Set — it captures all tracked configuration changes just like a named Update Set. The changes are not lost; they can be marked Complete, exported as XML, and migrated to other instances. The risk is organizational: mixing changes from different projects makes it hard to migrate only one project's changes selectively. A is wrong — changes are not auto-discarded. C is wrong — the Default Update Set can be exported. D is wrong — it accepts changes freely.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📦 Topic 1 — System Update Sets</div>
+              <div class="quiz-scenario">Scenario: A developer's Update Set contains: a Business Rule, a new table she created, a Form Layout change, 500 Incident test records, and a User record for a test account. [TRAP]</div>
+              <p class="quiz-question">Which items in this Update Set will NOT be moved to the target instance when committed?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Business Rule and the new table</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The 500 Incident records and the User record — Update Sets capture configuration, not data records</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Form Layout change</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Nothing — all items including data records are captured and committed</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is the most tested Update Set trap on the CSA exam. Update Sets capture CONFIGURATION changes only — Business Rules, UI Policies, Tables, Form Layouts, Workflows, Scripts, ACLs. They do NOT capture DATA records — Incidents, User records, Tasks, and Asset rows are never tracked in Update Sets. The developer's Incident test data and User record appear to be "in" the Update Set but will NOT transfer. To move data records, use XML Export/Import instead.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📦 Topic 1 — System Update Sets</div>
+              <div class="quiz-scenario">Scenario: An admin previews an Update Set on the Test instance and sees several "collision" warnings — configurations in the Update Set conflict with existing customizations on Test.</div>
+              <p class="quiz-question">What should the admin do next?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Immediately commit — collisions are automatically resolved during commit</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Delete the Update Set and recreate all configurations manually on Test</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Review each collision, decide whether to accept the incoming change or keep the existing customization, then commit</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Collisions prevent the Update Set from loading — the set must be corrected on Dev first</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The Preview step exists precisely to surface collisions before commit. The admin must review each collision and decide: accept the incoming version (overwrite Test) or keep the existing version (skip that change). After all collisions are resolved, the admin safely commits. A is wrong — collisions are not automatically resolved. B is unnecessary and wasteful. D is wrong — collisions do not prevent loading; the set is already loaded, Preview runs successfully, it just flags conflicts for human review.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📦 Topic 1 — System Update Sets</div>
+              <div class="quiz-scenario">Scenario: A developer wants to verify which specific configurations her active Update Set has tracked so far before marking it Complete.</div>
+              <p class="quiz-question">Which table stores the individual tracked customization records that belong to an active Update Set?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">sys_update_set</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">sys_update_xml</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">sys_audit</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">sys_import_set</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The sys_update_xml table stores the individual tracked customization records — each configuration change as an XML payload — that belong to a given Update Set. sys_update_set (A) stores the Update Set header record itself (name, state, description), not the individual changes. sys_audit (C) stores field-level change history for data records, unrelated to configuration migration. sys_import_set (D) is the staging table for Import Sets, completely unrelated to Update Sets.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">📄 Topic 2 — XML Imports &amp; Exports</div>
+              <div class="quiz-scenario">Scenario: An admin needs to move a specific catalog item (including its variables and approval workflow) from Dev to Production without including other unrelated configuration changes.</div>
+              <p class="quiz-question">What is the best approach to migrate just this catalog item record?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Create a new Update Set, then re-create the catalog item manually on Prod</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Export the catalog item record as XML from Dev, then import it on Prod using the XML import feature</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Use the CMDB Dependency View to clone the record to Prod</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Write a Business Rule to copy the record to Prod automatically</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> XML Export/Import is the correct tool for moving individual data records between ServiceNow instances. The exported XML preserves the record's original sys_id, so when imported on the target, the same sys_id is reused — no duplicate is created and any existing references remain intact. A is inefficient and still requires manual effort. C is wrong — Dependency View is a CMDB visualization tool, not a record migration feature. D introduces unnecessary complexity without benefit.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">📄 Topic 2 — XML Imports &amp; Exports</div>
+              <div class="quiz-scenario">Scenario: A developer exports a Group record from Dev as XML and imports it on Test. She checks the sys_id of the Group on Test and finds it is identical to the sys_id on Dev. [TRAP]</div>
+              <p class="quiz-question">Why does the imported Group record have the same sys_id?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">This is a bug — sys_ids should always be unique across all instances</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">XML export and import preserve the original sys_id by design, which maintains referential integrity across instances</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">ServiceNow generates a new sys_id only if the record already exists on the target</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Test automatically copies all sys_ids from Dev during daily synchronization</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> XML export and import intentionally preserve the original sys_id. This is a feature, not a bug — it is essential for referential integrity. If other records reference this Group by sys_id (ACLs, workflows, user memberships), those references continue to resolve correctly after import because the sys_id is unchanged. A is wrong — having the same sys_id for the same logical record across Dev/Test/Prod is expected and desirable. C is wrong — sys_ids are always preserved. D is wrong — no automatic daily sync exists.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">📄 Topic 2 — XML Imports &amp; Exports</div>
+              <div class="quiz-scenario">Scenario: A team needs to migrate 200 User records from a legacy ServiceNow instance to a new instance. They want to preserve user sys_ids so existing Incident assignments don't break.</div>
+              <p class="quiz-question">Which migration method is most appropriate?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Update Sets — they capture user records and preserve sys_ids</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">XML Export/Import — it transfers data records and preserves original sys_ids exactly</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Transform Map with a coalesce field on user_name</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Manually re-enter all 200 users on the new instance</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> XML Export/Import is designed exactly for this scenario: migrating data records (users, groups, catalog items) between instances while preserving sys_ids. Since existing Incidents reference users by sys_id, preservation is critical to avoid broken assignments. A is wrong — Update Sets capture configuration changes, not User data records. C works for importing from external non-ServiceNow sources but may not preserve sys_ids from the source instance. D generates new sys_ids for each user, breaking all existing Incident references.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">📄 Topic 2 — XML Imports &amp; Exports</div>
+              <div class="quiz-scenario">Scenario: An admin asks: "I need to move a new Table definition and 50 test Incident records from Dev to Test. Can I do both in one Update Set?"</div>
+              <p class="quiz-question">What is the correct answer?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — Update Sets capture both tables and data records in a single package</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — use the Update Set for the Table definition (configuration), and use XML Export/Import separately for the Incident records (data)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">No — neither tool can move table definitions; tables must be recreated manually</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Yes — but only if the Incident records were created by an admin account</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This tests when to use each migration tool. Update Sets: move configuration (tables, business rules, forms, scripts). XML Export/Import: move data records (incidents, users, catalog items). Both tools are complementary and needed here. A is wrong — Update Sets do NOT capture data records. C is wrong — Update Sets absolutely can capture and migrate table definitions. D is wrong — who created the incident records is irrelevant to what Update Sets can track.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#67e8f9">🔌 Topic 3 — IntegrationHub &amp; Spokes</div>
+              <div class="quiz-scenario">Scenario: A ServiceNow admin wants to automatically send a Microsoft Teams message when a Priority 1 Incident is created. She wants to use a pre-built Teams connector without writing custom REST API calls from scratch.</div>
+              <p class="quiz-question">Which IntegrationHub component provides pre-built actions specifically for interfacing with Microsoft Teams?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">REST Message</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Business Rule with a GlideHTTPRequest</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Microsoft Teams Spoke</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Transform Map with a REST data source</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> A Spoke is a scoped application within IntegrationHub containing pre-built actions for a specific third-party service. The Microsoft Teams Spoke provides actions like "Send Message," "Create Channel," and "Add Member" without requiring custom REST coding. REST Message (A) is a lower-level configuration requiring manual endpoint, header, and payload definition. Business Rule with GlideHTTPRequest (B) is even more script-heavy. Transform Maps (D) are for data import pipelines, not outbound API calls.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#67e8f9">🔌 Topic 3 — IntegrationHub &amp; Spokes</div>
+              <div class="quiz-scenario">Scenario: A procurement manager wants to use IntegrationHub to connect ServiceNow with SAP, Salesforce, and Workday. An IT director says this is included at no extra cost in the base ServiceNow license. [TRAP]</div>
+              <p class="quiz-question">Who is correct?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The IT director — IntegrationHub is included with all ServiceNow licenses</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The IT director is wrong — IntegrationHub requires a separate subscription (Standard, Professional, or Enterprise tier)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Both — IntegrationHub is free, but individual Spokes cost extra</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Neither — REST Messages can replace IntegrationHub entirely at no cost</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> IntegrationHub is a subscription-licensed add-on product with three tiers — Standard, Professional, and Enterprise — that unlock different pre-built Spoke libraries and action volumes. It is NOT included in the base ServiceNow platform license. This is a common trap on the CSA exam. A is wrong — IntegrationHub requires a separate purchase. C is wrong — IntegrationHub itself is not free. D is wrong — REST Messages require significant manual scripting and do not provide the codeless Spoke actions that make IntegrationHub valuable.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#67e8f9">🔌 Topic 3 — IntegrationHub &amp; Spokes</div>
+              <div class="quiz-scenario">Scenario: An admin needs to configure an outbound HTTP GET request to retrieve weather data from an external REST API, including the endpoint URL, authentication headers, and HTTP method.</div>
+              <p class="quiz-question">Which ServiceNow object is designed to store this outbound HTTP configuration?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Data Source</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">REST Message</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Transform Map</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Update Set</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A REST Message stores all the details of an outbound REST API call: endpoint URL, authentication method and credentials, HTTP method (GET, POST, PUT, DELETE), request headers, and variable substitution. It can then be called from Business Rules, Scripts, or Flow Designer actions. Data Source (A) defines inbound data origins for Import Sets — it is for pulling data in via imports, not making programmatic API calls. Transform Map (C) is for field mapping during data imports. Update Set (D) is for configuration migration between instances.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#67e8f9">🔌 Topic 3 — IntegrationHub &amp; Spokes</div>
+              <div class="quiz-scenario">Scenario: A developer describes IntegrationHub as "just another name for REST Messages." A senior architect strongly disagrees. [TRAP]</div>
+              <p class="quiz-question">What is the key distinction between IntegrationHub and REST Messages?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">IntegrationHub only supports SOAP, while REST Messages support REST APIs</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IntegrationHub provides a codeless pre-built Spoke library for dozens of third-party apps integrated with Flow Designer; REST Messages are lower-level scripted HTTP configurations</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">REST Messages are deprecated in Zurich and fully replaced by IntegrationHub</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">There is no functional difference — they are aliases for the same feature</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> IntegrationHub is a higher-level platform providing pre-built Spokes (one per third-party app), codeless drag-and-drop actions in Flow Designer, and managed authentication. REST Messages are lower-level building blocks requiring the developer to manually configure every HTTP call parameter and write scripts to invoke them. Both coexist in ServiceNow. A is wrong — IntegrationHub supports REST, SOAP, and more. C is wrong — REST Messages are not deprecated. D is wrong — they are fundamentally different abstraction levels.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📦 Topic 1 — System Update Sets</div>
+              <div class="quiz-scenario">Scenario: An admin loads an Update Set XML file on the Test instance and notices the Update Set's state is now "Loaded." She wants to understand what this state means before taking the next step.</div>
+              <p class="quiz-question">What does the "Loaded" state indicate in the Update Set lifecycle on the target instance?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Update Set has been committed and all changes are live on Test</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The XML file has been imported onto the target instance and the Update Set is ready for Preview</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Update Set is actively recording changes on the source instance</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Preview step has completed with no collisions found</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> In the Update Set lifecycle on the target instance: Loaded → Preview → (resolve collisions) → Commit. "Loaded" means the XML file was successfully imported — the changes are staged but not yet applied, and are ready for Preview. A is wrong — Loaded precedes commit; no changes are applied yet. C is wrong — "In Progress" is the recording state on the source instance. D is wrong — a successful Preview with no collisions prepares the set for commit, but "Loaded" is the state before Preview runs.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#67e8f9">🔌 Topic 3 — IntegrationHub &amp; Spokes</div>
+              <div class="quiz-scenario">Scenario: A Flow Designer flow needs to call an external ticketing system's API when a Change Request is approved. A junior developer suggests writing a Business Rule with a REST call instead. [TRAP]</div>
+              <p class="quiz-question">What is the primary advantage of using an IntegrationHub Spoke action in Flow Designer over a scripted Business Rule with REST Message?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Business Rules cannot make outbound HTTP calls</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IntegrationHub Spoke actions are codeless, maintainable by admins without scripting, visible in flow diagrams, and support managed authentication — whereas Business Rules require scripting and are harder to maintain</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">IntegrationHub executes faster at runtime than Business Rules</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Spoke actions bypass ServiceNow ACLs, making them more reliable for outbound calls</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The primary advantage of IntegrationHub Spoke actions in Flow Designer is the codeless, visual, maintainable approach. Non-developers can understand and modify flows; authentication is managed centrally; error handling is built in; and the integration is visible as a clear step in the flow diagram. Business Rules with REST Messages work technically but require scripting expertise, are hidden in code, harder to debug visually, and authentication must be managed manually in script. A is wrong — Business Rules can make outbound HTTP calls via GlideHTTPRequest. C is wrong — runtime speed is not the distinguishing factor. D is wrong — Spoke actions do not bypass ACLs.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div><!-- /main-quiz -->
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 15;
+  const dots = document.getElementById('q-dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => {
+      const s = window._quizState;
+      if (!s) return;
+      s.current = i;
+      QuizEngine._renderState(s);
+      updateDots(i, s);
+    });
+    dots.appendChild(d);
+  }
+
+  function updateDots(current, s) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current', 'correct', 'incorrect');
+      if (i === current) {
+        d.classList.add('current');
+      } else if (s.answered[i] !== null) {
+        const correct = s.questions[i].querySelector('[data-correct]')?.dataset.correct;
+        d.classList.add(s.answered[i] === correct ? 'correct' : 'incorrect');
+      }
+    });
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = s.score + ' / ' + TOTAL;
+    document.getElementById('qs-answered').textContent = s.answered.filter(a => a !== null).length;
+    document.getElementById('qs-prog').style.width = (((current + 1) / TOTAL) * 100) + '%';
+    const scoreEl = document.querySelector('[data-q-score]');
+    if (scoreEl) scoreEl.textContent = 'Score: ' + s.score + ' / ' + TOTAL;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('main-quiz');
+    QuizEngine.init('main-quiz');
+
+    setTimeout(() => {
+      const s = QuizEngine._getState ? QuizEngine._getState('main-quiz') : null;
+      window._quizState = s;
+
+      const patch = () => setTimeout(() => {
+        if (window._quizState) updateDots(window._quizState.current, window._quizState);
+      }, 60);
+
+      container.querySelectorAll('[data-option]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          QuizEngine.selectOption('main-quiz', btn);
+          patch();
+        });
+      });
+
+      container.querySelector('[data-q-prev]')?.addEventListener('click', () => {
+        QuizEngine.prevQuestion('main-quiz');
+        patch();
+      });
+      container.querySelector('[data-q-next]')?.addEventListener('click', () => {
+        QuizEngine.nextQuestion('main-quiz');
+        patch();
+      });
+      container.querySelector('[data-q-submit]')?.addEventListener('click', () => {
+        QuizEngine.submitQuiz('main-quiz');
+      });
+
+      if (s) updateDots(0, s);
+    }, 100);
+  });
+</script>
+</body>
+</html>

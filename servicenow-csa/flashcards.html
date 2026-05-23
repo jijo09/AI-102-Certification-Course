@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSA – Flashcards</title>
+  <link rel="stylesheet" href="../styles/main.css" />
+  <script src="scripts/study-data.js"></script>
+  <script>
+    // Utility to get query param value
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const part = getQueryParam('part') || '1';
+      const container = document.getElementById('flashcard-container');
+      // Filter cards for the selected part
+      const cards = STUDY_DATA.cards.filter(c => c.p === `p${part}`);
+      cards.forEach(card => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'flashcard';
+        cardEl.innerHTML = `
+          <div class="flashcard-inner">
+            <div class="flashcard-front"><strong>${card.term}</strong></div>
+            <div class="flashcard-back">${card.def}</div>
+          </div>`;
+        container.appendChild(cardEl);
+      });
+    });
+  </script>
+  <style>
+    .flashcard { perspective: 600px; margin: 1rem; display: inline-block; }
+    .flashcard-inner { position: relative; width: 250px; height: 150px; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
+    .flashcard:hover .flashcard-inner { transform: rotateY(180deg); }
+    .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border: 1px solid var(--gb-white); border-radius: var(--radius-md); display:flex; align-items:center; justify-content:center; padding: var(--space-3); background: var(--bg-card); color: var(--text-primary); }
+    .flashcard-back { transform: rotateY(180deg); background: var(--bg-card-hover); }
+  </style>
+</head>
+<body class="theme-csa">
+  <header class="header"><h1>Flashcards – Part <span id="part-number"></span></h1></header>
+  <main class="content">
+    <div id="flashcard-container" class="flashcard-grid"></div>
+  </main>
+  <footer class="footer">© 2026 ServiceNow CSA Study Hub</footer>
+  <script>document.getElementById('part-number').textContent = getQueryParam('part') || '1';</script>
+</body>
+</html>

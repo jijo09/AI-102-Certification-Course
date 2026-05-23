@@ -1,0 +1,790 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Schema &amp; Import Sets | ServiceNow CSA Part 4</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 4</a>
+        <span class="sep">›</span>
+        <span class="current">Data Schema &amp; Import Sets</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🗄️ Part 4 · Topic 1 of 4</div>
+        <h1 class="topic-title">Data Schema &amp; Import Sets</h1>
+        <div class="topic-meta">
+          <span>⏱ ~75 min read</span>
+          <span>·</span>
+          <span>Part 4 — Database &amp; Security (27% exam weight — HIGHEST)</span>
+        </div>
+        <div class="callout-exam" style="margin-top:var(--space-4)">
+          <strong>Highest-Weight Section:</strong> Part 4 carries <strong>27% of the CSA exam</strong> — more than any other section. Data schema and import sets are among the most heavily tested topics. Master every concept here before exam day.
+        </div>
+      </div>
+
+      <!-- Section 1: Table Architecture -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Table Architecture</h2>
+        <p>ServiceNow stores all data in database tables. Understanding how tables are defined, registered, and related to each other is fundamental to everything else in the platform.</p>
+
+        <h3>sys_db_object — The Table Registry</h3>
+        <p>Every table in ServiceNow is itself a record in the <code>sys_db_object</code> table. This is ServiceNow's internal table registry — it defines all tables that exist on the platform.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>sys_db_object</h4>
+            <p>The <strong>table registry</strong>. Every user-defined and platform table has a record here. Contains the table name, label, parent (extended) table, and configuration metadata.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate: type <code>sys_db_object.list</code> in the filter navigator</p>
+          </div>
+          <div class="term-card">
+            <h4>sys_dictionary</h4>
+            <p>The <strong>column (field) registry</strong>. Every field on every table has a record here. Defines field type, max length, default value, and dictionary overrides.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate: type <code>sys_dictionary.list</code> in the filter navigator</p>
+          </div>
+          <div class="term-card">
+            <h4>sys_choice</h4>
+            <p>Stores all <strong>choice list values</strong> for Choice fields. Choice fields display a dropdown — each option is a row in sys_choice with a label and value.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate: type <code>sys_choice.list</code> in the filter navigator</p>
+          </div>
+        </div>
+
+        <h3>The sys_id — Universal Record Identifier</h3>
+        <p>Every record in every ServiceNow table has a <code>sys_id</code> — a globally unique identifier (GUID) that never changes for the lifetime of that record.</p>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — sys_id Format:</strong> A <code>sys_id</code> is a <strong>32-character hexadecimal string</strong> (128-bit UUID). Example: <code>9d385017c611228701d22104cc95c371</code>. It contains only characters 0–9 and a–f. ServiceNow uses sys_ids for all record references, foreign keys, and relationships — never plain integers.
+        </div>
+
+        <h3>System Fields on Every Table</h3>
+        <p>All ServiceNow tables automatically inherit a set of system audit fields. These fields are present on every record, on every table, without exception.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sys_id</code></td>
+              <td>GUID (32 hex chars)</td>
+              <td>Unique identifier for the record. Never changes. Used as primary key and foreign key reference.</td>
+            </tr>
+            <tr>
+              <td><code>sys_created_on</code></td>
+              <td>Date/Time</td>
+              <td>Timestamp when the record was first created. Set automatically; cannot be modified.</td>
+            </tr>
+            <tr>
+              <td><code>sys_created_by</code></td>
+              <td>String</td>
+              <td>Username of the user who created the record. Set automatically at creation.</td>
+            </tr>
+            <tr>
+              <td><code>sys_updated_on</code></td>
+              <td>Date/Time</td>
+              <td>Timestamp of the most recent modification to the record. Updated on every save.</td>
+            </tr>
+            <tr>
+              <td><code>sys_updated_by</code></td>
+              <td>String</td>
+              <td>Username of the user who last modified the record. Updated on every save.</td>
+            </tr>
+            <tr>
+              <td><code>sys_class_name</code></td>
+              <td>String</td>
+              <td>The actual table name of the record within an extended hierarchy. Critical for polymorphic queries.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-tip">
+          <strong>Why sys_class_name Matters:</strong> When a table extends another (e.g., <code>incident</code> extends <code>task</code>), querying the parent <code>task</code> table returns rows from all child tables mixed together. The <code>sys_class_name</code> field tells you which actual table each row belongs to — incident, change_request, problem, etc. Without it, you cannot distinguish record types in a polymorphic query.
+        </div>
+
+        <h3>Table Inheritance (Extends)</h3>
+        <p>ServiceNow supports single-table inheritance. A child table can <strong>extend</strong> a parent table, inheriting all of the parent's columns while adding its own unique fields.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Child table rows are stored in the <strong>same physical database rows</strong> as parent table data</li>
+          <li>All parent columns are accessible on child records</li>
+          <li>The child table can add new fields that only exist on that table</li>
+          <li>Querying the parent table returns records from <strong>all</strong> child tables (polymorphic)</li>
+          <li>Querying a child table returns only records of that specific type</li>
+        </ul>
+
+        <h3>The task Table — Root of the ITIL Hierarchy</h3>
+        <p>The <code>task</code> table is the most important extended table in ServiceNow. It is the root parent for all core ITIL process tables.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:2;color:var(--text-primary);overflow-x:auto"><code>task                          ← Root parent table
+├── incident                  ← Extends task
+├── problem                   ← Extends task
+├── change_request            ← Extends task
+│   ├── change_task           ← Extends change_request
+├── sc_task                   ← Extends task (service catalog task)
+├── sc_req_item               ← Extends task (catalog item request)
+└── sn_si_incident            ← Extends task (security incident)</code></pre>
+        </div>
+
+        <p>Because all these tables extend <code>task</code>, they all share common fields like <code>number</code>, <code>short_description</code>, <code>state</code>, <code>assigned_to</code>, <code>assignment_group</code>, <code>priority</code>, and <code>opened_at</code>.</p>
+
+        <div class="callout-concept">
+          <strong>Flat vs. Extended Tables:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><strong>Extended table</strong> — inherits columns from a parent table. Example: <code>incident</code> extends <code>task</code>. Records appear in both the child table and the parent table query.</li>
+            <li><strong>Flat table</strong> — does not extend any other table (or only extends the base <code>sys_metadata</code>). Example: <code>sys_user</code> (users table) is essentially flat — it does not extend a domain-specific parent.</li>
+          </ul>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Trap — Querying Extended Tables:</strong> If you query <code>task.list</code>, you will see records from <code>incident</code>, <code>change_request</code>, <code>problem</code>, and all other task child tables mixed together. Use <code>sys_class_name=incident</code> to filter to a specific child type, or query the child table directly via <code>incident.list</code>.
+        </div>
+      </div>
+
+      <!-- Section 2: Import Sets -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Import Sets — Overview</h2>
+        <p>Import Sets are ServiceNow's mechanism for loading external data into the platform. They use a two-stage process: first load data into a staging table, then transform it into the target production table.</p>
+
+        <div class="callout-concept">
+          <strong>The Two-Stage Process:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><strong>Load</strong> — Raw data is loaded into a temporary import set (staging) table</li>
+            <li><strong>Transform</strong> — A transform map moves and converts data from staging to the target table</li>
+          </ol>
+          This separation means you can inspect and clean data in the staging area before it reaches production tables.
+        </div>
+
+        <h3>Key Tables in the Import Set System</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table Name</th>
+              <th>Purpose</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sys_import_set</code></td>
+              <td>Tracks each import set run — the "container" for a batch of imported rows</td>
+              <td>One record per import operation</td>
+            </tr>
+            <tr>
+              <td><code>u_imp_*</code></td>
+              <td>The actual staging table where raw imported rows land</td>
+              <td>Auto-created with <code>u_</code> prefix and auto-generated suffix</td>
+            </tr>
+            <tr>
+              <td><code>sys_import_set_row</code></td>
+              <td>Tracks the result of each individual row: inserted, updated, error, or skipped</td>
+              <td>One record per row per import run</td>
+            </tr>
+            <tr>
+              <td><code>sys_transform_map</code></td>
+              <td>Defines the transform — source table, target table, and settings</td>
+              <td>Must be created before running transform</td>
+            </tr>
+            <tr>
+              <td><code>sys_transform_entry</code></td>
+              <td>Individual field mapping rules within a transform map (source field → target field)</td>
+              <td>One record per mapped field</td>
+            </tr>
+            <tr>
+              <td><code>sys_data_source</code></td>
+              <td>Defines the external data source — file type, connection details, credentials</td>
+              <td>Referenced by scheduled imports</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Import Set Staging Table Naming</h3>
+        <p>When you upload a file (Excel or CSV) to create an import set, ServiceNow automatically creates a staging table with a <code>u_imp_</code> prefix. The table name is derived from the file name or can be specified manually.</p>
+
+        <div class="callout-exam">
+          <strong>Exam Fact:</strong> Import set staging tables are <strong>always prefixed with <code>u_</code></strong> (the user-created table prefix) and typically contain <code>imp</code> in the name. Example: <code>u_imp_users_from_hr</code>. They are temporary staging areas — data in them is not meaningful until transformed to a target table.
+        </div>
+
+        <h3>Data Loading Methods</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>File Upload (Excel / CSV)</h4>
+            <p>Most common method. Upload a <code>.xlsx</code> or <code>.csv</code> file directly via the ServiceNow UI. ServiceNow reads column headers and creates matching staging table columns automatically.</p>
+          </div>
+          <div class="term-card">
+            <h4>JDBC</h4>
+            <p>Connect to an external relational database (Oracle, SQL Server, MySQL) via JDBC. Run a SQL query to pull records directly into an import set staging table.</p>
+          </div>
+          <div class="term-card">
+            <h4>REST Web Service</h4>
+            <p>POST data to the ServiceNow Import Set REST API endpoint. Allows external systems to push data in real-time into a staging table without file uploads.</p>
+          </div>
+          <div class="term-card">
+            <h4>SFTP / FTP</h4>
+            <p>Pull a file from a remote SFTP/FTP server on a schedule. ServiceNow retrieves the file automatically and loads it into the staging table — no manual upload required.</p>
+          </div>
+          <div class="term-card">
+            <h4>LDAP</h4>
+            <p>Import user directory data from an LDAP/Active Directory server. Commonly used for user provisioning and synchronization.</p>
+          </div>
+          <div class="term-card">
+            <h4>HTTP</h4>
+            <p>Retrieve data from a URL (REST/HTTP endpoint) as part of a scheduled import. ServiceNow fetches and parses the response into the staging table.</p>
+          </div>
+        </div>
+
+        <h3>Import Set Run Process — Load → Transform → Result</h3>
+        <p>Every import set operation follows the same three-stage lifecycle:</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:2;color:var(--text-primary);overflow-x:auto"><code>┌─────────────────────────────────────────────────────────────┐
+│  STAGE 1: LOAD                                              │
+│  External data (CSV/XLSX/JDBC/REST) → Import Set Table      │
+│  Raw rows land in u_imp_* staging table                     │
+│  No transformation yet — data in raw source format          │
+├─────────────────────────────────────────────────────────────┤
+│  STAGE 2: TRANSFORM                                         │
+│  Transform Map applies field mappings + coalesce rules      │
+│  Scripts (onBefore/onAfter) execute for complex logic       │
+│  Each row: MATCH existing? → UPDATE : INSERT                │
+├─────────────────────────────────────────────────────────────┤
+│  STAGE 3: RESULT                                            │
+│  sys_import_set_row records show per-row outcome:           │
+│  inserted / updated / error / skipped / ignored             │
+│  Target table now contains the transformed records          │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+        </div>
+
+        <div class="callout-tip">
+          <strong>Reviewing Import Results:</strong> After a transform, navigate to the import set record in <code>sys_import_set.list</code> and open the import set rows to see the per-row result status. Error rows will show why they failed. This is the primary debugging tool for import issues.
+        </div>
+      </div>
+
+      <!-- Section 3: Transform Maps -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Transform Maps — In Depth</h2>
+        <p>A Transform Map is the rulebook that tells ServiceNow how to move data from the import set staging table into the target production table. Without a transform map, you cannot run a transform.</p>
+
+        <h3>Transform Map Components</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Source Table</h4>
+            <p>The import set staging table (<code>u_imp_*</code>) that contains the raw loaded data. This is the "from" side of the mapping.</p>
+          </div>
+          <div class="term-card">
+            <h4>Target Table</h4>
+            <p>The production ServiceNow table where records should land. Examples: <code>sys_user</code>, <code>cmdb_ci_server</code>, <code>incident</code>. This is the "to" side.</p>
+          </div>
+          <div class="term-card">
+            <h4>Field Mappings</h4>
+            <p>Individual rules connecting a source field (staging column) to a target field (production column). Created as <code>sys_transform_entry</code> records.</p>
+          </div>
+          <div class="term-card">
+            <h4>Coalesce Fields</h4>
+            <p>Designated "match key" fields. If a record in the target table matches on a coalesce field, the existing record is updated. If no match, a new record is inserted.</p>
+          </div>
+          <div class="term-card">
+            <h4>Transform Scripts</h4>
+            <p>Server-side JavaScript attached to individual field mappings. Runs per-row to perform complex value transformations (e.g., concatenate fields, look up reference values).</p>
+          </div>
+          <div class="term-card">
+            <h4>Map Scripts (onBefore / onAfter)</h4>
+            <p>Scripts that run at the transform map level — <code>onBefore</code> runs before any fields are mapped for a row, <code>onAfter</code> runs after all fields are mapped and the record is about to be saved.</p>
+          </div>
+        </div>
+
+        <h3>Field Mapping Details</h3>
+        <p>Each field mapping in a transform map specifies:</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Source field</strong></td>
+              <td>Column name in the import set staging table</td>
+              <td><code>u_first_name</code></td>
+            </tr>
+            <tr>
+              <td><strong>Target field</strong></td>
+              <td>Column name in the production target table</td>
+              <td><code>first_name</code></td>
+            </tr>
+            <tr>
+              <td><strong>Coalesce</strong></td>
+              <td>If checked, this field is used as a match key to find existing records</td>
+              <td>Checked on <code>email</code> field</td>
+            </tr>
+            <tr>
+              <td><strong>Use source script</strong></td>
+              <td>If enabled, a script transforms the source value before mapping it</td>
+              <td>Transform date format</td>
+            </tr>
+            <tr>
+              <td><strong>Choice action</strong></td>
+              <td>What to do when a choice field value doesn't match existing choices: ignore, reject, create</td>
+              <td><code>create</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Coalesce — How Deduplication Works</h3>
+        <p>Coalesce is the mechanism that prevents duplicate records when importing data that may already exist in the target table.</p>
+
+        <div class="callout-exam">
+          <strong>Exam Critical — Coalesce Logic:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>For each row being transformed, ServiceNow checks the target table for a record where the <strong>coalesce field value matches</strong></li>
+            <li>If a <strong>match is found</strong> → the existing record is <strong>UPDATED</strong> with the new data</li>
+            <li>If <strong>no match is found</strong> → a <strong>new record is INSERTED</strong></li>
+          </ol>
+          The coalesce field must contain a <strong>unique value</strong> in the target table (e.g., email address, employee ID) for this to work correctly.
+        </div>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:2;color:var(--text-primary);overflow-x:auto"><code>// Coalesce decision logic (conceptual pseudocode)
+for each row in import_set_staging_table:
+    existing = target_table.findWhere(coalesce_field == row.coalesce_value)
+
+    if existing:
+        existing.update(mapped_field_values)   // UPDATE
+        row.result = "updated"
+    else:
+        target_table.insert(mapped_field_values)  // INSERT
+        row.result = "inserted"</code></pre>
+        </div>
+
+        <div class="callout-warning">
+          <strong>Multiple Coalesce Fields:</strong> You can mark multiple fields as coalesce. When multiple coalesce fields exist, ServiceNow ANDs them together — a match requires ALL coalesce fields to match. This is useful for composite keys (e.g., match on both first name AND employee ID).
+        </div>
+
+        <h3>Transform Map Scripts</h3>
+        <p>Transform scripts allow server-side JavaScript to run during the transform process, giving you full control over complex transformation logic.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Script Type</th>
+              <th>When It Runs</th>
+              <th>Access To</th>
+              <th>Common Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Field mapping script</strong></td>
+              <td>When that specific field is being mapped for each row</td>
+              <td><code>source</code> (staging row), <code>answer</code> (return value)</td>
+              <td>Transform a date format, concatenate fields, look up a reference</td>
+            </tr>
+            <tr>
+              <td><strong>onBefore script</strong></td>
+              <td>Before any field mappings run for a row</td>
+              <td><code>source</code> (staging row), <code>target</code> (GlideRecord being built)</td>
+              <td>Pre-processing, setting ignore flag, skipping rows conditionally</td>
+            </tr>
+            <tr>
+              <td><strong>onAfter script</strong></td>
+              <td>After all field mappings run, before saving the target record</td>
+              <td><code>source</code>, <code>target</code>, <code>action</code> (insert/update)</td>
+              <td>Post-processing, sending notifications, logging, related record updates</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:2;color:var(--text-primary);overflow-x:auto"><code>// Example: onBefore script — skip rows marked as inactive
+if (source.u_status == 'inactive') {
+    ignore = true;  // skip this row entirely
+}
+
+// Example: Field mapping script — transform full name to first/last
+// (set on the target "first_name" field mapping)
+var parts = source.u_full_name.split(' ');
+answer = parts[0];  // return value becomes the field value
+
+// Example: onAfter script — log the action
+gs.log('Import row ' + action + ': ' + target.getDisplayValue(), 'ImportTransform');</code></pre>
+        </div>
+
+        <h3>Auto Map Matching Fields</h3>
+        <p>The <strong>Auto Map Matching Fields</strong> button on a transform map automatically creates field mapping entries for any staging table column whose name exactly matches a field name in the target table. This saves manual effort when column names are already aligned.</p>
+
+        <div class="callout-tip">
+          <strong>Workflow Tip:</strong> When creating a transform map, click <strong>Auto Map Matching Fields</strong> first to generate mappings for all directly-matching columns, then manually add or adjust mappings for fields that have different names or require transformation scripts.
+        </div>
+      </div>
+
+      <!-- Section 4: Data Sources -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Data Sources (sys_data_source)</h2>
+        <p>A Data Source defines the <em>connection</em> to an external data provider. Rather than re-specifying connection details each time, you create a reusable data source record and reference it from scheduled imports.</p>
+
+        <h3>Data Source Types</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>File (Excel / CSV)</h4>
+            <p>Pull data from a file attachment, a URL, or an SFTP server. The most common data source type for one-time and scheduled file-based imports.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Formats: <code>.xlsx</code>, <code>.csv</code>, <code>.xml</code></p>
+          </div>
+          <div class="term-card">
+            <h4>JDBC</h4>
+            <p>Direct database connection to an external RDBMS. Specify JDBC URL, driver class, credentials, and a SQL query. ServiceNow executes the query and loads results.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Databases: Oracle, SQL Server, MySQL, PostgreSQL</p>
+          </div>
+          <div class="term-card">
+            <h4>LDAP</h4>
+            <p>Connect to an LDAP or Active Directory server to pull user and group data. Define the base DN, filter, and attributes to retrieve.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Primary use: User provisioning and sync</p>
+          </div>
+          <div class="term-card">
+            <h4>REST</h4>
+            <p>Call an external REST API and load the JSON or XML response. Specify the URL, HTTP method, headers, authentication, and response format.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Supports Basic Auth, OAuth 2.0</p>
+          </div>
+        </div>
+
+        <h3>Data Source Key Fields</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Name</strong></td>
+              <td>Descriptive name for the data source</td>
+            </tr>
+            <tr>
+              <td><strong>Import set table name</strong></td>
+              <td>The staging table that data is loaded into (can be auto-generated or manually specified)</td>
+            </tr>
+            <tr>
+              <td><strong>Type</strong></td>
+              <td>File, JDBC, LDAP, REST — determines which connection fields appear</td>
+            </tr>
+            <tr>
+              <td><strong>Connection info</strong></td>
+              <td>URL, host, credentials, query — specific to the type selected</td>
+            </tr>
+            <tr>
+              <td><strong>Run as</strong></td>
+              <td>The ServiceNow user context under which the import runs (affects permissions)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Scheduled Imports</h3>
+        <p>A Scheduled Import links a Data Source to a Transform Map and runs on a configurable schedule. This automates the full import pipeline without manual intervention.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to: <strong>System Import Sets &gt; Scheduled Imports</strong></li>
+          <li>Set the data source, transform map, and schedule (daily, weekly, cron expression)</li>
+          <li>ServiceNow will automatically load and transform data at the specified time</li>
+          <li>The <strong>Test connection</strong> button verifies that the data source can be reached</li>
+          <li>Import logs and results are available in <code>sys_import_set.list</code> after each run</li>
+        </ul>
+
+        <div class="callout-tip">
+          <strong>Connection Testing:</strong> Before scheduling a data source, always use the <strong>Test connection</strong> or <strong>Load data</strong> buttons to verify the connection works and inspect the data before creating the transform map. This helps identify column names and data formats upfront.
+        </div>
+      </div>
+
+      <!-- Section 5: Excel/CSV Import Workflow -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Step-by-Step: Excel / CSV Import Workflow</h2>
+        <p>The file upload import is the most common import path tested on the CSA exam. Know every step in this workflow.</p>
+
+        <div class="term-grid" style="grid-template-columns:1fr">
+          <div class="term-card">
+            <h4>Step 1 — Upload the File</h4>
+            <p>Navigate to <strong>System Import Sets &gt; Load Data</strong>. Select or create an import set table name (or let ServiceNow auto-generate one with the <code>u_</code> prefix). Upload your <code>.xlsx</code> or <code>.csv</code> file and click <strong>Submit</strong>.</p>
+            <p style="margin-top:var(--space-2);font-size:0.85rem;color:var(--text-muted)"><strong>Result:</strong> An import set staging table is created and populated with the raw rows from your file. Column headers become table fields.</p>
+          </div>
+          <div class="term-card">
+            <h4>Step 2 — Inspect the Staging Data</h4>
+            <p>Review the newly created import set table to verify all rows loaded correctly. Check that column names, data types, and values look as expected. Identify which field will serve as your coalesce (match) key.</p>
+          </div>
+          <div class="term-card">
+            <h4>Step 3 — Create a Transform Map</h4>
+            <p>Navigate to <strong>System Import Sets &gt; Transform Maps &gt; New</strong>. Set the <strong>Source table</strong> (your staging table) and <strong>Target table</strong> (the production table). Give it a descriptive name and save.</p>
+          </div>
+          <div class="term-card">
+            <h4>Step 4 — Map Fields</h4>
+            <p>Open the transform map. Click <strong>Auto Map Matching Fields</strong> to auto-create mappings for columns with identical names. Then manually add or edit mappings for remaining fields. Mark the appropriate field as <strong>Coalesce</strong>.</p>
+          </div>
+          <div class="term-card">
+            <h4>Step 5 — Run the Transform</h4>
+            <p>From the import set record, click <strong>Transform</strong>. Select your transform map and click <strong>Transform</strong> again to execute. ServiceNow processes each staging row and inserts/updates records in the target table.</p>
+          </div>
+          <div class="term-card">
+            <h4>Step 6 — Review Import Set Rows</h4>
+            <p>After the transform completes, open the import set and examine the <strong>Import Set Rows</strong> related list. Each row shows its result: <code>inserted</code>, <code>updated</code>, <code>error</code>, <code>skipped</code>, or <code>ignored</code>. Investigate error rows by reading the error message in the row record.</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact — Row Result States:</strong> The <code>sys_import_set_row</code> table tracks the per-row transform outcome. Know these states:
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><strong>inserted</strong> — No coalesce match found; new record created in target table</li>
+            <li><strong>updated</strong> — Coalesce match found; existing record updated</li>
+            <li><strong>error</strong> — Transform failed for this row; check error message</li>
+            <li><strong>skipped</strong> — Row was skipped (e.g., due to an onBefore script setting <code>ignore = true</code>)</li>
+            <li><strong>ignored</strong> — Row was excluded before transform began</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 6: Update Sets vs Import Sets -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Update Sets vs. Import Sets — Critical Distinction</h2>
+        <p>This is one of the most commonly tested distinctions on the CSA exam. Update Sets and Import Sets sound related and are often confused — they serve <strong>completely different purposes</strong>.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Update Sets</th>
+              <th>Import Sets</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Primary purpose</strong></td>
+              <td>Migrate <strong>configuration (metadata)</strong> between ServiceNow instances</td>
+              <td>Import <strong>data (records)</strong> from external sources into a table</td>
+            </tr>
+            <tr>
+              <td><strong>What moves?</strong></td>
+              <td>Platform configuration: UI policies, business rules, forms, workflows, scripts</td>
+              <td>Business data: user records, CI records, incident data, asset lists</td>
+            </tr>
+            <tr>
+              <td><strong>Source</strong></td>
+              <td>Another ServiceNow instance (dev → test → production pipeline)</td>
+              <td>External system: CSV file, JDBC database, REST API, SFTP</td>
+            </tr>
+            <tr>
+              <td><strong>Direction</strong></td>
+              <td>ServiceNow instance → (exported) → another ServiceNow instance</td>
+              <td>External file/system → ServiceNow instance</td>
+            </tr>
+            <tr>
+              <td><strong>Key table</strong></td>
+              <td><code>sys_update_set</code></td>
+              <td><code>sys_import_set</code></td>
+            </tr>
+            <tr>
+              <td><strong>Transform map needed?</strong></td>
+              <td>No — configuration is applied directly during merge/preview/commit</td>
+              <td>Yes — a transform map is required to map staging fields to target fields</td>
+            </tr>
+            <tr>
+              <td><strong>Example use case</strong></td>
+              <td>Deploy a new business rule from development to production</td>
+              <td>Import 10,000 employee records from an HR system CSV file</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Trap — Never Confuse These:</strong> If a question asks "how do you move a business rule from dev to prod?" — the answer is <strong>Update Sets</strong>. If a question asks "how do you load user data from an external HR CSV file?" — the answer is <strong>Import Sets</strong>. They are completely separate mechanisms with no overlap in function.
+        </div>
+
+        <div class="callout-concept">
+          <strong>Memory Aid:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><strong>Update Sets</strong> = "Update the system configuration" = config migration between instances</li>
+            <li><strong>Import Sets</strong> = "Import data from outside" = bring external data into the platform</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 7: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Key Exam Facts &amp; Rapid-Fire Review</h2>
+        <p>This section consolidates the highest-frequency exam facts for Data Schema and Import Sets. Review these before your exam.</p>
+
+        <h3>Coalesce Facts</h3>
+        <div class="callout-exam">
+          <strong>Coalesce = the "match key"</strong> — the field(s) used to look up an existing record in the target table.
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Coalesce field value <strong>must be unique</strong> in the target table to work reliably</li>
+            <li>Coalesce match found → <strong>UPDATE</strong> existing record</li>
+            <li>No coalesce match → <strong>INSERT</strong> new record</li>
+            <li>Multiple coalesce fields = AND logic (all must match)</li>
+            <li>Without coalesce, <strong>every row inserts a new record</strong> (no deduplication)</li>
+          </ul>
+        </div>
+
+        <h3>Import Set System Facts</h3>
+        <div class="callout-exam">
+          <strong>Import Set Staging Tables:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Always prefixed with <code>u_</code> (user-created table prefix)</li>
+            <li>Auto-created when you upload a file or load data</li>
+            <li><code>sys_import_set_row</code> tracks per-row result: inserted / updated / error / skipped / ignored</li>
+            <li>A transform map <strong>must exist</strong> before you can run a transform — transforms do not run without one</li>
+            <li>Multiple transform maps can exist for the same source/target table pair</li>
+          </ul>
+        </div>
+
+        <h3>Table Architecture Facts</h3>
+        <div class="callout-exam">
+          <strong>sys_class_name:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><code>sys_class_name</code> is critical for identifying a record's actual table in an extended hierarchy</li>
+            <li>All task child records queried via <code>task.list</code> will show their <code>sys_class_name</code> as <code>incident</code>, <code>change_request</code>, etc.</li>
+            <li>Polymorphic task hierarchy queries must use <code>sys_class_name</code> to filter by specific record type</li>
+            <li><code>sys_id</code> = 32 hexadecimal characters = GUID = never changes for record's lifetime</li>
+            <li><code>sys_db_object</code> = table registry (every table is a record here)</li>
+          </ul>
+        </div>
+
+        <h3>Transform Map Facts</h3>
+        <div class="callout-exam">
+          <strong>Transform Map Checklist:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><code>sys_transform_map</code> = the transform map itself (one per import pipeline)</li>
+            <li><code>sys_transform_entry</code> = individual field mapping records within a transform map</li>
+            <li><strong>Auto Map Matching Fields</strong> = button that auto-creates mappings for identically-named fields</li>
+            <li><code>onBefore</code> script = runs before field mappings; can set <code>ignore = true</code> to skip the row</li>
+            <li><code>onAfter</code> script = runs after all field mappings; <code>action</code> variable is <code>"insert"</code> or <code>"update"</code></li>
+            <li>Field mapping scripts use <code>answer</code> variable to return the transformed value</li>
+          </ul>
+        </div>
+
+        <h3>Quick-Reference: Import Set vs Update Set</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Answer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Move a business rule from dev to prod?</td>
+              <td><strong>Update Set</strong></td>
+            </tr>
+            <tr>
+              <td>Load CSV data from an HR system?</td>
+              <td><strong>Import Set</strong></td>
+            </tr>
+            <tr>
+              <td>Table used for staging imported data?</td>
+              <td><strong><code>u_imp_*</code></strong> (auto-created with u_ prefix)</td>
+            </tr>
+            <tr>
+              <td>What prevents duplicate records during import?</td>
+              <td><strong>Coalesce field</strong></td>
+            </tr>
+            <tr>
+              <td>Coalesce match found → what happens?</td>
+              <td><strong>UPDATE</strong> the existing record</td>
+            </tr>
+            <tr>
+              <td>No coalesce match → what happens?</td>
+              <td><strong>INSERT</strong> a new record</td>
+            </tr>
+            <tr>
+              <td>Table that registers all tables?</td>
+              <td><strong><code>sys_db_object</code></strong></td>
+            </tr>
+            <tr>
+              <td>Field that identifies record type in extended hierarchy?</td>
+              <td><strong><code>sys_class_name</code></strong></td>
+            </tr>
+            <tr>
+              <td>Format of sys_id?</td>
+              <td><strong>32 hexadecimal characters (GUID)</strong></td>
+            </tr>
+            <tr>
+              <td>Root parent of ITIL process tables?</td>
+              <td><strong><code>task</code></strong> table</td>
+            </tr>
+            <tr>
+              <td>Table tracking per-row import results?</td>
+              <td><strong><code>sys_import_set_row</code></strong></td>
+            </tr>
+            <tr>
+              <td>Script type that can skip a row during transform?</td>
+              <td><strong>onBefore script</strong> (set <code>ignore = true</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Part 4 — Big Picture:</strong> This topic (data schema and imports) underpins everything else in Part 4. A solid understanding of how tables are structured, how inheritance works, and how import sets flow from staging to target is foundational for the CMDB, ACL, and scripting topics that follow. Return here to reinforce these concepts after completing the rest of Part 4.
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../part3-collaboration/topics/04-service-catalog.html" class="btn btn-secondary">← Service Catalog</a>
+          <a href="02-cmdb-relationships.html" class="btn btn-primary">CMDB &amp; Relationships →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p4-data-schema-imports', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p4-data-schema-imports')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topic 3 — Content Understanding | AI-102 Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sbo { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; }
+    #sbo.show { display:block; }
+    .modality-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+    }
+    .modality-icon {
+      font-size: 2rem; margin-bottom: var(--space-3);
+    }
+    .pipeline-step {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      display: flex; gap: var(--space-4); align-items: flex-start;
+    }
+    .step-num {
+      width: 32px; height: 32px; min-width: 32px;
+      background: #0891b2; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700;
+      color: #fff; margin-top: 2px;
+    }
+    .step-title { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .step-desc  { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+    .vs-cell-winner { background: rgba(16,185,129,0.08); }
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+
+  <div id="app-sidebar"></div>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span><span class="current">Content Understanding</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header animate-fade-in">
+        <div class="topic-part-badge badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3)">🎛️ Part 5 · Topic 3 of 3</div>
+        <h1 class="topic-title">Azure Content Understanding</h1>
+        <p style="font-size:1rem;color:var(--text-secondary);max-width:680px;line-height:1.7;margin-top:var(--space-3)">
+          Azure Content Understanding is Microsoft's newest AI service in Foundry Tools — a unified pipeline that
+          ingests and analyses <em>any</em> content modality: documents, images, videos, and audio. Unlike Document
+          Intelligence (which specialises in structured form data) or AI Search (which makes content searchable),
+          Content Understanding is built for <strong>multi-modal AI enrichment at scale</strong> — summarising,
+          classifying, extracting, and understanding diverse content through a single, consistent API.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">🐍 <strong>Python — every line explained</strong></span>
+          <span class="topic-meta-item">⏱️ <strong>~40 min</strong></span>
+          <span class="topic-meta-item">🔶 <strong>Medium exam weight — newer topic</strong></span>
+        </div>
+      </div>
+
+      <!-- SECTION 1 — VOCAB -->
+      <div class="section-block" id="vocab">
+        <div class="section-label">🔤 Section 1 — New Vocabulary</div>
+        <h2>Content Understanding terms — defined before code</h2>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">What you already know that applies here</div>
+            <p>You have learned the async POST-then-poll pattern (from Document Intelligence in Topic 2), REST APIs and endpoints (from Part 1), and the concept of AI enrichment pipelines (from AI Search skillsets in Topic 1). Content Understanding uses all of these patterns — just applied to a wider range of content types. The new vocabulary below is specific to this service.</p>
+          </div>
+        </div>
+
+        <div class="term-grid" style="margin-top:var(--space-6)">
+          <div class="term-card">
+            <span class="term-name">Content Understanding</span>
+            <p class="term-definition">An Azure AI Foundry service that processes and extracts meaning from any content type — documents (PDFs, Word), images (JPEG, PNG), videos (MP4), and audio (WAV, MP3) — through a single, unified API. It applies AI operations like summarisation, classification, entity extraction, and OCR across all these modalities. Available through Azure AI Foundry portal and REST API.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Content Modality</span>
+            <p class="term-definition">The type of content being processed. Content Understanding supports four modalities: <strong>Document</strong> (PDFs, Word files, Excel, text files), <strong>Image</strong> (photos, diagrams, scanned pages), <strong>Video</strong> (MP4 files, video streams — analysed as sequences of keyframes + audio), <strong>Audio</strong> (spoken word recordings, phone calls, meeting audio). Most services only handle one modality — Content Understanding handles all four.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Analyzer</span>
+            <p class="term-definition">A configured AI processing pipeline you define inside Content Understanding. Think of it as a reusable "analysis template" — you define what operations to perform (summarise, classify, extract entities, run OCR) and on what modality. Once created, you submit content to the analyzer and get back structured results. One analyzer can be reused for many documents.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Analyzer Template</span>
+            <p class="term-definition">A predefined set of operations grouped together for common scenarios — pre-packaged analyzers for common document types. Examples: <code>prebuilt-documentAnalysis</code> (general document extraction), <code>prebuilt-read</code> (OCR text extraction), <code>prebuilt-imageAnalysis</code> (image understanding). Templates mean you don't always need to build a custom analyzer from scratch.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Field Schema</span>
+            <p class="term-definition">When building a custom analyzer, the field schema defines exactly which fields you want extracted and their data types. Example: you want to extract "ContractValue" (number), "ExpiryDate" (date), and "PartyNames" (list of strings) from legal contracts. The AI uses the field schema as instructions for what to look for in each document.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">OCR Pipeline</span>
+            <p class="term-definition">The text extraction step applied to documents and images. Content Understanding uses Azure's latest OCR engine to extract printed and handwritten text from documents before applying downstream AI operations. The OCR pipeline identifies text, its position, and its structure (paragraphs, tables, headings). Every document and image analysis begins with OCR as the foundation.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Summarisation (Document AI)</span>
+            <p class="term-definition">An AI operation that generates a concise summary of a long document — capturing the main points without requiring you to read the whole document. Content Understanding uses Azure OpenAI models under the hood to produce the summary. The summary length and style can be configured. Applied at the document level (one summary per document) or section level (summaries per section).</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Classification (Document AI)</span>
+            <p class="term-definition">An AI operation that assigns a category label to a document based on its content. Example: you receive mixed correspondence — the classifier automatically labels each document as "Invoice", "Contract", "Complaint Letter", or "Support Request". You define the possible categories and optionally provide examples. The classifier then routes or tags incoming documents automatically.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Keyframe Extraction (Video)</span>
+            <p class="term-definition">For video content, Content Understanding doesn't analyse every single frame (that would be millions of images). Instead it extracts <strong>keyframes</strong> — representative frames that capture significant moments or scene changes — and analyses those. This dramatically reduces processing time while still capturing the important visual content of the video.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Transcript (Audio/Video)</span>
+            <p class="term-definition">For audio and video content, Content Understanding automatically transcribes the spoken audio into text using Azure Speech services. The transcript includes speaker diarisation (identifying who is speaking when) and timestamps. This transcript then feeds into text-based AI operations — summarisation, entity extraction, sentiment — applied to the spoken content.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Entity Extraction</span>
+            <p class="term-definition">An AI operation that identifies and extracts named entities from content — people, organisations, locations, dates, amounts, product names — and returns them as structured fields. Applied to text from documents, image captions from pictures, and transcripts from audio/video. Same concept as Named Entity Recognition (NER) from Part 4 NLP, but applied here in the Content Understanding pipeline.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Table Extraction</span>
+            <p class="term-definition">An AI operation that detects tables in documents or images and returns them as structured data — rows, columns, header labels, and cell values — in a format your code can directly process. Part of the OCR pipeline for documents. Enables you to extract financial tables, schedules, or data grids without writing custom parsing code.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2 — WHAT IS IT AND WHY -->
+      <div class="section-block" id="concepts">
+        <div class="section-label">🏗️ Section 2 — What Is Content Understanding and Why Does It Exist?</div>
+        <h2>The problem of multi-modal content at scale</h2>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📚</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A universal content processing assistant</div>
+            <p>
+              Imagine a large media company that receives thousands of pieces of content every day: PDF reports from analysts,
+              photo submissions from journalists, recorded video interviews, and audio recordings from press conferences.
+              Previously, they needed four completely different tools and teams — one for each content type.
+              Each tool had its own API, its own output format, its own quirks.<br><br>
+              <strong>Content Understanding is like hiring one expert assistant</strong> who can read any PDF, describe any photo,
+              transcribe and summarise any video, and extract insights from any audio recording — all using the same set of
+              instructions and returning results in the same output format.<br><br>
+              That consistency and universality is what makes Content Understanding powerful. The same <code>begin_analyze</code>
+              call. The same structured output schema. One service, four modalities.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">The four modalities — what Content Understanding processes</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-8)">
+          <div class="modality-card">
+            <div class="modality-icon">📄</div>
+            <div style="font-family:var(--font-heading);font-weight:700;font-size:1rem;margin-bottom:var(--space-2)">Documents</div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.6">PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx), plain text files. Operations: OCR (text extraction), summarisation, classification, entity extraction, table extraction, image extraction from embedded images. The most feature-rich modality.</p>
+          </div>
+          <div class="modality-card">
+            <div class="modality-icon">🖼️</div>
+            <div style="font-family:var(--font-heading);font-weight:700;font-size:1rem;margin-bottom:var(--space-2)">Images</div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.6">JPEG, PNG, BMP, TIFF, GIF. Operations: OCR (text in images), caption generation (what is depicted), object and attribute detection, classification (what kind of image is this). Useful for processing scanned documents, photos, and diagrams.</p>
+          </div>
+          <div class="modality-card">
+            <div class="modality-icon">🎥</div>
+            <div style="font-family:var(--font-heading);font-weight:700;font-size:1rem;margin-bottom:var(--space-2)">Videos</div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.6">MP4, MOV, AVI. Operations: keyframe extraction + analysis (what is shown), audio transcription (what is said), speaker diarisation (who said what when), scene summarisation. Covers both visual and audio content in a single pass.</p>
+          </div>
+          <div class="modality-card">
+            <div class="modality-icon">🔊</div>
+            <div style="font-family:var(--font-heading);font-weight:700;font-size:1rem;margin-bottom:var(--space-2)">Audio</div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.6">WAV, MP3, M4A, OGG. Operations: speech-to-text transcription, speaker diarisation, sentiment analysis on spoken content, keyword and entity extraction from transcript. Ideal for call centre recordings, meeting audio, voice memos.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3 — HOW IT COMPARES -->
+      <div class="section-block" id="comparison">
+        <div class="section-label">⚖️ Section 3 — Content Understanding vs Document Intelligence vs AI Search</div>
+        <h2>Choosing the right service for the job — the exam decision table</h2>
+
+        <p style="margin-bottom:var(--space-5)">These three services (all in Part 5) are closely related and the exam will give you scenarios requiring you to choose between them. Here is the complete decision guide:</p>
+
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Best Service</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="vs-cell-winner">
+              <td>Extract "InvoiceTotal", "VendorName", "DueDate" from invoices</td>
+              <td><strong>Document Intelligence</strong></td>
+              <td>Purpose-built for structured field extraction from known document types. Prebuilt invoice model exists. High accuracy, field-level confidence scores.</td>
+            </tr>
+            <tr>
+              <td>Make 10,000 PDF reports searchable by keyword and meaning</td>
+              <td><strong>Azure AI Search</strong></td>
+              <td>Purpose-built for search — index, query, filter, facet. Skillset pipeline handles OCR and enrichment. Users query the index via a search bar.</td>
+            </tr>
+            <tr class="vs-cell-winner">
+              <td>Summarise a 200-page contract and extract clause entities</td>
+              <td><strong>Content Understanding</strong></td>
+              <td>Summarisation and entity extraction from long documents. Content Understanding uses LLMs for understanding, not just pattern-matching.</td>
+            </tr>
+            <tr>
+              <td>Transcribe a call centre recording and extract customer sentiment</td>
+              <td><strong>Content Understanding</strong></td>
+              <td>Audio modality — transcript, speaker diarisation, and downstream NLP (sentiment, entities) from speech in one pipeline.</td>
+            </tr>
+            <tr class="vs-cell-winner">
+              <td>Index video interviews so journalists can search by topic or keyword</td>
+              <td><strong>Content Understanding + AI Search</strong></td>
+              <td>Use Content Understanding to extract transcripts and keyframe descriptions, then feed enriched output into AI Search for full-text querying.</td>
+            </tr>
+            <tr>
+              <td>Classify incoming emails as "Invoice", "Contract", or "Complaint"</td>
+              <td><strong>Content Understanding</strong></td>
+              <td>Document classification feature — define categories, submit documents, get labels automatically.</td>
+            </tr>
+            <tr>
+              <td>Extract tables from financial reports — rows, columns, values</td>
+              <td><strong>Content Understanding or Document Intelligence</strong></td>
+              <td>Both can extract tables. Document Intelligence uses Layout model. Content Understanding uses table extraction as part of its document pipeline. Either is valid — context determines the best choice.</td>
+            </tr>
+            <tr class="vs-cell-winner">
+              <td>Process PDFs, images, videos, AND audio through one unified API</td>
+              <td><strong>Content Understanding</strong></td>
+              <td>Only Content Understanding handles all four modalities. Document Intelligence handles documents only. AI Search can index all via skillsets but is query-focused, not extraction-focused.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam" style="margin-top:var(--space-6)">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — The three-word trigger phrases</div>
+            <p>
+              <strong>"Extract specific named fields"</strong> (invoice total, vendor name) → Document Intelligence<br><br>
+              <strong>"Search / query / find across documents"</strong> → Azure AI Search<br><br>
+              <strong>"Summarise / classify / understand meaning"</strong> or <strong>"audio / video / multi-modal"</strong> → Content Understanding<br><br>
+              When a scenario mentions processing <em>audio recordings</em> or <em>video files</em> with AI — it is always Content Understanding, not the other two services.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4 — HOW IT WORKS -->
+      <div class="section-block" id="how-it-works">
+        <div class="section-label">⚙️ Section 4 — How Content Understanding Works</div>
+        <h2>The analyzer pipeline — from content to structured output</h2>
+
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-8)">
+          <div class="pipeline-step">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-title">Create or select an Analyzer</div>
+              <p class="step-desc">Either use a prebuilt analyzer template (e.g. <code>prebuilt-documentAnalysis</code>) or create a custom analyzer by defining: which modality (document, image, video, audio), which operations (OCR, summarise, classify, extract entities), and a field schema describing what fields to extract. The analyzer definition is stored in your Azure AI Foundry resource.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-title">Submit content for analysis</div>
+              <p class="step-desc">POST the content to the analyzer — either as a file URL (from Azure Blob Storage) or as binary bytes. The service accepts the submission and returns an operation ID. This is the same async pattern you learned in Document Intelligence (Topic 2): you get a ticket number and poll for the result.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-title">Foundation processing (OCR / transcription / keyframes)</div>
+              <p class="step-desc">The service runs the foundation pass appropriate to the modality. For documents and images: OCR extracts all text and identifies structure. For audio: Speech-to-Text transcribes spoken content. For video: keyframes are extracted from each scene, and audio is transcribed. This foundation output feeds all subsequent AI operations.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">4</div>
+            <div>
+              <div class="step-title">AI enrichment operations</div>
+              <p class="step-desc">Based on your analyzer configuration, AI models process the foundation output: a language model reads the text/transcript and generates a summary; a classification model assigns the document to one of your defined categories; an entity extraction model identifies named entities and maps them to your field schema. These operations run in parallel or in sequence as configured.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">5</div>
+            <div>
+              <div class="step-title">Poll and retrieve structured results</div>
+              <p class="step-desc">Poll the operation status URL using the operation ID from Step 2. When status is <code>"succeeded"</code>, retrieve the result — a structured JSON object containing: the full OCR transcript, extracted tables, detected entities, classification label, generated summary, keyframe descriptions (for video), and any custom field values you defined in the schema. Your application processes this JSON directly.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:var(--space-4)">What the output looks like — a document result example</h3>
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Simplified JSON structure of a Content Understanding result</div>
+            <p>After analysis completes, the result JSON contains sections like this:</p>
+            <pre style="margin-top:var(--space-3);background:var(--navy-900);border-radius:var(--radius-md);padding:var(--space-4);font-size:0.8rem;overflow-x:auto"><code style="font-family:var(--font-mono)">{
+  "status": "succeeded",
+  "result": {
+    "contents": [
+      {
+        "kind": "document",
+        "markdown": "# Contract Agreement\n\nThis contract...",  // Full OCR text as markdown
+        "fields": {
+          "ContractValue": { "valueNumber": 150000.00, "confidence": 0.95 },
+          "ExpiryDate":    { "valueDate": "2026-12-31",  "confidence": 0.98 },
+          "PartyNames":    { "valueArray": ["Contoso Ltd", "Fabrikam Inc"], "confidence": 0.97 }
+        },
+        "summary": "This contract between Contoso Ltd and Fabrikam Inc...",
+        "classificationLabel": "LegalContract",
+        "tables": [                       // Extracted tables
+          { "rowCount": 5, "columnCount": 3, "cells": [...] }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 5 — PYTHON CODE -->
+      <div class="section-block" id="python">
+        <div class="section-label">🐍 Section 5 — Python: Using Content Understanding</div>
+        <h2>Creating an analyzer and submitting documents for analysis</h2>
+
+        <div class="callout callout-concept" style="margin-bottom:var(--space-5)">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Note on the SDK — two ways to use Content Understanding</div>
+            <p>Content Understanding is a newer service and its dedicated Python SDK (<code>azure-ai-contentunderstanding</code>) is still evolving. The most reliable approach for the current exam is using the <strong>REST API directly with the requests library</strong> (which you already know from Part 1), or using the <strong>Azure AI Projects SDK</strong> as a wrapper. The code below shows both approaches so you recognise either in the exam.</p>
+          </div>
+        </div>
+
+        <p style="margin-bottom:var(--space-4)">Install: <code>pip install requests azure-identity azure-ai-projects</code></p>
+
+<pre><code><span class="token-keyword">import</span> os
+<span class="token-keyword">import</span> time       <span class="token-comment"># The 'time' module lets us pause execution (time.sleep) while polling</span>
+<span class="token-keyword">import</span> requests   <span class="token-comment"># The 'requests' library lets us make HTTP REST API calls</span>
+<span class="token-keyword">import</span> json       <span class="token-comment"># The 'json' module converts Python dicts to JSON strings and back</span>
+
+<span class="token-comment"># ── Connection details ─────────────────────────────────────────────────</span>
+<span class="token-comment"># These come from your Azure AI Foundry resource in Azure portal</span>
+<span class="token-comment"># Navigate to: Azure AI Foundry → your project → Settings → API Keys</span>
+ENDPOINT = os.environ.get(<span class="token-string">"CONTENTUNDERSTANDING_ENDPOINT"</span>)
+<span class="token-comment"># The endpoint format is: https://&lt;your-resource&gt;.cognitiveservices.azure.com/</span>
+
+API_KEY = os.environ.get(<span class="token-string">"CONTENTUNDERSTANDING_KEY"</span>)
+<span class="token-comment"># Store API keys in environment variables — never hardcode them in your script</span>
+
+<span class="token-comment"># API version — Content Understanding requires a specific API version in the URL</span>
+<span class="token-comment"># Always check Microsoft docs for the latest stable version</span>
+API_VERSION = <span class="token-string">"2024-12-01-preview"</span>
+
+<span class="token-comment"># HTTP headers — sent with every request to authenticate and specify content type</span>
+headers = {
+    <span class="token-string">"Ocp-Apim-Subscription-Key"</span>: API_KEY,  <span class="token-comment"># The standard Azure key header</span>
+    <span class="token-string">"Content-Type"</span>: <span class="token-string">"application/json"</span>       <span class="token-comment"># We are sending JSON in the request body</span>
+}
+
+
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+<span class="token-comment"># STEP 1 — Create a custom Analyzer</span>
+<span class="token-comment"># An analyzer is a reusable configuration that defines:</span>
+<span class="token-comment">#   - Which content modality (document, image, video, audio)</span>
+<span class="token-comment">#   - Which AI operations to perform</span>
+<span class="token-comment">#   - What fields to extract (the field schema)</span>
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+
+<span class="token-comment"># A unique name for your analyzer (letters, numbers, hyphens only)</span>
+ANALYZER_NAME = <span class="token-string">"contract-analyzer-v1"</span>
+
+<span class="token-comment"># The analyzer definition — a dictionary that becomes the JSON request body</span>
+analyzer_definition = {
+    <span class="token-comment"># description: a human-readable name for this analyzer (optional)</span>
+    <span class="token-string">"description"</span>: <span class="token-string">"Extracts key fields from legal contract documents"</span>,
+
+    <span class="token-comment"># scenario: tells the service what kind of content this analyzer handles</span>
+    <span class="token-comment"># Options: "documentAnalysis" (docs/images), "videoAnalysis", "audioAnalysis"</span>
+    <span class="token-string">"scenario"</span>: <span class="token-string">"documentAnalysis"</span>,
+
+    <span class="token-comment"># fieldSchema: defines the specific fields you want extracted</span>
+    <span class="token-comment"># The AI will look for these fields in every document submitted to this analyzer</span>
+    <span class="token-string">"fieldSchema"</span>: {
+        <span class="token-string">"fields"</span>: {
+            <span class="token-comment"># Each key is the field name you want in the output</span>
+            <span class="token-comment"># "type" tells the service what data type this field contains</span>
+            <span class="token-string">"ContractValue"</span>: {
+                <span class="token-string">"type"</span>: <span class="token-string">"number"</span>,       <span class="token-comment"># A numeric value (e.g. 150000.00)</span>
+                <span class="token-string">"description"</span>: <span class="token-string">"The total monetary value of the contract"</span>
+            },
+            <span class="token-string">"ExpiryDate"</span>: {
+                <span class="token-string">"type"</span>: <span class="token-string">"date"</span>,         <span class="token-comment"># A date value (e.g. "2026-12-31")</span>
+                <span class="token-string">"description"</span>: <span class="token-string">"The date when the contract expires"</span>
+            },
+            <span class="token-string">"PartyNames"</span>: {
+                <span class="token-string">"type"</span>: <span class="token-string">"array"</span>,        <span class="token-comment"># A list of values</span>
+                <span class="token-string">"items"</span>: {<span class="token-string">"type"</span>: <span class="token-string">"string"</span>}, <span class="token-comment"># Each item in the list is a string</span>
+                <span class="token-string">"description"</span>: <span class="token-string">"Names of all parties involved in the contract"</span>
+            },
+            <span class="token-string">"GoverningLaw"</span>: {
+                <span class="token-string">"type"</span>: <span class="token-string">"string"</span>,       <span class="token-comment"># A text/string value</span>
+                <span class="token-string">"description"</span>: <span class="token-string">"The jurisdiction or country whose law governs the contract"</span>
+            }
+        }
+    }
+}
+
+<span class="token-comment"># Build the URL for creating the analyzer</span>
+<span class="token-comment"># Format: {endpoint}/contentunderstanding/analyzers/{name}?api-version={version}</span>
+create_url = (
+    <span class="token-string">f"{ENDPOINT}contentunderstanding/analyzers/{ANALYZER_NAME}"</span>
+    <span class="token-string">f"?api-version={API_VERSION}"</span>
+)
+
+<span class="token-comment"># PUT request creates or updates the analyzer (idempotent — safe to run again)</span>
+<span class="token-comment"># json.dumps() converts our Python dictionary into a JSON string for the HTTP body</span>
+response = requests.put(create_url, headers=headers, data=json.dumps(analyzer_definition))
+
+<span class="token-comment"># Check the response status code:</span>
+<span class="token-comment"># 200 = updated existing, 201 = created new — both mean success</span>
+<span class="token-keyword">if</span> response.status_code <span class="token-keyword">in</span> (<span class="token-number">200</span>, <span class="token-number">201</span>):
+    <span class="token-keyword">print</span>(<span class="token-string">f"✅ Analyzer '{ANALYZER_NAME}' created/updated successfully."</span>)
+<span class="token-keyword">else</span>:
+    <span class="token-comment"># response.text contains the error message from the API</span>
+    <span class="token-keyword">print</span>(<span class="token-string">f"❌ Failed to create analyzer: {response.status_code} — {response.text}"</span>)
+    <span class="token-keyword">raise</span> SystemExit(<span class="token-number">1</span>)  <span class="token-comment"># Stop the script — no point continuing without the analyzer</span>
+
+
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+<span class="token-comment"># STEP 2 — Submit a document for analysis</span>
+<span class="token-comment"># Same async pattern as Document Intelligence:  POST → get operation ID → poll</span>
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+
+<span class="token-comment"># URL of the document to analyse — must be publicly accessible or in Azure Blob Storage</span>
+document_url = <span class="token-string">"https://your-storage.blob.core.windows.net/contracts/contract-001.pdf"</span>
+
+<span class="token-comment"># Build the URL for submitting an analysis job to your analyzer</span>
+analyze_url = (
+    <span class="token-string">f"{ENDPOINT}contentunderstanding/analyzers/{ANALYZER_NAME}:analyze"</span>
+    <span class="token-string">f"?api-version={API_VERSION}"</span>
+)
+
+<span class="token-comment"># The request body specifies what to analyse</span>
+<span class="token-comment"># url: a publicly accessible URL to the document</span>
+analyze_body = {
+    <span class="token-string">"url"</span>: document_url
+}
+
+<span class="token-comment"># POST request submits the analysis job</span>
+<span class="token-comment"># The service does NOT process it immediately — it queues it and returns an operation ID</span>
+response = requests.post(analyze_url, headers=headers, data=json.dumps(analyze_body))
+
+<span class="token-comment"># 202 Accepted means the job was queued successfully (not completed yet)</span>
+<span class="token-keyword">if</span> response.status_code != <span class="token-number">202</span>:
+    <span class="token-keyword">print</span>(<span class="token-string">f"❌ Failed to submit document: {response.status_code} — {response.text}"</span>)
+    <span class="token-keyword">raise</span> SystemExit(<span class="token-number">1</span>)
+
+<span class="token-comment"># The operation URL is in the "Operation-Location" response header</span>
+<span class="token-comment"># This is the URL we will poll to check the status and get results</span>
+operation_url = response.headers[<span class="token-string">"Operation-Location"</span>]
+<span class="token-keyword">print</span>(<span class="token-string">f"✅ Analysis job submitted. Operation URL: {operation_url}"</span>)
+
+
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+<span class="token-comment"># STEP 3 — Poll until the operation completes</span>
+<span class="token-comment"># Keep checking the operation URL every few seconds until status = "succeeded"</span>
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+
+<span class="token-keyword">print</span>(<span class="token-string">"⏳ Waiting for analysis to complete..."</span>)
+result = <span class="token-keyword">None</span>
+
+<span class="token-comment"># A while loop runs repeatedly until we tell it to stop</span>
+<span class="token-comment"># We loop until the operation status is "succeeded" or "failed"</span>
+<span class="token-keyword">while</span> <span class="token-keyword">True</span>:
+    <span class="token-comment"># GET request to the operation URL — returns current status and (when done) results</span>
+    poll_response = requests.get(operation_url, headers=headers)
+    poll_data = poll_response.json()  <span class="token-comment"># Parse the JSON response into a Python dictionary</span>
+
+    status = poll_data.get(<span class="token-string">"status"</span>)  <span class="token-comment"># "running", "notStarted", "succeeded", or "failed"</span>
+    <span class="token-keyword">print</span>(<span class="token-string">f"  Status: {status}"</span>)
+
+    <span class="token-keyword">if</span> status == <span class="token-string">"succeeded"</span>:
+        <span class="token-comment"># Analysis is complete — save the full result dictionary</span>
+        result = poll_data
+        <span class="token-keyword">break</span>  <span class="token-comment"># Exit the while loop — we have our results</span>
+    <span class="token-keyword">elif</span> status == <span class="token-string">"failed"</span>:
+        <span class="token-comment"># Something went wrong — print the error and stop</span>
+        <span class="token-keyword">print</span>(<span class="token-string">f"❌ Analysis failed: {poll_data.get('error', {}).get('message', 'Unknown error')}"</span>)
+        <span class="token-keyword">raise</span> SystemExit(<span class="token-number">1</span>)
+    <span class="token-keyword">else</span>:
+        <span class="token-comment"># Still processing — wait 3 seconds before checking again</span>
+        <span class="token-comment"># time.sleep(3) pauses the script for 3 seconds without using CPU</span>
+        time.sleep(<span class="token-number">3</span>)
+
+
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+<span class="token-comment"># STEP 4 — Read the results</span>
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+
+<span class="token-comment"># result["result"]["contents"] is a list — one item per analysed content unit</span>
+<span class="token-comment"># For a single document, it will have one item</span>
+contents = result.get(<span class="token-string">"result"</span>, {}).get(<span class="token-string">"contents"</span>, [])
+
+<span class="token-keyword">for</span> content <span class="token-keyword">in</span> contents:
+    <span class="token-comment"># content["kind"] tells you the modality: "document", "image", "video", "audio"</span>
+    <span class="token-keyword">print</span>(<span class="token-string">f"\n=== Content Kind: {content.get('kind')} ==="</span>)
+
+    <span class="token-comment"># ── Extracted Fields (from your field schema) ──</span>
+    fields = content.get(<span class="token-string">"fields"</span>, {})
+    <span class="token-keyword">if</span> fields:
+        <span class="token-keyword">print</span>(<span class="token-string">"\n📋 Extracted Fields:"</span>)
+        <span class="token-keyword">for</span> field_name, field_data <span class="token-keyword">in</span> fields.items():
+            <span class="token-comment"># Each field has a value and a confidence score</span>
+            <span class="token-comment"># The value key varies by type: valueNumber, valueDate, valueString, valueArray</span>
+            confidence = field_data.get(<span class="token-string">"confidence"</span>, <span class="token-number">0</span>)
+            <span class="token-comment"># Look for any key starting with "value" to get the actual extracted value</span>
+            value = (field_data.get(<span class="token-string">"valueNumber"</span>)
+                  <span class="token-keyword">or</span> field_data.get(<span class="token-string">"valueDate"</span>)
+                  <span class="token-keyword">or</span> field_data.get(<span class="token-string">"valueString"</span>)
+                  <span class="token-keyword">or</span> field_data.get(<span class="token-string">"valueArray"</span>))
+            <span class="token-keyword">print</span>(<span class="token-string">f"  {field_name}: {value}  (confidence: {confidence:.2f})"</span>)
+
+    <span class="token-comment"># ── Summary (if summarisation was enabled in the analyzer) ──</span>
+    summary = content.get(<span class="token-string">"summary"</span>)
+    <span class="token-keyword">if</span> summary:
+        <span class="token-keyword">print</span>(<span class="token-string">f"\n📝 Summary:\n  {summary[:300]}..."</span>)   <span class="token-comment"># Print first 300 characters</span>
+
+    <span class="token-comment"># ── Classification Label (if classification was enabled) ──</span>
+    label = content.get(<span class="token-string">"classificationLabel"</span>)
+    <span class="token-keyword">if</span> label:
+        <span class="token-keyword">print</span>(<span class="token-string">f"\n🏷️  Classification: {label}"</span>)
+
+    <span class="token-comment"># ── Tables (extracted table data) ──</span>
+    tables = content.get(<span class="token-string">"tables"</span>, [])
+    <span class="token-keyword">if</span> tables:
+        <span class="token-keyword">print</span>(<span class="token-string">f"\n📊 Tables found: {len(tables)}"</span>)
+        <span class="token-keyword">for</span> i, table <span class="token-keyword">in</span> enumerate(tables):
+            <span class="token-keyword">print</span>(<span class="token-string">f"  Table {i+1}: {table.get('rowCount')} rows × {table.get('columnCount')} cols"</span>)
+
+    <span class="token-comment"># ── Full OCR Text (as markdown) ──</span>
+    markdown = content.get(<span class="token-string">"markdown"</span>)
+    <span class="token-keyword">if</span> markdown:
+        <span class="token-comment"># The full OCR text — headings, paragraphs, tables as markdown formatted text</span>
+        <span class="token-keyword">print</span>(<span class="token-string">f"\n📄 Full OCR text ({len(markdown)} chars) — first 200:\n  {markdown[:200]}..."</span>)</code></pre>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Python — Submitting an Audio file for transcription and analysis</h3>
+
+<pre><code><span class="token-comment"># ── Audio analyzer — transcription + entity extraction ──────────────────</span>
+<span class="token-comment"># First: create an audio analyzer (same pattern as document analyzer above)</span>
+audio_analyzer_definition = {
+    <span class="token-string">"description"</span>: <span class="token-string">"Transcribes call recordings and extracts customer entities"</span>,
+    <span class="token-string">"scenario"</span>: <span class="token-string">"audioAnalysis"</span>,   <span class="token-comment"># Must be "audioAnalysis" for audio files</span>
+    <span class="token-string">"fieldSchema"</span>: {
+        <span class="token-string">"fields"</span>: {
+            <span class="token-string">"CustomerName"</span>: {
+                <span class="token-string">"type"</span>: <span class="token-string">"string"</span>,
+                <span class="token-string">"description"</span>: <span class="token-string">"The name of the customer speaking in the recording"</span>
+            },
+            <span class="token-string">"IssueType"</span>: {
+                <span class="token-string">"type"</span>: <span class="token-string">"string"</span>,
+                <span class="token-string">"description"</span>: <span class="token-string">"The type of issue the customer is reporting"</span>
+            },
+            <span class="token-string">"Sentiment"</span>: {
+                <span class="token-string">"type"</span>: <span class="token-string">"string"</span>,
+                <span class="token-string">"description"</span>: <span class="token-string">"Overall customer sentiment: Positive, Neutral, or Negative"</span>
+            }
+        }
+    }
+}
+
+AUDIO_ANALYZER_NAME = <span class="token-string">"call-center-audio-analyzer"</span>
+
+<span class="token-comment"># Create the audio analyzer (PUT request — same pattern as document analyzer)</span>
+audio_create_url = (
+    <span class="token-string">f"{ENDPOINT}contentunderstanding/analyzers/{AUDIO_ANALYZER_NAME}"</span>
+    <span class="token-string">f"?api-version={API_VERSION}"</span>
+)
+requests.put(audio_create_url, headers=headers, data=json.dumps(audio_analyzer_definition))
+
+<span class="token-comment"># Submit an audio file for analysis</span>
+audio_analyze_url = (
+    <span class="token-string">f"{ENDPOINT}contentunderstanding/analyzers/{AUDIO_ANALYZER_NAME}:analyze"</span>
+    <span class="token-string">f"?api-version={API_VERSION}"</span>
+)
+
+<span class="token-comment"># The audio file URL — must be a WAV, MP3, or M4A file in Azure Blob Storage</span>
+audio_body = {
+    <span class="token-string">"url"</span>: <span class="token-string">"https://your-storage.blob.core.windows.net/calls/call-20241201-001.wav"</span>
+}
+
+response = requests.post(audio_analyze_url, headers=headers, data=json.dumps(audio_body))
+<span class="token-comment"># operation_url is in response.headers["Operation-Location"]</span>
+<span class="token-comment"># Then poll the operation URL until status == "succeeded" (same loop as above)</span>
+<span class="token-comment"># The result will contain:</span>
+<span class="token-comment">#   content["transcript"]        → Full speech-to-text transcript with timestamps</span>
+<span class="token-comment">#   content["fields"]["CustomerName"]  → Extracted customer name from the transcript</span>
+<span class="token-comment">#   content["fields"]["IssueType"]     → Extracted issue type</span>
+<span class="token-comment">#   content["fields"]["Sentiment"]     → Detected sentiment</span>
+<span class="token-keyword">print</span>(<span class="token-string">f"Audio job submitted: {response.headers.get('Operation-Location', 'N/A')}"</span>)</code></pre>
+      </div>
+
+      <!-- SECTION 6 — EXAM TIPS -->
+      <div class="section-block" id="exam-tips">
+        <div class="section-label">🎯 Section 6 — Exam Tips</div>
+        <h2>Content Understanding — what the exam tests</h2>
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Top 5 Tested Facts</div>
+            <p>
+              <strong>1. Content Understanding = the only service for audio and video AI analysis</strong> — If a scenario mentions processing audio recordings, phone calls, or video files with AI to extract insights, classify, or summarise — the answer is Content Understanding. Document Intelligence and AI Search do not handle audio or raw video files.<br><br>
+              <strong>2. Four modalities, one consistent API</strong> — Documents, Images, Videos, Audio. All are submitted via the same analyzer pattern. This is the unique selling point of Content Understanding vs the other services.<br><br>
+              <strong>3. Field schema defines what to extract — like giving instructions</strong> — You define field names and types in the analyzer. The AI reads the document and fills in your fields. No pre-trained model for your specific fields exists — the LLM understands the field description you write in plain English.<br><br>
+              <strong>4. Async pattern — same as Document Intelligence</strong> — POST → 202 Accepted → Operation-Location header → poll GET → "succeeded" → read results. If the exam asks how results are returned, it is always async polling for Content Understanding.<br><br>
+              <strong>5. Content Understanding vs Document Intelligence — the key distinction</strong> — Document Intelligence: structured form extraction (invoice total, vendor name, fixed fields with high accuracy). Content Understanding: understanding meaning (summarise, classify, extract entities from any content, handle audio/video). When the scenario asks for "summarise" or involves multi-modal content, choose Content Understanding.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 7 — QUIZ -->
+      <div class="section-block" id="quiz">
+        <div class="section-label">✅ Section 7 — Quick Quiz</div>
+        <h2>Test your understanding</h2>
+
+        <div class="quiz-container" id="p5t3-quiz" data-quiz="p5-content-understanding">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Topic 3 — Content Understanding</span>
+            <span class="quiz-question-count" data-q-counter>1 / 5</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:#0891b2;transition:width 0.4s ease;width:20%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <div data-question>
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A media company records 500 customer support phone calls every day. They want to automatically: (1) transcribe each call, (2) identify the customer's name and account number from the conversation, (3) classify the call as "Billing", "Technical", or "General Enquiry", and (4) detect whether the customer's tone was positive, neutral, or negative.</div>
+                <p class="quiz-question">Which Azure AI service should be used to build this solution?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Azure AI Search with a Speech custom skill — index the transcripts for search</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Azure Document Intelligence — use the prebuilt Read model on the audio files</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Azure Content Understanding with an audio analyzer — transcribes, extracts fields, classifies, and detects sentiment from audio recordings in a single pipeline</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Azure AI Language service — it handles all NLP operations including audio</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> This scenario requires processing audio files end-to-end: transcription, entity extraction, classification, and sentiment — all from audio recordings. Content Understanding's audio modality handles exactly this pipeline in one service. Document Intelligence (B) has no audio capability — it analyses documents and images only. AI Language (D) processes text, not audio directly. AI Search (A) could index the transcripts but requires separate transcription and wouldn't classify or extract fields automatically.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is the purpose of a <strong>Field Schema</strong> in an Azure Content Understanding custom analyzer?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It defines the database table structure where extracted results are stored</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">It specifies which fields to extract from the content — their names, data types, and descriptions that guide the AI to find the right values</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It defines the content types (PDF, Word, audio) that the analyzer will accept</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">It sets the confidence threshold — results below this threshold are rejected</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The field schema is the list of named fields you want extracted from every piece of content submitted to this analyzer. You define the field name (e.g. "ContractValue"), its type (number, date, string, array), and a plain-English description of what to look for. The AI uses these descriptions as instructions. Content modalities are defined by the analyzer's "scenario" setting (A is wrong about schema). Confidence thresholds are separate controls, not defined in the schema.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A publishing company has a repository of 10,000 articles in PDF format. They need: (a) journalists to search articles by keyword and topic, AND (b) an automated pipeline that reads new articles as they arrive and generates a one-paragraph summary plus extracts author names and publication dates.</div>
+                <p class="quiz-question">Which combination of services best meets BOTH requirements?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Document Intelligence for both — it can search and extract from documents</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Content Understanding for summarising and extracting new articles; Azure AI Search for making all 10,000 articles queryable by journalists</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Azure AI Search for both — it can summarise and index with its semantic ranking feature</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Content Understanding for both — it handles search and summarisation together</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> This is a classic two-service scenario. The search requirement ("journalists search by keyword and topic") maps to <strong>Azure AI Search</strong> — it is purpose-built for indexed, queryable document retrieval. The enrichment requirement ("summarise new articles, extract author and date") maps to <strong>Content Understanding</strong> — its document analyzer handles summarisation and field extraction. These two services work naturally together: Content Understanding enriches, AI Search indexes the enriched output. Document Intelligence (A) has no search capability. AI Search (C) doesn't summarise documents natively.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">When a developer submits a document to Azure Content Understanding for analysis and immediately receives HTTP status code <strong>202</strong>, what does this mean?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">202 means partial results are ready — the developer can read a subset of extracted fields immediately</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">202 means authentication failed — the API key is incorrect</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">202 Accepted means the analysis job was successfully queued — the developer must poll the Operation-Location URL to monitor progress and retrieve results when the status becomes "succeeded"</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">202 means the document format is unsupported and the request was rejected</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> HTTP 202 Accepted is the standard async response pattern used throughout Azure AI services. It means the server has accepted the request for processing — but the processing is not yet complete. The response includes an <code>Operation-Location</code> header containing the URL to poll. The developer sends GET requests to that URL periodically until the <code>status</code> field returns <code>"succeeded"</code>, at which point the full result is available. This same pattern applies to Document Intelligence, Content Understanding, Video Indexer, and Azure AI Document Translation.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A law firm wants to process legal contracts. They need to: extract the "Total Contract Value" (a dollar amount) and "Governing Jurisdiction" (text), generate a one-paragraph plain-English summary of each contract, and classify each contract as "Employment", "Service Agreement", or "NDA".</div>
+                <p class="quiz-question">Which combination of Content Understanding capabilities is needed in the custom analyzer configuration?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">OCR only — text extraction is sufficient for all requirements</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Field schema (for contract value and jurisdiction extraction) + summarisation + classification — combined in one document analyzer</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Three separate analyzers — one for extraction, one for summarisation, one for classification — submitted in sequence</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Use Document Intelligence instead — it handles extraction, summarisation, and classification in one model</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Content Understanding allows you to configure a single analyzer that performs multiple operations simultaneously: a <strong>field schema</strong> for structured field extraction (contract value, jurisdiction), <strong>summarisation</strong> for the plain-English paragraph, and <strong>classification</strong> for document type labelling — all returned in one API response per document. You don't need three separate analyzers. OCR alone (A) extracts text but can't extract semantically named fields, summarise, or classify. Document Intelligence (D) has no summarisation or classification capability — it is for structured form field extraction only.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 5</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next style="background:#0891b2">Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="completion-bar">
+        <div class="completion-checkbox" data-complete-toggle="p5-content-understanding"><span class="check-icon">✓</span></div>
+        <span class="completion-label" data-complete-label>Mark this topic as complete</span>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="02-document-intelligence.html" class="topic-nav-prev">
+          <span style="color:var(--text-muted)">←</span>
+          <div><div class="topic-nav-label">Previous topic</div><div class="topic-nav-title">Document Intelligence</div></div>
+        </a>
+        <a href="../flashcards.html" class="topic-nav-next">
+          <div><div class="topic-nav-label">All topics done!</div><div class="topic-nav-title">Part 5 Flashcards →</div></div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/common.js"></script>
+</body>
+</html>

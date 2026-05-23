@@ -1,0 +1,500 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security &amp; Access Controls | ServiceNow CSA Part 2</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Security &amp; Access Controls</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🔧 Part 2 · Topic 3 of 3</div>
+        <h1 class="topic-title">Security &amp; Access Controls</h1>
+        <div class="topic-meta">
+          <span>⏱ ~60 min read</span>
+          <span>·</span>
+          <span>ServiceNow CSA Exam Core Topic</span>
+        </div>
+        <div class="callout-tip" style="margin-top:var(--space-4)">
+          <strong>Note:</strong> Part 4 covers ACLs in greater depth. This topic introduces core security concepts and the ACL model — Part 4 goes deeper on ACL construction, testing, and advanced patterns.
+        </div>
+      </div>
+
+      <!-- Section 1: Security Model Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>ServiceNow Security Model Overview</h2>
+        <p>ServiceNow enforces security at multiple layers, each serving a distinct purpose. Understanding how these layers interact is essential for both the exam and real-world administration.</p>
+
+        <h3>Three Layers of Security</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🚪</div>
+            <h4>1. Role-Based Security</h4>
+            <p>Controls which <strong>modules and applications</strong> appear in the navigation menu. Roles determine what a user can see in the left-side navigator. If you don't have the role, the module doesn't appear.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: The <code>itil</code> role exposes Incident, Problem, and Change modules in the navigator.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🔒</div>
+            <h4>2. ACL-Based Security</h4>
+            <p>Controls who can <strong>read, write, create, or delete</strong> specific records and fields. ACLs operate at the database layer, enforcing rules even when accessed via REST API or direct queries.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: An ACL on <code>incident[READ]</code> determines who can read incident records.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📋</div>
+            <h4>3. Data-Level Security</h4>
+            <p>Row-level security through <strong>conditions and scripts</strong> on ACL rules. Restricts which specific records a user can access, even within the same table.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: A condition ensures users only see incidents assigned to them.</p>
+          </div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Key Principle:</strong> ServiceNow security is <strong>additive for roles</strong> (any matching role grants access) but uses a <strong>waterfall for ACLs</strong> (most specific matching ACL wins and evaluation stops).
+        </div>
+
+        <div class="callout-analogy">
+          <strong>Castle Analogy:</strong> Think of security as a castle. <strong>Roles are the main gate</strong> — they determine whether you can enter the application at all (is the module visible?). <strong>ACLs are the room locks</strong> — once you're inside the castle, they control which specific rooms and files you can access. You need both: the gate key and the room key.
+        </div>
+      </div>
+
+      <!-- Section 2: ACL Introduction -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Access Control Lists (ACLs) — Introduction</h2>
+        <p>Access Control Lists (ACLs) are the primary security enforcement mechanism in ServiceNow. They are database-level permission rules evaluated on every data access attempt.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>ACLs are stored in the <code>sys_security_acl</code> table</li>
+          <li>Navigate to: <strong>Security &gt; Access Control (ACL)</strong> or type <code>sys_security_acl.list</code> in the filter navigator</li>
+          <li>Required role to create/modify ACLs: <code>security_admin</code> (or <code>admin</code> on older instances)</li>
+          <li>ACLs are evaluated every time a user attempts to read, write, create, delete, or execute</li>
+        </ul>
+
+        <h3>ACL Anatomy</h3>
+        <p>Every ACL rule contains the following fields:</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>What It Means</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Type</strong></td>
+              <td>Scope of the ACL: table, record, or field</td>
+              <td><code>table</code></td>
+            </tr>
+            <tr>
+              <td><strong>Operation</strong></td>
+              <td>The action being controlled: read, write, create, delete, execute</td>
+              <td><code>read</code></td>
+            </tr>
+            <tr>
+              <td><strong>Name (Table.field)</strong></td>
+              <td>What is being protected — table name, optionally followed by a field name</td>
+              <td><code>incident.caller_id</code></td>
+            </tr>
+            <tr>
+              <td><strong>Role</strong></td>
+              <td>The role(s) a user must have; multiple roles are OR'd together</td>
+              <td><code>itil</code></td>
+            </tr>
+            <tr>
+              <td><strong>Condition</strong></td>
+              <td>Optional GlideRecord condition or JavaScript expression that must evaluate to true</td>
+              <td><code>assigned_to=javascript:gs.getUserID()</code></td>
+            </tr>
+            <tr>
+              <td><strong>Script</strong></td>
+              <td>Optional server-side script returning <code>true</code> (allow) or <code>false</code> (deny)</td>
+              <td><code>return gs.hasRole('manager');</code></td>
+            </tr>
+            <tr>
+              <td><strong>Admin overrides</strong></td>
+              <td>Whether admin users bypass this ACL. Default: true (admins bypass). Set to false to enforce for all users.</td>
+              <td><code>true</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>ACL Types</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Table ACL</h4>
+            <p>Controls access to <strong>entire records</strong> in a table. Most commonly used type.</p>
+            <p style="margin-top:var(--space-2);font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted)">Example: <code>incident[READ]</code><br>Who can read any incident record?</p>
+          </div>
+          <div class="term-card">
+            <h4>Field ACL</h4>
+            <p>Controls access to a <strong>specific field</strong> within a table. Used to protect sensitive data columns.</p>
+            <p style="margin-top:var(--space-2);font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted)">Example: <code>incident.salary_info[READ]</code><br>Protect a sensitive field on the form.</p>
+          </div>
+          <div class="term-card">
+            <h4>Record ACL</h4>
+            <p>Controls access to <strong>specific records</strong> via a condition. Implements row-level security — filters which rows a user can access.</p>
+            <p style="margin-top:var(--space-2);font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted)">Example: Only incidents where <code>assigned_to = current user</code>.</p>
+          </div>
+        </div>
+
+        <h3>ACL Operations</h3>
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+          <div class="term-card"><strong>read</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">View records or field values</p></div>
+          <div class="term-card"><strong>write</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">Modify existing records</p></div>
+          <div class="term-card"><strong>create</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">Insert new records</p></div>
+          <div class="term-card"><strong>delete</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">Remove records</p></div>
+          <div class="term-card"><strong>execute</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">Run scripts or REST APIs</p></div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — ACL Three-Part Check:</strong> When evaluating an ACL, ServiceNow checks three things in sequence:
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Does the user have the required <strong>ROLE</strong>?</li>
+            <li>Does the optional <strong>CONDITION</strong> evaluate to true?</li>
+            <li>Does the optional <strong>SCRIPT</strong> return true?</li>
+          </ol>
+          <strong>ALL three must pass</strong> for access to be granted. If any one fails, the ACL denies access.
+        </div>
+      </div>
+
+      <!-- Section 3: ACL Evaluation Order -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>ACL Evaluation Order <span style="color:var(--accent);font-size:0.9rem">(CRITICAL for Exam)</span></h2>
+        <p>ServiceNow evaluates ACLs from <strong>most-specific to least-specific</strong>. The first matching ACL wins — evaluation stops as soon as a match is found.</p>
+
+        <h3>Priority Order</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Priority</th>
+              <th>ACL Pattern</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent)">1 — Most Specific</strong></td>
+              <td><code>record.field</code></td>
+              <td>Exact table + exact field + record condition</td>
+              <td><code>incident.caller_id[READ]</code> with condition</td>
+            </tr>
+            <tr>
+              <td><strong>2</strong></td>
+              <td><code>table.field</code></td>
+              <td>Specific table, specific field — no record condition</td>
+              <td><code>incident.caller_id[READ]</code></td>
+            </tr>
+            <tr>
+              <td><strong>3</strong></td>
+              <td><code>table.*</code></td>
+              <td>All fields on a specific table</td>
+              <td><code>incident.*[READ]</code></td>
+            </tr>
+            <tr>
+              <td><strong>4</strong></td>
+              <td><code>*.field</code></td>
+              <td>A specific field name on any table</td>
+              <td><code>*.salary_info[READ]</code></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--text-muted)">5 — Least Specific</strong></td>
+              <td><code>*.*</code></td>
+              <td>All fields on all tables — the global fallback</td>
+              <td><code>*.*[READ]</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Trap:</strong> If a more-specific ACL <strong>denies</strong> access, the less-specific ACL is <strong>NOT checked</strong>. The most specific matching ACL wins and evaluation stops immediately — even if a broader ACL would have allowed access.
+        </div>
+
+        <h3>What Happens When No ACL Matches?</h3>
+        <div class="callout-exam">
+          <strong>Fail-Closed Security:</strong> If no ACL rule matches for a <strong>non-admin user</strong>, access is <strong>DENIED by default</strong>. ServiceNow implements a fail-closed (deny-by-default) security model. You must explicitly grant access — it is never implicitly granted by absence of rules.
+        </div>
+        <div class="callout-tip">
+          <strong>Admin Exception:</strong> Admin users bypass ACL evaluation by default. This means admins can always access all records unless you explicitly set <strong>Admin overrides = false</strong> on an ACL. Use this for highly sensitive data that even admins shouldn't casually access.
+        </div>
+      </div>
+
+      <!-- Section 4: Role-Based Access Control -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Role-Based Access Control (RBAC)</h2>
+        <p>Roles are named collections of permissions that control navigation visibility and act as prerequisites within ACL rules. They are the first gate a user passes through.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Roles control the <strong>visibility of modules and applications</strong> in the left navigation bar</li>
+          <li>The <code>itil</code> role grants access to Incident, Problem, and Change Management modules</li>
+          <li>Create custom roles: <strong>User Administration &gt; Roles &gt; New</strong></li>
+          <li>Roles can contain (include) other roles — creating a role hierarchy</li>
+          <li>Users can have multiple roles; role access is <strong>additive</strong> (any matching role grants the permission)</li>
+        </ul>
+
+        <h3>Role vs. ACL Interaction</h3>
+        <p>Roles and ACLs work together as complementary layers — one affects navigation visibility, the other controls data access.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>Controls</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Role → Navigation</strong></td>
+              <td>Whether the module appears in the left-side navigator</td>
+              <td><code>itil</code> role makes "Incident &gt; All Incidents" visible in nav</td>
+            </tr>
+            <tr>
+              <td><strong>Role → ACL Condition</strong></td>
+              <td>The role check inside an ACL rule determines record access</td>
+              <td>ACL rule: <em>incident[READ] requires itil role</em></td>
+            </tr>
+            <tr>
+              <td><strong>Both Together</strong></td>
+              <td>Full access path: nav shows the module AND ACL allows reading records</td>
+              <td>User can navigate to Incidents AND see the incident list</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-warning">
+          <strong>Common Misconception:</strong> A user might have a role that shows a module in navigation, but an ACL on the underlying table could still block them from reading records. Both layers apply independently. Removing the role hides the module but does not prevent direct URL or API access — only the ACL does that.
+        </div>
+      </div>
+
+      <!-- Section 5: Row-Level Security -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Row-Level Security (Data-Level ACLs)</h2>
+        <p>Row-level security restricts access to specific records within a table rather than the entire table. It is implemented through the <strong>Condition</strong> and <strong>Script</strong> fields on an ACL rule.</p>
+
+        <h3>How It Works</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>The <strong>Condition field</strong> on an ACL accepts a GlideRecord condition or JavaScript expression</li>
+          <li>The expression has access to the <code>current</code> object (the record being evaluated) and <code>gs</code> (GlideSystem)</li>
+          <li>Example: Only allow reading incidents where the current user is the assigned agent</li>
+          <li>The <strong>Script field</strong> handles more complex logic and must explicitly <code>return true;</code> or <code>return false;</code></li>
+        </ul>
+
+        <div class="callout-exam">
+          <strong>Critical Method:</strong> <code>gs.getUserID()</code> returns the <strong>sys_id</strong> of the currently logged-in user. This is used heavily in ACL conditions to implement row-level security. Know this method — it appears frequently on the exam.
+        </div>
+
+        <h3>Common ACL Condition Patterns</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// User can only see their own records (Condition field)
+assigned_to=javascript:gs.getUserID()
+
+// User can see records assigned to any of their groups
+assignment_group=javascript:gs.getMyGroups()
+
+// Check if user has a specific role (Script field)
+javascript:gs.hasRole('itil')
+
+// User is the caller OR the assigned agent (Script field)
+javascript:current.caller_id == gs.getUserID() || current.assigned_to == gs.getUserID()</code></pre>
+        </div>
+
+        <div class="callout-tip">
+          <strong>Condition vs. Script:</strong> Use the <strong>Condition field</strong> for simple database-style conditions (field = value). Use the <strong>Script field</strong> for complex logic requiring multiple checks, boolean operators, or method calls that return true/false. Scripts run server-side and have full API access.
+        </div>
+      </div>
+
+      <!-- Section 6: UI Policies vs ACLs -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>UI Policies vs. ACLs</h2>
+        <p>This is one of the most important distinctions on the CSA exam. UI Policies and ACLs look similar — both affect what users can do with fields — but they operate at completely different layers.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>UI Policy</th>
+              <th>ACL (Access Control)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Runs on</strong></td>
+              <td>Client (browser — JavaScript)</td>
+              <td>Server (database layer)</td>
+            </tr>
+            <tr>
+              <td><strong>Enforcement</strong></td>
+              <td>Client-side JavaScript execution</td>
+              <td>Server-side database evaluation</td>
+            </tr>
+            <tr>
+              <td><strong>Can be bypassed</strong></td>
+              <td><span style="color:var(--red-400)">Yes</span> — REST API, direct DB calls, disabling JS</td>
+              <td><span style="color:var(--green-400)">No</span> — enforced at the database level always</td>
+            </tr>
+            <tr>
+              <td><strong>Primary purpose</strong></td>
+              <td>UX behavior: field visibility, mandatory, read-only</td>
+              <td>Security: record and field access enforcement</td>
+            </tr>
+            <tr>
+              <td><strong>Controls</strong></td>
+              <td>What a user <em>sees and can interact with</em> on a form</td>
+              <td>What a user is <em>permitted to access</em> in the database</td>
+            </tr>
+            <tr>
+              <td><strong>Applies to</strong></td>
+              <td>Form UI only (not list views, API, integrations)</td>
+              <td>All access paths: UI, API, integrations, scripts</td>
+            </tr>
+            <tr>
+              <td><strong>Use case example</strong></td>
+              <td>Make "Resolution Notes" mandatory when State = Resolved</td>
+              <td>Prevent non-managers from reading salary fields</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-warning">
+          <strong>Critical Exam Point:</strong> UI Policies are <strong>NOT security controls</strong>. They run in the browser and can be bypassed by direct REST API calls, integrations, or anyone who disables JavaScript. If you need to enforce security (e.g., hide a sensitive field), you <strong>must</strong> use an ACL. Use UI Policies for UX behavior only.
+        </div>
+      </div>
+
+      <!-- Section 7: High Security Plugin -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>High Security Plugin</h2>
+        <p>ServiceNow offers a "High Security Settings" plugin that adds an enhanced layer of security controls on top of the base platform.</p>
+
+        <h3>What It Provides</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Password Policies</h4>
+            <p>Enforces password strength rules: minimum length, complexity requirements, expiration policies.</p>
+          </div>
+          <div class="term-card">
+            <h4>Session Controls</h4>
+            <p>Configurable session timeouts and idle session expiration to reduce exposure from unattended sessions.</p>
+          </div>
+          <div class="term-card">
+            <h4>Account Lockout</h4>
+            <p>Lockout policies after a configurable number of failed login attempts to prevent brute-force attacks.</p>
+          </div>
+          <div class="term-card">
+            <h4>IP Restrictions</h4>
+            <p>Restrict instance access to specific IP ranges or subnets — useful for enterprise environments.</p>
+          </div>
+          <div class="term-card">
+            <h4>Enhanced Auditing</h4>
+            <p>More granular audit trail for security-sensitive events and admin actions.</p>
+          </div>
+          <div class="term-card">
+            <h4>Stricter Auth</h4>
+            <p>Enables stricter authentication mechanisms and multi-factor authentication support.</p>
+          </div>
+        </div>
+
+        <div class="callout-tip">
+          <strong>CSA Exam Scope:</strong> For the CSA exam, know that the <strong>High Security Plugin exists</strong> and adds additional security settings like password rules, session timeouts, and lockout policies. You do not need to know how to configure each setting in detail — awareness is sufficient at this level.
+        </div>
+      </div>
+
+      <!-- Section 8: Exam Traps -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Exam Traps &amp; Key Reminders</h2>
+        <p>This section consolidates the most frequently tested ACL concepts and common wrong-answer traps on the CSA exam.</p>
+
+        <div class="callout-exam">
+          <strong>Trap 1 — Evaluation Order:</strong> ACL evaluation runs from <strong>most-specific to least-specific</strong>. The first matching ACL wins and evaluation stops. Do not assume a permissive wildcard ACL will "catch" a user denied by a more-specific ACL.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 2 — Admin Override:</strong> The <code>admin</code> role <strong>bypasses ACL evaluation by default</strong>. To make an ACL also apply to admin users, set <strong>Admin overrides = false</strong> on that specific ACL. This is how organizations protect highly sensitive data (e.g., salary records, HR data) from casual admin access.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 3 — Field ACLs and Table ACLs are independent:</strong> A user needs <strong>BOTH</strong> table-level read permission AND field-level read permission to see a field's value. Passing the table ACL does not automatically grant access to all fields — field ACLs are checked separately.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 4 — Deny by Default:</strong> If no ACL rule matches for a non-admin user, access is <strong>DENIED</strong>. This is the fail-closed model. Never assume "no rule = allow."
+        </div>
+
+        <div class="callout-tip">
+          <strong>Debugging ACL Issues:</strong> When troubleshooting access problems, use the <strong>ACL Simulator</strong>: navigate to <strong>Security &gt; Diagnose &gt; ACL</strong>. You can simulate access for a specific user to a specific record and see exactly which ACL rules are matching and why. Also check the <strong>system log</strong> (<code>syslog.list</code>) for ACL denial messages.
+        </div>
+
+        <div class="callout-concept">
+          <strong>Putting It All Together:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>User navigates to a module → <strong>Role check</strong>: does the nav item appear?</li>
+            <li>User opens a record list → <strong>Table ACL [READ]</strong>: can they see any records?</li>
+            <li>Row-level ACL condition → <strong>Record ACL</strong>: which specific records can they see?</li>
+            <li>User opens a record form → <strong>Field ACLs [READ]</strong>: which fields are visible?</li>
+            <li>User tries to save → <strong>Table ACL [WRITE] + Field ACLs [WRITE]</strong>: can they modify?</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="02-tables-dictionary.html" class="btn btn-secondary">← Tables &amp; Dictionary</a>
+          <a href="../../part3-collaboration/index.html" class="btn btn-primary">Part 3: Collaboration →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p2-instance-security', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p2-instance-security')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

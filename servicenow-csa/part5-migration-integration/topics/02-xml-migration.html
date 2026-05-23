@@ -1,0 +1,609 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XML Export/Import &amp; Data Migration | ServiceNow CSA Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span>
+        <span class="current">XML Export/Import &amp; Data Migration</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🔄 Part 5 · Topic 2 of 3</div>
+        <h1 class="topic-title">XML Export/Import &amp; Data Migration</h1>
+        <div class="topic-meta">
+          <span>⏱ ~55 min read</span>
+          <span>·</span>
+          <span>Part 5 — Migration &amp; Integration · 15% Exam Weight</span>
+        </div>
+        <div class="callout-tip" style="margin-top:var(--space-4)">
+          <strong>Topic Context:</strong> Update Sets (Topic 1) move <em>configuration</em> between instances. This topic covers XML export/import for moving specific records by <code>sys_id</code>, and Import Sets for moving bulk <em>data</em>. Understanding when to use each mechanism is a frequent exam question.
+        </div>
+      </div>
+
+      <!-- Section 1: XML Export/Import Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>XML Export/Import Overview</h2>
+        <p>Every record stored in ServiceNow can be exported as an XML file. This XML is a faithful representation of the record's field values, including its <code>sys_id</code>. Because the <code>sys_id</code> is preserved, the same record can be cleanly reimported into another instance — making XML the most reliable method for migrating individual configuration records.</p>
+
+        <h3>How to Export a Single Record</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Open any record on a form view</li>
+          <li>Right-click the form header (grey bar) to open the context menu</li>
+          <li>Select <strong>Export → XML</strong></li>
+          <li>The browser downloads a <code>.xml</code> file for that record</li>
+        </ul>
+
+        <h3>How to Export from a List</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to any list view</li>
+          <li>Right-click a row (or select rows using checkboxes)</li>
+          <li>Select <strong>Export → XML</strong> from the context menu</li>
+          <li>Exports all selected records into a single XML file</li>
+          <li>Without selection: exports all records currently visible in the list</li>
+        </ul>
+
+        <h3>How to Import XML</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to: <strong>System Definition &gt; XML Import</strong> — or use the filter navigator</li>
+          <li>Alternatively: <strong>System Import Sets &gt; Load Data</strong> and choose the XML file source</li>
+          <li>ServiceNow reads the <code>sys_id</code> inside the XML</li>
+          <li>If a record with that <code>sys_id</code> exists in the target instance: the record is <strong>updated</strong></li>
+          <li>If no record with that <code>sys_id</code> exists: a new record is <strong>inserted</strong></li>
+        </ul>
+
+        <div class="callout-concept">
+          <strong>Why sys_id Matters:</strong> The <code>sys_id</code> is a globally unique identifier that ServiceNow generates for every record. When you export a record as XML, the <code>sys_id</code> travels with it. On import, ServiceNow uses this value to determine whether to update an existing record or create a new one — ensuring configuration records land in exactly the right place on the target instance.
+        </div>
+
+        <div class="callout-analogy">
+          <strong>Passport Analogy:</strong> Think of a record's <code>sys_id</code> as a passport. When you export XML, the record takes its passport with it. When it arrives at another instance (country), the passport is checked: if someone with that ID already lives there, the record updates them; if not, a new resident is registered. No passport = no guarantee of identity.
+        </div>
+      </div>
+
+      <!-- Section 2: Export Formats -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Export Formats</h2>
+        <p>ServiceNow provides multiple export formats accessible from the right-click context menu on a list row or the form header. Each format has a distinct purpose — the exam tests whether you know which format supports reimport.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Format</th>
+              <th>Use Case</th>
+              <th>Reimportable?</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>XML</strong></td>
+              <td>Configuration migration, full-fidelity backup of records</td>
+              <td><span style="color:var(--green-400);font-weight:700">Yes</span></td>
+              <td>Preserves <code>sys_id</code> and all field values. Gold standard for record migration.</td>
+            </tr>
+            <tr>
+              <td><strong>CSV</strong></td>
+              <td>Flat data analysis, spreadsheet consumption</td>
+              <td><span style="color:var(--red-400);font-weight:700">Not directly</span></td>
+              <td>Loses relational context; can be reimported via Import Sets with a Transform Map.</td>
+            </tr>
+            <tr>
+              <td><strong>Excel</strong></td>
+              <td>Formatted spreadsheet reports for stakeholders</td>
+              <td><span style="color:var(--red-400);font-weight:700">No</span></td>
+              <td>For sharing/printing. Cannot be used as an import source natively.</td>
+            </tr>
+            <tr>
+              <td><strong>PDF</strong></td>
+              <td>Print-ready or shareable snapshots</td>
+              <td><span style="color:var(--red-400);font-weight:700">No</span></td>
+              <td>Read-only output format. No data import capability.</td>
+            </tr>
+            <tr>
+              <td><strong>JSON</strong></td>
+              <td>REST API responses, integration payloads</td>
+              <td><span style="color:var(--text-muted);font-weight:700">Via API</span></td>
+              <td>Returned by REST API calls; not a native right-click export option in all versions.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know:</strong> Of all the export formats, <strong>XML is the only one that can be directly reimported</strong> into ServiceNow while preserving <code>sys_id</code> and record relationships. CSV can be imported but requires a Transform Map and does not preserve <code>sys_id</code> automatically. Expect a question contrasting XML with CSV or Excel.
+        </div>
+
+        <h3>Accessing Export Options</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>From a List View</h4>
+            <p>Right-click any row in a list to open the context menu. The <strong>Export</strong> submenu appears with all available format options. If multiple rows are selected via checkboxes, all selected records export together.</p>
+          </div>
+          <div class="term-card">
+            <h4>From a Form View</h4>
+            <p>Right-click the grey form <strong>header bar</strong> (the bar showing the table/record name at the top of the form). The context menu includes Export options for the current record.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Bulk Export -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Bulk Export</h2>
+        <p>When you need to export large volumes of records — potentially thousands of rows — ServiceNow provides mechanisms beyond a simple right-click export.</p>
+
+        <h3>Ad-Hoc Bulk Export</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to a list view and apply filters to scope your records</li>
+          <li>Select all visible records (or use <strong>Select All</strong> to include filtered records)</li>
+          <li>Right-click → <strong>Export → XML</strong></li>
+          <li>For very large datasets, ServiceNow may process the export asynchronously</li>
+          <li>Large exports are packaged and <strong>delivered via email link</strong> rather than an immediate download</li>
+        </ul>
+
+        <h3>Scheduled Exports</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to: <strong>System Definition &gt; Scheduled Jobs</strong> or <strong>Reports &gt; Scheduled Reports</strong></li>
+          <li>Automates regular data extraction on a defined schedule (hourly, daily, weekly)</li>
+          <li>Useful for keeping external systems in sync with ServiceNow data</li>
+          <li>Can export to FTP, email, or shared storage depending on configuration</li>
+        </ul>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>sys_export_log</h4>
+            <p>ServiceNow maintains an audit trail of all export operations in the <code>sys_export_log</code> table. Administrators can review who exported what data and when — important for compliance and data governance.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate via filter navigator: <code>sys_export_log.list</code></p>
+          </div>
+          <div class="term-card">
+            <h4>Email Delivery for Large Exports</h4>
+            <p>When an export job is too large to complete synchronously, ServiceNow queues it as a background job. Once complete, the user receives an email containing a <strong>download link</strong> to retrieve the exported file.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">This prevents browser timeouts on large dataset exports.</p>
+          </div>
+        </div>
+
+        <div class="callout-tip">
+          <strong>Best Practice:</strong> Before running a bulk export, always apply a meaningful filter to limit the record set. Exporting an entire large table without filters can generate enormous files, trigger email delivery instead of immediate download, and place unnecessary load on the instance.
+        </div>
+      </div>
+
+      <!-- Section 4: XML Import (Record-Level) -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>XML Import — Record-Level Migration</h2>
+        <p>XML import is the preferred method for moving individual configuration records between instances. Unlike Import Sets (which are designed for bulk data ingestion), XML import performs a targeted, <code>sys_id</code>-aware upsert directly into the target table.</p>
+
+        <h3>Import Process Step-by-Step</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Action</th>
+              <th>Location / Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1</strong></td>
+              <td>Export the record from source instance</td>
+              <td>Right-click form or list row → Export → XML</td>
+            </tr>
+            <tr>
+              <td><strong>2</strong></td>
+              <td>Log in to target instance</td>
+              <td>Ensure you have <code>admin</code> or appropriate import permissions</td>
+            </tr>
+            <tr>
+              <td><strong>3</strong></td>
+              <td>Navigate to XML Import</td>
+              <td><strong>System Definition &gt; XML Import</strong> or type <code>xml_import.do</code> in filter navigator URL</td>
+            </tr>
+            <tr>
+              <td><strong>4</strong></td>
+              <td>Upload the XML file</td>
+              <td>Choose the downloaded XML file from your local machine</td>
+            </tr>
+            <tr>
+              <td><strong>5</strong></td>
+              <td>ServiceNow processes sys_id</td>
+              <td>Reads <code>sys_id</code> from XML; checks target table for existing record</td>
+            </tr>
+            <tr>
+              <td><strong>6</strong></td>
+              <td>Upsert executed</td>
+              <td>If <code>sys_id</code> found: <strong>UPDATE</strong> existing record. If not found: <strong>INSERT</strong> new record.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Upsert Defined:</strong> An <em>upsert</em> is a database operation that combines <em>update</em> and <em>insert</em> — it updates a record if it exists, or inserts it if it does not. XML import in ServiceNow always performs an upsert keyed on the record's <code>sys_id</code>.
+        </div>
+
+        <h3>When to Use XML Import</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Migrating specific <strong>configuration records</strong> that are not captured in an Update Set (e.g., custom catalog items, knowledge articles, specific workflow versions)</li>
+          <li>When you need the record to land with the <strong>exact same sys_id</strong> on the target instance</li>
+          <li>Moving a handful of records — not suitable for bulk data migration (use Import Sets for that)</li>
+          <li>Sharing specific records between developers working on different instances</li>
+        </ul>
+
+        <div class="callout-warning">
+          <strong>Reference Fields Warning:</strong> If the record being imported contains reference fields (fields that point to other records by <code>sys_id</code>), those referenced records must also exist on the target instance with the same <code>sys_id</code> — otherwise the references will be broken or null after import. Always audit dependencies before migrating configuration records via XML.
+        </div>
+      </div>
+
+      <!-- Section 5: Data Migration — Import Sets vs Update Sets vs XML -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Data Migration: Import Sets vs. Update Sets vs. XML</h2>
+        <p>One of the most tested areas in Part 5 is understanding <strong>which migration tool to use in which scenario</strong>. The three mechanisms look superficially similar — all move information between instances — but they serve fundamentally different purposes.</p>
+
+        <h3>Core Distinction</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📦</div>
+            <h4>Update Sets</h4>
+            <p>Move <strong>configuration changes</strong> — scripts, form layouts, business rules, UI policies, workflows, and other customizations made through the ServiceNow interface.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Think: "What you built or configured."</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📊</div>
+            <h4>Import Sets</h4>
+            <p>Move <strong>data records</strong> in bulk — incidents, users, CIs, assets, and other transactional or reference data. Requires a Transform Map to map source columns to target fields.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Think: "Rows of data from an external source."</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📄</div>
+            <h4>XML Export/Import</h4>
+            <p>Move <strong>specific records</strong> by <code>sys_id</code> — sits between the other two. Best for individual config records not captured in Update Sets, or precise record-level migrations.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Think: "An exact copy of a specific record."</p>
+          </div>
+        </div>
+
+        <h3>Full Comparison Table</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Update Sets</th>
+              <th>Import Sets</th>
+              <th>XML Export/Import</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Primary purpose</strong></td>
+              <td>Config migration (DEV → TEST → PROD)</td>
+              <td>Bulk data ingestion from external sources</td>
+              <td>Record-level migration preserving sys_id</td>
+            </tr>
+            <tr>
+              <td><strong>What it moves</strong></td>
+              <td>Customizations: scripts, forms, rules, workflows</td>
+              <td>Data rows: users, incidents, CIs, assets</td>
+              <td>Any individual record type</td>
+            </tr>
+            <tr>
+              <td><strong>sys_id preserved?</strong></td>
+              <td>Yes — captures changes by sys_id</td>
+              <td>No — Transform Map generates new sys_ids</td>
+              <td>Yes — explicit sys_id upsert</td>
+            </tr>
+            <tr>
+              <td><strong>Transform Map needed?</strong></td>
+              <td>No</td>
+              <td>Yes — required for field mapping</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td><strong>Staging table used?</strong></td>
+              <td>No</td>
+              <td>Yes — <code>sys_import_set_row</code></td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td><strong>Typical source</strong></td>
+              <td>ServiceNow DEV instance</td>
+              <td>External file (CSV, XML, JDBC, LDAP)</td>
+              <td>ServiceNow instance (any environment)</td>
+            </tr>
+            <tr>
+              <td><strong>Volume</strong></td>
+              <td>Configuration records (usually low volume)</td>
+              <td>High volume bulk data</td>
+              <td>Low volume (individual or small sets)</td>
+            </tr>
+            <tr>
+              <td><strong>Table stored in</strong></td>
+              <td><code>sys_update_set</code></td>
+              <td><code>sys_import_set</code></td>
+              <td>Directly in target table</td>
+            </tr>
+            <tr>
+              <td><strong>Best for</strong></td>
+              <td>Promoting application development changes</td>
+              <td>Loading data from external systems (HR, CMDB feeds)</td>
+              <td>Cloning specific records between instances</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Scenario — Pick the Right Tool:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>"Move a business rule from DEV to PROD" → <strong>Update Set</strong></li>
+            <li>"Load 50,000 employee records from an HR CSV file" → <strong>Import Set</strong></li>
+            <li>"Copy a specific catalog item with its sys_id to a new instance" → <strong>XML Export/Import</strong></li>
+            <li>"Migrate a workflow from TEST to PROD" → <strong>Update Set</strong></li>
+            <li>"Import CI data from a discovery scan file" → <strong>Import Set</strong></li>
+          </ul>
+        </div>
+
+        <h3>Import Sets Deep Dive — Key Concepts</h3>
+        <p>Since Import Sets are the tool for bulk data migration, understanding how they work is essential for the exam.</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li><strong>Import Set Table:</strong> When you load data, ServiceNow first stages it in a temporary import set table (prefixed with <code>u_</code>)</li>
+          <li><strong>Transform Map:</strong> A configuration record that maps columns in the import set table to fields in the target table</li>
+          <li><strong>Coalesce:</strong> A Transform Map field option that identifies a "match" field — if a record with the same value exists in the target, update it instead of creating a duplicate</li>
+          <li><strong>Run Transform:</strong> After loading data, you run the transform to move records from the staging table to the target table</li>
+          <li><strong>Import Set Log:</strong> Tracks the status of each row (inserted, updated, error, ignored)</li>
+        </ul>
+
+        <div class="callout-concept">
+          <strong>Coalesce vs. sys_id:</strong> Import Sets use <em>coalescing</em> on a chosen field (like email address or employee number) to match incoming records to existing ones. This is fundamentally different from XML import, which always uses <code>sys_id</code> as the match key. This is why Import Sets do not preserve <code>sys_id</code> by default.
+        </div>
+      </div>
+
+      <!-- Section 6: MID Server -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>MID Server</h2>
+        <p>The <strong>MID Server</strong> (Management, Instrumentation, and Discovery server) is a Java-based agent application that customers install on a server within their own network. It enables ServiceNow — a cloud-hosted platform — to communicate with systems that are not publicly accessible on the internet.</p>
+
+        <h3>What MID Server Enables</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>JDBC Imports</h4>
+            <p>Query databases inside a corporate network using JDBC. Pull data from SQL Server, Oracle, MySQL, etc., directly into Import Sets without exposing the database externally.</p>
+          </div>
+          <div class="term-card">
+            <h4>LDAP Integration</h4>
+            <p>Connect to on-premise Active Directory or other LDAP servers for user provisioning and authentication — common in enterprise environments with internal identity systems.</p>
+          </div>
+          <div class="term-card">
+            <h4>Discovery</h4>
+            <p>Probe IP ranges inside the corporate firewall to discover hardware and software assets for the CMDB. MID Server reaches network devices that ServiceNow's cloud cannot directly access.</p>
+          </div>
+          <div class="term-card">
+            <h4>REST/SOAP to Internal APIs</h4>
+            <p>Call REST or SOAP APIs hosted on internal servers (behind a firewall) on behalf of ServiceNow workflows and integrations.</p>
+          </div>
+          <div class="term-card">
+            <h4>Orchestration</h4>
+            <p>Run scripts and automation on internal servers as part of ServiceNow workflow orchestration steps.</p>
+          </div>
+          <div class="term-card">
+            <h4>PowerShell / SSH</h4>
+            <p>Execute commands on Windows (PowerShell) and Linux/Unix (SSH) servers within the customer's network for automation and data collection.</p>
+          </div>
+        </div>
+
+        <h3>MID Server Architecture</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Technology</strong></td>
+              <td>Java application (JAR-based agent) installed on a customer-managed server</td>
+            </tr>
+            <tr>
+              <td><strong>Network direction</strong></td>
+              <td><strong>Outbound only</strong> — MID Server initiates connection TO ServiceNow. ServiceNow never connects inbound to the MID Server.</td>
+            </tr>
+            <tr>
+              <td><strong>Firewall requirement</strong></td>
+              <td>Only outbound port 443 (HTTPS) needs to be open from MID Server to ServiceNow. No inbound firewall rules required.</td>
+            </tr>
+            <tr>
+              <td><strong>Location</strong></td>
+              <td>Customer's own network — behind the corporate firewall, within the same network segment as the target systems</td>
+            </tr>
+            <tr>
+              <td><strong>Configuration table</strong></td>
+              <td><code>sys_mid_server</code> — manage all MID Servers from <strong>MID Server &gt; Servers</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Status monitoring</strong></td>
+              <td>MID Server sends heartbeat to ServiceNow; status visible in the <code>sys_mid_server</code> record (Up/Down)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>The Bridge Analogy:</strong> Imagine ServiceNow is a city on one side of a river, and your corporate network is on the other side. Normally they cannot communicate because a firewall separates them. The MID Server is a bridge-keeper who lives on the corporate side — it can reach systems on that side, and it calls across to ServiceNow to report findings. Crucially, ServiceNow never crosses to the corporate side on its own.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Key Exam Fact — Outbound Only:</strong> The MID Server connects <strong>outbound</strong> from the customer network to ServiceNow. This means no inbound firewall ports need to be opened on the customer's firewall. This is a deliberate security design — the corporate network is never exposed. Expect exam questions that test whether you know the direction of communication.
+        </div>
+      </div>
+
+      <!-- Section 7: Instance Clone -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Instance Clone</h2>
+        <p>An instance clone copies an entire ServiceNow instance — including all data, configuration, and customizations — from a source instance to a target instance. This is most commonly used to refresh a DEV or TEST environment with real PROD data so that testing is performed against realistic data sets.</p>
+
+        <h3>Common Clone Scenarios</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>PROD → DEV</h4>
+            <p>Refresh the development environment with current production data and configuration. Ensures developers are working with a realistic copy of the system.</p>
+          </div>
+          <div class="term-card">
+            <h4>PROD → TEST</h4>
+            <p>Refresh the test/staging environment before a major release to run acceptance tests against production-equivalent data.</p>
+          </div>
+          <div class="term-card">
+            <h4>PROD → UAT</h4>
+            <p>Provide business users with a production-like environment for User Acceptance Testing without risk to real data.</p>
+          </div>
+        </div>
+
+        <h3>Clone Characteristics</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>What is included</strong></td>
+              <td>All tables, records, configuration, scripts, customizations, user data — a complete copy</td>
+            </tr>
+            <tr>
+              <td><strong>What is excluded</strong></td>
+              <td>User passwords (reset to default), some external integration credentials, MID Server bindings</td>
+            </tr>
+            <tr>
+              <td><strong>Effect on target</strong></td>
+              <td><strong>Completely destructive</strong> — all existing data on the target instance is wiped and replaced. There is no merge; it is a full overwrite.</td>
+            </tr>
+            <tr>
+              <td><strong>How to request</strong></td>
+              <td>Managed via the <strong>HI (Hosted Instances) portal</strong> — customers submit a clone request through the ServiceNow support portal</td>
+            </tr>
+            <tr>
+              <td><strong>Duration</strong></td>
+              <td>Can take hours depending on instance size; target instance is offline during clone</td>
+            </tr>
+            <tr>
+              <td><strong>Passwords after clone</strong></td>
+              <td>User passwords are excluded — all user accounts will need to reset passwords on the cloned instance</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-warning">
+          <strong>Destructive Operation — Target Data Lost:</strong> A clone completely overwrites the target instance. Any development work, test data, or configurations on the target instance that have not been captured in Update Sets or otherwise backed up will be <strong>permanently lost</strong>. Always communicate with your team before initiating a clone and ensure all in-progress work is saved.
+        </div>
+
+        <div class="callout-tip">
+          <strong>Clone Exclusion Lists:</strong> ServiceNow provides a mechanism to <em>exclude specific tables or records</em> from a clone (clone exclusions). This prevents certain data — such as integration tokens, test-specific configurations, or sensitive records — from overwriting the target's own values. Configure exclusions before requesting the clone via the HI portal.
+        </div>
+      </div>
+
+      <!-- Section 8: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Key Exam Facts &amp; Traps</h2>
+        <p>This section consolidates the highest-frequency exam topics for XML migration and data migration within Part 5.</p>
+
+        <div class="callout-exam">
+          <strong>Fact 1 — XML Preserves sys_id:</strong> XML export is the <strong>safest method</strong> for migrating individual configuration records because it preserves the record's <code>sys_id</code>. This ensures referential integrity — other records that reference the exported record by <code>sys_id</code> will still resolve correctly after import.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 2 — Import Sets + Transform Maps:</strong> Import Sets use <strong>Transform Maps</strong> for field mapping. Transform Maps do <em>not</em> preserve <code>sys_id</code> by default — new sys_ids are generated for inserted records unless you explicitly configure coalescing or map the <code>sys_id</code> field in the transform. This is a critical distinction from XML import.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 3 — Right Tool for Config vs. Data:</strong>
+          <ul style="margin:var(--space-2) 0 0 var(--space-4);line-height:2">
+            <li><strong>Update Sets</strong> = configuration (scripts, forms, rules) between instances</li>
+            <li><strong>Import Sets</strong> = bulk data (users, incidents, CIs) from external sources</li>
+            <li><strong>XML Export/Import</strong> = specific records with sys_id fidelity</li>
+          </ul>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 4 — MID Server Direction:</strong> The MID Server always connects <strong>outbound</strong> from the customer network to ServiceNow. No inbound firewall rules are required on the customer firewall. ServiceNow sends instructions to the MID Server via the outbound connection — it never initiates an inbound connection.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 5 — Clone Destroys Target:</strong> An instance clone is <strong>completely destructive to the target instance</strong>. All existing records and configurations on the target are wiped. Clones are requested via the HI (Hosted Instances) portal, not done directly in the instance UI.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 6 — Large Exports via Email:</strong> When an export job is too large to complete synchronously (e.g., exporting tens of thousands of records), ServiceNow queues it as a background job and emails the user a download link when complete. The export is not lost — it is delivered asynchronously.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 7 — sys_export_log:</strong> All export operations are tracked in the <code>sys_export_log</code> table. This supports data governance and compliance requirements by providing an audit trail of what was exported, by whom, and when.
+        </div>
+
+        <div class="callout-concept">
+          <strong>Quick Reference — Migration Decision Tree:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Moving a <em>script/form/rule/workflow</em> between instances? → <strong>Update Set</strong></li>
+            <li>Loading <em>bulk external data</em> (CSV, database, LDAP)? → <strong>Import Set</strong></li>
+            <li>Copying a <em>specific record</em> with same sys_id to another instance? → <strong>XML Export/Import</strong></li>
+            <li>Need to communicate with <em>on-premise internal systems</em>? → <strong>MID Server</strong></li>
+            <li>Need a <em>full copy</em> of PROD for testing? → <strong>Instance Clone</strong></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="01-update-sets.html" class="btn btn-secondary">← Update Sets</a>
+          <a href="03-integration-flows.html" class="btn btn-primary">Integration Flows →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p5-xml-migration', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p5-xml-migration')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,810 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Scripts | ServiceNow CSA Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span>
+        <span class="current">Client Scripts</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">⚙️ Part 6 · Topic 3 of 4</div>
+        <h1 class="topic-title">Client Scripts</h1>
+        <div class="topic-meta">
+          <span>⏱ ~70 min read</span>
+          <span>·</span>
+          <span>Part 6 — Self-Service &amp; Automation · 20% Exam Weight</span>
+        </div>
+        <div class="callout-exam" style="margin-top:var(--space-4)">
+          <strong>Heavily Tested:</strong> Client Scripts are among the most frequently tested topics on the CSA exam. Expect multiple questions on script types, g_form API methods, GlideAjax usage, and the isLoading pattern. Master every section here.
+        </div>
+      </div>
+
+      <!-- Section 1: Client Script Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Client Script Overview</h2>
+        <p>Client Scripts are JavaScript programs that execute in the <strong>user's browser</strong> — not on the ServiceNow server. They allow administrators and developers to dynamically control form behavior, validate user input, and interact with the UI in real time.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🖥️</div>
+            <h4>Runs In Browser</h4>
+            <p>Client Scripts execute client-side (in the browser). They have no direct access to server-side APIs like GlideRecord. For server data, use <strong>GlideAjax</strong>.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📋</div>
+            <h4>Storage Table</h4>
+            <p>All Client Scripts are stored in the <code>sys_client_script</code> table. Navigate to: <strong>System Definition &gt; Client Scripts</strong>.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🔗</div>
+            <h4>Scoped to Table</h4>
+            <p>Each Client Script is associated with a specific table (e.g., <code>incident</code>). They fire only when that table's form or list is active.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">⚡</div>
+            <h4>4 Script Types</h4>
+            <p>There are exactly four Client Script types: <strong>onLoad</strong>, <strong>onChange</strong>, <strong>onSubmit</strong>, and <strong>onCellEdit</strong>. Each fires at a different user interaction point.</p>
+          </div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Key Principle:</strong> Because Client Scripts run in the browser, they affect <strong>only the current user's session</strong>. They cannot be used as security controls — any client-side restriction can be bypassed via REST API or direct database access. Use ACLs and Business Rules for real security enforcement.
+        </div>
+      </div>
+
+      <!-- Section 2: Script Types -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Script Types <span style="color:var(--accent);font-size:0.9rem">— CRITICAL EXAM TOPIC</span></h2>
+        <p>Knowing exactly when each script type fires and what parameters it receives is essential for the CSA exam. This is one of the most heavily tested areas.</p>
+
+        <h3>onLoad</h3>
+        <div class="callout-concept">
+          <strong>Fires when:</strong> The form is displayed to the user — before any user interaction occurs.<br>
+          <strong>Use for:</strong> Setting initial field states, pre-populating values, hiding fields based on user role, or configuring the form layout on first render.<br>
+          <strong>Parameters:</strong> None.
+        </div>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// onLoad example: hide resolution fields when opening a new incident
+function onLoad() {
+    var state = g_form.getValue('state');
+    // If state is not Resolved, hide resolution code
+    if (state != '6') {
+        g_form.setVisible('close_code', false);
+        g_form.setVisible('close_notes', false);
+    }
+}</code></pre>
+        </div>
+
+        <h3>onChange</h3>
+        <div class="callout-concept">
+          <strong>Fires when:</strong> A specific field's value changes (field must be specified in the "Field name" property of the script).<br>
+          <strong>Use for:</strong> Reacting to field changes — show/hide related fields, update dependent fields, validate the new value.<br>
+          <strong>Parameters:</strong> <code>(tableName, oldValue, newValue, isLoading, isTemplate)</code>
+        </div>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// onChange example: show resolution fields when state changes to Resolved
+function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    // ALWAYS include this guard — prevents firing on form load
+    if (isLoading) return;
+    if (isTemplate) return;
+
+    if (newValue == '6') { // 6 = Resolved
+        g_form.setVisible('close_code', true);
+        g_form.setMandatory('close_code', true);
+        g_form.setVisible('close_notes', true);
+        g_form.setMandatory('close_notes', true);
+    } else {
+        g_form.setVisible('close_code', false);
+        g_form.setMandatory('close_code', false);
+        g_form.setVisible('close_notes', false);
+        g_form.setMandatory('close_notes', false);
+    }
+}</code></pre>
+        </div>
+
+        <h3>onSubmit</h3>
+        <div class="callout-concept">
+          <strong>Fires when:</strong> The user clicks Save, Update, or Submit — immediately before the record is saved to the server.<br>
+          <strong>Use for:</strong> Final validation before save. <strong>Return false to cancel the submit</strong> and keep the user on the form.<br>
+          <strong>Parameters:</strong> None explicitly (but you can call <code>g_form.getValue()</code> inside).
+        </div>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// onSubmit example: prevent save if priority is Critical but no manager approval
+function onSubmit() {
+    var priority = g_form.getValue('priority');
+    var approvalState = g_form.getValue('approval');
+
+    if (priority == '1' && approvalState != 'approved') {
+        g_form.addErrorMessage('Critical priority incidents require manager approval before saving.');
+        return false; // Cancel the save — user stays on the form
+    }
+    // Returning true (or nothing) allows the save to proceed
+    return true;
+}</code></pre>
+        </div>
+
+        <h3>onCellEdit</h3>
+        <div class="callout-concept">
+          <strong>Fires when:</strong> A user edits a cell directly in a <strong>list view</strong> (not on a form). This is the inline list editing mode.<br>
+          <strong>Use for:</strong> Validating or reacting to changes made directly in a list without opening the full form record.<br>
+          <strong>Key distinction:</strong> onCellEdit does NOT fire on a form — it is exclusively for list editing.
+        </div>
+
+        <h3>Full Comparison Table</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>When It Fires</th>
+              <th>Where</th>
+              <th>Return false effect</th>
+              <th>Parameters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>onLoad</strong></td>
+              <td>Form is loaded/displayed</td>
+              <td>Form only</td>
+              <td>No effect</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <td><strong>onChange</strong></td>
+              <td>Specified field value changes</td>
+              <td>Form only</td>
+              <td>No effect</td>
+              <td>control, oldValue, newValue, isLoading, isTemplate</td>
+            </tr>
+            <tr>
+              <td><strong>onSubmit</strong></td>
+              <td>Save/Update/Submit clicked</td>
+              <td>Form only</td>
+              <td><strong>Cancels the save</strong></td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <td><strong>onCellEdit</strong></td>
+              <td>Cell edited in list view</td>
+              <td>List only</td>
+              <td>Cancels the edit</td>
+              <td>sysIDs, table, oldValues, newValue, callback</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know:</strong> Only <strong>onSubmit</strong> and <strong>onCellEdit</strong> can cancel an action by returning false. Returning false in onLoad or onChange has no effect. Also remember: onCellEdit fires in <strong>list view</strong>, not on a form — this distinction is frequently tested.
+        </div>
+      </div>
+
+      <!-- Section 3: g_form API -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>g_form API <span style="color:var(--accent);font-size:0.9rem">— Critical, Memorize</span></h2>
+        <p>The <code>g_form</code> object is the primary API for interacting with form fields from a Client Script. It is available in all form-based script types (onLoad, onChange, onSubmit). You must know these methods cold for the exam.</p>
+
+        <h3>Getting and Setting Values</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4><code>g_form.getValue('field')</code></h4>
+            <p>Returns the current <strong>value</strong> of a field. For reference fields, returns the <strong>sys_id</strong> of the referenced record (not the display value).</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.setValue('field', 'value')</code></h4>
+            <p>Sets the value of a field. For reference fields, pass the <strong>sys_id</strong>. This triggers onChange listeners for the field being set.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.getDisplayValue('field')</code></h4>
+            <p>Returns the <strong>display value</strong> of a field (what the user sees). Useful for reference fields where getValue returns a sys_id.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.clearValue('field')</code></h4>
+            <p>Clears the current value of a field, setting it to empty/null. Equivalent to calling <code>setValue('field', '')</code>.</p>
+          </div>
+        </div>
+
+        <h3>Field Visibility and State</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4><code>g_form.setVisible('field', true/false)</code></h4>
+            <p>Shows (<code>true</code>) or hides (<code>false</code>) a field on the form. Hidden fields still submit their current value.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.setMandatory('field', true/false)</code></h4>
+            <p>Makes a field required (<code>true</code>) or optional (<code>false</code>). Mandatory fields show a red asterisk and block save if empty.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.setReadOnly('field', true/false)</code></h4>
+            <p>Makes a field read-only (<code>true</code>) or editable (<code>false</code>). Read-only fields display their value but cannot be edited by the user.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.setDisplay('field', true/false)</code></h4>
+            <p>Similar to setVisible, but also removes the field's space from the layout when hidden. More aggressive than setVisible.</p>
+          </div>
+        </div>
+
+        <h3>Messages and Notifications</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4><code>g_form.addInfoMessage('msg')</code></h4>
+            <p>Displays a <strong>blue informational banner</strong> at the top of the form. Useful for guidance or context messages.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.addErrorMessage('msg')</code></h4>
+            <p>Displays a <strong>red error banner</strong> at the top of the form. Commonly used in onSubmit to explain why a save was cancelled.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.clearMessages()</code></h4>
+            <p>Removes all info and error banners from the form. Call this before adding new messages to avoid duplicates stacking up.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.showFieldMsg('field', 'msg', 'type')</code></h4>
+            <p>Displays a message directly <strong>below a specific field</strong>. Type can be <code>'info'</code> or <code>'error'</code>. More targeted than form-level banners.</p>
+          </div>
+        </div>
+
+        <h3>DOM and Label Access</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4><code>g_form.getControl('field')</code></h4>
+            <p>Returns the <strong>DOM element</strong> for the specified field. Use for advanced UI manipulation beyond the standard g_form API.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.getLabel('field')</code></h4>
+            <p>Returns the <strong>label text</strong> of a field as displayed on the form. Useful for dynamic messages that reference field names.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.getSections()</code></h4>
+            <p>Returns an array of all form sections. Use with <code>g_form.setSectionDisplay()</code> to show or hide entire form sections.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>g_form.isNewRecord()</code></h4>
+            <p>Returns <code>true</code> if the current form is a new (unsaved) record, <code>false</code> if editing an existing record.</p>
+          </div>
+        </div>
+
+        <h3>Complete g_form Reference</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Purpose</th>
+              <th>Returns</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>getValue('field')</code></td><td>Get field value (sys_id for references)</td><td>String</td></tr>
+            <tr><td><code>getDisplayValue('field')</code></td><td>Get display value (label for references)</td><td>String</td></tr>
+            <tr><td><code>setValue('field', val)</code></td><td>Set field value</td><td>void</td></tr>
+            <tr><td><code>clearValue('field')</code></td><td>Empty a field</td><td>void</td></tr>
+            <tr><td><code>setVisible('field', bool)</code></td><td>Show/hide a field (preserves layout space)</td><td>void</td></tr>
+            <tr><td><code>setDisplay('field', bool)</code></td><td>Show/hide a field (removes layout space)</td><td>void</td></tr>
+            <tr><td><code>setMandatory('field', bool)</code></td><td>Make field required/optional</td><td>void</td></tr>
+            <tr><td><code>setReadOnly('field', bool)</code></td><td>Make field read-only/editable</td><td>void</td></tr>
+            <tr><td><code>addInfoMessage('msg')</code></td><td>Show blue info banner</td><td>void</td></tr>
+            <tr><td><code>addErrorMessage('msg')</code></td><td>Show red error banner</td><td>void</td></tr>
+            <tr><td><code>clearMessages()</code></td><td>Remove all form banners</td><td>void</td></tr>
+            <tr><td><code>showFieldMsg('field', 'msg', 'type')</code></td><td>Show message under a field</td><td>void</td></tr>
+            <tr><td><code>getControl('field')</code></td><td>Get the DOM element for a field</td><td>DOM Element</td></tr>
+            <tr><td><code>getLabel('field')</code></td><td>Get the label text of a field</td><td>String</td></tr>
+            <tr><td><code>isNewRecord()</code></td><td>Check if this is a new record</td><td>Boolean</td></tr>
+            <tr><td><code>getSysId()</code></td><td>Get the sys_id of the current record</td><td>String</td></tr>
+            <tr><td><code>getTableName()</code></td><td>Get the table name of the current form</td><td>String</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Trap — setMandatory vs ACL:</strong> <code>g_form.setMandatory()</code> enforces mandatory only in the browser UI. It can be bypassed by sending a REST API request directly. For true enforcement that cannot be bypassed, use a <strong>Business Rule</strong> or <strong>ACL</strong> on the server side.
+        </div>
+      </div>
+
+      <!-- Section 4: g_user API -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>g_user API</h2>
+        <p>The <code>g_user</code> object provides information about the currently logged-in user on the client side. It is available in all Client Script types and also in UI Policies.</p>
+
+        <div class="callout-warning">
+          <strong>Important:</strong> <code>g_user.hasRole()</code> uses <strong>cached role data</strong> loaded when the session started. It is NOT a real-time security check — it simply reads what roles the browser session believes the user has. Never use g_user for security enforcement; use server-side checks (ACLs, Business Rules with <code>gs.hasRole()</code>) instead.
+        </div>
+
+        <h3>g_user Properties and Methods</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Property / Method</th>
+              <th>Description</th>
+              <th>Example Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>g_user.userID</code></td>
+              <td>The sys_id of the currently logged-in user</td>
+              <td><code>"a8f98bb0eb32010045e1a5115206fe3a"</code></td>
+            </tr>
+            <tr>
+              <td><code>g_user.userName</code></td>
+              <td>The login/username (user_name field)</td>
+              <td><code>"john.doe"</code></td>
+            </tr>
+            <tr>
+              <td><code>g_user.firstName</code></td>
+              <td>The user's first name</td>
+              <td><code>"John"</code></td>
+            </tr>
+            <tr>
+              <td><code>g_user.lastName</code></td>
+              <td>The user's last name</td>
+              <td><code>"Doe"</code></td>
+            </tr>
+            <tr>
+              <td><code>g_user.getFullName()</code></td>
+              <td>Returns the user's full display name</td>
+              <td><code>"John Doe"</code></td>
+            </tr>
+            <tr>
+              <td><code>g_user.hasRole('role')</code></td>
+              <td>Returns true if user has the specified role (cached — not for security)</td>
+              <td><code>g_user.hasRole('itil')</code> → true/false</td>
+            </tr>
+            <tr>
+              <td><code>g_user.hasRoleExactly('role')</code></td>
+              <td>Returns true only if user has the <em>exact</em> role — does not include inherited roles (e.g., admin)</td>
+              <td><code>g_user.hasRoleExactly('itil')</code></td>
+            </tr>
+            <tr>
+              <td><code>g_user.hasRoles()</code></td>
+              <td>Returns true if the user has any roles at all (as opposed to being a basic end user)</td>
+              <td>true / false</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Practical Example</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// onLoad example: customize form based on current user's role
+function onLoad() {
+    // Show the "Assigned to" field as read-only for non-ITIL users
+    if (!g_user.hasRole('itil')) {
+        g_form.setReadOnly('assigned_to', true);
+        g_form.setReadOnly('assignment_group', true);
+    }
+
+    // Pre-fill caller with current user if this is a new record
+    if (g_form.isNewRecord()) {
+        g_form.setValue('caller_id', g_user.userID);
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout-exam">
+          <strong>hasRole vs hasRoleExactly:</strong> <code>g_user.hasRole('admin')</code> returns true if the user has the admin role OR any role that inherits from admin. <code>g_user.hasRoleExactly('admin')</code> returns true only if the user is directly assigned the admin role — not through role inheritance. The exam may test this distinction.
+        </div>
+      </div>
+
+      <!-- Section 5: onChange Parameters Deep Dive -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>onChange Parameters &amp; the isLoading Pattern</h2>
+        <p>The <code>onChange</code> script type has a behavior that catches many developers off-guard: it fires for <strong>every field</strong> on the form when the form first loads, with <code>isLoading = true</code>. Understanding and handling this is critical for both the exam and writing correct scripts.</p>
+
+        <h3>Parameter Breakdown</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>control</code></td>
+              <td>Object</td>
+              <td>The DOM element / control for the field that changed. Rarely used directly — prefer g_form methods.</td>
+            </tr>
+            <tr>
+              <td><code>oldValue</code></td>
+              <td>String</td>
+              <td>The value the field had <em>before</em> the change. On initial form load (isLoading=true), this is an empty string.</td>
+            </tr>
+            <tr>
+              <td><code>newValue</code></td>
+              <td>String</td>
+              <td>The value the field now has <em>after</em> the change. This is what the user just selected or typed.</td>
+            </tr>
+            <tr>
+              <td><code>isLoading</code></td>
+              <td>Boolean</td>
+              <td><strong>true</strong> when onChange fires during form initial load (not a real user change). Always check this first.</td>
+            </tr>
+            <tr>
+              <td><code>isTemplate</code></td>
+              <td>Boolean</td>
+              <td><strong>true</strong> when values are being set from a template. Often treated the same as isLoading.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>The isLoading Guard Pattern</h3>
+        <p>Because onChange fires for every field on form load (with <code>isLoading = true</code>), you typically want to skip processing during the initial load and only react to genuine user-driven changes. The standard pattern is to return early when isLoading is true.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    // Standard guard — skip if firing during initial form load
+    if (isLoading) return;
+    if (isTemplate) return;  // Optional: also skip template population
+
+    // Your logic only runs on genuine user-driven field changes
+    if (newValue == 'some_value') {
+        g_form.setMandatory('another_field', true);
+    } else {
+        g_form.setMandatory('another_field', false);
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Critical Exam Point:</strong> The <code>isLoading</code> check is one of the most frequently tested onChange patterns. The exam may ask: "An onChange script is running twice on form load — what should you add?" The answer is always: <strong>add <code>if (isLoading) return;</code> at the top of the function.</strong>
+        </div>
+
+        <div class="callout-concept">
+          <strong>When You DO Want isLoading Behavior:</strong> Sometimes you want onChange to also run on form load — for example, to set initial visibility based on a field's default value that was already set. In that case, you intentionally omit the isLoading guard, or handle both cases with separate logic blocks.
+        </div>
+      </div>
+
+      <!-- Section 6: GlideAjax -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>GlideAjax — Server Calls from Client Scripts</h2>
+        <p>Client Scripts run in the browser and have no direct access to server-side APIs like GlideRecord. When you need server data inside a Client Script (e.g., look up a related record's value), you use <strong>GlideAjax</strong> to call a server-side Script Include asynchronously.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🔄</div>
+            <h4>Asynchronous</h4>
+            <p>GlideAjax calls are <strong>always asynchronous</strong>. Your script does not pause to wait for the result — it fires the request and continues. All logic that uses the result must be inside the <strong>callback function</strong>.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📦</div>
+            <h4>Script Include Required</h4>
+            <p>GlideAjax calls a server-side <strong>Script Include</strong> that must extend <code>AbstractAjaxProcessor</code> and have the <strong>Client callable</strong> checkbox enabled.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📡</div>
+            <h4>Parameters</h4>
+            <p>Pass data to the Script Include using <code>addParam()</code>. The server-side method reads these using <code>getParameter()</code>. Return the result using <code>setAnswer()</code>.</p>
+          </div>
+        </div>
+
+        <h3>GlideAjax Pattern — Step by Step</h3>
+
+        <p><strong>Step 1: Create the Script Include (server-side)</strong></p>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Script Include: AssignmentGroupAjax
+// Table: sys_script_include
+// Name: AssignmentGroupAjax
+// Client callable: CHECKED (must be true)
+// Extends: AbstractAjaxProcessor
+
+var AssignmentGroupAjax = Class.create();
+AssignmentGroupAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+    // This method will be called from the client
+    getGroupManager: function() {
+        // Read the parameter sent from the client
+        var groupId = this.getParameter('sysparm_group_id');
+
+        var gr = new GlideRecord('sys_user_group');
+        if (gr.get(groupId)) {
+            var managerName = gr.getDisplayValue('manager');
+            this.setAnswer(managerName); // Send result back to client
+        } else {
+            this.setAnswer('Unknown');
+        }
+    },
+
+    type: 'AssignmentGroupAjax'
+});</code></pre>
+        </div>
+
+        <p><strong>Step 2: Call from Client Script (browser-side)</strong></p>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Client Script (onChange for assignment_group field)
+function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    if (isLoading) return;
+    if (!newValue) return;
+
+    // Step 1: Create a GlideAjax object, naming the Script Include
+    var ga = new GlideAjax('AssignmentGroupAjax');
+
+    // Step 2: Specify which method in the Script Include to call
+    ga.addParam('sysparm_name', 'getGroupManager');
+
+    // Step 3: Pass parameters to the server method
+    ga.addParam('sysparm_group_id', newValue);
+
+    // Step 4: Send the async request with a callback function
+    // ALL logic using the result goes INSIDE the callback
+    ga.getXML(function(response) {
+        // The callback fires when the server responds
+        var answer = response.responseXML.documentElement.getAttribute('answer');
+        g_form.addInfoMessage('Group Manager: ' + answer);
+    });
+
+    // NOTE: Any code here runs BEFORE the callback fires
+    // Do NOT try to use the result outside the callback
+}</code></pre>
+        </div>
+
+        <div class="callout-exam">
+          <strong>GlideAjax Exam Rules:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>The Script Include <strong>must extend AbstractAjaxProcessor</strong></li>
+            <li>The Script Include <strong>must have Client callable = true</strong></li>
+            <li>GlideAjax is <strong>always asynchronous</strong> — use a callback</li>
+            <li>All code using the result must be <strong>inside the callback function</strong></li>
+            <li>The client cannot call GlideRecord directly — only via GlideAjax</li>
+            <li><code>sysparm_name</code> specifies which method in the Script Include to run</li>
+          </ol>
+        </div>
+
+        <div class="callout-warning">
+          <strong>Common Mistake:</strong> Trying to use the GlideAjax result outside the callback. Because the call is async, the variable will still be undefined when the next line of code runs. Always put your result-dependent logic inside <code>ga.getXML(function(response) { ... })</code>.
+        </div>
+      </div>
+
+      <!-- Section 7: Client Scripts vs UI Policies -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Client Scripts vs. UI Policies</h2>
+        <p>Both Client Scripts and UI Policies run in the browser and affect form behavior, but they serve different purposes and have different capabilities. Knowing when to use each is an exam favorite.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Client Script</th>
+              <th>UI Policy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Implementation</strong></td>
+              <td>Full JavaScript code</td>
+              <td>No-code configuration (point and click)</td>
+            </tr>
+            <tr>
+              <td><strong>Can set field values</strong></td>
+              <td>Yes — <code>g_form.setValue()</code></td>
+              <td>Yes (via UI Policy Action)</td>
+            </tr>
+            <tr>
+              <td><strong>Can make mandatory</strong></td>
+              <td>Yes — <code>g_form.setMandatory()</code></td>
+              <td>Yes — built-in option</td>
+            </tr>
+            <tr>
+              <td><strong>Can make read-only</strong></td>
+              <td>Yes — <code>g_form.setReadOnly()</code></td>
+              <td>Yes — built-in option</td>
+            </tr>
+            <tr>
+              <td><strong>Can show/hide fields</strong></td>
+              <td>Yes — <code>g_form.setVisible()</code></td>
+              <td>Yes — built-in option</td>
+            </tr>
+            <tr>
+              <td><strong>Can call server (GlideAjax)</strong></td>
+              <td><span style="color:var(--green-400)">Yes</span></td>
+              <td><span style="color:var(--red-400)">No</span></td>
+            </tr>
+            <tr>
+              <td><strong>Complex conditions</strong></td>
+              <td>Full JavaScript — any logic</td>
+              <td>Condition builder — limited operators</td>
+            </tr>
+            <tr>
+              <td><strong>Script Include access</strong></td>
+              <td><span style="color:var(--green-400)">Yes (via GlideAjax)</span></td>
+              <td><span style="color:var(--red-400)">No</span></td>
+            </tr>
+            <tr>
+              <td><strong>Ease of maintenance</strong></td>
+              <td>Requires JavaScript knowledge</td>
+              <td>Easier — no coding required</td>
+            </tr>
+            <tr>
+              <td><strong>Best for</strong></td>
+              <td>Value manipulation, server lookups, complex multi-field logic</td>
+              <td>Simple mandatory/visible/read-only based on a condition</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Best Practice:</strong> Always prefer <strong>UI Policies</strong> for simple field behavior (mandatory, visible, read-only) triggered by a single condition. They are easier to read, maintain, and debug. Use <strong>Client Scripts</strong> when you need JavaScript logic: setting computed values, calling the server via GlideAjax, or handling complex multi-field interactions.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Question Pattern:</strong> "A field should be mandatory when Priority = Critical. What is the BEST approach?" The answer is <strong>UI Policy</strong> — not a Client Script — because it is a simple condition with no need for JavaScript or server calls.
+        </div>
+      </div>
+
+      <!-- Section 8: Script Includes (Client-Callable) -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Script Includes — Client-Callable</h2>
+        <p>Script Includes are server-side JavaScript libraries stored in the <code>sys_script_include</code> table. A subset of Script Includes can be called from Client Scripts via GlideAjax — these are known as <strong>client-callable Script Includes</strong>.</p>
+
+        <h3>Requirements for Client-Callable Script Includes</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Client callable = true</h4>
+            <p>The <strong>Client callable</strong> checkbox on the Script Include record must be checked. Without this, GlideAjax calls to the Script Include will fail with a security error.</p>
+          </div>
+          <div class="term-card">
+            <h4>Extends AbstractAjaxProcessor</h4>
+            <p>The Script Include class must extend <code>AbstractAjaxProcessor</code> (not the default <code>AbstractScriptInclude</code>). This is what enables the GlideAjax communication pattern.</p>
+          </div>
+          <div class="term-card">
+            <h4>Use getParameter()</h4>
+            <p>Read parameters sent from the client using <code>this.getParameter('param_name')</code>. By convention, parameter names start with <code>sysparm_</code>.</p>
+          </div>
+          <div class="term-card">
+            <h4>Use setAnswer()</h4>
+            <p>Return a value to the client using <code>this.setAnswer(value)</code>. The client reads this from the XML response: <code>response.responseXML.documentElement.getAttribute('answer')</code>.</p>
+          </div>
+        </div>
+
+        <h3>Script Include Structure Template</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Client-callable Script Include template
+// Name: MyAjaxHelper
+// Client callable: true  (MUST be checked)
+// Extends: AbstractAjaxProcessor
+
+var MyAjaxHelper = Class.create();
+MyAjaxHelper.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+
+    // Public method callable from client via sysparm_name parameter
+    lookupSomeValue: function() {
+        var inputParam = this.getParameter('sysparm_my_input');
+
+        // Perform server-side logic (GlideRecord, etc.)
+        var gr = new GlideRecord('some_table');
+        gr.addQuery('some_field', inputParam);
+        gr.setLimit(1);
+        gr.query();
+
+        if (gr.next()) {
+            this.setAnswer(gr.getValue('result_field'));
+        } else {
+            this.setAnswer('');
+        }
+        // Do NOT return a value — use setAnswer()
+    },
+
+    type: 'MyAjaxHelper'
+});</code></pre>
+        </div>
+
+        <div class="callout-tip">
+          <strong>Security Note:</strong> Even though a Script Include is marked "Client callable," ACLs and other security controls still apply to the underlying data it queries. The Script Include simply enables the communication channel — it does not bypass data security.
+        </div>
+      </div>
+
+      <!-- Section 9: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 9</div>
+        <h2>Key Exam Facts &amp; Traps</h2>
+        <p>This section consolidates the highest-probability exam questions and common wrong-answer traps for Client Scripts. Review these carefully before your exam.</p>
+
+        <div class="callout-exam">
+          <strong>Fact 1 — Execution Order:</strong> When a form loads, scripts execute in this order:
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>onLoad fires first (once, when the form is rendered)</li>
+            <li>onChange fires for <em>each field</em> on the form with <code>isLoading = true</code></li>
+          </ol>
+          This is why the isLoading guard is essential — onChange fires during load, NOT just when a user changes a field.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 2 — Return false in onSubmit:</strong> Returning <code>false</code> in an <strong>onSubmit</strong> script cancels the save and keeps the user on the form. Returning <code>false</code> in onLoad or onChange has <strong>no effect</strong>. Only onSubmit and onCellEdit can cancel an action with return false.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 3 — setMandatory ≠ Security:</strong> <code>g_form.setMandatory('field', true)</code> only enforces mandatory in the browser UI. It can be bypassed via REST API, web services, or any direct server-side insert/update. For true required-field enforcement, use a <strong>Business Rule</strong> with server-side validation.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 4 — GlideAjax is ASYNC:</strong> All code that depends on the GlideAjax result must be inside the callback. Code after <code>ga.getXML(callback)</code> runs before the server responds. This is a frequent wrong-answer pattern: code placed outside the callback will always see undefined/null results.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 5 — No GlideRecord in Client Scripts:</strong> GlideRecord is a server-side API. You <strong>cannot</strong> use <code>new GlideRecord()</code> in a Client Script. If you need server data, use <strong>GlideAjax</strong> to call a Script Include that uses GlideRecord on the server.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 6 — onCellEdit is List-Only:</strong> onCellEdit fires when a user edits a cell in <strong>list view inline editing</strong>. It does NOT fire on a form. If you want to react to a field change on a form, use onChange.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 7 — g_user.hasRole() is Cached:</strong> Client-side role checks via <code>g_user.hasRole()</code> use cached data from session initialization. They are NOT authoritative security checks. An attacker could manipulate cached role data in the browser. Real security enforcement must be done server-side.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 8 — Script Include Requirements:</strong> For GlideAjax to work, the Script Include must: (1) have <strong>Client callable = true</strong>, and (2) extend <strong>AbstractAjaxProcessor</strong>. Missing either one will cause the GlideAjax call to fail.
+        </div>
+
+        <div class="callout-concept">
+          <strong>Quick Decision Guide:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Need simple mandatory/visible/read-only based on one condition? → <strong>UI Policy</strong></li>
+            <li>Need to set a field value dynamically? → <strong>Client Script (onChange or onLoad)</strong></li>
+            <li>Need to look up server data without a page reload? → <strong>Client Script + GlideAjax</strong></li>
+            <li>Need to validate before save and possibly cancel? → <strong>Client Script (onSubmit)</strong></li>
+            <li>Need to react to list-view inline edits? → <strong>Client Script (onCellEdit)</strong></li>
+            <li>Need true security enforcement (not bypassable)? → <strong>ACL or Business Rule</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="02-business-rules.html" class="btn btn-secondary">← Business Rules</a>
+          <a href="04-flow-designer.html" class="btn btn-primary">Flow Designer →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p6-client-scripts', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p6-client-scripts')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

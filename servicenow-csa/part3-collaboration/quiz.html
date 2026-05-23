@@ -1,0 +1,460 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 3 – Collaboration Quiz · CSA</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #a78bfa; color: #c4b5fd; background: rgba(139,92,246,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .q-dot.answered { border-color: var(--slate-500); color: var(--text-muted); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 3</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(139,92,246,0.15);color:#c4b5fd;border:1px solid rgba(167,139,250,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 3 · All 4 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 3 Full Quiz</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">16 scenario-based questions covering all topics in Part 3. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 16</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#a78bfa">0 / 16</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#a78bfa"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 3 — Configuring Applications for Collaboration</span>
+          <span class="quiz-question-count" data-q-counter>1 / 16</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#a78bfa;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📧 Topic 1 — Notifications &amp; Templates</div>
+              <div class="quiz-scenario">Scenario: An admin configures an email notification that should fire when an Incident is assigned. The notification record has all 3 sections correctly filled in. However, the assigned technician never receives the email.</div>
+              <p class="quiz-question">[TRAP] What is the most likely overlooked cause?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The notification needs to be activated by an admin with the security_admin role</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The technician has email notifications disabled in their user preferences</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Incident table does not support email notifications by default</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The SMTP server is incorrectly configured in System Properties</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is a critical exam trap. Even if a notification is perfectly configured, it will silently fail to deliver if the <strong>recipient has email notifications disabled</strong> in their user profile preferences (<code>sys_user</code> record → Notification field set to "Disabled"). This is a common real-world issue that affects individual users while other users receive the notification normally. Option A is wrong — notifications don't require security_admin. Option C is wrong — Incident is a core table that fully supports notifications. Option D would affect ALL email notifications across the instance, not just one user.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📧 Topic 1 — Notifications &amp; Templates</div>
+              <div class="quiz-scenario">Scenario: A developer is writing a Business Rule that should trigger an email notification when a specific custom event occurs. They need to fire the event from server-side JavaScript.</div>
+              <p class="quiz-question">Which method is used to trigger an event from a Business Rule script?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text"><code>gs.sendEmail('event_name', current)</code></span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text"><code>gs.eventQueue('event_name', current, param1, param2)</code></span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text"><code>current.fireEvent('event_name')</code></span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text"><code>NotificationEngine.trigger('event_name', current)</code></span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> <code>gs.eventQueue()</code> is the standard ServiceNow server-side JavaScript method used to add an event to the event queue. The event queue is processed asynchronously and fires any notifications registered against that event in the Event Registry (sysevent_register). The signature is: <code>gs.eventQueue(event_name, GlideRecord, param1, param2)</code>. The <code>current</code> GlideRecord provides context. Options A, C, and D use method names that do not exist in ServiceNow's GlideSystem or GlideRecord APIs.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📧 Topic 1 — Notifications &amp; Templates</div>
+              <div class="quiz-scenario">Scenario: An admin creates an email notification with three sections. A trainee asks: "What are the three required sections of a ServiceNow email notification?"</div>
+              <p class="quiz-question">Which answer correctly names all three sections?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Trigger, Recipients, Body</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">When to send, Who will receive, What it will contain</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Event, Template, Action</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Condition, Role, Message</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> ServiceNow email notifications (sysevent_email_action) are structured around three tabs/sections: <strong>When to send</strong> (the triggering conditions — which event, table, and filter conditions must be met), <strong>Who will receive</strong> (the recipient logic — users, groups, event parameters), and <strong>What it will contain</strong> (the message content — subject line, body using HTML and variables). Memorise these three as "When / Who / What" — they map directly to the three tabs on the notification record and are a staple CSA exam question.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(245,158,11,0.15);color:var(--amber-400)">📊 Topic 2 — Reporting &amp; Dashboards</div>
+              <div class="quiz-scenario">Scenario: A manager asks a ServiceNow admin to build a report showing the number of open incidents per assignment group. The admin opens Report Designer.</div>
+              <p class="quiz-question">What is the correct sequence of steps in Report Designer?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Type → Data → Style → Configure</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Configure → Data → Type → Publish</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Data → Type → Configure → Style</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Source → Filter → Display → Finish</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The ServiceNow Report Designer follows a 4-step wizard in this exact sequence: <strong>1. Data</strong> (choose the source table and apply filter conditions), <strong>2. Type</strong> (select the report type: Bar, Pie, List, Trend, etc.), <strong>3. Configure</strong> (set grouping fields, aggregations, axis labels), <strong>4. Style</strong> (colours, chart size, title formatting). The order matters for the exam: Data → Type → Configure → Style. Choosing the data source before the chart type makes logical sense — you need to know what data you have before choosing how to display it.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 — TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(245,158,11,0.15);color:var(--amber-400)">📊 Topic 2 — Reporting &amp; Dashboards</div>
+              <div class="quiz-scenario">Scenario: A manager shares a dashboard with their team by setting report sharing to "Everyone". A team member opens the dashboard and sees the reports, but gets an "Insufficient rights" error when clicking a bar segment to drill into the underlying records.</div>
+              <p class="quiz-question">[TRAP] Why does this happen?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The team member needs to be re-added to the sharing list specifically for drill-down access</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Report sharing controls who can see the report visually, but the user must also have ACL read access to the underlying table to view record details</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Drill-down is an Enterprise feature that requires an additional ServiceNow licence</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Dashboards cannot be shared across different groups — each group needs its own dashboard</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is a critical exam trap about the distinction between report sharing and data access. <strong>Report sharing</strong> (Me / Everyone / Groups and Users) only controls who can <em>see the report widget on the dashboard</em>. It does NOT grant access to the underlying records. When a user drills down into a report segment, ServiceNow queries the actual source table — and at that point, the user's ACLs determine whether they can see those records. If their role doesn't permit reading that table, they get an access error even though the aggregate chart was visible. Always remember: <strong>sharing ≠ data access</strong>.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(245,158,11,0.15);color:var(--amber-400)">📊 Topic 2 — Reporting &amp; Dashboards</div>
+              <div class="quiz-scenario">Scenario: A dashboard has three different reports on the same tab. A manager wants to filter all three reports to show only data from the last 30 days using a single control, without editing each report individually.</div>
+              <p class="quiz-question">Which dashboard feature allows a single filter to apply to all reports on a tab simultaneously?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Global Filter</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Dashboard Condition</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Report Sync</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Interactive Filter</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>D is correct.</strong> An <strong>Interactive Filter</strong> is a special widget that can be added to a dashboard tab. When a user changes the Interactive Filter value (e.g., selects "Last 30 days"), it dynamically applies that filter condition to all reports on the same dashboard tab simultaneously. This eliminates the need to edit individual report conditions. Interactive Filters are commonly used for date ranges, assignment groups, or priority levels. "Global Filter" (A), "Dashboard Condition" (B), and "Report Sync" (C) are not standard ServiceNow dashboard features.</p>
+              </div>
+              <p data-correct="D" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(16,185,129,0.15);color:var(--green-400)">📚 Topic 3 — Knowledge Management</div>
+              <div class="quiz-scenario">Scenario: An admin needs to understand what controls who can read and who can contribute to a Knowledge Base. A colleague says "it's managed by roles, just like ACLs."</div>
+              <p class="quiz-question">[TRAP] Is the colleague correct?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — you add roles like "knowledge_admin" to the Knowledge Base to control access</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — Knowledge Base access is controlled by User Criteria records (Can Read / Can Contribute), not by roles or ACLs directly</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Yes — ACLs on the kb_knowledge table control who can read and write articles</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">No — Knowledge Base access is open to all users by default and cannot be restricted</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Knowledge Base access is controlled by <strong>User Criteria</strong> records — these are separate from ACLs and roles. Each Knowledge Base has two User Criteria lists: <strong>"Can Read"</strong> (who can view published articles) and <strong>"Can Contribute"</strong> (who can author/edit articles). User Criteria can match by users, groups, roles, companies, or departments. This is a different mechanism from the ACL system that controls table/field access. Roles and ACLs (A, C) alone do not control KB access. Option D is wrong — KBs can absolutely be restricted.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 — TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(16,185,129,0.15);color:var(--green-400)">📚 Topic 3 — Knowledge Management</div>
+              <div class="quiz-scenario">Scenario: A Knowledge Base has both "Can Read" User Criteria (includes all employees) and "Cannot Read" User Criteria (includes contractors). A contractor who is also classified as an employee in the system tries to access a KB article.</div>
+              <p class="quiz-question">[TRAP] What happens?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Access is granted — the "Can Read" match takes priority because it was set first</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Access is denied — if a user matches "Cannot Read" User Criteria, they are blocked even if they also match "Can Read"</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Access is granted — "Can Read" always overrides "Cannot Read" for any matching user</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The system throws an error because a user cannot match both criteria simultaneously</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> In ServiceNow Knowledge Management, <strong>"Cannot Read" takes precedence over "Can Read"</strong>. If a user matches any "Cannot Read" User Criteria on a Knowledge Base, they are denied access regardless of whether they also match a "Can Read" User Criteria. This allows organisations to create precise exclusions — for example, open a KB to all employees but explicitly exclude contractors who may technically also match an "employee" group. This deny-wins logic is different from many other access control systems and is specifically tested on the CSA exam.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(16,185,129,0.15);color:var(--green-400)">📚 Topic 3 — Knowledge Management</div>
+              <div class="quiz-scenario">Scenario: A knowledge author submits a new article for review. A knowledge manager reviews and approves it. The article is then published to the Knowledge Base for all users to read.</div>
+              <p class="quiz-question">Which sequence of workflow states did this article pass through?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Draft → Review → Published → Retired</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">New → Pending Review → Published → Archived</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Draft → Approved → Live → Inactive</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Open → In Review → Active → Closed</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>A is correct.</strong> The Knowledge Article lifecycle in ServiceNow follows these exact states: <strong>Draft</strong> (author is writing the article, not visible to end users) → <strong>Review</strong> (submitted for approval, under review by knowledge manager) → <strong>Published</strong> (approved and visible to users with Can Read access) → <strong>Retired</strong> (removed from active use, no longer visible but preserved in the database for history). Memorise the four stages: Draft → Review → Published → Retired. These are the exact state names used in the ServiceNow Knowledge workflow.</p>
+              </div>
+              <p data-correct="A" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.15);color:#c4b5fd">🛒 Topic 4 — Service Catalog</div>
+              <div class="quiz-scenario">Scenario: A user submits a Service Catalog request for a new laptop. The request is approved and work begins. The technician fulfilling the request asks: "Which record am I working on to actually deliver the laptop?"</div>
+              <p class="quiz-question">What is the correct record hierarchy, and which record does the fulfiller work on?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The REQ (Request) record — top level, used by both requesters and fulfillers</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The RITM (Request Item) record — one per catalog item ordered, managed by fulfillers</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The SCTASK (Catalog Task) — the lowest-level task that breaks down fulfillment work steps</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The INC (Incident) record — catalog requests automatically create an Incident for tracking</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The Service Catalog hierarchy has three levels: <strong>REQ</strong> (sc_request) — the top-level container record created when a user submits a cart; <strong>RITM</strong> (sc_req_item) — one record per catalog item ordered within the REQ; <strong>SCTASK</strong> (sc_task) — optional sub-tasks created within a RITM for individual work steps. The RITM is the primary record that fulfillers work on to deliver the service. Option A (REQ) is the requester's umbrella record. Option C (SCTASK) is for sub-tasks within a RITM. Option D is wrong — catalog requests do NOT automatically create Incidents (that would be a Record Producer, which is a different catalog type).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.15);color:#c4b5fd">🛒 Topic 4 — Service Catalog</div>
+              <div class="quiz-scenario">Scenario: An IT department wants to allow users to report incidents directly from the Service Catalog — without creating an RITM. The submission should automatically create an Incident record in the system.</div>
+              <p class="quiz-question">Which catalog item type should be used?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Standard Catalog Item — with a workflow that creates an Incident after submission</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Order Guide — bundles multiple catalog items including an Incident creation step</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Record Producer — a catalog item type that creates a specified record type (e.g., Incident) on submission</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Content Item — a catalog page that links to the Incident form</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> A <strong>Record Producer</strong> is a special type of catalog item that, upon submission, creates a record on a specified table (Incident, Change, Problem, or any custom table) instead of creating the standard RITM. This gives users a user-friendly, catalog-style interface while the back-end creates the correct record type. This is commonly used to provide "Report an Incident" or "Submit a Change" buttons in the Service Portal. A standard Catalog Item (A) always creates a REQ/RITM structure. An Order Guide (B) bundles multiple standard catalog items. Content Item (D) is informational only.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.15);color:#c4b5fd">🛒 Topic 4 — Service Catalog</div>
+              <div class="quiz-scenario">Scenario: An IT department offers 12 different software installation catalog items. Each item needs the same 5 questions: "Business Justification", "Cost Centre", "Manager Approval Name", "Delivery Date", and "Priority". An admin is setting these up individually on each item.</div>
+              <p class="quiz-question">What is the more efficient approach that allows these questions to be managed centrally?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Create a Variable Template and import it into each catalog item</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Create a Variable Set containing the 5 variables and attach it to each of the 12 catalog items</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Use an Order Guide to group all 12 items and add the variables once at the guide level</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Create a Global Variable that appears on every catalog item automatically</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>Variable Set</strong> is a reusable container of Catalog Variables that can be attached to multiple catalog items. You define the 5 variables once in the Variable Set, then attach it to all 12 catalog items. If you need to update any of the 5 questions later, you edit the Variable Set once and the change propagates to all 12 items automatically. This is a major efficiency gain over maintaining variables individually. "Variable Template" (A) is not a standard ServiceNow term. Order Guide (C) is for bundling items at checkout, not sharing variables. "Global Variable" (D) does not exist as a ServiceNow catalog feature.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 — TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.15);color:#c4b5fd">🛒 Topic 4 — Service Catalog</div>
+              <div class="quiz-scenario">Scenario: A "Standard Software Request" Variable Set is shared across 8 catalog items. An admin edits the "Priority" variable inside the Variable Set, changing it from a dropdown to a radio button.</div>
+              <p class="quiz-question">[TRAP] Which catalog items are affected?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Only the catalog item that was open when the change was saved</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">All 8 catalog items that use the Variable Set — changes to a Variable Set propagate to every item that uses it</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">None — variable type changes require re-attaching the Variable Set to each item</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Only future catalog items created after the change; existing items are unaffected</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is a critical Variable Set trap. Because the Variable Set is a <strong>shared record</strong>, any change made to it (adding variables, changing field types, updating labels, reordering) immediately affects <strong>all catalog items that reference it</strong>. This is both a powerful feature (one change updates everywhere) and a potential risk (an unintended change breaks every item using the set). Admins must be extremely careful when editing shared Variable Sets in production. There is no selective application — it's all-or-nothing. If item-specific customisation is needed, use individual variables on that specific catalog item instead.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.15);color:#c4b5fd">🛒 Topic 4 — Service Catalog</div>
+              <div class="quiz-scenario">Scenario: A company's IT department offers a "New Employee Onboarding" bundle. When ordered, it should automatically add the employee to Active Directory, provision a laptop, and set up their email account — all as a single checkout experience.</div>
+              <p class="quiz-question">Which catalog feature is designed to bundle multiple catalog items into a single order?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Record Producer</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Variable Set</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Catalog Category</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Order Guide</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>D is correct.</strong> An <strong>Order Guide</strong> is a special catalog item type that bundles multiple standard catalog items together into a single checkout experience. When a user orders an Order Guide, they complete one set of questions and ServiceNow automatically orders all the bundled items, creating separate RITMs for each. This is perfect for complex onboarding scenarios where multiple services need to be provisioned together. A Record Producer (A) creates task records, not bundles. A Variable Set (B) is for sharing variables across items. A Catalog Category (C) is just an organisational folder for grouping items in the catalog UI.</p>
+              </div>
+              <p data-correct="D" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(16,185,129,0.15);color:var(--green-400)">📚 Topic 3 — Knowledge Management</div>
+              <div class="quiz-scenario">Scenario: A company has multiple Knowledge Bases — one for IT, one for HR, and one for Finance. An admin needs to organise articles within the IT Knowledge Base into logical groupings such as "Hardware", "Software", and "Network".</div>
+              <p class="quiz-question">What ServiceNow Knowledge Management feature is used to create these logical groupings within a Knowledge Base?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Knowledge Tag</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Knowledge Category</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Knowledge Group</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Knowledge Folder</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> <strong>Knowledge Categories</strong> are hierarchical folder-like groupings within a Knowledge Base. Each KB can have multiple categories, and categories can be nested (sub-categories). When an author creates an article, they assign it to a category. Users browsing the Knowledge Base see the category structure and can navigate articles by topic. Categories can also be nested — for example, "Software" can have sub-categories "Microsoft Office" and "Adobe". "Knowledge Tag" (A) is not a standard ServiceNow term. "Knowledge Group" (C) and "Knowledge Folder" (D) are not the correct ServiceNow terms for this feature.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q16 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">📧 Topic 1 — Notifications &amp; Templates</div>
+              <div class="quiz-scenario">Scenario: An admin wants to understand how a custom "incident.escalated" event gets connected to an email notification that fires when that event occurs.</div>
+              <p class="quiz-question">Which ServiceNow table/mechanism maps custom event names to notifications?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">sys_trigger — the event scheduler table</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">sysevent_register — the Event Registry, which defines valid event names that notifications can reference</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">sys_script — business rules that automatically create the event-notification link</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">syslog — the system log table that routes events to notifications</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The <strong>Event Registry</strong> (table: <code>sysevent_register</code>) is where all valid event names are registered in ServiceNow. Before a notification can subscribe to an event, that event name must exist in the Event Registry. When a Business Rule fires <code>gs.eventQueue('incident.escalated', current)</code>, ServiceNow looks up 'incident.escalated' in sysevent_register, then checks sysevent_email_action (Notifications) for any notifications configured to send on that event. The flow is: Business Rule → gs.eventQueue() → Event Registry (sysevent_register) → Notification (sysevent_email_action). sys_trigger (A) handles scheduled jobs, not event routing. syslog (D) is for system logging, not notification routing.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 16</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 16;
+  const dots = document.getElementById('q-dots');
+
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => {
+      const state = window._quizState?.['main-quiz'];
+      if (!state) return;
+      state.current = i;
+      QuizEngine._render('main-quiz');
+      updateDots(i, state);
+    });
+    dots.appendChild(d);
+  }
+
+  function updateDots(current, state) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current','correct','incorrect','answered');
+      if (i === current) d.classList.add('current');
+      else if (state.answered[i] !== null) {
+        const q = state.questions[i];
+        const correct = q.querySelector('[data-correct]')?.dataset.correct;
+        d.classList.add(state.answered[i] === correct ? 'correct' : 'incorrect');
+      }
+    });
+    const answered = state.answered.filter(a => a !== null).length;
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = `${state.score} / ${TOTAL}`;
+    document.getElementById('qs-answered').textContent = answered;
+    document.getElementById('qs-prog').style.width = `${((current+1)/TOTAL)*100}%`;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    QuizEngine.init('main-quiz');
+    QuizEngine.wireOptions('main-quiz');
+    window._quizState = QuizEngine._state ?? {};
+    const quiz = document.getElementById('main-quiz');
+    const patch = () => setTimeout(() => { const s = QuizEngine._state?.['main-quiz']; if(s) updateDots(s.current, s); }, 50);
+    quiz.querySelectorAll('[data-option]').forEach(btn => btn.addEventListener('click', patch));
+    quiz.querySelector('[data-q-prev]')?.addEventListener('click', patch);
+    quiz.querySelector('[data-q-next]')?.addEventListener('click', patch);
+  });
+</script>
+</body>
+</html>

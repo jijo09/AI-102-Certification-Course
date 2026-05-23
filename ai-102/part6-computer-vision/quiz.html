@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 6 Full Quiz — Computer Vision | AI-102 Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page{max-width:820px;margin:0 auto;padding:var(--space-10) var(--space-6)}
+    .q-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:.7rem;font-weight:700;border:2px solid var(--border-subtle);color:var(--text-muted);cursor:pointer;transition:all var(--transition-fast);background:var(--bg-card)}
+    .q-dot.current{border-color:#6366f1;color:#a5b4fc;background:rgba(99,102,241,.1)}
+    .q-dot.correct{border-color:var(--green-500);color:#fff;background:var(--green-500)}
+    .q-dot.incorrect{border-color:var(--red-500);color:#fff;background:var(--red-500)}
+    .q-topic{display:inline-flex;align-items:center;gap:var(--space-2);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:var(--font-heading);padding:2px 8px;border-radius:10px;margin-bottom:var(--space-4)}
+    #sbo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+    #sbo.show{display:block}
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb"><a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a><span class="sep">›</span><a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a><span class="sep">›</span><span class="current">Full Quiz</span></div>
+    </header>
+    <div class="quiz-page animate-fade-in">
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3);margin-bottom:var(--space-3)">✅ Part 6 · Computer Vision</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 6 Full Quiz</h1>
+        <p style="color:var(--text-muted);font-size:.9rem">15 scenario-based questions covering all 3 Part 6 topics. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-5) var(--space-6);margin-bottom:var(--space-6);display:flex;gap:var(--space-6);flex-wrap:wrap;align-items:center">
+        <div><div style="font-size:.75rem;color:var(--text-muted)">Question</div><div style="font-family:var(--font-heading);font-size:1.1rem;font-weight:800"><span id="qc">1</span> / 15</div></div>
+        <div><div style="font-size:.75rem;color:var(--text-muted)">Score</div><div style="font-family:var(--font-heading);font-size:1.1rem;font-weight:800;color:var(--green-400)" id="qs">0 / 15</div></div>
+        <div style="flex:1"><div style="font-size:.75rem;color:var(--text-muted);margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qp" style="width:6.7%;background:#6366f1"></div></div></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--space-6)" id="qdots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header"><span class="font-heading" style="font-size:.875rem;font-weight:600">Part 6 — Computer Vision</span><span class="quiz-question-count" data-q-counter>1 / 15</span></div>
+        <div style="height:3px;background:var(--navy-800)"><div style="height:3px;background:#6366f1;transition:width .4s ease;width:6.7%" data-q-progress></div></div>
+        <div data-quiz-body>
+
+          <!-- Q1 T1 Analyze Images -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(99,102,241,.15);color:#a5b4fc">🖼️ Topic 1 — Analyze Images</div>
+              <div class="quiz-scenario">Scenario: A developer is analysing product photos using Azure AI Vision Image Analysis 4.0. For each image, they need: (1) category labels describing what is in the image overall, (2) the locations of specific recognisable objects within the image with bounding boxes, and (3) a single natural-language sentence summarising the image.</div>
+              <p class="quiz-question">Which three visual features should the developer request in a single <code>analyze()</code> call?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">READ, PEOPLE, SMART_CROPS</span></button>
+                <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">TAGS (category labels for the whole image), OBJECTS (located items with bounding boxes), CAPTION (single natural-language sentence)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">DENSE_CAPTIONS, TAGS, READ</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">CAPTION, PEOPLE, READ</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> TAGS returns category labels for the whole image without location information — exactly requirement (1). OBJECTS returns specific detected items with bounding box coordinates (x, y, width, height as fractions) — requirement (2). CAPTION returns a single natural-language descriptive sentence — requirement (3). DENSE_CAPTIONS (option C) generates multiple captions for different regions — not what was asked. READ extracts text (OCR) — not needed. PEOPLE detects human figures — not the same as general object detection. All three correct features can be requested in one analyze() call, which is more efficient than making separate requests.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 T1 Analyze Images -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(99,102,241,.15);color:#a5b4fc">🖼️ Topic 1 — Analyze Images</div>
+              <div class="quiz-scenario">Scenario: A news agency wants to build a system that automatically reads text from photographs of printed documents, handwritten notes, and newspaper clippings. The extracted text must include the position of each word in the image so the agency can reconstruct the document layout.</div>
+              <p class="quiz-question">Which Azure AI Vision feature provides this, and what does its result structure look like?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">TAGS feature — extracts text labels from images including their positions</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">CAPTION feature — describes the document text in a natural language summary</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">READ feature (OCR) — extracts text in a Pages → Lines → Words hierarchy, with each word having a bounding polygon for its precise position in the image</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">OBJECTS feature — detects text objects in images and returns their bounding boxes</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The READ visual feature is the OCR capability of Image Analysis 4.0. It extracts text from both printed and handwritten sources and returns a hierarchical structure: Pages → Lines → Words. Each Word object has: the recognised text, a confidence score, and a bounding polygon (list of vertex coordinates — not just a rectangle, but the actual polygon boundary of the word in the image). This enables precise layout reconstruction. TAGS (A) returns content category labels, not text content. CAPTION (B) writes a description sentence about the image, not the actual text within it. OBJECTS (D) detects things like "car" or "bottle" — not text content.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 T1 Analyze Images -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(99,102,241,.15);color:#a5b4fc">🖼️ Topic 1 — Analyze Images</div>
+              <div class="quiz-scenario">Scenario: A security company wants to use Azure AI Vision in two ways: (1) Detect whether any faces are present in security camera still images and count them. (2) Identify which specific employees appear in the images by matching faces against a database of employee photos.</div>
+              <p class="quiz-question">Which of these capabilities requires Microsoft Limited Access approval?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Both (1) and (2) — any face processing in Azure AI Vision requires Limited Access</span></button>
+                <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Only (2) — face identification (matching faces to known identities) requires Limited Access. Face detection (1) — detecting and counting faces — does not require approval</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only (1) — face detection in security contexts requires special approval; identification uses a separate approved API</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Neither — both detection and identification are freely available features of Azure AI Vision</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Microsoft's Responsible AI policy distinguishes between detection and identification. <strong>Face detection</strong> (finding that faces exist, counting them, getting their location and basic attributes like estimated age) is available without approval — it's low privacy risk. <strong>Face identification</strong> (matching a detected face to a specific known person) creates biometric recognition capabilities and carries significant privacy implications, so it requires Microsoft Limited Access approval before use. This distinction appears frequently in the exam — the key question is always whether you need to know WHO the face belongs to (identification → approval needed) or just that faces exist (detection → no approval).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 T1 Analyze Images -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(99,102,241,.15);color:#a5b4fc">🖼️ Topic 1 — Analyze Images</div>
+              <p class="quiz-question">An Image Analysis 4.0 result shows an object with bounding box values: <code>x=0.15, y=0.30, width=0.40, height=0.25</code>. The source image is 1200 × 800 pixels. What are the pixel coordinates of the top-left corner and the bottom-right corner of the bounding box?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Top-left: (0.15, 0.30) — Bottom-right: (0.55, 0.55) — coordinates are already in normalised format</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Top-left: (150, 300) — Bottom-right: (400, 250) — multiply x by width and y by height directly</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Top-left: (180, 240) — Bottom-right: (660, 440). Calculate: top-left = (0.15×1200, 0.30×800) = (180, 240). Bottom-right = ((0.15+0.40)×1200, (0.30+0.25)×800) = (660, 440)</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Top-left: (15, 30) — Bottom-right: (40, 25) — multiply by 100 to convert to percentage pixels</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Image Analysis bounding boxes use normalised coordinates (0.0–1.0 as fractions of the image). x=0.15 and y=0.30 are the top-left corner as fractions. width=0.40 and height=0.25 are the box dimensions as fractions. To convert: top-left pixel = (x × img_width, y × img_height) = (0.15 × 1200, 0.30 × 800) = (180, 240). Bottom-right pixel = ((x + width) × img_width, (y + height) × img_height) = (0.55 × 1200, 0.55 × 800) = (660, 440). Option B makes the mistake of using x and width directly without adding them together for bottom-right, and doesn't multiply by image dimensions correctly.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 T1 Analyze Images -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(99,102,241,.15);color:#a5b4fc">🖼️ Topic 1 — Analyze Images</div>
+              <div class="quiz-scenario">Scenario: A travel website wants to display hero images at multiple aspect ratios — 16:9 for desktop headers, 1:1 for mobile thumbnails, and 4:3 for tablet cards — without manually editing each photo. They have thousands of images in Azure Blob Storage and need automatic crop suggestions that focus on the most visually interesting part of each image.</div>
+              <p class="quiz-question">Which Azure AI Vision 4.0 feature handles this requirement?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">DENSE_CAPTIONS — generates captions for multiple image regions including suggested crop areas</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Background Removal — removes backgrounds so the main subject can be cropped to any ratio</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Smart Cropping (SMART_CROPS feature) — returns suggested crop bounding boxes for each specified aspect ratio, focused on the most visually salient part of the image</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">OBJECTS — identifies the main subject object in the image for cropping guidance</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Smart Cropping is designed exactly for this use case — automatic crop suggestion at multiple aspect ratios. You request SMART_CROPS as a visual feature and specify the desired aspect ratios. The service uses saliency detection to identify the most visually interesting and important part of the image and returns crop rectangle suggestions that preserve that area at each ratio. DENSE_CAPTIONS (A) describes regions in text, not crop coordinates. Background Removal (B) is useful for subject isolation but doesn't handle aspect-ratio cropping. OBJECTS (D) finds item boundaries — not the same as finding the best compositional crop for the image.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q6 T2 Custom Vision -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(13,148,136,.15);color:#5eead4">🎯 Topic 2 — Custom Vision Models</div>
+              <div class="quiz-scenario">Scenario: A food delivery app receives photo submissions from restaurant partners. Each photo can show multiple food items — a single photo may include a burger, fries, and a drink simultaneously. The company wants to automatically label each photo with all applicable category tags (e.g. "Fast Food", "Beverage", "Sides") to power search filters.</div>
+              <p class="quiz-question">Which Custom Vision project type is correct for this scenario?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Multi-class Classification — classifies each image with the single most dominant food category</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Object Detection — detects each food item individually and tags with bounding boxes</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Multi-label Classification — allows each image to receive multiple category tags simultaneously, since one photo can belong to several categories at once</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Multi-class Classification — it supports multiple tags if you add enough training images</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The key requirement is "each photo can include multiple categories simultaneously" — this is the definition of multi-label classification. Multi-label classification assigns multiple tags to a single image where categories are NOT mutually exclusive. Multi-class classification (A/D) assigns exactly ONE tag per image — categories are mutually exclusive. It cannot assign "Fast Food" AND "Beverage" to the same image. Object Detection (B) would find where each item is in the image with bounding boxes — overkill for this use case, which only needs whole-image category labels, not locations. No location information is needed for the search filter requirement.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q7 T2 Custom Vision -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(13,148,136,.15);color:#5eead4">🎯 Topic 2 — Custom Vision Models</div>
+              <div class="quiz-scenario">Scenario: A printed circuit board manufacturer uses Custom Vision object detection to inspect boards. After training, the model shows: Precision: 95%, Recall: 71%, mAP: 68%. The quality team says the model is missing too many actual defects — defective boards are slipping through the inspection line into production.</div>
+              <p class="quiz-question">What single change to the model configuration will best address this concern?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Raise the probability threshold to 90% — higher confidence requirements improve recall</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Switch from object detection to multi-class classification — classification has higher recall</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Lower the probability threshold (e.g. to 30%) — this increases Recall by accepting lower-confidence detections, catching more actual defects at the cost of more false positives that can be manually reviewed</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Reduce the number of training images — the model is overfitted to training data causing low recall</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The problem is 71% Recall — 29% of real defects are being missed. In a safety/quality critical scenario, missing true positives (false negatives) is the primary concern. Lowering the probability threshold makes the model report detections at lower confidence levels — it will now flag more potential defects, including real ones it was previously too uncertain to report. This increases Recall at the cost of more false positives (boards flagged as defective that are actually fine) — acceptable because those can be manually reviewed. Raising the threshold (A) does the opposite — it becomes even more conservative, missing even more defects. Switching to classification (B) is the wrong tool — you lose the location information. Reducing training data (D) would make everything worse.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q8 T2 Custom Vision -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(13,148,136,.15);color:#5eead4">🎯 Topic 2 — Custom Vision Models</div>
+              <p class="quiz-question">A developer writes code that creates a <code>CustomVisionTrainingClient</code> using the <strong>Prediction Key</strong> to upload training images and train a model. The code fails with an authentication error. What is the root cause?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Prediction Key has expired — regenerate it in the portal</span></button>
+                <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Wrong key for the client — CustomVisionTrainingClient requires the Training Key (from the training endpoint). The Prediction Key is only for CustomVisionPredictionClient to make predictions</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Prediction Key needs to be in a different header format — use Bearer token instead of ApiKeyCredentials</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Image upload requires a separate Upload Key — Training Key is only for training, not uploading</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Custom Vision has TWO completely separate key pairs and endpoints: (1) Training endpoint + Training Key → authenticates the <code>CustomVisionTrainingClient</code> for all project management operations: creating tags, uploading images, training models, evaluating metrics, publishing iterations. (2) Prediction endpoint + Prediction Key → authenticates the <code>CustomVisionPredictionClient</code> for making predictions against published models. Using the Prediction Key with the Training Client will fail authentication — they are separate credentials, not interchangeable. This separation is intentional: production apps only need prediction access, not the ability to modify the training project.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q9 T2 Custom Vision -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(13,148,136,.15);color:#5eead4">🎯 Topic 2 — Custom Vision Models</div>
+              <div class="quiz-scenario">Scenario: After training an object detection model, a developer calls <code>detect_image()</code> and receives the following prediction for one object: <code>tag_name="Defect", probability=0.82, bounding_box={left=0.10, top=0.20, width=0.30, height=0.15}</code>. The image is 640 × 480 pixels. The developer needs to draw the bounding box in pixels.</div>
+              <p class="quiz-question">What are the pixel coordinates of the defect's bounding box top-left and bottom-right corners?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Top-left: (10, 20) — Bottom-right: (30, 15) — the values are already percentages</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Top-left: (64, 96) — Bottom-right: (192, 72) — multiply width values by image width</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Top-left: (64, 96) — Bottom-right: (256, 168). top-left = (0.10×640, 0.20×480) = (64, 96). Bottom-right = ((0.10+0.30)×640, (0.20+0.15)×480) = (256, 168)</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Top-left: (0.10, 0.20) — Bottom-right: (0.40, 0.35) — normalised coordinates should not be converted to pixels</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Custom Vision bounding boxes use normalised coordinates (0.0–1.0). Top-left pixel: (left × img_width, top × img_height) = (0.10 × 640, 0.20 × 480) = (64, 96). Bottom-right pixel: ((left + width) × img_width, (top + height) × img_height) = (0.40 × 640, 0.35 × 480) = (256, 168). Option B has the bottom-right calculation wrong — it uses raw width/height values instead of adding them to the position first. Option A and D are wrong because these are normalised fractions — they MUST be multiplied by the image dimensions to get pixel coordinates before drawing on an image.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q10 T2 Custom Vision -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(13,148,136,.15);color:#5eead4">🎯 Topic 2 — Custom Vision Models</div>
+              <p class="quiz-question">An object detection model evaluation shows: Precision 88%, Recall 82%, mAP 74%. A colleague argues that mAP should equal (88% + 82%) / 2 = 85% and that the displayed 74% must be a calculation error. Is the colleague correct?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — mAP is the arithmetic mean of Precision and Recall at the 50% threshold</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Yes — if Precision and Recall are both above 80%, mAP must be higher than both</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">No — mAP is not the arithmetic mean of Precision and Recall. It calculates the area under the precision-recall curve across all thresholds and all object classes, and also accounts for bounding box overlap accuracy (IoU), so it can be lower than the single-threshold Precision and Recall values</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">No — mAP only applies to classification models; object detection uses a different metric called AUC</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> mAP (Mean Average Precision) is NOT the arithmetic mean of Precision and Recall. The reported Precision (88%) and Recall (82%) are evaluated at a single probability threshold (typically 50%). mAP is a much more comprehensive metric: it calculates Average Precision (AP) by computing the area under the precision-recall curve across ALL probability thresholds, then averages that across ALL object classes. Additionally, for object detection, correct detections require the predicted bounding box to sufficiently overlap the ground truth box (measured by IoU — Intersection over Union, typically IoU ≥ 0.5). This bounding box accuracy requirement means mAP can be significantly lower than the point-in-time Precision and Recall. mAP is specifically the standard for object detection (not AUC, which is for classification ROC curves).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q11 T3 Video Analysis -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(124,58,237,.15);color:#c084fc">🎥 Topic 3 — Video Analysis &amp; Spatial Intelligence</div>
+              <div class="quiz-scenario">Scenario: A legal firm wants to index 500 hours of recorded deposition videos. They need to search across all videos by the names of legal entities mentioned in testimony, find specific expert witnesses by face, and extract keyword summaries. All video content must remain within the firm's own Azure subscription in the EU West region for legal compliance.</div>
+              <p class="quiz-question">Which Video Indexer account type is required and why?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Trial account — it supports all Video Indexer features including custom person models</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Trial account — compliance regions can be configured in the Trial account settings</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">ARM-Connected account — required for data residency (content in their own Azure subscription/region), for volumes beyond the Trial hour limits (500 hours >> 40-hour API limit), and for the custom person model needed to identify specific witnesses</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Either account type — the Video Indexer API does not distinguish between Trial and ARM for enterprise features</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Three requirements force the ARM-Connected account: (1) <strong>Data residency</strong> — the firm's content must stay in their own Azure subscription and EU West region. Trial accounts store data under Microsoft's control, not in the customer's subscription. (2) <strong>Scale</strong> — 500 hours far exceeds the Trial limit (40 hours via API). (3) <strong>Custom person model</strong> — identifying specific expert witnesses by face requires training a custom person model, which is only available on ARM-Connected accounts (and also requires Limited Access approval for face identification). Trial accounts (A/B) have none of these capabilities. All three requirements independently make Trial unsuitable.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q12 T3 Video Analysis -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(124,58,237,.15);color:#c084fc">🎥 Topic 3 — Video Analysis &amp; Spatial Intelligence</div>
+              <div class="quiz-scenario">Scenario: During a Video Indexer analysis of an interview video, the following insights are extracted: (a) "Bill Gates" appears in the transcript text because the interviewee said "Bill Gates announced..." (b) A face matching "Bill Gates" is visually detected in the video frames. The developer wants to understand which of these required Limited Access approval.</div>
+              <p class="quiz-question">Which scenario (a or b) required Microsoft Limited Access approval, and why?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Scenario (a) — extracting named entities from transcript requires Limited Access due to privacy</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Both (a) and (b) — any extraction of person information from video requires Limited Access</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only (b) — face identification (matching a detected face to a known person's identity) requires Limited Access. Scenario (a) is named entity recognition from transcript text (NLP), which requires no approval</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Neither — Video Indexer extracts all insights including person identification without any approval requirement</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Scenario (a) is pure NLP — the transcript text mentions "Bill Gates" as a string, and Named Entity Recognition (NER) identifies it as a person entity from the text, exactly like Azure AI Language's entity recognition. No biometric processing involved, no Limited Access required. Scenario (b) involves face identification — visually matching a face in video frames to a specific known person. This is biometric recognition and requires Microsoft Limited Access approval. This distinction is important: what someone SAYS about a person vs recognising a person's FACE are entirely different processes with different privacy implications and different access requirements.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q13 T3 Video Analysis -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(124,58,237,.15);color:#c084fc">🎥 Topic 3 — Video Analysis &amp; Spatial Intelligence</div>
+              <div class="quiz-scenario">Scenario: A shopping mall operator wants to add intelligent people analytics to their existing security camera system. They need three capabilities: (A) An alert when the food court area exceeds 200 people capacity, (B) Directional count of how many shoppers enter vs leave through the main entrance each hour, (C) Monitoring that staff on the shop floor maintain at least 1.5 metres from each other during the COVID safety period.</div>
+              <p class="quiz-question">Which Spatial Analysis operations should be configured for each requirement?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">(A) personcount, (B) personcountingzone, (C) personcrossingline</span></button>
+                <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">(A) personcountingzone — count people within the food court zone, (B) personcrossingline — directional line crossing at entrance to count in vs out, (C) persondistance — measure real-world distance between staff members</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">(A) personcount, (B) personcrossingpolygon, (C) personcountingzone</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">(A) personcrossingpolygon, (B) personcount, (C) persondistance</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> (A) The food court is a <em>zone</em> and the requirement is to count people <em>within</em> that zone — <strong>personcountingzone</strong> is designed for counting within a defined polygon area with configurable threshold alerts. <em>personcount</em> counts the whole camera frame, not a specific zone. (B) The entrance requires <em>directional</em> counting — people going IN vs people going OUT — <strong>personcrossingline</strong> tracks crossing events with direction (A→B or B→A), enabling separate entry vs exit counts. <em>personcrossingpolygon</em> tracks zone entry/exit but is better for dwell-time analysis. (C) Measuring the physical gap between people is exactly what <strong>persondistance</strong> does — it measures real-world distance in metres (requires camera calibration) and fires events when distance drops below the threshold.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q14 T3 Video Analysis -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(124,58,237,.15);color:#c084fc">🎥 Topic 3 — Video Analysis &amp; Spatial Intelligence</div>
+              <p class="quiz-question">A developer needs to embed a Video Indexer cognitive insights panel in a customer-facing web portal, showing the transcript and detected topics for a specific video. They want to use a token scoped only to that video for security. What is the correct authentication approach?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Use the Management API key directly in the iframe URL — it is the primary credential for all Video Indexer operations</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Use an account-level access token — it provides the broadest access and works for all video operations</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Request a video-level access token (scoped to that specific videoId with allowEdit=false), then pass it as the accessToken parameter to GET /Videos/{videoId}/InsightsWidget to receive the embeddable iframe URL</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Video Indexer widgets do not require authentication — they are publicly accessible once the video is indexed</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The correct workflow is: (1) Use the Management API key to request a <strong>video-level access token</strong> from the Auth endpoint: <code>GET /Auth/{location}/Accounts/{accountId}/Videos/{videoId}/AccessToken?allowEdit=false</code>. The video-level token is scoped to one specific video — even if it's exposed in a web page, it cannot access other videos or perform account-level management. (2) Call <code>GET /Videos/{videoId}/InsightsWidget?accessToken={videoToken}</code> to get the embeddable iframe URL. (3) Embed the returned URL as an iframe. Using the Management API key directly in a public web page (A) would expose full account management access — a serious security risk. An account-level token (B) provides access to all videos, which violates the "scoped to one video" requirement.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q15 Synthesis -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic" style="background:rgba(30,64,175,.15);color:#93c5fd">🎯 Synthesis — All Part 6 Topics</div>
+              <div class="quiz-scenario">Scenario: An airport security operations centre needs to implement four AI capabilities: (1) Extract and digitise text from scanned security clearance paper forms, (2) Detect whether specific cleared personnel are present in access-controlled area CCTV images, (3) Count how many people enter the secure airside zone through a specific gate each hour and alert if more than 50 are inside at once, (4) Identify objects and their locations in baggage X-ray images using a custom-trained AI model.</div>
+              <p class="quiz-question">Which Azure service or feature correctly maps to each requirement, and which requirements need Limited Access approval?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">(1) Azure AI Vision READ, (2) Azure AI Vision TAGS, (3) Video Indexer, (4) Custom Vision multi-class classification. None require Limited Access.</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">(1) Azure AI Vision READ — no Limited Access. (2) Face API identification — requires Limited Access. (3) Spatial Analysis personcountingzone + personcrossingline — requires Limited Access. (4) Custom Vision object detection — no Limited Access. Total: 2 and 3 need approval.</span></button>
+                <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">(1) Azure AI Vision READ feature (OCR) — no approval needed. (2) Face API identification — requires Limited Access. (3) Spatial Analysis personcountingzone + personcrossingline — requires Limited Access (whole service). (4) Custom Vision object detection — no approval needed. Requirements 2 and 3 both require Limited Access approval.</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">(1) Document Intelligence Layout model, (2) Video Indexer face identification, (3) Custom Vision object detection, (4) Azure AI Vision OBJECTS. Only (2) requires Limited Access.</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> (1) <strong>Azure AI Vision READ / OCR</strong> — extracts printed text from scanned forms. No Limited Access needed (just general text, no biometrics). (2) <strong>Face API identification</strong> — detecting whether specific known personnel appear in CCTV images requires face identification (matching faces to known persons), which requires Limited Access. Face detection alone (bounding boxes, count) would not need approval. (3) <strong>Spatial Analysis</strong> — real-time counting from live CCTV feeds via personcountingzone (capacity alert at 50) and personcrossingline (hourly directional count). The entire Spatial Analysis service requires Limited Access. (4) <strong>Custom Vision object detection</strong> — trains a custom model to locate objects with bounding boxes in X-ray images. No Limited Access required for custom vision models. Options A misses both Limited Access requirements. Option D misidentifies (3) as Custom Vision (wrong — real-time camera analysis is Spatial Analysis) and (2) as Video Indexer (wrong — single images, not video files).</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next style="background:#6366f1">Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4);margin-top:var(--space-8)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary" style="background:#6366f1">Back to Dashboard →</a>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="../config.js"></script>
+<script src="../../scripts/common.js"></script>
+<script>
+const TOTAL=15;
+const dots=document.getElementById('qdots');
+for(let i=0;i<TOTAL;i++){const d=document.createElement('div');d.className='q-dot'+(i===0?' current':'');d.textContent=i+1;d.dataset.idx=i;dots.appendChild(d);}
+function syncDots(){
+  const s=QuizEngine._state?.['main-quiz'];if(!s)return;
+  dots.querySelectorAll('.q-dot').forEach((d,i)=>{
+    d.classList.remove('current','correct','incorrect');
+    if(i===s.current)d.classList.add('current');
+    else if(s.answered[i]!==null){const q=s.questions[i];const correct=q.querySelector('[data-correct]')?.dataset.correct;d.classList.add(s.answered[i]===correct?'correct':'incorrect');}
+  });
+  document.getElementById('qc').textContent=s.current+1;
+  document.getElementById('qs').textContent=`${s.score} / ${TOTAL}`;
+  document.getElementById('qp').style.width=`${((s.current+1)/TOTAL)*100}%`;
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  QuizEngine.init('main-quiz');QuizEngine.wireOptions('main-quiz');
+  const quiz=document.getElementById('main-quiz');
+  quiz.querySelectorAll('[data-option]').forEach(btn=>btn.addEventListener('click',()=>setTimeout(syncDots,50)));
+  quiz.querySelector('[data-q-prev]')?.addEventListener('click',()=>setTimeout(syncDots,50));
+  quiz.querySelector('[data-q-next]')?.addEventListener('click',()=>setTimeout(syncDots,50));
+});
+</script>
+</body>
+</html>

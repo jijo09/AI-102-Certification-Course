@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 5 — Migration & Integration | ServiceNow CSA Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .part-hero {
+      background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, #0a1628 60%);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-10) var(--space-12);
+      margin-bottom: var(--space-8);
+      position: relative; overflow: hidden;
+    }
+    .part-hero::before {
+      content: ''; position: absolute;
+      top: -60px; right: -60px; width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+    }
+    .part-hero-eyebrow {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue-300);
+      background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25);
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm);
+      margin-bottom: var(--space-4); font-family: var(--font-heading);
+    }
+    .part-hero-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.15;
+      margin-bottom: var(--space-4);
+      background: linear-gradient(135deg, #eff6ff 0%, var(--blue-200) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .part-hero-desc {
+      font-size: 0.975rem; color: var(--text-secondary);
+      max-width: 600px; line-height: 1.75; margin-bottom: var(--space-8);
+    }
+    .part-hero-meta { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-value {
+      font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800;
+      color: var(--blue-300); line-height: 1;
+    }
+    .meta-label { font-size: 0.7rem; color: var(--text-muted); }
+
+    .why-card {
+      background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15);
+      border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+    .why-title {
+      font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700;
+      color: var(--blue-300); margin-bottom: var(--space-4);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+
+    .topic-list { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-10); }
+    .topic-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: var(--space-6);
+      display: flex; gap: var(--space-6); align-items: flex-start;
+      text-decoration: none; transition: all var(--transition-normal);
+      position: relative; overflow: hidden;
+    }
+    .topic-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--blue-400);
+      border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    }
+    .topic-card:hover {
+      border-color: rgba(59,130,246,0.4);
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(59,130,246,0.1);
+    }
+    .topic-card.completed::before { background: var(--green-500); }
+    .topic-num-badge {
+      width: 44px; height: 44px; min-width: 44px;
+      background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25);
+      border-radius: var(--radius-md); display: flex; align-items: center;
+      justify-content: center; font-family: var(--font-heading); font-size: 0.85rem;
+      font-weight: 700; color: var(--blue-300); margin-top: 2px;
+    }
+    .topic-card.completed .topic-num-badge {
+      background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.25);
+      color: var(--green-400);
+    }
+    .topic-card-body { flex: 1; }
+    .topic-card-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: var(--space-4); margin-bottom: var(--space-2);
+    }
+    .topic-card-title {
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 700;
+      color: var(--text-primary); line-height: 1.3;
+    }
+    .topic-card-desc {
+      font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: var(--space-4);
+    }
+    .topic-card-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .topic-tag {
+      font-size: 0.68rem; font-family: var(--font-mono);
+      background: var(--bg-secondary); color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 8px; border-radius: var(--radius-sm);
+    }
+    .topic-arrow {
+      color: var(--text-muted); font-size: 1.2rem; margin-top: 2px; flex-shrink: 0;
+      transition: transform var(--transition-fast);
+    }
+    .topic-card:hover .topic-arrow { transform: translateX(4px); color: var(--blue-300); }
+
+    .learn-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--space-4); margin-bottom: var(--space-8);
+    }
+    .learn-item {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      display: flex; gap: var(--space-3); align-items: flex-start;
+    }
+    .learn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .learn-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+    .action-bar {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-8);
+    }
+    .action-bar-left { display: flex; flex-direction: column; gap: var(--space-1); }
+    .action-bar-title {
+      font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700;
+      color: var(--text-primary);
+    }
+    .action-bar-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 99; backdrop-filter: blur(2px);
+    }
+    #sidebar-overlay.show { display: block; }
+
+    @media (max-width: 700px) {
+      .part-hero { padding: var(--space-6); }
+      .topic-card { flex-direction: column; gap: var(--space-3); }
+      .action-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+
+<div class="app-shell">
+
+  <div id="app-sidebar"></div>
+
+  <main class="main-content">
+
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <span class="current">Part 5 — Migration &amp; Integration</span>
+      </div>
+    </header>
+
+    <div class="page-content stagger">
+
+      <div class="part-hero animate-fade-in">
+        <div class="part-hero-eyebrow">✈️ Part 5 of 6 &nbsp;·&nbsp; Migration &amp; Integration</div>
+        <h1 class="part-hero-title">Data Migration<br>&amp; Integration</h1>
+        <p class="part-hero-desc">
+          Move configurations safely between environments using Update Sets and XML, then connect ServiceNow to external systems via IntegrationHub spokes and REST APIs. These skills are essential for any real-world admin deployment.
+        </p>
+        <div class="part-hero-meta">
+          <div class="meta-item">
+            <span class="meta-value">15%</span>
+            <span class="meta-label">Exam Weight</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-value" data-part-done-count>0/3</span>
+            <span class="meta-label">Topics Finished</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-value" data-part-done-pct>0%</span>
+            <span class="meta-label">Readiness</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-title">💡 Why Migration &amp; Integration Matters</div>
+        <p style="font-size:0.875rem; line-height:1.6; color:var(--text-secondary); margin:0;">
+          Every production ServiceNow deployment requires moving configuration between sub-production and production instances. The exam tests your understanding of Update Set capture scope, merge conflicts, XML import/export procedures, and Integration Hub spoke orchestration — practical skills that define a competent admin.
+        </p>
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">Part 5 Study Modules</h2>
+
+      <div class="topic-list">
+
+        <a href="topics/01-update-sets.html" class="topic-card" id="card-csa-p5-update-sets">
+          <div class="topic-num-badge">01</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">System Update Sets</h3>
+            </div>
+            <p class="topic-card-desc">Capture, merge, and deploy configuration changes across environments. Understand Update Set scope, local vs. parent sets, commit sequencing, and how to resolve preview errors before deployment.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">Update Sets</span>
+              <span class="topic-tag">Merge Sets</span>
+              <span class="topic-tag">Preview &amp; Deploy</span>
+              <span class="topic-tag">Conflict Resolution</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/02-xml-migration.html" class="topic-card" id="card-csa-p5-xml-migration">
+          <div class="topic-num-badge">02</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">XML Imports &amp; Exports</h3>
+            </div>
+            <p class="topic-card-desc">Transfer individual records and table data using XML export/import. Understand when to use XML versus Update Sets, and how to use the Load Data module and sys_remote_update_set table for targeted migration.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">XML Export</span>
+              <span class="topic-tag">Load Data</span>
+              <span class="topic-tag">Record Transfer</span>
+              <span class="topic-tag">sys_remote_update_set</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/03-integration-flows.html" class="topic-card" id="card-csa-p5-integration-flows">
+          <div class="topic-num-badge">03</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">IntegrationHub &amp; Spokes</h3>
+            </div>
+            <p class="topic-card-desc">Connect ServiceNow to third-party systems using IntegrationHub spokes and REST/SOAP integrations. Configure inbound and outbound message functions and understand authentication patterns for external services.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">IntegrationHub</span>
+              <span class="topic-tag">REST Spokes</span>
+              <span class="topic-tag">Outbound REST</span>
+              <span class="topic-tag">Authentication</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">What You'll Master</h2>
+      <div class="learn-grid">
+        <div class="learn-item">
+          <span class="learn-icon">🔵</span>
+          <span class="learn-text">Creating, completing, and deploying Update Sets without leaving configuration behind.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔵</span>
+          <span class="learn-text">Merging Update Sets and resolving preview errors before committing to production.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔵</span>
+          <span class="learn-text">XML-based export and import of records for targeted data transfers.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔵</span>
+          <span class="learn-text">Building Integration Hub flows with pre-built spokes for Slack, Jira, and REST APIs.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔵</span>
+          <span class="learn-text">Configuring REST Message records with authentication profiles for outbound calls.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔵</span>
+          <span class="learn-text">Understanding when to use Update Sets vs XML vs Import Sets for data movement.</span>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <div class="action-bar-title">Ready to Test Your Part 5 Knowledge?</div>
+          <div class="action-bar-sub">Run flashcard drills or attempt the scenario quiz covering migration and integration patterns.</div>
+        </div>
+        <div style="display:flex; gap:var(--space-3)">
+          <a href="flashcards.html" class="btn btn-secondary">🧠 Flashcards</a>
+          <a href="quiz.html" class="btn btn-primary">🎯 Take Part Quiz</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  function updatePartPageStats() {
+    const meta = ProgressManager.getPartProgress(5);
+    document.querySelectorAll('[data-part-done-count]').forEach(el => {
+      el.textContent = `${meta.done} / ${meta.total}`;
+    });
+    document.querySelectorAll('[data-part-done-pct]').forEach(el => {
+      el.textContent = `${meta.pct}%`;
+    });
+
+    const topics = [
+      'csa-p5-update-sets',
+      'csa-p5-xml-migration',
+      'csa-p5-integration-flows'
+    ];
+    topics.forEach(tid => {
+      const card = document.getElementById(`card-${tid}`);
+      if (card) card.classList.toggle('completed', ProgressManager.isComplete(tid));
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => { updatePartPageStats(); });
+  document.addEventListener('progressUpdated', () => { updatePartPageStats(); });
+</script>
+</body>
+</html>

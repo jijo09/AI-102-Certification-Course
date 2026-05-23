@@ -7,6 +7,38 @@
 
 'use strict';
 
+/* ============================================================
+   DYNAMIC THEME INITIALIZATION
+   Runs immediately to prevent FOUC (Flash of Unstyled Content)
+   ============================================================ */
+(function() {
+  const activeCourse = localStorage.getItem('active_course') || 'ai-102';
+  if (activeCourse === 'servicenow-csa') {
+    document.body.classList.add('theme-csa');
+    document.body.classList.remove('theme-ai102');
+  } else {
+    document.body.classList.add('theme-ai102');
+    document.body.classList.remove('theme-csa');
+  }
+})();
+
+function _ai102Prefixes() {
+  const tags = document.getElementsByTagName('script');
+  let courseRoot = null, hubRoot = '';
+  for (let i = 0; i < tags.length; i++) {
+    const src = tags[i].getAttribute('src');
+    if (!src) continue;
+    if (src.endsWith('config.js')) courseRoot = src.replace('config.js', '');
+    if (src.includes('common.js')) hubRoot = src.replace('scripts/common.js', '');
+  }
+  return { course: courseRoot !== null ? courseRoot : hubRoot, hub: hubRoot };
+}
+
+function switchCourse() {
+  localStorage.removeItem('active_course');
+  window.location.assign(_ai102Prefixes().hub + 'index.html');
+}
+
 /* ── Constants ────────────────────────────────────────────── */
 const STORAGE_KEY   = 'ai102_progress';
 const SETTINGS_KEY  = 'ai102_settings';
@@ -638,7 +670,6 @@ const SidebarManager = (() => {
     _highlightActive();
     _initMobileToggle();
     _initSidebarGroups();
-    _initSidebarSettings();
     _renderProgressDots();
     _initAccordions();
 
@@ -807,16 +838,7 @@ const SidebarManager = (() => {
   }
 
   function _resolveRelativePath(targetPath) {
-    const scripts = document.getElementsByTagName('script');
-    let prefix = '';
-    for (let i = 0; i < scripts.length; i++) {
-        const src = scripts[i].getAttribute('src');
-        if (src && src.includes('common.js')) {
-            prefix = src.replace('scripts/common.js', '');
-            break;
-        }
-    }
-    return prefix + targetPath;
+    return _ai102Prefixes().course + targetPath;
   }
 
   function _initMobileToggle() {
@@ -874,76 +896,6 @@ const SidebarManager = (() => {
         group.classList.toggle('open');
       });
     });
-  }
-
-  function _initSidebarSettings() {
-    const sidebar = document.querySelector('.sidebar');
-    const nav = document.querySelector('.sidebar-nav');
-    const progress = document.getElementById('sidebar-overall-progress');
-    if (!sidebar || !nav || !progress) return;
-
-    document.querySelectorAll('.sidebar-item.sidebar-utility').forEach(item => item.remove());
-
-    let toggle = document.getElementById('open-sidebar-settings');
-    if (!toggle) {
-      toggle = document.createElement('button');
-      toggle.type = 'button';
-      toggle.id = 'open-sidebar-settings';
-      toggle.className = 'sidebar-item sidebar-settings-toggle';
-      toggle.dataset.shortLabel = '';
-      toggle.title = 'Settings';
-      toggle.textContent = 'Settings';
-      nav.appendChild(toggle);
-    }
-
-    let panel = document.getElementById('sidebar-settings-panel');
-    if (!panel) {
-      panel = document.createElement('div');
-      panel.id = 'sidebar-settings-panel';
-      panel.className = 'sidebar-settings-panel';
-      panel.innerHTML = `
-        <div class="sidebar-settings-title">Settings</div>
-        <label class="sidebar-settings-label" for="sidebar-settings-date">Exam date</label>
-        <input id="sidebar-settings-date" class="sidebar-settings-input" type="date" />
-        <div class="sidebar-settings-actions" style="display:flex;gap:8px;">
-          <button type="button" id="sidebar-settings-save" class="btn btn-sm" style="background:var(--amber-400);color:#0f172a;border:none;font-weight:700;flex:1;">Save Date</button>
-          <button type="button" id="sidebar-settings-reset" class="btn btn-sm" style="background:#ef4444;color:#fff;border:none;font-weight:600;flex:1;">Reset Progress</button>
-        </div>
-      `;
-      sidebar.insertBefore(panel, progress);
-    }
-
-    const dateInput = document.getElementById('sidebar-settings-date');
-    const saveBtn = document.getElementById('sidebar-settings-save');
-    const resetBtn = document.getElementById('sidebar-settings-reset');
-
-    if (dateInput) {
-      const existing = ExamCountdown.getDate();
-      if (existing) {
-        dateInput.value = existing.toISOString().split('T')[0];
-      }
-    }
-
-    toggle.addEventListener('click', () => {
-      if (document.body.classList.contains('sidebar-collapsed') && !DESKTOP_BREAKPOINT.matches) {
-        _toggleDesktopSidebar();
-      }
-      panel.classList.toggle('open');
-    });
-
-    saveBtn?.addEventListener('click', () => {
-      if (!dateInput?.value) return;
-      ExamCountdown.setDate(dateInput.value);
-      panel.classList.remove('open');
-    });
-
-    resetBtn?.addEventListener('click', () => {
-      if (ProgressManager.reset()) {
-        panel.classList.remove('open');
-      }
-    });
-
-    document.querySelectorAll('.topbar-actions button[onclick*="openExamDateModal"]').forEach(btn => btn.remove());
   }
 
   function _renderProgressDots() {
@@ -1087,7 +1039,8 @@ function initProgressBars() {
     const part = parseInt(el.dataset.progressPart);
     const prog = ProgressManager.getPartProgress(part);
     const fill = el.querySelector('.progress-fill');
-    const pct  = el.querySelector('[data-progress-pct]');
+    const pct  = el.querySelector('[data-progress-pct]') ||
+                 el.closest('.part-hero')?.querySelector('[data-progress-pct]');
     if (fill) fill.style.width = `${prog.pct}%`;
     if (pct)  pct.textContent  = `${prog.pct}%`;
   });
@@ -1243,31 +1196,6 @@ function initTooltips() {
 }
 
 /* ============================================================
-   SECTION 13 — SETTINGS PANEL
-   Exam date, reset progress
-   ============================================================ */
-function initSettingsPanel() {
-  const panel = document.getElementById('settings-panel');
-  const openBtn = document.getElementById('open-settings');
-  const closeBtn = document.getElementById('close-settings');
-  const resetBtn = document.getElementById('reset-progress-btn');
-
-  if (!panel) return;
-
-  if (openBtn)  openBtn.addEventListener('click', () => panel.classList.add('open'));
-  if (closeBtn) closeBtn.addEventListener('click', () => panel.classList.remove('open'));
-
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      if (ProgressManager.reset()) {
-        initProgressBars();
-        SidebarManager.init();
-      }
-    });
-  }
-}
-
-/* ============================================================
    SECTION 14 — SEARCH (topic search in sidebar)
    ============================================================ */
 function initSidebarSearch() {
@@ -1329,7 +1257,6 @@ const PageHelpers = {
     el.querySelector('[data-stat-days]') && (el.querySelector('[data-stat-days]').textContent = days ?? '—');
   },
 
-  /** Get list of incomplete topics (for "what to study next") */
   getNextTopics(limit = 3) {
     const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     return TOPIC_REGISTRY
@@ -1354,7 +1281,6 @@ const AI102 = {
     initTabs();
     initSmoothScroll();
     initTooltips();
-    initSettingsPanel();
     initSidebarSearch();
 
     // Auto-init any quiz containers present on the page
@@ -1402,6 +1328,13 @@ window.ExamCountdown   = ExamCountdown;
 /* Auto-init when DOM is ready */
 document.addEventListener('DOMContentLoaded', () => AI102.init());
 
+/* ── Global: navigate back to welcome hub ── */
+function switchCourse() {
+  localStorage.removeItem('active_course');
+  const segs = window.location.pathname.split('/').filter(s => s && !s.endsWith('.html'));
+  window.location.href = '../'.repeat(segs.length) + 'index.html';
+}
+
 
 const SidebarTemplate = (p) => `
 <aside class="sidebar">
@@ -1416,18 +1349,9 @@ const SidebarTemplate = (p) => `
       </div>
     </div>
 
-    <!-- Search -->
-    <div id="sidebar-search-container" style="padding:var(--space-2) var(--space-4) var(--space-3);">
-      <input id="sidebar-search" type="text" placeholder="🔍  Search topics…"
-        style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
-        border-radius:24px;padding:10px 16px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);
-        color:#fff;font-size:0.85rem;font-family:var(--font-body);outline:none;transition:0.2s;">
-    </div>
-
     <!-- Nav -->
     <nav class="sidebar-nav">
-      <a href="${p}index.html" class="sidebar-item"><span class="item-icon">⌂</span><span>Dashboard</span></a>
-      <a href="${p}revision.html" class="sidebar-item"><span class="item-icon">🧠</span><span>Revision Center</span></a>
+      <a href="${p}index.html" class="sidebar-item sidebar-nav-tab" data-short-label="⌂"><span class="item-icon">⌂</span><span>Dashboard</span></a>
       <div class="sidebar-group" data-part-group="1">
         <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span><span class="item-badge" data-part-progress="1">0/5</span></button>
         <div class="sidebar-group-body">
@@ -1488,7 +1412,7 @@ const SidebarTemplate = (p) => `
           <a href="${p}part6-computer-vision/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
         </div>
       </div>
-      <a href="#" onclick="openExamDateModal()" class="sidebar-item"><span class="item-icon">📅</span><span>Set Exam Date</span></a>
+      <a href="${p}revision.html" class="sidebar-item sidebar-nav-tab"><span class="item-icon">🧠</span><span>Revision Center</span></a>
       <a href="#" onclick="ProgressManager.reset()" class="sidebar-item"><span class="item-icon">↺</span><span>Reset Progress</span></a>
     </nav>
 
@@ -1510,18 +1434,21 @@ const SidebarTemplate = (p) => `
 SidebarManager.injectAndInit = function() {
     const container = document.getElementById('app-sidebar');
     if (!container) return;
-    
-    const scripts = document.getElementsByTagName('script');
-    let p = '';
-    for (let i = 0; i < scripts.length; i++) {
-        const src = scripts[i].getAttribute('src');
-        if (src && src.includes('common.js')) {
-            p = src.replace('scripts/common.js', '');
-            break;
-        }
-    }
-    
+
+    const { course: p } = _ai102Prefixes();
+
     container.outerHTML = SidebarTemplate(p);
+
+    // Inject "All Courses" button into topbar
+    document.querySelectorAll('.topbar').forEach(topbar => {
+      if (!topbar.querySelector('.back-to-hub-btn')) {
+        const btn = document.createElement('button');
+        btn.className = 'back-to-hub-btn';
+        btn.textContent = 'All Courses';
+        btn.onclick = switchCourse;
+        topbar.insertBefore(btn, topbar.firstChild);
+      }
+    });
     
     // Immediately apply collapsed state to prevent FOUC jank
     try {

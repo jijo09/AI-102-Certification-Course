@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topic 2 — Custom Vision Models | AI-102 Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sbo { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; }
+    #sbo.show { display:block; }
+    .metric-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+    }
+    .metric-value {
+      font-family: var(--font-heading); font-size: 2rem; font-weight: 800;
+      line-height: 1; margin-bottom: var(--space-2);
+    }
+    .pipeline-step {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      display: flex; gap: var(--space-4); align-items: flex-start;
+    }
+    .step-num {
+      width: 32px; height: 32px; min-width: 32px;
+      background: #0d9488; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700;
+      color: #fff; margin-top: 2px;
+    }
+    .step-title { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .step-desc  { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+    .retirement-banner {
+      background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.35);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      display: flex; gap: var(--space-4); align-items: flex-start;
+      margin-bottom: var(--space-6);
+    }
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+
+  <div id="app-sidebar"></div>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span><span class="current">Custom Vision Models</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header animate-fade-in">
+        <div class="topic-part-badge badge" style="background:rgba(13,148,136,0.15);color:#5eead4;border:1px solid rgba(13,148,136,0.3)">🎯 Part 6 · Topic 2 of 3</div>
+        <h1 class="topic-title">Custom Vision Models</h1>
+        <p style="font-size:1rem;color:var(--text-secondary);max-width:680px;line-height:1.7;margin-top:var(--space-3)">
+          Azure Custom Vision lets you train your own computer vision model using your own photographs —
+          without writing machine learning code. You upload labelled images, click Train, and Azure builds
+          a model that can classify images or detect objects with bounding boxes. This topic covers
+          the complete workflow from labelling to publishing to evaluation metrics.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">🐍 <strong>Python — every line explained</strong></span>
+          <span class="topic-meta-item">⏱️ <strong>~45 min</strong></span>
+          <span class="topic-meta-item">🔥 <strong>High exam weight — metrics are a trap area</strong></span>
+        </div>
+      </div>
+
+      <!-- RETIREMENT NOTICE -->
+      <div class="retirement-banner">
+        <span style="font-size:1.5rem;margin-top:2px">⚠️</span>
+        <div>
+          <div style="font-family:var(--font-heading);font-weight:700;color:var(--amber-400);margin-bottom:var(--space-2)">Important: Custom Vision is being retired</div>
+          <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;margin:0">
+            Azure Custom Vision is transitioning to <strong>Azure AI Foundry / Azure Machine Learning AutoML for Vision</strong>.
+            New model creation will be disabled from 2026 onwards. However, <strong>the exam still tests Custom Vision</strong> — including
+            its workflow, metrics, and Python SDK. Learn it for the exam. For new production projects, prefer Azure ML AutoML for Vision.
+            The retirement applies to new projects, not knowledge of the service.
+          </p>
+        </div>
+      </div>
+
+      <!-- SECTION 1 — VOCAB -->
+      <div class="section-block" id="vocab">
+        <div class="section-label">🔤 Section 1 — New Vocabulary</div>
+        <h2>Custom Vision terms — defined before code</h2>
+        <div class="term-grid">
+          <div class="term-card">
+            <span class="term-name">Image Classification</span>
+            <p class="term-definition">Answering the question: <em>"What is in this image overall?"</em> — assigning one or more category labels to the whole image. Example: a photo of a cat → label: "Cat". A photo of a beach → label: "Beach". The model doesn't tell you WHERE in the image the thing is — just what the image shows. Two sub-types: <strong>multi-class</strong> (exactly one label) and <strong>multi-label</strong> (multiple labels allowed per image).</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Object Detection</span>
+            <p class="term-definition">Answering the question: <em>"What objects are in this image and WHERE are they?"</em> — identifies specific objects and draws bounding boxes around each one. Example: a photo of a street → detects: Car at [top-left], Person at [centre], Bicycle at [right]. Use when you need to locate and count specific objects, not just classify the whole image.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Tag (Custom Vision)</span>
+            <p class="term-definition">A category label applied to a training image. For classification: you add tags to whole images ("Cat", "Dog"). For object detection: you add tags to bounding box regions you draw on images. Tags are the categories your model learns to recognise. You need at least 5 images per tag minimum (15+ recommended for good accuracy).</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Multi-Class Classification</span>
+            <p class="term-definition">Each image gets <strong>exactly one</strong> tag — the image belongs to one and only one category. The model outputs the single most likely class. Example: classify photos as either "Healthy" or "Diseased" plant — no image can be both. Use when categories are mutually exclusive.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Multi-Label Classification</span>
+            <p class="term-definition">Each image can have <strong>multiple tags</strong> — an image can belong to several categories simultaneously. Example: a food photo can be tagged as both "Vegetarian" and "Spicy" and "Main Course". The model outputs confidence scores for ALL tags, not just the top one. Use when categories are not mutually exclusive.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Iteration</span>
+            <p class="term-definition">A trained version of your custom model. Each time you train in Custom Vision, a new Iteration is created — the previous iterations are kept. This gives you a version history. You can compare iterations' metrics side by side. Only one iteration can be published (active) at a time. If training with new data improves metrics, you publish the new iteration to replace the old one.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Precision</span>
+            <p class="term-definition">Of all the times the model said "Yes, this is a Cat" — what percentage was it actually right? <strong>Precision = True Positives / (True Positives + False Positives)</strong>. High precision means: when the model fires, it's reliable. Low precision means: it fires too eagerly and generates many false alarms. Important when false positives are costly.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Recall</span>
+            <p class="term-definition">Of all the actual Cats in the test set — what percentage did the model correctly find? <strong>Recall = True Positives / (True Positives + False Negatives)</strong>. High recall means: the model finds most of the real examples. Low recall means: it misses many real examples. Important when missing true positives is costly (e.g. disease detection).</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">mAP (Mean Average Precision)</span>
+            <p class="term-definition">The single summary metric for object detection models. Combines precision and recall across all object classes into one number. Higher is better — 100% mAP is perfect. Used because detecting objects requires both finding them (recall) AND putting the bounding box in the right place (precision). mAP is the standard metric for object detection; Precision and Recall are used for classification.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Probability Threshold</span>
+            <p class="term-definition">A confidence cutoff — the model only reports a detection/classification if its confidence score is above this threshold. Default: 50% (0.5). <strong>Raising the threshold</strong> (e.g. to 80%) → higher precision (fewer false positives) but lower recall (misses more). <strong>Lowering the threshold</strong> (e.g. to 30%) → higher recall (catches more) but lower precision (more false positives). The exam tests this tradeoff directly.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Quick Training vs Advanced Training</span>
+            <p class="term-definition"><strong>Quick Training</strong>: fast (minutes), uses a lightweight model, good for initial experiments and small datasets. Lower accuracy potential. No configuration needed. <strong>Advanced Training</strong>: slower (hours), uses a more powerful model, configures a training budget (how many hours of compute to use). Better accuracy, especially with more training data. The exam may ask when to use each.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Prediction Endpoint</span>
+            <p class="term-definition">The REST API endpoint for making predictions with your published Custom Vision model. After publishing an iteration, you get a prediction URL your application calls with new images. Two prediction methods: <code>classify_image()</code> for classification, <code>detect_image()</code> for object detection. The prediction URL and prediction key are separate from the training endpoint and key.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Suggested Tags (Active Learning)</span>
+            <p class="term-definition">Custom Vision automatically suggests tags for newly uploaded untagged images based on the current model's predictions. You review and confirm or correct the suggestions rather than manually tagging every image from scratch. This speeds up the labelling process significantly as your dataset grows. The model learns from your corrections to improve future suggestions.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2 — CLASSIFICATION VS DETECTION -->
+      <div class="section-block" id="concepts">
+        <div class="section-label">🏗️ Section 2 — Classification vs Object Detection</div>
+        <h2>Choosing the right project type — the most common exam decision</h2>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📚</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A stamp vs a spotlight</div>
+            <p>
+              <strong>Image Classification</strong> is like stamping a label on the whole photo envelope: "This envelope contains a cat photo." You know what's in the photo, but not where.<br><br>
+              <strong>Object Detection</strong> is like shining a spotlight inside the photo: "There's a cat in the top-left corner, a dog in the centre, and a bowl in the bottom-right." You know both what and where.<br><br>
+              If the scenario only needs to categorise images (spam vs not spam, defective vs normal), use classification.
+              If the scenario needs to find and locate specific things (count cars, detect defects in a specific part), use detection.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Decision guide — classification vs detection</h3>
+        <table class="compare-table">
+          <thead><tr><th>Scenario</th><th>Project Type</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>Classify product images as "Defective" or "Normal"</td><td><strong>Multi-class Classification</strong></td><td>Each image is either one or the other — mutually exclusive categories</td></tr>
+            <tr><td>Tag food photos with all applicable dietary labels (Vegan, Spicy, Gluten-free)</td><td><strong>Multi-label Classification</strong></td><td>One photo can have multiple labels simultaneously</td></tr>
+            <tr><td>Detect and count cars in parking lot camera images</td><td><strong>Object Detection</strong></td><td>Need to find WHERE each car is and how many there are, not just "cars are present"</td></tr>
+            <tr><td>Locate and highlight specific defects in circuit board images</td><td><strong>Object Detection</strong></td><td>Need to know WHERE the defect is on the board — bounding box required</td></tr>
+            <tr><td>Identify which type of fruit is in a photo</td><td><strong>Multi-class Classification</strong></td><td>Image shows one type of fruit — one label per image</td></tr>
+            <tr><td>Detect and locate faces, cars, and pedestrians in dashcam footage</td><td><strong>Object Detection</strong></td><td>Multiple distinct object types need to be located with bounding boxes</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Labelling differences</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-6)">
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5)">
+            <div style="font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-3);color:#a5b4fc">Classification Labelling</div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.6">
+              1. Upload images to your project<br>
+              2. Select each image (or batch)<br>
+              3. Assign one tag (multi-class) or multiple tags (multi-label)<br>
+              4. Repeat until all images are tagged<br><br>
+              No drawing required — you just select the label for the whole image.
+            </p>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5)">
+            <div style="font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-3);color:#5eead4">Object Detection Labelling</div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);line-height:1.6">
+              1. Upload images to your project<br>
+              2. Open each image in the labelling tool<br>
+              3. Draw a bounding box around each object<br>
+              4. Assign a tag to each drawn box<br>
+              5. Every object in the image must be boxed<br><br>
+              More effort per image — but gives the model location data.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3 — TRAINING WORKFLOW -->
+      <div class="section-block" id="workflow">
+        <div class="section-label">🔄 Section 3 — Training Workflow: from images to published model</div>
+        <h2>The complete Custom Vision pipeline</h2>
+
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-8)">
+          <div class="pipeline-step">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-title">Create a Custom Vision project</div>
+              <p class="step-desc">In <code>customvision.ai</code> (or via Python SDK), create a project specifying: project type (Classification or Object Detection), classification type (Multi-class or Multi-label), and domain (General, Food, Retail, Landmarks, etc. — each domain specialises the base model). Domains affect the underlying base model used for transfer learning. Choose "General" if none of the specific domains match.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-title">Upload and label images</div>
+              <p class="step-desc">Upload at least <strong>5 images per tag</strong> (minimum). 15+ per tag recommended for reasonable accuracy. 50+ per tag for good production accuracy. Images should be varied — different angles, lighting conditions, backgrounds, sizes. Similar images don't help the model generalise. For object detection: draw bounding boxes around every instance of every object in each image.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-title">Train the model</div>
+              <p class="step-desc">Click "Train" — choose Quick Training (faster, less accurate) or Advanced Training (specify a compute budget in hours). Training performs transfer learning: it takes a powerful pre-trained vision model and fine-tunes it on your tagged images. A new Iteration is created. You can train multiple times — each creates a new Iteration.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">4</div>
+            <div>
+              <div class="step-title">Evaluate metrics</div>
+              <p class="step-desc">After training, Custom Vision shows Precision, Recall, and mAP for the new Iteration. Review these metrics at different probability thresholds using the threshold slider. Identify which tags have low precision or recall — these need more training images or better image diversity. Compare against previous iterations to confirm improvement.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">5</div>
+            <div>
+              <div class="step-title">Test with new images</div>
+              <p class="step-desc">Use the "Quick Test" feature in the portal to upload images that were NOT part of training. Review the model's predictions — this is a real-world sanity check beyond the training metrics. If the model performs well on Quick Test images, you can be more confident in its real-world accuracy.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">6</div>
+            <div>
+              <div class="step-title">Publish the Iteration</div>
+              <p class="step-desc">Click "Publish" on the Iteration you want to deploy. Give it a publication name. This exposes the prediction endpoint URL and prediction key that your application will use to call the model. Until published, the model is only accessible for testing in the portal — it has no REST endpoint for external applications.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">7</div>
+            <div>
+              <div class="step-title">Consume via prediction endpoint</div>
+              <p class="step-desc">Call the prediction endpoint from your application using the <code>azure-cognitiveservices-vision-customvision</code> Python SDK (or REST). For classification: call <code>classify_image()</code> — returns predictions with tag names and probabilities. For detection: call <code>detect_image()</code> — returns predictions with bounding boxes, tag names, and probabilities. Filter by probability threshold.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4 — EVALUATION METRICS -->
+      <div class="section-block" id="metrics">
+        <div class="section-label">📊 Section 4 — Evaluation Metrics</div>
+        <h2>Precision, Recall, mAP — and the probability threshold tradeoff</h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-8)">
+          <div class="metric-card">
+            <div class="metric-value" style="color:#60a5fa">P</div>
+            <div style="font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-2)">Precision</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">"When the model fires, how often is it right?"<br><br>TP ÷ (TP + FP)<br><br><em>High precision</em> = low false alarm rate. Relevant when false positives are expensive (e.g. flagging innocent products for disposal).</p>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color:#34d399">R</div>
+            <div style="font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-2)">Recall</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">"Of all real examples, how many did it find?"<br><br>TP ÷ (TP + FN)<br><br><em>High recall</em> = catches most real cases. Relevant when missing true positives is dangerous (e.g. missing a defect that could cause product failure).</p>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color:#f472b6">mAP</div>
+            <div style="font-family:var(--font-heading);font-weight:700;margin-bottom:var(--space-2)">Mean Avg. Precision</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">Object detection summary metric. Combines precision + recall + bounding box accuracy across ALL classes into one score. Higher is better. Used for detection; Precision + Recall used for classification.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:var(--space-4)">Probability threshold — the precision/recall tradeoff</h3>
+        <p style="margin-bottom:var(--space-4)">Every prediction has a probability score (0–100%). The <strong>probability threshold</strong> is your cutoff — below it, the model stays silent. Adjusting it changes the precision/recall balance:</p>
+
+        <table class="compare-table">
+          <thead><tr><th>Threshold</th><th>Effect on Precision</th><th>Effect on Recall</th><th>Use when…</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>High (e.g. 80%)</strong></td>
+              <td>⬆️ Higher (fewer false positives)</td>
+              <td>⬇️ Lower (misses more real cases)</td>
+              <td>False alarms are very costly (e.g. triggering expensive automated responses)</td>
+            </tr>
+            <tr>
+              <td><strong>Default (50%)</strong></td>
+              <td>Balanced</td>
+              <td>Balanced</td>
+              <td>General purpose scenarios where both matter equally</td>
+            </tr>
+            <tr>
+              <td><strong>Low (e.g. 30%)</strong></td>
+              <td>⬇️ Lower (more false positives)</td>
+              <td>⬆️ Higher (catches more real cases)</td>
+              <td>Missing a real case is dangerous (e.g. missing a defect in safety-critical manufacturing)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam" style="margin-top:var(--space-6)">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — Precision/Recall scenario questions</div>
+            <p>
+              <em>"The model is generating too many false alarms — legitimate products are being rejected."</em><br>
+              → This is a <strong>low Precision</strong> problem (too many false positives). Fix: <strong>raise the probability threshold</strong>.<br><br>
+              <em>"The model is missing too many actual defects — defective products are passing through."</em><br>
+              → This is a <strong>low Recall</strong> problem (too many false negatives). Fix: <strong>lower the probability threshold</strong>.<br><br>
+              <em>"The company needs to balance catching defects vs. not flagging good products."</em><br>
+              → Use the <strong>default 50% threshold</strong> or adjust based on the cost comparison.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 5 — PYTHON CODE -->
+      <div class="section-block" id="python">
+        <div class="section-label">🐍 Section 5 — Python: Training, Evaluating, and Predicting</div>
+        <h2>Custom Vision end-to-end — train, publish, and predict</h2>
+        <p style="margin-bottom:var(--space-4)">Install: <code>pip install azure-cognitiveservices-vision-customvision</code></p>
+
+<pre><code><span class="token-keyword">from</span> azure.cognitiveservices.vision.customvision.training <span class="token-keyword">import</span> CustomVisionTrainingClient
+<span class="token-keyword">from</span> azure.cognitiveservices.vision.customvision.training.models <span class="token-keyword">import</span> (
+    ImageFileCreateBatch,  <span class="token-comment"># Wraps a batch of images with their tags for upload</span>
+    ImageFileCreateEntry,  <span class="token-comment"># One image + its tag(s) in a batch</span>
+    Region,                <span class="token-comment"># Bounding box for object detection (normalised 0.0–1.0)</span>
+)
+<span class="token-keyword">from</span> azure.cognitiveservices.vision.customvision.prediction <span class="token-keyword">import</span> CustomVisionPredictionClient
+<span class="token-keyword">from</span> msrest.authentication <span class="token-keyword">import</span> ApiKeyCredentials
+<span class="token-comment"># CustomVision uses msrest credentials, not azure-core credentials</span>
+<span class="token-keyword">import</span> os
+<span class="token-keyword">import</span> time  <span class="token-comment"># For polling the training status</span>
+
+<span class="token-comment"># ── Connection details ─────────────────────────────────────────────────</span>
+<span class="token-comment"># Custom Vision has SEPARATE endpoints and keys for Training and Prediction</span>
+<span class="token-comment"># Find them in customvision.ai → Settings (gear icon)</span>
+TRAINING_ENDPOINT = os.environ.get(<span class="token-string">"CUSTOMVISION_TRAINING_ENDPOINT"</span>)
+TRAINING_KEY      = os.environ.get(<span class="token-string">"CUSTOMVISION_TRAINING_KEY"</span>)
+PREDICTION_ENDPOINT = os.environ.get(<span class="token-string">"CUSTOMVISION_PREDICTION_ENDPOINT"</span>)
+PREDICTION_KEY      = os.environ.get(<span class="token-string">"CUSTOMVISION_PREDICTION_KEY"</span>)
+PREDICTION_RESOURCE_ID = os.environ.get(<span class="token-string">"CUSTOMVISION_PREDICTION_RESOURCE_ID"</span>)
+<span class="token-comment"># Resource ID format: /subscriptions/xxx/resourceGroups/xxx/providers/...</span>
+<span class="token-comment"># Needed when publishing an Iteration — links the model to the prediction resource</span>
+
+<span class="token-comment"># msrest credential wraps the key — different from AzureKeyCredential used elsewhere</span>
+training_credentials   = ApiKeyCredentials(in_headers={<span class="token-string">"Training-key"</span>: TRAINING_KEY})
+prediction_credentials = ApiKeyCredentials(in_headers={<span class="token-string">"Prediction-key"</span>: PREDICTION_KEY})
+
+<span class="token-comment"># Training client: create projects, upload images, train, evaluate</span>
+trainer = CustomVisionTrainingClient(TRAINING_ENDPOINT, training_credentials)
+<span class="token-comment"># Prediction client: make predictions against published models</span>
+predictor = CustomVisionPredictionClient(PREDICTION_ENDPOINT, prediction_credentials)
+
+
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+<span class="token-comment"># PART 1 — TRAINING: Create project, add tags, upload images, train</span>
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+
+<span class="token-comment"># Get the list of available domains — you must use a domain ID, not a name</span>
+<span class="token-comment"># Domains: General, Food, Landmarks, Retail, General (compact), etc.</span>
+domains = trainer.get_domains()
+<span class="token-comment"># Find the General classification domain</span>
+general_domain = next(d <span class="token-keyword">for</span> d <span class="token-keyword">in</span> domains <span class="token-keyword">if</span> d.name == <span class="token-string">"General"</span> <span class="token-keyword">and</span> d.type == <span class="token-string">"Classification"</span>)
+
+<span class="token-comment"># Create a new Classification project</span>
+<span class="token-comment"># classification_type: "Multiclass" (one tag per image) or "Multilabel" (many tags per image)</span>
+project = trainer.create_project(
+    name                = <span class="token-string">"plant-disease-classifier"</span>,
+    description         = <span class="token-string">"Classifies plant leaves as Healthy or Diseased"</span>,
+    domain_id           = general_domain.id,
+    classification_type = <span class="token-string">"Multiclass"</span>   <span class="token-comment"># Each plant is either Healthy OR Diseased</span>
+)
+project_id = project.id
+<span class="token-keyword">print</span>(<span class="token-string">f"Created project: {project.name} (ID: {project_id})"</span>)
+
+
+<span class="token-comment"># ── Create Tags (categories) ───────────────────────────────────────────</span>
+<span class="token-comment"># Tags are the categories the model will learn to recognise</span>
+<span class="token-comment"># You must create tags BEFORE uploading images</span>
+healthy_tag  = trainer.create_tag(project_id, <span class="token-string">"Healthy"</span>)
+diseased_tag = trainer.create_tag(project_id, <span class="token-string">"Diseased"</span>)
+<span class="token-comment"># Each tag gets a unique ID — use the ID when uploading images</span>
+<span class="token-keyword">print</span>(<span class="token-string">f"Created tags: {healthy_tag.name} (ID: {healthy_tag.id}), {diseased_tag.name}"</span>)
+
+
+<span class="token-comment"># ── Upload images with tags ────────────────────────────────────────────</span>
+<span class="token-comment"># Build a batch — more efficient than uploading one image at a time</span>
+<span class="token-comment"># Batch size limit: 64 images per call</span>
+upload_batch = []
+
+healthy_images = [<span class="token-string">"healthy_leaf_1.jpg"</span>, <span class="token-string">"healthy_leaf_2.jpg"</span>, <span class="token-string">"healthy_leaf_3.jpg"</span>]
+<span class="token-keyword">for</span> image_path <span class="token-keyword">in</span> healthy_images:
+    <span class="token-keyword">with</span> <span class="token-keyword">open</span>(image_path, <span class="token-string">"rb"</span>) <span class="token-keyword">as</span> f:
+        image_bytes = f.read()  <span class="token-comment"># Read the image as binary</span>
+    <span class="token-comment"># ImageFileCreateEntry: wraps one image + its tags for the batch</span>
+    <span class="token-comment"># tag_ids: a list of tag IDs — for multiclass, use exactly one tag</span>
+    upload_batch.append(ImageFileCreateEntry(
+        name    = image_path,
+        contents= image_bytes,
+        tag_ids = [healthy_tag.id]   <span class="token-comment"># This image belongs to the Healthy category</span>
+    ))
+
+diseased_images = [<span class="token-string">"diseased_leaf_1.jpg"</span>, <span class="token-string">"diseased_leaf_2.jpg"</span>, <span class="token-string">"diseased_leaf_3.jpg"</span>]
+<span class="token-keyword">for</span> image_path <span class="token-keyword">in</span> diseased_images:
+    <span class="token-keyword">with</span> <span class="token-keyword">open</span>(image_path, <span class="token-string">"rb"</span>) <span class="token-keyword">as</span> f:
+        image_bytes = f.read()
+    upload_batch.append(ImageFileCreateEntry(
+        name    = image_path,
+        contents= image_bytes,
+        tag_ids = [diseased_tag.id]  <span class="token-comment"># This image belongs to the Diseased category</span>
+    ))
+
+<span class="token-comment"># Upload the entire batch at once — more efficient than one-by-one</span>
+upload_result = trainer.create_images_from_files(
+    project_id,
+    ImageFileCreateBatch(images=upload_batch)  <span class="token-comment"># Wrap the list in a batch object</span>
+)
+
+<span class="token-comment"># Check if all images were successfully uploaded</span>
+<span class="token-keyword">if</span> <span class="token-keyword">not</span> upload_result.is_batch_successful:
+    <span class="token-comment"># Some images may have failed (unsupported format, duplicate, too small)</span>
+    <span class="token-keyword">for</span> img <span class="token-keyword">in</span> upload_result.images:
+        <span class="token-keyword">if</span> img.status != <span class="token-string">"OK"</span>:
+            <span class="token-keyword">print</span>(<span class="token-string">f"Failed: {img.source_url} — {img.status}"</span>)
+<span class="token-keyword">else</span>:
+    <span class="token-keyword">print</span>(<span class="token-string">f"Uploaded {len(upload_batch)} images successfully."</span>)
+
+
+<span class="token-comment"># ── Train the model ────────────────────────────────────────────────────</span>
+<span class="token-comment"># train_project() starts training and returns an Iteration object</span>
+<span class="token-comment"># training_type: "Regular" (Quick Training) — for faster/smaller models</span>
+<span class="token-comment"># For Advanced Training: training_type="Advanced", budget_in_hours=1 (minimum: 1 hour)</span>
+iteration = trainer.train_project(project_id)
+<span class="token-keyword">print</span>(<span class="token-string">f"\nTraining started — Iteration: {iteration.id}"</span>)
+
+<span class="token-comment"># Training is async — poll until status changes from "Training" to "Completed"</span>
+<span class="token-keyword">while</span> iteration.status == <span class="token-string">"Training"</span>:
+    <span class="token-keyword">print</span>(<span class="token-string">"  Still training..."</span>)
+    time.sleep(<span class="token-number">10</span>)  <span class="token-comment"># Wait 10 seconds before checking again</span>
+    <span class="token-comment"># get_iteration() refreshes the iteration status from the server</span>
+    iteration = trainer.get_iteration(project_id, iteration.id)
+
+<span class="token-keyword">print</span>(<span class="token-string">f"Training complete! Status: {iteration.status}"</span>)
+
+
+<span class="token-comment"># ── Evaluate metrics ───────────────────────────────────────────────────</span>
+<span class="token-comment"># get_iteration_performance() returns the evaluation metrics for a trained iteration</span>
+performance = trainer.get_iteration_performance(
+    project_id,
+    iteration.id,
+    threshold = <span class="token-number">0.5</span>   <span class="token-comment"># Probability threshold: only count predictions above 50%</span>
+)
+
+<span class="token-comment"># Overall model metrics</span>
+<span class="token-keyword">print</span>(<span class="token-string">f"\n=== Model Performance (threshold=50%) ==="</span>)
+<span class="token-keyword">print</span>(<span class="token-string">f"  Precision: {performance.precision:.1%}"</span>)   <span class="token-comment"># :.1% formats 0.923 as "92.3%"</span>
+<span class="token-keyword">print</span>(<span class="token-string">f"  Recall:    {performance.recall:.1%}"</span>)
+<span class="token-keyword">print</span>(<span class="token-string">f"  mAP:       {performance.average_precision:.1%}"</span>)  <span class="token-comment"># Mean Average Precision</span>
+
+<span class="token-comment"># Per-tag metrics — see which tags are weak</span>
+<span class="token-keyword">print</span>(<span class="token-string">"\nPer-tag metrics:"</span>)
+<span class="token-keyword">for</span> tag_perf <span class="token-keyword">in</span> performance.per_tag_performance:
+    <span class="token-keyword">print</span>(<span class="token-string">f"  {tag_perf.name}: precision={tag_perf.precision:.1%}  recall={tag_perf.recall:.1%}"</span>)
+    <span class="token-comment"># If Healthy is 95% precision but Diseased is only 60% precision,</span>
+    <span class="token-comment"># you need more / better Diseased training images</span>
+
+
+<span class="token-comment"># ── Publish the Iteration ──────────────────────────────────────────────</span>
+<span class="token-comment"># After evaluating, publish the iteration so external apps can use it</span>
+<span class="token-comment"># publish_name: a human-readable name for this published model</span>
+<span class="token-comment"># prediction_id: the Azure resource ID of your prediction resource</span>
+trainer.publish_iteration(
+    project_id,
+    iteration.id,
+    publish_name      = <span class="token-string">"plant-classifier-v1"</span>,
+    prediction_id     = PREDICTION_RESOURCE_ID
+)
+<span class="token-keyword">print</span>(<span class="token-string">"\nIteration published as 'plant-classifier-v1'"</span>)
+
+
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+<span class="token-comment"># PART 2 — PREDICTION: Call the published model with new images</span>
+<span class="token-comment"># ══════════════════════════════════════════════════════════════════════</span>
+
+<span class="token-comment"># ── Classification prediction ──────────────────────────────────────────</span>
+<span class="token-keyword">with</span> <span class="token-keyword">open</span>(<span class="token-string">"new_leaf.jpg"</span>, <span class="token-string">"rb"</span>) <span class="token-keyword">as</span> f:
+    test_image = f.read()
+
+<span class="token-comment"># classify_image(): makes a classification prediction with a local image</span>
+<span class="token-comment"># project_id: which project this image belongs to</span>
+<span class="token-comment"># published_name: the name you gave when publishing the iteration above</span>
+<span class="token-comment"># image_data: the image bytes</span>
+results = predictor.classify_image(
+    project_id     = project_id,
+    published_name = <span class="token-string">"plant-classifier-v1"</span>,  <span class="token-comment"># Must match what you used in publish_iteration()</span>
+    image_data     = test_image
+)
+
+<span class="token-comment"># results.predictions: list of all tags with their probability scores</span>
+<span class="token-comment"># Sorted by probability descending — first item is the most likely prediction</span>
+<span class="token-keyword">print</span>(<span class="token-string">"\n=== Classification Predictions ==="</span>)
+<span class="token-keyword">for</span> prediction <span class="token-keyword">in</span> results.predictions:
+    <span class="token-comment"># prediction.tag_name: the label — prediction.probability: confidence (0.0 to 1.0)</span>
+    <span class="token-keyword">print</span>(<span class="token-string">f"  {prediction.tag_name}: {prediction.probability:.1%}"</span>)
+
+<span class="token-comment"># Best prediction: use the first result (highest probability)</span>
+best = results.predictions[<span class="token-number">0</span>]
+<span class="token-keyword">if</span> best.probability >= <span class="token-number">0.7</span>:       <span class="token-comment"># Our custom threshold: only act if 70%+ confident</span>
+    <span class="token-keyword">print</span>(<span class="token-string">f"\nDiagnosis: {best.tag_name} ({best.probability:.1%} confidence)"</span>)
+<span class="token-keyword">else</span>:
+    <span class="token-keyword">print</span>(<span class="token-string">"\nLow confidence — flag for human review"</span>)
+
+
+<span class="token-comment"># ── URL-based prediction (no local file needed) ─────────────────────────</span>
+<span class="token-comment"># classify_image_with_no_store() for predictions that don't store the image</span>
+<span class="token-comment"># classify_image_url() for URL-based images</span>
+<span class="token-keyword">from</span> azure.cognitiveservices.vision.customvision.prediction.models <span class="token-keyword">import</span> ImageUrl
+
+url_results = predictor.classify_image_url(
+    project_id     = project_id,
+    published_name = <span class="token-string">"plant-classifier-v1"</span>,
+    image_url      = ImageUrl(url=<span class="token-string">"https://example.com/leaf-photo.jpg"</span>)
+)
+<span class="token-keyword">print</span>(<span class="token-string">f"\nURL prediction: {url_results.predictions[0].tag_name} — {url_results.predictions[0].probability:.1%}"</span>)</code></pre>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Python — Object Detection prediction (with bounding boxes)</h3>
+
+<pre><code><span class="token-comment"># Object detection prediction uses detect_image() instead of classify_image()</span>
+<span class="token-comment"># Returns both tag names AND bounding box coordinates for each detected object</span>
+
+<span class="token-comment"># Assume you have an object detection project and published iteration</span>
+<span class="token-keyword">with</span> <span class="token-keyword">open</span>(<span class="token-string">"warehouse_photo.jpg"</span>, <span class="token-string">"rb"</span>) <span class="token-keyword">as</span> f:
+    detect_image = f.read()
+
+<span class="token-comment"># detect_image(): same structure as classify_image() but returns bounding boxes</span>
+detect_results = predictor.detect_image(
+    project_id     = project_id,
+    published_name = <span class="token-string">"defect-detector-v1"</span>,
+    image_data     = detect_image
+)
+
+THRESHOLD = <span class="token-number">0.6</span>  <span class="token-comment"># Only report detections above 60% confidence</span>
+
+<span class="token-keyword">print</span>(<span class="token-string">"\n=== Object Detection Results ==="</span>)
+<span class="token-keyword">for</span> prediction <span class="token-keyword">in</span> detect_results.predictions:
+    <span class="token-comment"># Filter out low-confidence predictions using our threshold</span>
+    <span class="token-keyword">if</span> prediction.probability < THRESHOLD:
+        <span class="token-keyword">continue</span>   <span class="token-comment"># skip this prediction — not confident enough</span>
+
+    <span class="token-comment"># prediction.bounding_box: NORMALISED coordinates (0.0 to 1.0, not pixels)</span>
+    <span class="token-comment"># Multiply by image width/height to get pixel coordinates</span>
+    bb = prediction.bounding_box
+    <span class="token-comment"># bb.left: x position of left edge as a fraction of image width</span>
+    <span class="token-comment"># bb.top:  y position of top edge as a fraction of image height</span>
+    <span class="token-comment"># bb.width: width as a fraction of total image width</span>
+    <span class="token-comment"># bb.height: height as a fraction of total image height</span>
+    <span class="token-keyword">print</span>(<span class="token-string">f"  {prediction.tag_name}: {prediction.probability:.1%}"</span>)
+    <span class="token-keyword">print</span>(<span class="token-string">f"    Box: left={bb.left:.2f} top={bb.top:.2f} w={bb.width:.2f} h={bb.height:.2f}"</span>)
+    <span class="token-comment"># Example to convert to pixel coordinates (assuming 1920x1080 image):</span>
+    <span class="token-comment"># pixel_x = int(bb.left * 1920)  → left edge in pixels</span>
+    <span class="token-comment"># pixel_y = int(bb.top  * 1080)  → top edge in pixels</span></code></pre>
+      </div>
+
+      <!-- SECTION 6 — EXAM TIPS -->
+      <div class="section-block" id="exam-tips">
+        <div class="section-label">🎯 Section 6 — Exam Tips</div>
+        <h2>Custom Vision — what the exam tests</h2>
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Top 6 Tested Facts</div>
+            <p>
+              <strong>1. Classification vs Object Detection decision</strong> — "Categorise the whole image" → Classification. "Find WHERE objects are + draw boxes" → Object Detection. This is the most common project type selection question.<br><br>
+              <strong>2. Precision/Recall/threshold tradeoff</strong> — Raising threshold improves precision but hurts recall. Lowering threshold improves recall but hurts precision. Know which direction each scenario needs.<br><br>
+              <strong>3. mAP is the object detection metric; Precision+Recall for classification</strong> — Don't mix them up. mAP = Mean Average Precision, specifically for detection. Classification uses Precision and Recall directly.<br><br>
+              <strong>4. Minimum 5 images per tag</strong> — The minimum to even start training. 15+ is recommended. Always check if a scenario mentions insufficient training data.<br><br>
+              <strong>5. Training vs Prediction: separate endpoints and keys</strong> — Custom Vision has TWO endpoints (training and prediction) with different keys. Training creates/manages the model; Prediction makes predictions. A common code question tests if you know which client and key to use for predictions.<br><br>
+              <strong>6. Object detection bounding boxes are normalised (0.0–1.0)</strong> — Not in pixels. Multiply by the image dimensions to convert to pixels. Classification doesn't use bounding boxes at all.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 7 — QUIZ -->
+      <div class="section-block" id="quiz">
+        <div class="section-label">✅ Section 7 — Quick Quiz</div>
+        <h2>Test your understanding</h2>
+
+        <div class="quiz-container" id="p6t2-quiz" data-quiz="p6-custom-vision">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Topic 2 — Custom Vision Models</span>
+            <span class="quiz-question-count" data-q-counter>1 / 5</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:#0d9488;transition:width 0.4s ease;width:20%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <div data-question>
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A supermarket wants to build a system that analyses images taken at checkout to identify all the products on the conveyor belt — including their positions in the image — so they can automatically scan and charge for each item.</div>
+                <p class="quiz-question">Which Custom Vision project type should be used and why?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Multi-class Classification — classifies the entire image as a product category</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Multi-label Classification — assigns multiple product labels to the image since there are multiple items</span></button>
+                  <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Object Detection — identifies each individual product AND its bounding box location in the image, enabling separate identification of multiple distinct items</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Multi-label Classification — it supports multiple items per image, which is all that's needed</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> The key phrase is "identify products including their <em>positions in the image</em>." Object Detection provides bounding boxes for each detected product — telling the system exactly where each item is, what it is, and how many there are. Multi-label Classification (B/D) could assign multiple product labels to the whole image but would not differentiate between two items of the same product type or provide locations. Without bounding boxes, you can't count individual items reliably or distinguish which product is where.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A pharmaceutical manufacturing company uses Custom Vision to detect defective pills on a production line. The model currently has Precision: 92% and Recall: 65%. The quality team receives many rejected pills that were actually fine (false positives are acceptable) but is extremely concerned that some defective pills are being missed (false negatives must be minimised).</div>
+                <p class="quiz-question">What adjustment should be made to improve this situation?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Raise the probability threshold to 80% — this will catch more defective pills</span></button>
+                  <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Lower the probability threshold to 30% — this increases Recall (catches more defective pills) at the cost of lower Precision (more false alarms that humans can review)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Switch from Quick Training to Advanced Training — this always improves Recall</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The current model is fine — 92% Precision is excellent</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The problem is 65% Recall — 35% of defective pills are being missed. In a safety-critical context, missing defects (false negatives) is far worse than false alarms (false positives). Lowering the probability threshold means the model reports a defect even when it's less certain — catching more real defects (higher recall) at the cost of more false alarms (lower precision). The quality team can manually review the additional rejected pills (false positives are acceptable per the scenario). Raising the threshold (A) would do the opposite — fewer detections, even lower recall. Advanced Training (C) may improve overall accuracy but doesn't specifically target recall.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">In Azure Custom Vision, what is the difference between a <strong>Training Key</strong> and a <strong>Prediction Key</strong>, and when is each used?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">They are the same key — Custom Vision uses one key for both training and prediction</span></button>
+                  <button class="quiz-option" data-option="B" data-correct="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Training Key: used with CustomVisionTrainingClient to upload images, create tags, train models, and review metrics. Prediction Key: used with CustomVisionPredictionClient to make predictions against published models in production</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Training Key: used in production for high-volume predictions. Prediction Key: used during development for testing</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Prediction Key is only needed for object detection — classification prediction uses the Training Key</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Custom Vision has completely separate endpoints and keys for training and prediction. The <strong>Training Key</strong> authenticates operations that modify the project: uploading images, creating tags, training models, publishing iterations, and viewing metrics — all done during development. The <strong>Prediction Key</strong> authenticates the production prediction calls made by your application (<code>classify_image()</code>, <code>detect_image()</code>) — used at runtime when actual images are analysed. Using the wrong key causes authentication errors. This separation is a security feature — your production app only needs the prediction key, not the ability to modify the training project.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">After training, a Custom Vision object detection model shows the following metrics: Precision: 88%, Recall: 82%, mAP: 76%. A developer is confused about what mAP measures. Which statement correctly describes mAP in this context?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">mAP is the average of Precision and Recall — (88% + 82%) / 2 = 85% — the developer's mAP calculation must be wrong</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">mAP is the model's accuracy at the 50% threshold only — it's the same as Precision at 50%</span></button>
+                  <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">mAP (Mean Average Precision) combines precision and recall across all probability thresholds and all object classes — it factors in both detection accuracy AND bounding box accuracy (how well the box overlaps the actual object)</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">mAP is only relevant for multi-class classification — object detection uses Precision and Recall only</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> mAP (Mean Average Precision) is the standard summary metric for object detection. It is NOT a simple average of the reported Precision and Recall. mAP calculates the area under the precision-recall curve across multiple probability thresholds, then averages this across all object classes, and also accounts for how accurately the bounding boxes overlap with the true object boundaries (IoU — Intersection over Union). This is why mAP (76%) can be lower than the per-point Precision and Recall — it's a more rigorous combined measure. Classification models use Precision and Recall; detection models use mAP.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A team uploads 3 training images tagged as "Apple" and 3 images tagged as "Orange", then tries to train a Custom Vision classification model. Training fails with an error saying the project doesn't meet the training requirements.</div>
+                <p class="quiz-question">What is the most likely cause and how should it be fixed?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The images are too large — resize all images to under 1MB before uploading</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Multi-class classification requires at least 2 tags — they have 2 tags so the project is correct</span></button>
+                  <button class="quiz-option" data-option="C" data-correct="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Each tag requires a minimum of 5 training images — with only 3 images per tag they fall below the minimum threshold. They must upload at least 2 more images per tag</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A negative tag ("Neither") is required to tell the model what doesn't belong to either class</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Azure Custom Vision requires a <strong>minimum of 5 training images per tag</strong> before training can proceed. With only 3 images tagged as "Apple" and 3 as "Orange", the project does not meet this minimum and training will fail. The fix is to upload at least 2 more images for each tag (reaching the minimum of 5). For better accuracy, 15+ images per tag is recommended. A negative tag (D) exists as a concept but is not a hard requirement — it's used when you want the model to learn what doesn't match any category. Image size constraints (A) are a separate issue. The tag count (B) is fine.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 5</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next style="background:#0d9488">Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="completion-bar">
+        <div class="completion-checkbox" data-complete-toggle="p6-custom-vision"><span class="check-icon">✓</span></div>
+        <span class="completion-label" data-complete-label>Mark this topic as complete</span>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="01-analyze-images.html" class="topic-nav-prev">
+          <span style="color:var(--text-muted)">←</span>
+          <div><div class="topic-nav-label">Previous topic</div><div class="topic-nav-title">Analyze Images</div></div>
+        </a>
+        <a href="03-video-analysis.html" class="topic-nav-next">
+          <div><div class="topic-nav-label">Next topic</div><div class="topic-nav-title">Video Analysis →</div></div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/common.js"></script>
+</body>
+</html>

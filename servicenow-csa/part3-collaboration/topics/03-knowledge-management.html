@@ -1,0 +1,726 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knowledge Management | ServiceNow CSA Part 3</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 3</a>
+        <span class="sep">›</span>
+        <span class="current">Knowledge Management</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🤝 Part 3 · Topic 3 of 4</div>
+        <h1 class="topic-title">Knowledge Management</h1>
+        <div class="topic-meta">
+          <span>⏱ ~55 min read</span>
+          <span>·</span>
+          <span>Part 3 — Collaboration &amp; Self-Service (20% exam weight)</span>
+        </div>
+        <div class="callout-tip" style="margin-top:var(--space-4)">
+          <strong>Exam Weight:</strong> Knowledge Management is a consistent presence on the CSA exam. Focus on article lifecycle states, knowledge roles, access control layers, and the distinction between Published vs. other states. Expect 3–5 questions directly on this topic.
+        </div>
+      </div>
+
+      <!-- Section 1: Knowledge Base Structure -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Knowledge Base Structure</h2>
+        <p>ServiceNow organizes knowledge using a three-level hierarchy. Understanding this hierarchy — and the underlying tables that support it — is fundamental for both the exam and day-to-day administration.</p>
+
+        <h3>The Three-Level Hierarchy</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🗄️</div>
+            <h4>1. Knowledge Base (KB)</h4>
+            <p>The top-level container. Each KB is an independent repository with its own access rules, workflows, and ownership. A single instance can host <strong>multiple KBs</strong> — one per department or business unit.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Table: <code>kb_knowledge_base</code></p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📂</div>
+            <h4>2. Category</h4>
+            <p>Sub-divisions within a Knowledge Base. Categories are <strong>hierarchical</strong> — a category can have parent and child categories, allowing tree-like organization of content.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Table: <code>kb_category</code></p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📄</div>
+            <h4>3. Knowledge Article</h4>
+            <p>The actual content record. Each article belongs to one Knowledge Base and one Category. Articles carry a unique article number, lifecycle state, and version history.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Table: <code>kb_knowledge</code></p>
+          </div>
+        </div>
+
+        <h3>Key Tables — Exam Reference</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table Name</th>
+              <th>Stores</th>
+              <th>Key Fields</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>kb_knowledge_base</code></td>
+              <td>Knowledge Base records (root containers)</td>
+              <td><code>title</code>, <code>owner</code>, <code>kb_managers</code>, <code>kb_knowledge_base</code></td>
+            </tr>
+            <tr>
+              <td><code>kb_category</code></td>
+              <td>Category records (sub-divisions of KBs)</td>
+              <td><code>label</code>, <code>kb_knowledge_base</code>, <code>parent_id</code></td>
+            </tr>
+            <tr>
+              <td><code>kb_knowledge</code></td>
+              <td>Knowledge Articles (the actual content)</td>
+              <td><code>number</code>, <code>short_description</code>, <code>workflow_state</code>, <code>kb_knowledge_base</code>, <code>kb_category</code></td>
+            </tr>
+            <tr>
+              <td><code>kb_feedback</code></td>
+              <td>Article feedback and ratings from users</td>
+              <td><code>article</code>, <code>rating</code>, <code>comments</code>, <code>flagged</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Multiple Knowledge Bases Per Instance</h3>
+        <p>A single ServiceNow instance commonly runs several Knowledge Bases simultaneously, each scoped to a specific audience or domain:</p>
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+          <div class="term-card"><strong>IT Knowledge Base</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">Troubleshooting guides, how-to articles for IT issues</p></div>
+          <div class="term-card"><strong>HR Knowledge Base</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">HR policies, benefits information, onboarding docs</p></div>
+          <div class="term-card"><strong>Customer KB</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">External-facing articles for customer self-service</p></div>
+          <div class="term-card"><strong>Facilities KB</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">Building procedures, maintenance guides</p></div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Hierarchy Summary:</strong> Knowledge Base → Categories (with optional parent/child nesting) → Knowledge Articles. The <code>kb_knowledge_base</code> table is the root. Articles live in <code>kb_knowledge</code> and always reference both a KB and a Category.
+        </div>
+      </div>
+
+      <!-- Section 2: Knowledge Article Lifecycle -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Knowledge Article Lifecycle</h2>
+        <p>Every knowledge article progresses through a defined set of states. Understanding these states — particularly which state makes an article visible to end users — is one of the most tested areas on the CSA exam.</p>
+
+        <h3>Article States</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">✏️</div>
+            <h4>Draft</h4>
+            <p>Article is being written. <strong>Not visible</strong> to end users or in search results. Only the author and knowledge managers can view it. This is the initial state for all new articles.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)"><code>workflow_state = draft</code></p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🔍</div>
+            <h4>Review</h4>
+            <p>Article has been submitted for approval. Awaiting review by a knowledge manager or approver. Still <strong>not visible</strong> to end users. Approval workflow is active.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)"><code>workflow_state = review</code></p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">✅</div>
+            <h4>Published</h4>
+            <p>Article is approved and <strong>live</strong>. Visible to end users in the Knowledge Base, Service Portal search, and related article widgets. This is the only state accessible to standard users.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)"><code>workflow_state = published</code></p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🗑️</div>
+            <h4>Retired</h4>
+            <p>Article is no longer active. <strong>Removed from search results</strong> and not visible to end users, but the record is retained in the database for historical reference. Can be re-published if needed.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)"><code>workflow_state = retired</code></p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Critical — State Visibility:</strong> Only articles in the <strong>Published</strong> state are visible to end users. Draft, Review, and Retired articles are hidden from the standard user experience. If a user cannot find an article, the most common cause is that the article is still in Draft or Review state, or has been Retired.
+        </div>
+
+        <h3>Lifecycle Flow</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:0.9rem;color:var(--text-primary);line-height:2.2">
+            <span style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:var(--space-1) var(--space-3)">Draft</span>
+            <span style="color:var(--accent);margin:0 var(--space-3)">→ Submit for Review →</span>
+            <span style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:var(--space-1) var(--space-3)">Review</span>
+            <span style="color:var(--accent);margin:0 var(--space-3)">→ Approve →</span>
+            <span style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:var(--space-1) var(--space-3)">Published</span>
+            <span style="color:var(--accent);margin:0 var(--space-3)">→ Retire →</span>
+            <span style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:var(--space-1) var(--space-3)">Retired</span>
+          </div>
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-3)">Typical path: Author creates Draft → submits for Review → Approver publishes → eventually Retired</div>
+        </div>
+
+        <h3>Article Number and Identification</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Each article receives an auto-generated <strong>article number</strong> with the <strong>KB prefix</strong> (e.g., <code>KB0001234</code>)</li>
+          <li>The number is stored in the <code>number</code> field on <code>kb_knowledge</code></li>
+          <li>Article numbers are unique across the instance regardless of which KB the article belongs to</li>
+        </ul>
+
+        <h3>Versioning and Validity</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Description</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Versioning</strong></td>
+              <td>Multiple versions of the same article can exist. Each revision creates a new version record linked to the original.</td>
+              <td>Updating a procedure while keeping history of old instructions</td>
+            </tr>
+            <tr>
+              <td><strong>Valid From</strong></td>
+              <td>Date from which the article is considered current and valid</td>
+              <td>Schedule an article to become active on a future date</td>
+            </tr>
+            <tr>
+              <td><strong>Valid To</strong></td>
+              <td>Expiration date — after this date the article auto-retires or flags for review</td>
+              <td>Policy articles that must be reviewed annually</td>
+            </tr>
+            <tr>
+              <td><strong>View Count</strong></td>
+              <td>Tracks how many times users have viewed the article</td>
+              <td>Identify high-traffic articles for quality review</td>
+            </tr>
+            <tr>
+              <td><strong>Rating</strong></td>
+              <td>Aggregate star rating from user feedback (1–5 stars)</td>
+              <td>Surface most-helpful articles; flag low-rated articles for review</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-tip">
+          <strong>Workflow Shortcut:</strong> Users with the <code>knowledge_admin</code> role can <strong>publish articles directly</strong> without going through the approval workflow. All other contributors must submit through the standard Draft → Review → Published workflow.
+        </div>
+      </div>
+
+      <!-- Section 3: Knowledge Roles -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Knowledge Roles</h2>
+        <p>ServiceNow uses a tiered role model for Knowledge Management. Each role grants a specific level of access across the Knowledge Base hierarchy. These roles are frequently tested on the CSA exam.</p>
+
+        <h3>Role Hierarchy</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">👑</div>
+            <h4>knowledge_admin</h4>
+            <p>Full control over <strong>all Knowledge Bases and all articles</strong> on the instance. Can create, edit, delete, publish, and retire any article. <strong>Bypasses the approval workflow</strong> — can publish directly. Manages KB settings, workflows, and user assignments.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🔧</div>
+            <h4>knowledge_manager</h4>
+            <p>Manages categories and articles within <strong>their assigned KB(s)</strong>. Can approve, publish, and retire articles in their KB. Cannot manage other KBs they are not assigned to. Assigned via the <strong>KB Owner</strong> or <strong>KB Managers</strong> field on the KB record.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">✍️</div>
+            <h4>knowledge_contributor</h4>
+            <p>Can <strong>create and edit articles</strong> in Draft state. Submits articles for review but <strong>cannot publish</strong>. Typically granted to subject-matter experts, agents, and technical writers who author content.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">👀</div>
+            <h4>No Role (End User)</h4>
+            <p><strong>Read-only access</strong> to Published articles — but only if the Knowledge Base allows public or logged-in access. The KB's "Accessible by" setting controls whether users without explicit roles can read articles at all.</p>
+          </div>
+        </div>
+
+        <h3>Role Comparison Table</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>No Role</th>
+              <th>knowledge_contributor</th>
+              <th>knowledge_manager</th>
+              <th>knowledge_admin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Read Published articles</td>
+              <td>✓ (if KB allows)</td>
+              <td>✓</td>
+              <td>✓</td>
+              <td>✓</td>
+            </tr>
+            <tr>
+              <td>Create Draft articles</td>
+              <td>✗</td>
+              <td>✓</td>
+              <td>✓</td>
+              <td>✓</td>
+            </tr>
+            <tr>
+              <td>Submit for Review</td>
+              <td>✗</td>
+              <td>✓</td>
+              <td>✓</td>
+              <td>✓</td>
+            </tr>
+            <tr>
+              <td>Approve and Publish</td>
+              <td>✗</td>
+              <td>✗</td>
+              <td>✓ (their KB)</td>
+              <td>✓ (all KBs)</td>
+            </tr>
+            <tr>
+              <td>Retire articles</td>
+              <td>✗</td>
+              <td>✗</td>
+              <td>✓ (their KB)</td>
+              <td>✓ (all KBs)</td>
+            </tr>
+            <tr>
+              <td>Manage KB settings</td>
+              <td>✗</td>
+              <td>✗</td>
+              <td>Limited (their KB)</td>
+              <td>✓ (all KBs)</td>
+            </tr>
+            <tr>
+              <td>Bypass approval workflow</td>
+              <td>✗</td>
+              <td>✗</td>
+              <td>✗</td>
+              <td>✓</td>
+            </tr>
+            <tr>
+              <td>Create new Knowledge Bases</td>
+              <td>✗</td>
+              <td>✗</td>
+              <td>✗</td>
+              <td>✓</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>KB Owner Field</h3>
+        <p>Each Knowledge Base record has an <strong>Owner</strong> field and a <strong>KB Managers</strong> field. Users listed in these fields automatically receive knowledge_manager-level control over that specific KB, even without the global <code>knowledge_manager</code> role.</p>
+
+        <div class="callout-concept">
+          <strong>Delegation Pattern:</strong> The recommended approach is to assign the <code>knowledge_admin</code> role sparingly (to central KM admins), use the <strong>KB Owner / KB Managers fields</strong> for department-level managers, and assign <code>knowledge_contributor</code> to authors. This keeps management scoped to the appropriate KB.
+        </div>
+      </div>
+
+      <!-- Section 4: Access Control for Knowledge -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Access Control for Knowledge</h2>
+        <p>Knowledge access control works at three layers: Knowledge Base level, Category level, and Article level. These layers work together to create fine-grained control over who can read and contribute to knowledge content.</p>
+
+        <h3>Layer 1 — Knowledge Base Level</h3>
+        <p>The "Accessible by" field on the Knowledge Base record is the primary access gate. It determines the audience for all articles within that KB.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Accessible By Setting</th>
+              <th>Who Can Read Articles</th>
+              <th>Typical Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Everyone</strong></td>
+              <td>All users including unauthenticated users (public access)</td>
+              <td>External customer-facing knowledge portals</td>
+            </tr>
+            <tr>
+              <td><strong>Logged-in users</strong></td>
+              <td>Any authenticated user on the instance</td>
+              <td>Internal company-wide knowledge bases</td>
+            </tr>
+            <tr>
+              <td><strong>Specific roles</strong></td>
+              <td>Only users who hold the specified role(s)</td>
+              <td>Restricted KBs for HR, Finance, or security teams</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Layer 2 — Category Level</h3>
+        <p>Individual categories within a KB can apply additional restrictions. A category can be more restrictive than its parent KB — for example, an IT Knowledge Base may be accessible to all logged-in users, but a "Security Incidents" category within it can be restricted to the security team only.</p>
+
+        <div class="callout-tip">
+          <strong>Restriction Direction:</strong> Category-level access can only be <strong>more restrictive</strong> than the KB-level setting. A category cannot grant broader access than its parent KB allows. Access flows from most permissive (KB) down to more restrictive (Category → Article).
+        </div>
+
+        <h3>Layer 3 — Article Level (User Criteria)</h3>
+        <p>Individual articles support the most granular access control through <strong>User Criteria</strong>. User Criteria are reusable access rules that can be applied to both reading and contributing.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Can Read (User Criteria)</h4>
+            <p>Defines exactly which users or groups can <strong>view</strong> this specific article. Applied via the "Can Read" field on the article. Uses User Criteria records for reusable rule definitions.</p>
+          </div>
+          <div class="term-card">
+            <h4>Can Contribute (User Criteria)</h4>
+            <p>Defines who can <strong>edit</strong> this specific article beyond the standard contributor role. Allows article-level write control without granting broad KB access.</p>
+          </div>
+        </div>
+
+        <h3>User Criteria Records</h3>
+        <p>User Criteria are records in the <code>user_criteria</code> table that define a named set of users based on:</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Specific <strong>users</strong> (by reference to sys_user)</li>
+          <li><strong>Groups</strong> — all members of a specified group</li>
+          <li><strong>Roles</strong> — all users holding a specified role</li>
+          <li><strong>Companies</strong> — for multi-company/tenant scenarios</li>
+          <li><strong>Departments</strong> — organizational unit-based access</li>
+        </ul>
+
+        <div class="callout-exam">
+          <strong>Exam Tip — User Criteria:</strong> User Criteria is the mechanism for <strong>fine-grained article-level access</strong> in Knowledge Management. When a question asks how to restrict a specific article to only certain users (not the whole KB), the answer is User Criteria applied via the article's "Can Read" field. This is distinct from ACLs which control database-level access.
+        </div>
+      </div>
+
+      <!-- Section 5: Knowledge Workflows -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Knowledge Workflows</h2>
+        <p>Knowledge workflows govern how articles move through their lifecycle states. ServiceNow provides default workflows and allows customization per Knowledge Base.</p>
+
+        <h3>Default Workflows</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">📋</div>
+            <h4>Default Approval Workflow</h4>
+            <p>Triggered when a contributor submits a Draft article for review. Routes the article to the KB manager or approver. On approval, the article moves to <strong>Published</strong>. On rejection, it returns to <strong>Draft</strong> with feedback comments.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🔄</div>
+            <h4>Retire Workflow</h4>
+            <p>Triggered when a manager initiates article retirement. May include a notification step to the original author. Moves the article to <strong>Retired</strong> state and removes it from search indexes.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">⚙️</div>
+            <h4>Custom Approval Workflows</h4>
+            <p>Each Knowledge Base can be configured to use a <strong>custom approval workflow</strong> instead of the default. This allows multi-stage approval, parallel review, or specialized routing logic per business unit.</p>
+          </div>
+        </div>
+
+        <h3>Workflow Configuration Per KB</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to the Knowledge Base record and look for the <strong>Workflow</strong> field</li>
+          <li>Select the approval workflow to use — defaults to the system default workflow</li>
+          <li>Different KBs can use entirely different approval chains</li>
+          <li>The HR Knowledge Base might require an HR director approval, while IT KB goes to the IT manager</li>
+        </ul>
+
+        <h3>Workflow Bypass — knowledge_admin</h3>
+        <div class="callout-exam">
+          <strong>Critical Exam Fact:</strong> Users with the <code>knowledge_admin</code> role can <strong>publish articles directly</strong>, bypassing the approval workflow entirely. They can move an article straight from Draft to Published without going through Review. This is a deliberate design for trusted administrators who need to publish urgent content quickly.
+        </div>
+
+        <h3>Approval Flow Detail</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>Contributor creates article (Draft)
+    ↓
+Contributor clicks "Submit for Review"
+    ↓ [Workflow triggers]
+Article state → Review
+    ↓
+Approval task sent to KB Manager
+    ↓
+KB Manager reviews content
+    ├── Approved → Article state → Published (visible to users)
+    └── Rejected → Article state → Draft + comments returned to author</code></pre>
+        </div>
+      </div>
+
+      <!-- Section 6: Knowledge in Service Portal -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Knowledge in Service Portal</h2>
+        <p>The Service Portal is the primary self-service interface where end users interact with Knowledge Management. ServiceNow provides several out-of-box widgets and integration points for surfacing knowledge content.</p>
+
+        <h3>Knowledge Widgets in Service Portal</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>KB Widget</h4>
+            <p>Displays a browsable Knowledge Base with category navigation and article listings. Users can browse by KB, category, or search directly. Respects all KB-level and article-level access controls.</p>
+          </div>
+          <div class="term-card">
+            <h4>Search Integration</h4>
+            <p>Knowledge articles are indexed and included in <strong>global search results</strong> across the Service Portal. The search engine respects access controls — users only see articles they're permitted to read.</p>
+          </div>
+          <div class="term-card">
+            <h4>Related Articles Widget</h4>
+            <p>Surfaces relevant knowledge articles based on the content of an open incident or service request. Uses keyword matching and AI-assisted relevance scoring to suggest helpful articles automatically.</p>
+          </div>
+          <div class="term-card">
+            <h4>Attach to Record</h4>
+            <p>Agents can attach knowledge articles directly to incidents, problems, and other records. The "Attach to Record" functionality links the <code>kb_knowledge</code> record to the target record via a relationship table.</p>
+          </div>
+        </div>
+
+        <h3>How Related Articles Surface in Incidents</h3>
+        <p>When an agent is working an incident, ServiceNow can automatically suggest relevant knowledge articles. This integration requires:</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>A <strong>Knowledge widget or Related Knowledge section</strong> configured on the incident form</li>
+          <li>Published articles in a KB that the agent has read access to</li>
+          <li>Text in the incident's short description or work notes to drive the search query</li>
+          <li>The agent can then review suggestions and attach a relevant article with one click</li>
+        </ul>
+
+        <div class="callout-concept">
+          <strong>Deflection Goal:</strong> The primary purpose of knowledge integration in the Service Portal is <strong>incident deflection</strong> — helping users find answers themselves before submitting a ticket. When configured well, a user searching the portal sees relevant KB articles, reads the solution, and never needs to create an incident. This reduces ticket volume and improves user satisfaction.
+        </div>
+
+        <h3>Service Portal Navigation Path</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>Service Portal Home
+  └── Knowledge Base (top nav or search bar)
+        └── Select Knowledge Base (IT, HR, etc.)
+              └── Browse Categories
+                    └── Browse Sub-categories (if nested)
+                          └── Open Article → Rate / Flag / Attach to Record</code></pre>
+        </div>
+      </div>
+
+      <!-- Section 7: Feedback and Flagging -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Feedback and Flagging</h2>
+        <p>ServiceNow Knowledge Management includes a feedback loop that allows users to rate articles and flag content for review. This data helps knowledge managers identify high-quality articles and those needing improvement.</p>
+
+        <h3>Article Rating System</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">⭐</div>
+            <h4>Star Rating (1–5)</h4>
+            <p>Users can rate published articles on a <strong>1–5 star scale</strong>. Ratings are aggregated into an average score displayed on the article. The aggregate rating is stored on the <code>kb_knowledge</code> record.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">👍</div>
+            <h4>Useful / Not Useful</h4>
+            <p>Binary feedback option — simpler than the full star rating. Users click <strong>Useful</strong> or <strong>Not Useful</strong>. Useful/not-useful counts are tracked and used in relevance scoring for search results.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🚩</div>
+            <h4>Flagging for Review</h4>
+            <p>Any user can <strong>flag an article</strong> to indicate it contains outdated or incorrect information. Flagged articles are surfaced to knowledge managers for review. Multiple flags can trigger an automatic workflow to retire or update the article.</p>
+          </div>
+        </div>
+
+        <h3>The kb_feedback Table</h3>
+        <p>All feedback interactions — ratings, comments, and flags — are stored in the <code>kb_feedback</code> table. Key fields include:</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>article</code></td>
+              <td>Reference to the <code>kb_knowledge</code> record (the article being rated)</td>
+            </tr>
+            <tr>
+              <td><code>rating</code></td>
+              <td>Numeric rating value (1–5)</td>
+            </tr>
+            <tr>
+              <td><code>comments</code></td>
+              <td>Optional free-text feedback from the user</td>
+            </tr>
+            <tr>
+              <td><code>flagged</code></td>
+              <td>Boolean — true if the user flagged the article for review</td>
+            </tr>
+            <tr>
+              <td><code>useful</code></td>
+              <td>Boolean — true if the user marked the article as useful</td>
+            </tr>
+            <tr>
+              <td><code>sys_created_by</code></td>
+              <td>The user who submitted the feedback</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Using Feedback Data</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Knowledge managers can run reports on <code>kb_feedback</code> to identify low-rated articles needing revision</li>
+          <li>Articles with many "Not Useful" responses are candidates for rewriting or retirement</li>
+          <li>Highly rated articles are surfaced higher in search results (relevance boost)</li>
+          <li>Flagged articles appear in the knowledge manager's dashboard for immediate attention</li>
+          <li>Feedback data can be used in dashboards and performance analytics to measure KB health</li>
+        </ul>
+
+        <div class="callout-tip">
+          <strong>Feedback Loop Best Practice:</strong> A healthy Knowledge Management program reviews flagged articles weekly, checks articles with ratings below 3 stars monthly, and retires or updates articles with a <strong>Valid To</strong> date in the past. Automated workflows can send reminders to article authors when their articles receive negative feedback.
+        </div>
+      </div>
+
+      <!-- Section 8: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Key Exam Facts &amp; Common Traps</h2>
+        <p>This section consolidates the most frequently tested Knowledge Management facts and the most common wrong-answer traps on the CSA exam. Review this section before your exam.</p>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 1 — Published State is the Gate:</strong> Articles <strong>must be in Published state</strong> to be visible to end users in the Service Portal, global search, or related articles widget. Draft, Review, and Retired articles are <strong>never</strong> visible to standard end users. If a question says "users can't find the article," the answer almost always involves the article not being in Published state.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 2 — knowledge_admin Bypasses Workflow:</strong> The <code>knowledge_admin</code> role bypasses the approval workflow and can publish articles directly from Draft to Published. <code>knowledge_manager</code> and <code>knowledge_contributor</code> must go through the standard approval flow.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 3 — Default KB:</strong> ServiceNow's out-of-box default Knowledge Base is the <strong>"IT" Knowledge Base</strong>. It is pre-configured and available immediately after instance setup without additional configuration.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 4 — Retiring vs. Deleting:</strong> Retiring an article <strong>removes it from search results</strong> and hides it from end users, but the <strong>record is NOT deleted</strong>. It remains in the <code>kb_knowledge</code> table with <code>workflow_state = retired</code>. This preserves historical data and allows re-publishing if needed.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 5 — Hierarchical Categories:</strong> Categories are hierarchical with <strong>parent/child relationships</strong>. A category can have a parent category, enabling tree-like organization. The <code>parent_id</code> field on <code>kb_category</code> establishes this relationship. A child category inherits — and can further restrict — its parent's access controls.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 6 — workflow_state Field:</strong> The lifecycle state of a knowledge article is tracked in the <code>kb_knowledge.workflow_state</code> field. Valid values are: <code>draft</code>, <code>review</code>, <code>published</code>, <code>retired</code>. Know this field name — exam questions may reference it directly when asking about querying article states.
+        </div>
+
+        <div class="callout-warning">
+          <strong>Common Trap — Category Restrictions:</strong> A category can restrict access <strong>further</strong> than the KB, but it <strong>cannot grant more access</strong> than the KB allows. Exam distractors often suggest that a category can "override" KB-level restrictions to allow broader access — this is incorrect.
+        </div>
+
+        <div class="callout-warning">
+          <strong>Common Trap — Role Scope:</strong> The <code>knowledge_manager</code> role without a KB assignment does not automatically manage all KBs. Managers are scoped to KBs where they are listed as Owner or KB Manager. Only <code>knowledge_admin</code> has instance-wide management authority.
+        </div>
+
+        <h3>Quick-Reference: All Key Facts</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th>Exam Fact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Article visibility</td>
+              <td>Only <strong>Published</strong> articles are visible to end users</td>
+            </tr>
+            <tr>
+              <td>knowledge_admin</td>
+              <td>Bypasses approval workflow; publishes directly</td>
+            </tr>
+            <tr>
+              <td>Default KB</td>
+              <td>The out-of-box default is the <strong>"IT" Knowledge Base</strong></td>
+            </tr>
+            <tr>
+              <td>Retiring articles</td>
+              <td>Removes from search; record is <strong>kept</strong> in the database</td>
+            </tr>
+            <tr>
+              <td>Category structure</td>
+              <td>Hierarchical — categories can have parent and child categories</td>
+            </tr>
+            <tr>
+              <td>State field</td>
+              <td><code>kb_knowledge.workflow_state</code> stores Draft/Review/Published/Retired</td>
+            </tr>
+            <tr>
+              <td>Feedback table</td>
+              <td><code>kb_feedback</code> stores ratings, comments, flags, useful/not-useful</td>
+            </tr>
+            <tr>
+              <td>User Criteria</td>
+              <td>Used for fine-grained article-level access control (Can Read / Can Contribute)</td>
+            </tr>
+            <tr>
+              <td>Article number prefix</td>
+              <td>Articles use <strong>KB prefix</strong> (e.g., <code>KB0001234</code>)</td>
+            </tr>
+            <tr>
+              <td>Multiple KBs</td>
+              <td>One instance can host multiple independent Knowledge Bases</td>
+            </tr>
+            <tr>
+              <td>KB table</td>
+              <td><code>kb_knowledge_base</code> is the root table for KBs</td>
+            </tr>
+            <tr>
+              <td>Category table</td>
+              <td><code>kb_category</code> stores categories, references <code>kb_knowledge_base</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Putting It All Together — Scenario Walkthrough:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2.2">
+            <li>A <code>knowledge_contributor</code> writes a new article → it starts in <strong>Draft</strong></li>
+            <li>Contributor submits for review → article moves to <strong>Review</strong>, approval task sent to KB manager</li>
+            <li>KB manager approves → article moves to <strong>Published</strong>, now visible in Service Portal search</li>
+            <li>End user searches portal, finds article, rates it 2 stars and flags it → feedback stored in <code>kb_feedback</code></li>
+            <li>KB manager sees flagged article, edits it (creates new version), re-approves → article back to <strong>Published</strong> with updated content</li>
+            <li>Original article becomes outdated and is retired → <code>workflow_state = retired</code>, removed from search, record preserved</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="02-reporting-dashboards.html" class="btn btn-secondary">← Reporting &amp; Dashboards</a>
+          <a href="04-service-catalog.html" class="btn btn-primary">Service Catalog →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p3-knowledge-management', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p3-knowledge-management')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

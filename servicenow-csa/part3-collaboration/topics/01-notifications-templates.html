@@ -1,0 +1,795 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Notifications &amp; Templates | ServiceNow CSA Part 3</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 3</a>
+        <span class="sep">›</span>
+        <span class="current">Email Notifications &amp; Templates</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">💬 Part 3 · Topic 1 of 4</div>
+        <h1 class="topic-title">Email Notifications &amp; Templates</h1>
+        <div class="topic-meta">
+          <span>⏱ ~65 min read</span>
+          <span>·</span>
+          <span>Part 3 — Collaboration &amp; Communication · 20% Exam Weight</span>
+        </div>
+        <div class="callout-tip" style="margin-top:var(--space-4)">
+          <strong>Exam Weight:</strong> Part 3 carries <strong>20% of the CSA exam</strong>. Notifications, templates, events, and inbound email actions are heavily tested. Pay close attention to the weight/deduplication rules, variable syntax, and the event-driven notification pattern.
+        </div>
+      </div>
+
+      <!-- Section 1: Notification Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Notification Overview</h2>
+        <p>ServiceNow notifications are automated messages sent to users when specific conditions are met on platform records. They are the primary mechanism for keeping users informed about record state changes, assignments, and important events.</p>
+
+        <h3>What Triggers Notifications?</h3>
+        <p>Notifications can be triggered by three fundamental mechanisms:</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📥</div>
+            <h4>Record Insert / Update</h4>
+            <p>Fires when a record is <strong>created (inserted)</strong> or <strong>modified (updated)</strong> in a specified table. The most common trigger type. You define which table and optionally which field changes matter.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: Send notification when an Incident is inserted with High priority, or when the State field changes to "Resolved."</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">⚡</div>
+            <h4>Event-Based</h4>
+            <p>Fires when a named <strong>platform event</strong> is queued. Business Rules or Scripts fire events using <code>gs.eventQueue()</code>, and a notification listens for that event name. Decouples the triggering logic from the notification.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: A Business Rule fires <code>incident.assigned</code> event; a notification listens for that event and emails the assignee.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">⏰</div>
+            <h4>Time-Based</h4>
+            <p>Fires based on a <strong>time condition</strong> relative to a date/time field on a record — e.g., send a reminder X days before a contract expires, or escalate if an incident has been open for more than 4 hours.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: Email requester 2 days before SLA breach. Runs on a scheduled interval checking eligible records.</p>
+          </div>
+        </div>
+
+        <h3>The sys_notification Table</h3>
+        <p>All notification rules are stored in the <code>sys_notification</code> table. You can access and manage them via:</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to: <strong>System Notification &gt; Email &gt; Notifications</strong></li>
+          <li>Direct table: type <code>sys_notification.list</code> in the Filter Navigator</li>
+          <li>Each record in this table defines one complete notification rule</li>
+          <li>Notifications can be <strong>active</strong> or <strong>inactive</strong> — only active notifications fire</li>
+        </ul>
+
+        <h3>Three Delivery Types</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Delivery Type</th>
+              <th>Description</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Email</strong></td>
+              <td>Standard HTML or plain-text email sent to recipients via configured mail server. Most common type.</td>
+              <td>Incident assignments, approvals, SLA warnings, status updates</td>
+            </tr>
+            <tr>
+              <td><strong>SMS</strong></td>
+              <td>Short text message to a user's mobile device. Requires a configured SMS provider / integration.</td>
+              <td>Critical P1 alerts, on-call pages, urgent escalations</td>
+            </tr>
+            <tr>
+              <td><strong>Meeting Invitation</strong></td>
+              <td>Calendar invitation (iCal format) sent to recipients. Creates a calendar event in the recipient's calendar application.</td>
+              <td>Change advisory board meetings, scheduled maintenance windows</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Notification vs. Event vs. Email Client — Key Distinctions</h3>
+        <div class="def-grid">
+          <div class="def-item">
+            <div class="def-term">Notification</div>
+            <div class="def-desc">A configured rule in <code>sys_notification</code> that defines <em>when</em> to send, <em>who</em> receives it, and <em>what</em> message to deliver. It is the complete notification rule record.</div>
+          </div>
+          <div class="def-item">
+            <div class="def-term">Event</div>
+            <div class="def-desc">A named signal queued in the <code>sysevent</code> table using <code>gs.eventQueue()</code>. An event carries a name and optional parameters but has no delivery logic of its own — notifications listen for events.</div>
+          </div>
+          <div class="def-item">
+            <div class="def-term">Email Client</div>
+            <div class="def-desc">The <strong>Connect Sidebar</strong> email composition tool that allows users to manually send emails from within a record context. This is an <em>ad hoc</em> user action, not an automated notification rule.</div>
+          </div>
+        </div>
+
+        <div class="callout-info">
+          <strong>Architecture Note:</strong> Notifications are processed asynchronously. When a trigger condition is met, the notification is queued and processed by a background job — it is not sent instantaneously inline with the user's action. This is why you may see a brief delay between a record change and the email arriving.
+        </div>
+      </div>
+
+      <!-- Section 2: Notification Rule Anatomy -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Notification Rule Anatomy <span style="color:var(--accent);font-size:0.9rem">(CRITICAL for Exam)</span></h2>
+        <p>Understanding every field in a notification rule is essential for the CSA exam. Each field controls a distinct aspect of when, how, and to whom the notification is sent.</p>
+
+        <h3>Core Fields</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>What It Controls</th>
+              <th>Example / Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Name</strong></td>
+              <td>Descriptive label for the notification rule</td>
+              <td><code>Incident Assigned to User</code></td>
+            </tr>
+            <tr>
+              <td><strong>Table</strong></td>
+              <td>Which table this notification monitors. Changes to records in this table can trigger the notification.</td>
+              <td><code>Incident [incident]</code></td>
+            </tr>
+            <tr>
+              <td><strong>Active</strong></td>
+              <td>Whether the notification is enabled. Inactive notifications never fire.</td>
+              <td>Checkbox — must be checked for the notification to work</td>
+            </tr>
+            <tr>
+              <td><strong>Weight</strong></td>
+              <td>Integer priority value used for <strong>deduplication</strong>. When multiple notifications would fire for the same record/event, only the one with the <strong>highest weight</strong> is sent. Default weight is 0.</td>
+              <td><code>50</code> — higher number = higher priority</td>
+            </tr>
+            <tr>
+              <td><strong>Category</strong></td>
+              <td>Groups notifications for subscription management. Users can opt out of entire categories (if the notification is subscribable).</td>
+              <td><code>Incident</code>, <code>Change</code>, <code>Approval</code></td>
+            </tr>
+            <tr>
+              <td><strong>Subscribable</strong></td>
+              <td>If checked, users can opt in/out via Notification Preferences. If unchecked (mandatory), users cannot unsubscribe.</td>
+              <td>Mandatory approval notifications should not be subscribable</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>When to Send (Trigger Tab)</h3>
+        <div class="def-grid">
+          <div class="def-item">
+            <div class="def-term">Inserted</div>
+            <div class="def-desc">Fires when a new record is created in the table. Use for "new ticket created" notifications to the submitter.</div>
+          </div>
+          <div class="def-item">
+            <div class="def-term">Updated</div>
+            <div class="def-desc">Fires when any field on an existing record is modified. Can combine with "Field changes" to be more specific.</div>
+          </div>
+          <div class="def-item">
+            <div class="def-term">Field changes</div>
+            <div class="def-desc">Refines the "Updated" trigger. Fires only when a <strong>specific field</strong> changes value — e.g., only when <code>assigned_to</code> changes, ignoring all other updates.</div>
+          </div>
+          <div class="def-item">
+            <div class="def-term">Event fired</div>
+            <div class="def-desc">Fires when a named platform event is queued via <code>gs.eventQueue()</code>. Enter the event name — e.g., <code>incident.assigned</code>. Decouples trigger logic from notification config.</div>
+          </div>
+          <div class="def-item">
+            <div class="def-term">Time-based</div>
+            <div class="def-desc">Runs on a schedule. Specify an offset (positive = after, negative = before) relative to a date field. A scheduler job evaluates eligible records periodically.</div>
+          </div>
+        </div>
+
+        <h3>Weight and Deduplication — Exam Critical</h3>
+        <div class="callout-exam">
+          <strong>Weight Rule:</strong> When multiple notification rules are configured for the <strong>same table and same trigger type</strong>, and more than one would fire for a given record change, ServiceNow uses the <strong>Weight field to deduplicate</strong>. Only the notification with the <strong>highest weight value</strong> is actually sent to each recipient. Lower-weight notifications are suppressed.
+          <br><br>
+          Example: Two notifications fire on Incident update — one with weight 10, one with weight 50. Only the weight-50 notification is delivered. If both have weight 0, both fire (no deduplication).
+        </div>
+
+        <div class="callout-warn">
+          <strong>Common Misconception:</strong> Weight does NOT mean "more important = sent first." Weight means "if competing notifications would go to the same person for the same record event, only the highest weight one fires." Think of it as a deduplication priority, not a delivery order.
+        </div>
+
+        <h3>Conditions (Who Qualifies)</h3>
+        <p>The <strong>Conditions</strong> section uses a filter condition builder to determine which records trigger the notification. Only records matching all conditions will generate the notification.</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Works like any standard record filter in ServiceNow</li>
+          <li>Example: <code>Priority is 1 - Critical</code> AND <code>State is not Resolved</code></li>
+          <li>If no conditions are set, the notification fires for all matching inserts/updates</li>
+          <li>Conditions are evaluated server-side against the current record state</li>
+        </ul>
+
+        <h3>Who Receives — Recipients Tab</h3>
+        <p>The Recipients tab is one of the most important sections for the exam. It defines exactly who gets the email. Multiple recipient types can be combined.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Recipient Type</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Users</strong></td>
+              <td>Specific named user records. Hardcodes individual users as always receiving this notification.</td>
+              <td>Always notify the IT manager: <code>John Smith</code></td>
+            </tr>
+            <tr>
+              <td><strong>Groups</strong></td>
+              <td>All members of a specified group receive the notification. Dynamic — group membership changes apply automatically.</td>
+              <td>Notify all members of <code>Service Desk</code> group</td>
+            </tr>
+            <tr>
+              <td><strong>Roles</strong></td>
+              <td>All users with a specified role. Broader than groups — any user with that role on the instance receives it.</td>
+              <td>All users with <code>itil_manager</code> role</td>
+            </tr>
+            <tr>
+              <td><strong>Field values (record fields)</strong></td>
+              <td>Dynamic recipient pulled from a <strong>reference field</strong> on the triggering record. The user in that field gets notified. Most flexible and most common for record-specific notifications.</td>
+              <td><code>Opened by</code>, <code>Assigned to</code>, <code>Watch list</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-info">
+          <strong>Watch List:</strong> The <strong>Watch list</strong> field on many ServiceNow records (e.g., Incident, Problem) holds a list of users who have subscribed to updates on that <em>specific record</em>. Adding the Watch list as a recipient source in a notification rule means any user who adds themselves to the watch list on a particular record will receive notifications about that record. This is different from a group membership — it is record-scoped.
+        </div>
+
+        <h3>Send Condition</h3>
+        <div class="def-grid">
+          <div class="def-item">
+            <div class="def-term">Send always</div>
+            <div class="def-desc">Notification fires every time the trigger condition is met, regardless of any additional check. Used when you always want the notification for matching records.</div>
+          </div>
+          <div class="def-item">
+            <div class="def-term">Send only if condition met</div>
+            <div class="def-desc">An additional filter script or condition that is evaluated at send time. If it evaluates to false, the notification is suppressed even if the trigger fired. Useful for complex send logic that cannot be expressed in the trigger conditions alone.</div>
+          </div>
+        </div>
+
+        <h3>Advanced Tab: Subject, Message, Devices</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li><strong>Subject:</strong> The email subject line. Supports <code>${field_name}</code> variable substitution for dynamic content.</li>
+          <li><strong>Message (HTML):</strong> The body of the email. Full HTML is supported. Can reference an <strong>Email Template</strong> or contain inline content with variable substitution.</li>
+          <li><strong>Message (Text):</strong> Plain-text fallback for email clients that do not render HTML.</li>
+          <li><strong>Device:</strong> The delivery channel — Email, SMS, or Meeting Invitation. Defaults to Email.</li>
+          <li><strong>Content type:</strong> HTML or plain text message format.</li>
+        </ul>
+      </div>
+
+      <!-- Section 3: Email Templates -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Email Templates</h2>
+        <p>Email Templates allow you to create reusable HTML message bodies and subject lines that multiple notification rules can reference, maintaining consistency across communications and avoiding duplication.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Stored in the <code>sys_email_template</code> table</li>
+          <li>Navigate to: <strong>System Notification &gt; Email &gt; Templates</strong></li>
+          <li>A template defines reusable Subject and Message content</li>
+          <li>Notification rules can reference a template, inheriting its content</li>
+          <li>Individual notifications can override template content if needed</li>
+        </ul>
+
+        <h3>Variable Substitution Syntax</h3>
+        <p>Both templates and inline notification messages support dynamic variable insertion using a <strong>dollar-sign bracket syntax</strong>. Variables are resolved at send time against the triggering record.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Syntax</th>
+              <th>What It Inserts</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>${field_name}</code></td>
+              <td>The value of a field on the <strong>triggering record</strong> itself.</td>
+              <td><code>${number}</code> → <code>INC0001234</code></td>
+            </tr>
+            <tr>
+              <td><code>${table.field}</code></td>
+              <td>A field from a <strong>related (dot-walked) record</strong> via a reference field. Traverses the relationship at send time.</td>
+              <td><code>${caller_id.email}</code> → the caller's email address<br><code>${assignment_group.name}</code> → group name</td>
+            </tr>
+            <tr>
+              <td><code>${URI}</code></td>
+              <td>The full URL to the record on the instance. Inserts a clickable link to open the record directly.</td>
+              <td>Generates: <code>https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=...</code></td>
+            </tr>
+            <tr>
+              <td><code>${URI_REF}</code></td>
+              <td>An HTML anchor tag wrapping the record number as a clickable link. More user-friendly than raw URI.</td>
+              <td>Renders as: <a href="#">INC0001234</a></td>
+            </tr>
+            <tr>
+              <td><code>$[link]</code></td>
+              <td>Inserts a formatted hyperlink to the record. Common shorthand for generating a "View Record" link in the email body.</td>
+              <td>Renders as a "Click here to view the record" style link</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — Variable Syntax:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><code>${field_name}</code> — inserts a field value from the current (triggering) record</li>
+            <li><code>${table.field}</code> — dot-walk to related record field (e.g., <code>${caller_id.name}</code>)</li>
+            <li><code>$[link]</code> — inserts the record URL as a clickable hyperlink</li>
+            <li><code>${subject}</code> — inserts the value of the subject field within the message body</li>
+          </ul>
+          Know the difference between <code>${...}</code> (field value) and <code>$[...]</code> (link/URL syntax).
+        </div>
+
+        <h3>Template Example Structure</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.83rem;line-height:1.9;color:var(--text-primary);overflow-x:auto"><code>&lt;!-- Subject line --&gt;
+[${number}] Your incident has been updated: ${short_description}
+
+&lt;!-- Message HTML body --&gt;
+&lt;p&gt;Dear ${caller_id.first_name},&lt;/p&gt;
+
+&lt;p&gt;Your incident &lt;strong&gt;${number}&lt;/strong&gt; has been updated.&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;tr&gt;&lt;td&gt;&lt;strong&gt;State:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;${state}&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;&lt;strong&gt;Assigned To:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;${assigned_to.name}&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;&lt;strong&gt;Priority:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;${priority}&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p&gt;$[link]&lt;/p&gt;
+
+&lt;p&gt;Thank you,&lt;br&gt;IT Service Desk&lt;/p&gt;</code></pre>
+        </div>
+
+        <h3>Shared Templates vs. Notification-Specific Content</h3>
+        <div class="def-grid">
+          <div class="def-item">
+            <div class="def-term">Shared Template</div>
+            <div class="def-desc">A standalone record in <code>sys_email_template</code> that multiple notification rules reference. Changes to the template propagate to all notifications using it. Best for consistent corporate branding or standard message structures used across many notifications.</div>
+          </div>
+          <div class="def-item">
+            <div class="def-term">Notification-Specific Content</div>
+            <div class="def-desc">Subject and message content entered directly in the notification rule's Advanced tab. Does not reference a separate template. Best for one-off or highly custom notifications where reuse is not needed.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Notification Subscriptions -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Notification Subscriptions</h2>
+        <p>ServiceNow gives users control over which notifications they receive through a Notification Preferences system. Administrators control which notifications can be opted out of and which are mandatory.</p>
+
+        <h3>How Users Manage Preferences</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Users access preferences via: <strong>Profile icon &gt; Notification Preferences</strong> (or <strong>System Settings &gt; Notifications</strong>)</li>
+          <li>The preferences UI shows all subscribable notification categories and individual notifications</li>
+          <li>Users can opt in or opt out per notification, per category, and per device type (email vs. SMS)</li>
+          <li>Admin-set mandatory notifications do not appear in the opt-out list — users cannot disable them</li>
+        </ul>
+
+        <h3>Mandatory vs. Subscribable Notifications</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Subscribable Checkbox</th>
+              <th>User Can Opt Out?</th>
+              <th>Typical Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Mandatory</strong></td>
+              <td>Unchecked (not subscribable)</td>
+              <td><span style="color:var(--red-400)">No</span> — always sent</td>
+              <td>Security alerts, compliance notifications, approval requests</td>
+            </tr>
+            <tr>
+              <td><strong>Subscribable</strong></td>
+              <td>Checked</td>
+              <td><span style="color:var(--green-400)">Yes</span> — user may opt out</td>
+              <td>Status updates, informational digests, non-critical updates</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Key Point:</strong> <strong>Mandatory notifications cannot be unsubscribed by end users.</strong> To make a notification mandatory, ensure the <strong>Subscribable</strong> checkbox is <em>unchecked</em>. Conversely, checking Subscribable allows users to control whether they receive it. This is a common exam question framing.
+        </div>
+
+        <h3>Notification Categories and Devices</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li><strong>Categories</strong> group related notifications together (e.g., all "Incident" notifications in one category). Users can enable/disable an entire category at once.</li>
+          <li><strong>Devices</strong> represent delivery channels. A single notification can have preferences managed per device — a user may want Incident email alerts but not SMS alerts for the same event.</li>
+          <li>Categories are configured on notification records and help users navigate their preferences UI.</li>
+        </ul>
+
+        <h3>sys_notif_subscription Table</h3>
+        <p>User subscription preferences are stored in the <code>sys_notif_subscription</code> table. Each record represents a user's explicit opt-in or opt-out choice for a specific notification.</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to: <code>sys_notif_subscription.list</code> in the Filter Navigator</li>
+          <li>Contains: User, Notification, Device, Subscribed (yes/no)</li>
+          <li>Administrators can view and manage subscriptions for users from this table</li>
+          <li>If no subscription record exists for a user, the notification's default behavior (send or don't send) applies</li>
+        </ul>
+
+        <h3>Email Digest vs. Immediate Delivery</h3>
+        <div class="def-grid">
+          <div class="def-item">
+            <div class="def-term">Immediate</div>
+            <div class="def-desc">Notification is sent as soon as the trigger condition is met and the notification job processes it. Default behavior. Best for time-sensitive communications like incident assignments or approval requests.</div>
+          </div>
+          <div class="def-item">
+            <div class="def-term">Digest</div>
+            <div class="def-desc">Multiple notifications are batched together and sent as a single consolidated email at a configured interval (e.g., hourly, daily). Reduces email volume for high-frequency, low-urgency updates. Users or admins can configure digest schedules.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Events -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Events</h2>
+        <p>Events are a core part of the ServiceNow automation architecture. They decouple the action that <em>triggers</em> something from the action that <em>responds</em> to it, enabling clean separation of concerns and reusable event-driven logic.</p>
+
+        <h3>The Event Pattern</h3>
+        <div class="callout-concept">
+          <strong>Pattern:</strong> A Business Rule (or Script Include, Scheduled Job, etc.) fires an event using <code>gs.eventQueue()</code>. The event is written to the <strong>Event Queue</strong> (<code>sysevent</code> table). A background processor reads the queue and executes any registered handlers — including sending notifications that are configured to listen for that event name.
+          <br><br>
+          This pattern means: the notification definition does not need to contain any complex trigger logic. The complexity lives in the Business Rule; the notification simply declares "send me when event X fires."
+        </div>
+
+        <h3>gs.eventQueue() — The Event Firing Method</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.83rem;line-height:1.9;color:var(--text-primary);overflow-x:auto"><code>// Signature:
+gs.eventQueue(eventName, record, param1, param2);
+
+// Example: fire an event when an incident is assigned
+// Typically called from a Business Rule (After, on update)
+gs.eventQueue('incident.assigned', current, current.assigned_to, current.assignment_group);
+
+// eventName  — string matching a registered event in the Event Registry
+// record     — the GlideRecord context (current, previous, etc.)
+// param1     — optional parameter 1 (max 256 chars), accessible in notification as ${event.parm1}
+// param2     — optional parameter 2 (max 256 chars), accessible in notification as ${event.parm2}</code></pre>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know:</strong> <code>gs.eventQueue()</code> takes the <strong>event name</strong> as its first argument. The event name must match a registered event in the <strong>Event Registry</strong>. Know the method signature and the fact that it is asynchronous — the event is queued, not executed inline.
+        </div>
+
+        <h3>Event Registry (sysevent_register)</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>The Event Registry (<code>sysevent_register</code> table) contains all <strong>defined/registered event names</strong> on the instance</li>
+          <li>Navigate to: <strong>System Policy &gt; Events &gt; Registry</strong></li>
+          <li>Before you can fire an event, it should be registered here (though it will still queue even if unregistered)</li>
+          <li>Each registration record includes: Event Name, Table, Description, fired by (which system component)</li>
+          <li>Best practice: always register custom events before using them in scripts</li>
+        </ul>
+
+        <h3>Event Log (sysevent)</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>The Event Log (<code>sysevent</code> table) is the <strong>actual queue of fired events</strong></li>
+          <li>Navigate to: <strong>System Policy &gt; Events &gt; Event Log</strong> or <code>sysevent.list</code></li>
+          <li>Each row represents one queued event instance, with columns for: Event Name, Table, Record sys_id, Param1, Param2, State (ready, processed, error), Processing time</li>
+          <li>The event processor runs periodically and changes State from "ready" to "processed"</li>
+          <li>Invaluable for debugging: if a notification is not firing, check the Event Log to verify the event was actually queued and processed</li>
+        </ul>
+
+        <h3>Business Rule → Event → Notification Pattern (Exam Scenario)</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Component</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>User saves a record</td>
+              <td>Incident is updated; <code>assigned_to</code> field changes</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Business Rule (After, Update)</td>
+              <td>Detects <code>assigned_to</code> changed, calls <code>gs.eventQueue('incident.assigned', current, ...)</code></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Event Log (sysevent)</td>
+              <td>Event record created with name <code>incident.assigned</code>, state = ready</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Event Processor (background job)</td>
+              <td>Reads the event queue, finds the <code>incident.assigned</code> event, triggers registered handlers</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Notification rule</td>
+              <td>Notification configured with "When: Event fired = incident.assigned" matches and queues the email</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Email sent</td>
+              <td>Assignee receives email notification about their new incident assignment</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 6: Inbound Email Actions -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Inbound Email Actions</h2>
+        <p>Inbound Email Actions allow ServiceNow to automatically <strong>process incoming emails</strong> and take actions on records — creating new records, updating existing ones, or running scripts based on email content.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Stored in the <code>sys_email_inbound_action</code> table</li>
+          <li>Navigate to: <strong>System Notification &gt; Inbound Actions</strong></li>
+          <li>ServiceNow's mail server receives incoming email, which is then matched against inbound action rules</li>
+          <li>Multiple inbound actions can be defined; they are evaluated in order by the <strong>Order</strong> field</li>
+          <li>An inbound action can <strong>stop processing</strong> further rules once matched (like a catch-all)</li>
+        </ul>
+
+        <h3>Inbound Action Anatomy</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Name</strong></td>
+              <td>Descriptive name for the inbound action rule</td>
+              <td><code>Create Incident from Email</code></td>
+            </tr>
+            <tr>
+              <td><strong>Active</strong></td>
+              <td>Whether the rule is enabled</td>
+              <td>Must be checked to process emails</td>
+            </tr>
+            <tr>
+              <td><strong>Order</strong></td>
+              <td>Integer execution order. Lower numbers run first. First matching rule wins (by default).</td>
+              <td><code>100</code></td>
+            </tr>
+            <tr>
+              <td><strong>Type</strong></td>
+              <td>Reply (match email to existing record by correlation ID) or New (always create a new record)</td>
+              <td><code>Reply</code> or <code>New record</code></td>
+            </tr>
+            <tr>
+              <td><strong>Target table</strong></td>
+              <td>The table on which to create or update records</td>
+              <td><code>Incident [incident]</code></td>
+            </tr>
+            <tr>
+              <td><strong>Conditions</strong></td>
+              <td>Filter conditions on the email itself (e.g., subject contains a keyword, from a specific domain). Determines if this rule applies to the incoming email.</td>
+              <td><code>Subject contains "URGENT"</code></td>
+            </tr>
+            <tr>
+              <td><strong>Action script</strong></td>
+              <td>Server-side script executed when the rule matches. Has access to <code>current</code> (the target record), <code>email</code> (the incoming email object), and <code>email_action</code>.</td>
+              <td>Set fields, call APIs, create related records</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Reply Separators</h3>
+        <p>When a user replies to a notification email, ServiceNow must extract the <strong>new content</strong> from the reply and ignore the quoted original message. Reply separators define the delimiter between new and quoted content.</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to: <strong>System Notification &gt; Inbound Actions &gt; Reply Separators</strong></li>
+          <li>Default separator patterns match common email client quotation markers (e.g., <code>--- Reply above this line ---</code>)</li>
+          <li>Only the text <em>above</em> the separator is processed as new content and added to the record</li>
+          <li>Custom separators can be added to handle non-standard email clients or formats</li>
+        </ul>
+
+        <h3>Email-to-Record Correlation</h3>
+        <div class="callout-info">
+          <strong>How Replies Map to Records:</strong> When ServiceNow sends a notification email, it embeds a <strong>correlation ID</strong> (a unique watermark) in the email headers. When a user replies to that email, the incoming email contains the same correlation ID. The inbound action of type "Reply" uses this ID to find the original record and add the reply as a work note or comment — no manual record lookup needed.
+        </div>
+
+        <h3>Common Inbound Action Use Cases</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Email-to-Incident</h4>
+            <p>An email to <code>support@company.com</code> automatically creates an Incident record. Subject becomes short_description; body becomes description. Caller is matched by sender email address.</p>
+          </div>
+          <div class="term-card">
+            <h4>Reply Updates Work Notes</h4>
+            <p>A technician's email reply to a notification email adds a work note to the incident. Uses reply separator to extract only the new content.</p>
+          </div>
+          <div class="term-card">
+            <h4>Auto-close via Email</h4>
+            <p>If a user replies "Resolved" or "Close ticket", an inbound action script can change the incident state to Resolved automatically.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 7: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Key Exam Facts &amp; Common Traps</h2>
+        <p>This section consolidates the highest-frequency exam points on notifications and templates. Review these carefully before exam day.</p>
+
+        <div class="callout-exam">
+          <strong>Trap 1 — Weight Means Deduplication, Not Delivery Order:</strong> Notification <strong>weight</strong> is used for <em>deduplication</em> — when multiple notifications compete for the same recipient/record/event, only the highest weight notification fires. A common wrong answer is to say "weight controls delivery speed" or "highest weight fires last."
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 2 — Mandatory vs. Subscribable:</strong> If a notification has <strong>Subscribable = unchecked</strong>, it is mandatory and users <strong>cannot opt out</strong>. If Subscribable is checked, users can disable it in their Notification Preferences. The exam often presents a scenario asking what the correct setting is — remember: mandatory = subscribable checkbox is OFF.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 3 — Variable Syntax:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><code>${field_name}</code> — inserts the value of a field on the triggering record</li>
+            <li><code>${table.field}</code> — dot-walk syntax to traverse a reference field (e.g., <code>${caller_id.name}</code>)</li>
+            <li><code>$[link]</code> — inserts the record's URL as a clickable link (note: square brackets, not curly)</li>
+            <li><code>${subject}</code> — inserts the subject line content within the message body</li>
+          </ul>
+          Do not confuse <code>${...}</code> (field value) with <code>$[...]</code> (link / special variable).
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 4 — Watch List Scope:</strong> The Watch list lets individual users subscribe to a <em>specific record's</em> notifications. It is <strong>per-record</strong> (one user watching one incident), not a global subscription. Adding Watch list as a recipient on a notification rule means: "send to whoever is watching this particular record."
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 5 — Notifications Are Asynchronous:</strong> Notifications are processed by background jobs — they are <strong>NOT sent synchronously</strong> when the record saves. There is always a processing delay. This means if a notification does not fire immediately, it may still be queued or processing.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 6 — Event Must Be Queued Before Notification Fires:</strong> For event-triggered notifications, the event must be explicitly fired via <code>gs.eventQueue()</code>. Simply having the notification configured to listen for an event does nothing unless something actually fires that event. The Business Rule or script is the initiating component.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 7 — sys_notification vs. sys_email_template:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><code>sys_notification</code> — the notification <em>rule</em> (when, who, what trigger)</li>
+            <li><code>sys_email_template</code> — the reusable <em>message template</em> (subject and body HTML)</li>
+            <li><code>sysevent</code> — the <em>event log / queue</em> of fired events</li>
+            <li><code>sysevent_register</code> — the <em>event registry</em> (registered event names)</li>
+            <li><code>sys_notif_subscription</code> — user <em>subscription preferences</em></li>
+            <li><code>sys_email_inbound_action</code> — <em>inbound email action</em> rules</li>
+          </ul>
+        </div>
+
+        <div class="callout-tip">
+          <strong>Debugging Notifications:</strong> If a notification is not firing, follow this diagnostic path:
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Verify the notification rule is <strong>Active</strong></li>
+            <li>Check that the trigger condition actually fired (is the record matching the "When to send" and "Conditions"?)</li>
+            <li>For event-triggered: check the <strong>Event Log</strong> (<code>sysevent.list</code>) — was the event queued? Was it processed?</li>
+            <li>Check the <strong>Email Log</strong> (<strong>System Mailboxes &gt; Outbound &gt; Sent</strong>) to see if the email was generated but possibly filtered or bounced</li>
+            <li>Verify the recipient actually has a valid email address in their user record</li>
+            <li>Check if the user has opted out (if the notification is subscribable) in <code>sys_notif_subscription.list</code></li>
+          </ol>
+        </div>
+
+        <h3>Quick Reference — All Key Tables</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table Name</th>
+              <th>Navigator Path</th>
+              <th>Contains</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sys_notification</code></td>
+              <td>System Notification &gt; Email &gt; Notifications</td>
+              <td>All notification rules (when, who, what)</td>
+            </tr>
+            <tr>
+              <td><code>sys_email_template</code></td>
+              <td>System Notification &gt; Email &gt; Templates</td>
+              <td>Reusable email subject and body templates</td>
+            </tr>
+            <tr>
+              <td><code>sysevent</code></td>
+              <td>System Policy &gt; Events &gt; Event Log</td>
+              <td>Queue of fired event instances</td>
+            </tr>
+            <tr>
+              <td><code>sysevent_register</code></td>
+              <td>System Policy &gt; Events &gt; Registry</td>
+              <td>Registered event name definitions</td>
+            </tr>
+            <tr>
+              <td><code>sys_notif_subscription</code></td>
+              <td>sys_notif_subscription.list</td>
+              <td>User opt-in/opt-out subscription records</td>
+            </tr>
+            <tr>
+              <td><code>sys_email_inbound_action</code></td>
+              <td>System Notification &gt; Inbound Actions</td>
+              <td>Rules for processing incoming emails</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Putting It All Together — Notification Flow:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><strong>Trigger fires</strong> — record insert/update matches notification rule, or event is queued</li>
+            <li><strong>Conditions evaluated</strong> — does the record match all filter conditions?</li>
+            <li><strong>Weight deduplication</strong> — if multiple notifications match, highest weight wins per recipient</li>
+            <li><strong>Recipients resolved</strong> — users, groups, roles, and field-value recipients are expanded to a list of users</li>
+            <li><strong>Subscription check</strong> — mandatory notifications go to all; subscribable notifications skip users who opted out</li>
+            <li><strong>Template/message rendered</strong> — variable substitution resolves <code>${...}</code> and <code>$[...]</code> placeholders</li>
+            <li><strong>Email queued and sent</strong> — message enters the outbound mail queue and is delivered</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../part2-configuration/topics/03-instance-security.html" class="btn btn-secondary">← Security &amp; Access Controls</a>
+          <a href="02-reporting-dashboards.html" class="btn btn-primary">Reporting &amp; Dashboards →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p3-notifications', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p3-notifications')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

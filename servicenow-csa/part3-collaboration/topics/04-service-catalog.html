@@ -1,0 +1,813 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Catalog | ServiceNow CSA Part 3</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 3</a>
+        <span class="sep">›</span>
+        <span class="current">Service Catalog</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🤝 Part 3 · Topic 4 of 4</div>
+        <h1 class="topic-title">Service Catalog</h1>
+        <div class="topic-meta">
+          <span>⏱ ~75 min read</span>
+          <span>·</span>
+          <span>ServiceNow CSA Exam — Heavily Tested Topic</span>
+        </div>
+        <div class="callout-exam" style="margin-top:var(--space-4)">
+          <strong>Exam Priority — HIGH:</strong> Service Catalog is one of the most heavily tested areas on the CSA exam. Expect multiple questions on catalog item types, the REQ → RITM → SCTASK hierarchy, variable configuration, and how User Criteria controls access. Master every section here.
+        </div>
+      </div>
+
+      <!-- Section 1: Catalog Hierarchy -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Catalog Hierarchy</h2>
+        <p>The Service Catalog is a structured, self-service portal where users can browse and request IT and business services. Understanding the three-level hierarchy is foundational to everything else in this topic.</p>
+
+        <h3>Three-Level Structure</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📚</div>
+            <h4>1. Catalog (<code>sc_catalog</code>)</h4>
+            <p>The top-level container. An instance can have <strong>multiple catalogs</strong> — for example, a separate IT Catalog, HR Catalog, and Facilities Catalog. Each catalog can have its own look, feel, and access restrictions.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Table: <code>sc_catalog</code></p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📂</div>
+            <h4>2. Category (<code>sc_category</code>)</h4>
+            <p>Organizes catalog items within a catalog into logical groups. Categories can be nested (parent/child). Examples: "Hardware", "Software", "Access Requests".</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Table: <code>sc_category</code></p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🛒</div>
+            <h4>3. Catalog Item (<code>sc_cat_item</code>)</h4>
+            <p>The individual orderable item within a category. This is what users browse and add to their cart. Each item defines what information to collect (variables) and how to fulfill the request.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Table: <code>sc_cat_item</code></p>
+          </div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Visual Hierarchy:</strong> Catalog → Categories → Catalog Items. Think of it like a shopping website: the store (catalog) has departments (categories) which contain individual products (catalog items). Multiple stores (catalogs) can coexist on the same platform.
+        </div>
+
+        <h3>Multiple Catalogs Support</h3>
+        <p>ServiceNow natively supports multiple catalogs on a single instance. Common catalog examples include:</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li><strong>IT Service Catalog</strong> — Hardware, software, access requests</li>
+          <li><strong>HR Catalog</strong> — Onboarding, benefits, policy documents</li>
+          <li><strong>Facilities Catalog</strong> — Office supplies, building maintenance requests</li>
+          <li><strong>Employee Self-Service (ESS) Catalog</strong> — Common employee requests</li>
+        </ul>
+        <p>Each catalog can be associated with its own User Criteria to control who sees it. A single catalog item can appear in <strong>multiple catalogs</strong>.</p>
+
+        <h3>Key Catalog Tables Summary</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table</th>
+              <th>Contains</th>
+              <th>Navigate To</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sc_catalog</code></td>
+              <td>Catalog definitions (IT Catalog, HR Catalog, etc.)</td>
+              <td>Service Catalog &gt; Catalogs</td>
+            </tr>
+            <tr>
+              <td><code>sc_category</code></td>
+              <td>Category groupings within catalogs</td>
+              <td>Service Catalog &gt; Categories</td>
+            </tr>
+            <tr>
+              <td><code>sc_cat_item</code></td>
+              <td>All catalog items (all types stored here)</td>
+              <td>Service Catalog &gt; Catalog Items</td>
+            </tr>
+            <tr>
+              <td><code>sc_request</code></td>
+              <td>Top-level requests (REQ) — the cart/order</td>
+              <td>Service Catalog &gt; Requests</td>
+            </tr>
+            <tr>
+              <td><code>sc_req_item</code></td>
+              <td>Individual requested items (RITM)</td>
+              <td>Service Catalog &gt; Requested Items</td>
+            </tr>
+            <tr>
+              <td><code>sc_task</code></td>
+              <td>Fulfillment tasks (SCTASK) generated from RITMs</td>
+              <td>Service Catalog &gt; Tasks</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 2: Catalog Item Types -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Catalog Item Types <span style="color:var(--accent);font-size:0.9rem">(CRITICAL Exam Topic)</span></h2>
+        <p>There are four distinct catalog item types. Knowing the differences — especially what record each type creates — is one of the most tested areas on the CSA exam.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📋</div>
+            <h4>1. Catalog Item</h4>
+            <p>The standard, most common item type. When ordered, it creates an <strong><code>sc_req_item</code> (RITM)</strong> record. Users add it to a shopping cart and check out.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Creates: <strong>RITM (sc_req_item)</strong><br>Example: "Request a Laptop", "VPN Access Request"</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">⚡</div>
+            <h4>2. Record Producer</h4>
+            <p>Creates a record in <strong>any target table</strong> — not just catalog tables. Bypasses the shopping cart entirely and submits directly. Used to create incidents, problems, or any custom table record through a catalog-style form.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Creates: <strong>Any table record</strong> (incident, problem, custom)<br>Example: "Report an IT Issue" (creates an Incident)</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📦</div>
+            <h4>3. Order Guide</h4>
+            <p>Groups <strong>multiple catalog items</strong> that must be ordered together as a bundle. Uses a mandatory <strong>two-step checkout</strong> process: Step 1 (collect guide-level info) and Step 2 (customize individual items). Items in an order guide are ordered simultaneously.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Creates: <strong>Multiple RITMs</strong> (one per included item)<br>Example: "New Employee Setup" (laptop + software + badge)</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🔗</div>
+            <h4>4. Content Item</h4>
+            <p>Does <strong>not create any record</strong>. Links to an external URL, a Knowledge Base article, or other content. Used to surface reference material within the catalog browsing experience.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Creates: <strong>Nothing</strong><br>Example: "VPN Setup Guide" → links to KB article</p>
+          </div>
+        </div>
+
+        <h3>Comparison Table — All Four Item Types</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Item Type</th>
+              <th>Record Created</th>
+              <th>Uses Shopping Cart?</th>
+              <th>Checkout Steps</th>
+              <th>Primary Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Catalog Item</strong></td>
+              <td><code>sc_req_item</code> (RITM)</td>
+              <td><span style="color:var(--green-400)">Yes</span></td>
+              <td>Standard (1 step)</td>
+              <td>Standard IT/service requests (hardware, software, access)</td>
+            </tr>
+            <tr>
+              <td><strong>Record Producer</strong></td>
+              <td>Any target table (incident, problem, custom)</td>
+              <td><span style="color:var(--red-400)">No</span> — direct submit</td>
+              <td>None (direct)</td>
+              <td>Friendly front-end form for creating records in non-catalog tables</td>
+            </tr>
+            <tr>
+              <td><strong>Order Guide</strong></td>
+              <td>Multiple RITMs (one per bundled item)</td>
+              <td><span style="color:var(--green-400)">Yes</span></td>
+              <td>Mandatory 2-step</td>
+              <td>Bundle of items that must always be ordered together</td>
+            </tr>
+            <tr>
+              <td><strong>Content Item</strong></td>
+              <td><span style="color:var(--text-muted)">None</span></td>
+              <td><span style="color:var(--red-400)">No</span></td>
+              <td>None (redirect)</td>
+              <td>Link to documentation, KB articles, or external URLs</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — Record Producer:</strong> A Record Producer <strong>bypasses the shopping cart</strong> and goes directly to the target table. It does NOT create an sc_req_item. Instead it creates a record in whatever table you configure (e.g., incident, problem, or a custom table). This is a very common exam distractor — do not confuse it with a Catalog Item.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — Order Guide:</strong> An Order Guide uses a <strong>mandatory two-step checkout</strong>. Step 1 collects order-guide-level variables. Step 2 shows the individual items in the bundle and allows per-item customization. You cannot skip the two-step process — it is always enforced for Order Guides.
+        </div>
+
+        <div class="callout-tip">
+          <strong>When to Use Which:</strong> Use a <strong>Catalog Item</strong> for standard requests. Use a <strong>Record Producer</strong> when you want a user-friendly form that creates non-catalog records (like incidents). Use an <strong>Order Guide</strong> when a set of items must always be requested together (e.g., new hire onboarding bundle). Use a <strong>Content Item</strong> to surface documentation or links without creating any transactions.
+        </div>
+      </div>
+
+      <!-- Section 3: Variables -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Variables — Item Configuration</h2>
+        <p>Variables are the form fields that collect information from the requester when they order a catalog item. They define <em>what data to gather</em> during the ordering process and that data travels with the RITM through fulfillment.</p>
+
+        <h3>Variable Types</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Variable Type</th>
+              <th>Input Method</th>
+              <th>Common Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Single Line Text</strong></td>
+              <td>Single-line text input</td>
+              <td>Short answers — names, phone numbers, asset tags</td>
+            </tr>
+            <tr>
+              <td><strong>Multiple Line Text</strong></td>
+              <td>Multi-line text area</td>
+              <td>Descriptions, justifications, additional details</td>
+            </tr>
+            <tr>
+              <td><strong>Select Box</strong></td>
+              <td>Dropdown list of options</td>
+              <td>Priority, department, location choices</td>
+            </tr>
+            <tr>
+              <td><strong>Check Box</strong></td>
+              <td>True/false toggle</td>
+              <td>Acknowledgments, yes/no options, confirmations</td>
+            </tr>
+            <tr>
+              <td><strong>Date</strong></td>
+              <td>Date picker widget</td>
+              <td>Requested delivery date, start date, end date</td>
+            </tr>
+            <tr>
+              <td><strong>Reference</strong></td>
+              <td>Reference lookup field to another table</td>
+              <td>Selecting a manager, CI, user, location from another table</td>
+            </tr>
+            <tr>
+              <td><strong>Attachment</strong></td>
+              <td>File upload control</td>
+              <td>Uploading justification documents, images, forms</td>
+            </tr>
+            <tr>
+              <td><strong>Label</strong></td>
+              <td>Read-only display text (no input)</td>
+              <td>Section headers, instructional text, dividers</td>
+            </tr>
+            <tr>
+              <td><strong>Macro</strong></td>
+              <td>Renders a UI Macro on the form</td>
+              <td>Custom widgets, complex display logic</td>
+            </tr>
+            <tr>
+              <td><strong>UI Page</strong></td>
+              <td>Embeds a full UI Page</td>
+              <td>Complex custom forms, multi-step embedded content</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Variable Sets — Reusable Variable Groups</h3>
+        <p>A <strong>Variable Set</strong> is a reusable collection of variables that can be attached to multiple catalog items. Instead of recreating the same variables on every item, you define them once and reuse them.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>What is a Variable Set?</h4>
+            <p>A saved group of variables stored in <code>item_option_new_set</code> (variable set definition) that can be linked to any number of catalog items via <code>io_set_item</code>.</p>
+          </div>
+          <div class="term-card">
+            <h4>Why Use Variable Sets?</h4>
+            <p>Consistency and maintainability. If the common "Justification" and "Manager Approval" fields need updating, you change the Variable Set once and all linked items inherit the change.</p>
+          </div>
+          <div class="term-card">
+            <h4>Two Types of Variable Sets</h4>
+            <p><strong>One-to-Many:</strong> Standard set — same variables across multiple items.<br><strong>Single-Row:</strong> Displays each row as a single entry (used in Order Guides).</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Point — Variable Sets:</strong> Variable Sets can be <strong>shared across multiple catalog items</strong>. This is a key reusability feature. Know that changes to a Variable Set propagate to all catalog items that include it — making them the preferred approach for common variable groups (like "Business Justification" or "Contact Information").
+        </div>
+
+        <h3>Variable Configuration Options</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li><strong>Order</strong> — Controls the display sequence of variables on the form (lower number = appears first)</li>
+          <li><strong>Mandatory</strong> — Checkbox; when checked, the requester must fill in this field before submitting</li>
+          <li><strong>Default value</strong> — Pre-populates the field with a value; the requester can still change it</li>
+          <li><strong>Show/Hide conditions</strong> — Dynamic visibility rules: show this variable only when another variable has a specific value</li>
+          <li><strong>Read only</strong> — Displays the variable but prevents the requester from changing it</li>
+          <li><strong>Active</strong> — Inactive variables are hidden from the catalog form without being deleted</li>
+          <li><strong>Help text</strong> — Tooltip or inline guidance text displayed to the requester</li>
+          <li><strong>Variable name</strong> — Internal identifier used in scripts (e.g., <code>cat_item.variables.business_justification</code>)</li>
+        </ul>
+
+        <div class="callout-concept">
+          <strong>Variable Data Flow:</strong> When a user fills out variables and submits, the answers are stored in the <code>sc_item_option_mtom</code> table (linking RITM to variable answers) and in <code>sc_item_option</code> (the actual answers). Fulfillment agents can view all variable answers on the RITM form in the "Variables" tab.
+        </div>
+      </div>
+
+      <!-- Section 4: Request Fulfillment Tables -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Request Fulfillment Tables <span style="color:var(--accent);font-size:0.9rem">(CRITICAL Exam Topic)</span></h2>
+        <p>Understanding the three-tier fulfillment hierarchy is essential. The CSA exam tests this hierarchy frequently — know the table names, abbreviations, and the parent-child relationship.</p>
+
+        <h3>The REQ → RITM → SCTASK Hierarchy</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🛒</div>
+            <h4>REQ — <code>sc_request</code></h4>
+            <p>The <strong>top-level request</strong>, equivalent to the shopping cart or entire order. One REQ is created per checkout action, regardless of how many items are in the cart.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Number prefix: <strong>REQ</strong><br>Example: REQ0001234<br>Represents: The whole order/cart</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📝</div>
+            <h4>RITM — <code>sc_req_item</code></h4>
+            <p>An <strong>individual line item</strong> within a request. If a user orders 3 items in one cart, 3 RITMs are created — each linked to the parent REQ. Fulfillment teams work on RITMs, not REQs.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Number prefix: <strong>RITM</strong><br>Example: RITM0001234<br>Represents: One ordered item</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">✅</div>
+            <h4>SCTASK — <code>sc_task</code></h4>
+            <p>A <strong>fulfillment task</strong> generated by the catalog workflow to fulfill a RITM. One RITM can generate multiple SCTASKs assigned to different teams. SCTASKs are how work is distributed to fulfillment agents.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Number prefix: <strong>SCTASK</strong><br>Example: SCTASK0001234<br>Represents: A fulfillment work item</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — REQ vs. RITM:</strong> The REQ is the <strong>entire cart/order</strong>. The RITM is an <strong>individual line item</strong>. If a user checks out with 5 items in their cart, ServiceNow creates <strong>1 REQ and 5 RITMs</strong>. Fulfillment workflows are triggered at the RITM level, not the REQ level. Always remember: RITM = individual line item.
+        </div>
+
+        <h3>State Flows</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table</th>
+              <th>State Flow</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>sc_request (REQ)</strong></td>
+              <td>Requested → In Progress → Closed Complete / Closed Incomplete / Closed Cancelled</td>
+              <td>REQ state rolls up from its child RITMs; when all RITMs close, REQ closes</td>
+            </tr>
+            <tr>
+              <td><strong>sc_req_item (RITM)</strong></td>
+              <td>Requested → Approved → In Progress → Fulfilled → Closed Complete</td>
+              <td>Approval step optional (configured in workflow); fulfillment workflow drives state transitions</td>
+            </tr>
+            <tr>
+              <td><strong>sc_task (SCTASK)</strong></td>
+              <td>Open → Work In Progress → Closed Complete / Closed Incomplete / Closed Skipped</td>
+              <td>Inherits from the base <code>task</code> table; assignment group drives routing</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Table Inheritance</h3>
+        <div class="callout-concept">
+          <strong>sc_task Extends task:</strong> The <code>sc_task</code> table <strong>extends (inherits from) the base <code>task</code> table</strong>. This means SCTASKs have all standard task fields (assignment group, assigned to, state, priority, short description, comments, work notes, etc.) plus catalog-specific fields. This is an exam-tested fact — know that sc_task is a child of the task table.
+        </div>
+
+        <h3>Ordered Item Link</h3>
+        <p>The <strong>Ordered Item Link</strong> is the relationship that connects a RITM to the specific variable answers the requester submitted. This allows fulfillment agents to see exactly what options were selected when the user placed the order.</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Variable answers are accessible from the RITM in the "Variables" related list/tab</li>
+          <li>Scripts can access variable values via <code>current.variables.variable_name</code> on the RITM record</li>
+          <li>All variable answers persist with the RITM through its entire lifecycle</li>
+        </ul>
+      </div>
+
+      <!-- Section 5: Catalog Client Scripts & UI Policies -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Catalog Client Scripts &amp; UI Policies</h2>
+        <p>Catalog items support their own client-side scripting and UI policies. These are <strong>distinct from standard form client scripts and UI policies</strong> — they apply only to the catalog ordering form, not to regular table forms.</p>
+
+        <h3>Catalog Client Scripts</h3>
+        <p>Catalog Client Scripts run in the requester's browser during the catalog ordering experience. They behave similarly to standard client scripts but operate on catalog variables rather than record fields.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Catalog Client Script</th>
+              <th>Standard Client Script</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Applies to</strong></td>
+              <td>Catalog item ordering form (variables)</td>
+              <td>Table record form (fields)</td>
+            </tr>
+            <tr>
+              <td><strong>Script scope</strong></td>
+              <td>Catalog item or Variable Set</td>
+              <td>Specific table</td>
+            </tr>
+            <tr>
+              <td><strong>Access variables via</strong></td>
+              <td><code>g_form.getValue('variable_name')</code></td>
+              <td><code>g_form.getValue('field_name')</code></td>
+            </tr>
+            <tr>
+              <td><strong>Types supported</strong></td>
+              <td>onChange, onLoad, onSubmit</td>
+              <td>onChange, onLoad, onSubmit, onCellEdit</td>
+            </tr>
+            <tr>
+              <td><strong>Table</strong></td>
+              <td><code>catalog_script_client</code></td>
+              <td><code>sys_script_client</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Catalog Client Script Types</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>onLoad</h4>
+            <p>Runs when the catalog item form first loads in the browser. Used to set default values, show/hide variables based on context, or initialize dynamic content.</p>
+          </div>
+          <div class="term-card">
+            <h4>onChange</h4>
+            <p>Fires when the value of a specific variable changes. Used for cascading logic — e.g., when "Location" changes, filter the "Manager" reference field to show only that location's managers.</p>
+          </div>
+          <div class="term-card">
+            <h4>onSubmit</h4>
+            <p>Runs just before the form submits. Used for client-side validation — e.g., ensure two date variables are in the correct order before allowing submission. Return <code>false</code> to block submission.</p>
+          </div>
+        </div>
+
+        <h3>Catalog UI Policies</h3>
+        <p>Catalog UI Policies control the <strong>visibility, mandatory, and read-only state</strong> of variables on the catalog ordering form without requiring JavaScript. They are the catalog equivalent of standard UI Policies.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to: <strong>Service Catalog &gt; Catalog UI Policies</strong></li>
+          <li>Conditions reference catalog variables (not table fields)</li>
+          <li>Actions can make variables: <strong>Visible/Hidden</strong>, <strong>Mandatory/Optional</strong>, <strong>Read Only/Editable</strong></li>
+          <li>Can apply to a specific catalog item or a Variable Set (for reuse)</li>
+          <li>Run client-side — cannot be used as a security enforcement mechanism</li>
+        </ul>
+
+        <div class="callout-warning">
+          <strong>Key Distinction:</strong> Catalog Client Scripts and Catalog UI Policies are <strong>separate from standard Client Scripts and UI Policies</strong>. They are stored in different tables and configured through different navigators. A standard UI Policy does NOT apply to a catalog item's ordering form — you need a Catalog UI Policy for that.
+        </div>
+
+        <div class="callout-tip">
+          <strong>Catalog UI Policy vs. Catalog Client Script:</strong> Use a <strong>Catalog UI Policy</strong> for simple show/hide/mandatory/read-only logic driven by conditions — no coding required. Use a <strong>Catalog Client Script</strong> when you need programmatic logic: calling a GlideAjax, performing calculations, or handling complex multi-variable interactions.
+        </div>
+      </div>
+
+      <!-- Section 6: Access Control for Catalog -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Access Control for Catalog</h2>
+        <p>The Service Catalog uses a dedicated access control mechanism called <strong>User Criteria</strong> — this is different from the ACL system used elsewhere in ServiceNow. Understanding User Criteria is critical for the exam.</p>
+
+        <h3>User Criteria</h3>
+        <p>User Criteria define <strong>sets of users</strong> based on roles, groups, companies, departments, or locations. These criteria are then applied to catalog items (and catalogs/categories) to control who can see and order them.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>What User Criteria Can Match On</h4>
+            <ul style="font-size:0.875rem;padding-left:var(--space-4);line-height:2;margin:var(--space-2) 0 0">
+              <li><strong>Roles</strong> — User has specific role(s)</li>
+              <li><strong>Groups</strong> — User is member of group(s)</li>
+              <li><strong>Companies</strong> — User's company</li>
+              <li><strong>Departments</strong> — User's department</li>
+              <li><strong>Locations</strong> — User's location</li>
+              <li><strong>Users</strong> — Specific named user(s)</li>
+              <li><strong>Script</strong> — Custom boolean script for complex conditions</li>
+            </ul>
+          </div>
+          <div class="term-card">
+            <h4>Where User Criteria Are Applied</h4>
+            <ul style="font-size:0.875rem;padding-left:var(--space-4);line-height:2;margin:var(--space-2) 0 0">
+              <li>Catalog (entire catalog visibility)</li>
+              <li>Category (category visibility)</li>
+              <li>Catalog Item (item visibility and orderability)</li>
+              <li>Can be applied at multiple levels simultaneously</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Available For vs. Not Available For</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Effect</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Available for</strong></td>
+              <td>Explicitly grants visibility/ordering to matched users. If populated, <em>only</em> matching users see the item.</td>
+              <td>"Available for" = IT Staff group → Only IT Staff see this item in the catalog</td>
+            </tr>
+            <tr>
+              <td><strong>Not available for</strong></td>
+              <td>Explicitly denies visibility/ordering to matched users, even if they match the "Available for" criteria.</td>
+              <td>"Not available for" = Contractors → Contractors cannot order this item even if in the IT group</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Logic:</strong> The effective access = "Available for" MINUS "Not available for". "Not available for" takes precedence over "Available for". If a user matches both criteria, they are <strong>denied</strong> access. If neither field is populated, the item is visible to all authenticated users by default.
+        </div>
+
+        <h3>Testing Catalog Access</h3>
+        <p>ServiceNow provides a built-in tool to verify catalog visibility for specific users without impersonating them.</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li><strong>"Try it" / "Try as user" button</strong> — available on catalog item records; lets admins preview how the item appears to a specific user</li>
+          <li>Impersonation — admins can impersonate any user to fully test the catalog experience from that user's perspective</li>
+          <li>User Criteria Diagnostics — evaluate which User Criteria rules match for a given user</li>
+        </ul>
+
+        <div class="callout-exam">
+          <strong>Exam Point — User Criteria vs. ACLs:</strong> Catalog access is controlled by <strong>User Criteria</strong>, NOT by ACLs. ACLs still apply to the underlying tables (<code>sc_cat_item</code>, <code>sc_req_item</code>, etc.) for data-level security, but the catalog browsing/ordering visibility is governed exclusively by User Criteria. This is an important distinction.
+        </div>
+      </div>
+
+      <!-- Section 7: Workflow & Flow Designer for Fulfillment -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Workflow &amp; Flow Designer for Fulfillment</h2>
+        <p>After a user submits a catalog item, the <strong>fulfillment process</strong> is driven by either a Catalog Workflow (legacy) or a Flow Designer flow (modern approach). Both automate the steps required to fulfill the request.</p>
+
+        <h3>Catalog Workflows (Legacy)</h3>
+        <p>Catalog Workflows are workflow-engine based automations attached to catalog items. They trigger automatically when a RITM is created.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Trigger</h4>
+            <p>Catalog workflows are triggered on <strong>RITM creation</strong> (when the user submits the catalog order). One workflow instance runs per RITM.</p>
+          </div>
+          <div class="term-card">
+            <h4>Approval Steps</h4>
+            <p>Workflows can include approval activities — pausing the RITM in "Waiting for Approval" state until a designated approver approves or rejects. Approvals can be manual or automated.</p>
+          </div>
+          <div class="term-card">
+            <h4>Task Generation</h4>
+            <p>The workflow generates <strong>SCTASK records</strong> using the "Catalog Task" workflow activity. These tasks are assigned to fulfillment teams and must be closed before the workflow advances.</p>
+          </div>
+          <div class="term-card">
+            <h4>Configuration</h4>
+            <p>Assigned on the catalog item record in the <strong>"Process Engine"</strong> tab or <strong>"Workflow"</strong> field. Navigate to: <strong>Workflow &gt; Workflow Editor</strong> to build/modify.</p>
+          </div>
+        </div>
+
+        <h3>Flow Designer (Modern Replacement)</h3>
+        <p>Flow Designer is ServiceNow's modern, low-code automation platform. It replaces the legacy Workflow editor with a more intuitive drag-and-drop interface and better integration with the Now Platform.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Catalog Workflow (Legacy)</th>
+              <th>Flow Designer (Modern)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Interface</strong></td>
+              <td>Drag-and-drop visual workflow editor</td>
+              <td>Modern step-by-step flow builder (no-code/low-code)</td>
+            </tr>
+            <tr>
+              <td><strong>Trigger</strong></td>
+              <td>RITM creation (workflow context)</td>
+              <td>Service Catalog trigger (RITM-based or direct)</td>
+            </tr>
+            <tr>
+              <td><strong>Actions</strong></td>
+              <td>Workflow activities (Catalog Task, Approval, etc.)</td>
+              <td>Action library (Create Task, Ask for Approval, etc.)</td>
+            </tr>
+            <tr>
+              <td><strong>Recommended for</strong></td>
+              <td>Legacy instances, existing workflows</td>
+              <td>New development — ServiceNow recommended</td>
+            </tr>
+            <tr>
+              <td><strong>Access</strong></td>
+              <td>Workflow &gt; Workflow Editor</td>
+              <td>Process Automation &gt; Flow Designer</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-tip">
+          <strong>CSA Exam Guidance:</strong> The CSA exam covers both approaches. Know that Flow Designer is the <strong>modern replacement</strong> for the legacy Workflow engine and that ServiceNow recommends it for new catalog fulfillment automation. Understand that both can generate SCTASKs and include approval steps.
+        </div>
+
+        <h3>Typical Fulfillment Flow</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:2;color:var(--text-primary);overflow-x:auto"><code>User submits catalog item
+  ↓
+REQ created (sc_request) — state: Requested
+  ↓
+RITM created (sc_req_item) — state: Requested
+  ↓
+Workflow / Flow triggered on RITM
+  ↓
+[Optional] Approval activity → RITM state: Waiting for Approval
+  ↓ (approved)
+SCTASK generated (sc_task) — assigned to fulfillment team
+  ↓
+Fulfillment team works on SCTASK → closes it
+  ↓
+RITM state updates: Fulfilled / Closed Complete
+  ↓
+When all RITMs under REQ close → REQ auto-closes</code></pre>
+        </div>
+      </div>
+
+      <!-- Section 8: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Key Exam Facts &amp; Critical Reminders</h2>
+        <p>This section consolidates the most exam-critical facts about the Service Catalog. Review this before your exam — these points are directly tested.</p>
+
+        <div class="callout-exam">
+          <strong>Fact 1 — RITM is the line item, REQ is the cart:</strong> A user ordering 3 items creates <strong>1 REQ and 3 RITMs</strong>. Fulfillment workflows attach to the RITM, not the REQ. Fulfillment agents work RITMs and SCTASKs — never the REQ directly.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 2 — Record Producer bypasses the cart:</strong> A Record Producer goes <strong>directly to the target table</strong> without creating a shopping cart or RITM. It creates a record in whatever table you configure (incident, problem, custom table). It does NOT go through sc_request or sc_req_item.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 3 — Order Guide enforces 2-step checkout:</strong> The Order Guide's two-step checkout is <strong>mandatory and cannot be skipped</strong>. Step 1 is the Order Guide-level form. Step 2 is individual item customization. An Order Guide creates multiple RITMs — one for each bundled catalog item.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 4 — Variable Sets are shared/reusable:</strong> A Variable Set can be attached to <strong>multiple catalog items</strong>. Updating the Variable Set affects all linked items. This is the preferred approach for common variable groups across many catalog items.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 5 — sc_task extends the task table:</strong> The <code>sc_task</code> table (SCTASK) <strong>inherits from the base <code>task</code> table</strong>. It has all standard task fields plus catalog-specific fields. This means assignment groups, SLAs, and task management features work on SCTASKs exactly as they do on incidents and other task-based records.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 6 — Catalog access uses User Criteria, not ACLs:</strong> Who can see and order catalog items is controlled by <strong>User Criteria</strong> (the "Available for" and "Not available for" fields). Standard ACLs control the underlying table data security but not catalog browsing/ordering visibility.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 7 — Content Item creates nothing:</strong> A Content Item does <strong>not create any record</strong> in ServiceNow. It simply redirects the user to an external URL or KB article. There is no RITM, no REQ — nothing transactional happens.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 8 — Catalog Client Scripts are distinct from standard Client Scripts:</strong> They are stored in a different table (<code>catalog_script_client</code>) and apply only to the catalog ordering form. You cannot use a standard Client Script to control catalog variables — you must use a Catalog Client Script or Catalog UI Policy.
+        </div>
+
+        <h3>Full Hierarchy Quick Reference</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Level</th>
+              <th>Object</th>
+              <th>Table</th>
+              <th>Number Prefix</th>
+              <th>Created By</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1 (Top)</td>
+              <td>Request</td>
+              <td><code>sc_request</code></td>
+              <td>REQ</td>
+              <td>System — on checkout</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Requested Item</td>
+              <td><code>sc_req_item</code></td>
+              <td>RITM</td>
+              <td>System — one per ordered item</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Catalog Task</td>
+              <td><code>sc_task</code></td>
+              <td>SCTASK</td>
+              <td>Workflow/Flow — one per fulfillment step</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Catalog Item Type Quick Reference</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Creates</th>
+              <th>Cart?</th>
+              <th>Steps</th>
+              <th>Use When…</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Catalog Item</strong></td>
+              <td>RITM (<code>sc_req_item</code>)</td>
+              <td>Yes</td>
+              <td>1</td>
+              <td>Standard IT/service request</td>
+            </tr>
+            <tr>
+              <td><strong>Record Producer</strong></td>
+              <td>Any record (incident, etc.)</td>
+              <td>No</td>
+              <td>Direct</td>
+              <td>User-friendly form for non-catalog records</td>
+            </tr>
+            <tr>
+              <td><strong>Order Guide</strong></td>
+              <td>Multiple RITMs</td>
+              <td>Yes</td>
+              <td>2 (mandatory)</td>
+              <td>Bundle of related items always ordered together</td>
+            </tr>
+            <tr>
+              <td><strong>Content Item</strong></td>
+              <td>Nothing</td>
+              <td>No</td>
+              <td>Redirect</td>
+              <td>Surface links/documentation in the catalog</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Putting It All Together — Full Catalog Flow:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Admin creates a <strong>Catalog</strong> (sc_catalog) and <strong>Categories</strong> (sc_category) to structure the offering</li>
+            <li>Admin creates <strong>Catalog Items</strong> (sc_cat_item) with <strong>Variables</strong> to collect requester info</li>
+            <li>Admin attaches <strong>User Criteria</strong> ("Available for") to control who sees each item</li>
+            <li>Admin builds a <strong>Workflow or Flow</strong> to automate approval and SCTASK generation</li>
+            <li>User browses the catalog, fills in variables, checks out → <strong>REQ + RITM</strong> created</li>
+            <li>Workflow triggers on RITM → generates <strong>SCTASKs</strong> for fulfillment teams</li>
+            <li>Fulfillment team closes SCTASKs → RITM closes → REQ closes</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="03-knowledge-management.html" class="btn btn-secondary">← Knowledge Management</a>
+          <a href="../../part4-database-security/topics/01-data-schema-imports.html" class="btn btn-primary">Part 4: Data Schema &amp; Imports →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p3-service-catalog', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p3-service-catalog')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

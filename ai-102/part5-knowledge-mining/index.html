@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 5 — Knowledge Mining | AI-102 Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .part-hero {
+      background: linear-gradient(135deg, rgba(239,68,68,0.12) 0%, var(--navy-900) 60%);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-10) var(--space-12);
+      margin-bottom: var(--space-8);
+      position: relative; overflow: hidden;
+    }
+    .part-hero::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, transparent 70%);
+    }
+    .part-hero-title {
+      font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 800; line-height: 1.15;
+      margin-bottom: var(--space-4);
+      background: linear-gradient(135deg, #f0f6ff 0%, #f87171 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .topic-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: var(--space-6);
+      display: flex; gap: var(--space-6); align-items: flex-start;
+      text-decoration: none; transition: all var(--transition-normal);
+      position: relative; overflow: hidden;
+    }
+    .topic-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: #ef4444; border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    }
+    .topic-card:hover { border-color: rgba(239,68,68,0.4); transform: translateX(4px); }
+    .topic-card.completed::before { background: var(--green-500); }
+    .topic-card.completed > div:first-child { background: rgba(16,185,129,.12)!important; border-color: rgba(16,185,129,.25)!important; color: var(--green-400)!important; }
+    .topic-tag { font-size: 0.68rem; font-family: var(--font-mono); background: var(--bg-secondary); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: var(--radius-sm); }
+    #sbo { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sbo.show { display: block; }
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+
+  <div id="app-sidebar"></div>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span><span class="current">Part 5 — Knowledge Mining</span>
+      </div>
+    </header>
+
+    <div class="page-content stagger">
+
+      <div class="part-hero animate-fade-in">
+        <div style="display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#f87171;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);padding:var(--space-1) var(--space-3);border-radius:var(--radius-sm);margin-bottom:var(--space-4);font-family:var(--font-heading)">🔍 Part 5 of 6</div>
+        <h1 class="part-hero-title">Implement Knowledge Mining<br>& Information Extraction</h1>
+        <p style="font-size:0.975rem;color:var(--text-secondary);max-width:600px;line-height:1.75;margin-bottom:var(--space-8)">
+          Knowledge Mining covers finding, extracting, and indexing information from large unstructured datasets.
+          This part covers Azure AI Search (indexing, skillsets, semantic ranking, vector search),
+          Azure AI Document Intelligence (extracting structured data from forms and documents),
+          and Content Understanding (knowledge graphs, entity extraction at scale).
+        </p>
+        <div style="display:flex;gap:var(--space-6);flex-wrap:wrap">
+          <div><div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:#f87171;line-height:1">15–20%</div><div style="font-size:0.7rem;color:var(--text-muted)">of exam questions</div></div>
+          <div><div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:#f87171;line-height:1">3</div><div style="font-size:0.7rem;color:var(--text-muted)">topic files</div></div>
+          <div><div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:#f87171;line-height:1">~25</div><div style="font-size:0.7rem;color:var(--text-muted)">exam sub-skills</div></div>
+          <div><div style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:#f87171;line-height:1" data-progress-pct>0%</div><div style="font-size:0.7rem;color:var(--text-muted)">your progress</div></div>
+        </div>
+        <div style="margin-top:var(--space-6)" data-progress-part="5">
+          <div class="progress-bar" style="height:8px;border-radius:4px">
+            <div class="progress-fill" style="width:0%;background:#ef4444"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-concept">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+          <div class="callout-title">What This Part Covers</div>
+          <p>
+            Knowledge Mining is about making unstructured data searchable, extractable, and useful.
+            <strong>Azure AI Search</strong> indexes content from any source and adds AI enrichment via skillsets.
+            <strong>Azure AI Document Intelligence</strong> (formerly Form Recognizer) extracts structured fields from
+            scanned forms, invoices, receipts, and custom documents.
+            <strong>Content Understanding</strong> builds knowledge graphs and cross-document entity relationships.
+          </p>
+        </div>
+      </div>
+
+      <h2 style="margin-bottom:var(--space-2)">Topics in this Part</h2>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-6)">Study in order — Topic 1 (AI Search) is the foundation that Topics 2 and 3 build on.</p>
+
+      <div style="display:flex;flex-direction:column;gap:var(--space-4);margin-bottom:var(--space-10)">
+
+        <a href="topics/01-ai-search.html" class="topic-card" id="card-p5-ai-search">
+          <div id="badge-p5-ai-search" style="width:44px;height:44px;min-width:44px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.85rem;font-weight:700;color:#f87171;margin-top:2px">01</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-2)">
+              <div style="font-family:var(--font-heading);font-size:1rem;font-weight:700;color:var(--text-primary)">🔎 Azure AI Search</div>
+              <span style="color:var(--text-muted);font-size:1.2rem;flex-shrink:0">→</span>
+            </div>
+            <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;margin-bottom:var(--space-4)">
+              Azure's enterprise search platform. Covers indexes, indexers, skillsets (AI enrichment pipeline),
+              semantic ranking, vector search, hybrid search with RRF, and the full indexing pipeline.
+              Includes Python code for creating indexes, uploading documents, and querying with filters.
+            </p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+              <span class="topic-tag">Indexes</span>
+              <span class="topic-tag">Indexers</span>
+              <span class="topic-tag">Skillsets</span>
+              <span class="topic-tag">Semantic Ranking</span>
+              <span class="topic-tag">Vector Search</span>
+              <span class="topic-tag">Hybrid Search</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="topics/02-document-intelligence.html" class="topic-card" id="card-p5-document-intelligence">
+          <div id="badge-p5-document-intelligence" style="width:44px;height:44px;min-width:44px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.85rem;font-weight:700;color:#f87171;margin-top:2px">02</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-2)">
+              <div style="font-family:var(--font-heading);font-size:1rem;font-weight:700;color:var(--text-primary)">📄 Azure AI Document Intelligence</div>
+              <span style="color:var(--text-muted);font-size:1.2rem;flex-shrink:0">→</span>
+            </div>
+            <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;margin-bottom:var(--space-4)">
+              Formerly Form Recognizer — extracts structured data from scanned documents.
+              Covers prebuilt models (invoice, receipt, ID, business card, tax form),
+              custom models (template and neural), the Read model for OCR,
+              and the Layout model for tables and structure. Python code with every line explained.
+            </p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+              <span class="topic-tag">Prebuilt Models</span>
+              <span class="topic-tag">Custom Models</span>
+              <span class="topic-tag">Read / OCR</span>
+              <span class="topic-tag">Layout</span>
+              <span class="topic-tag">Invoice</span>
+              <span class="topic-tag">Form Recognizer rename</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="topics/03-content-understanding.html" class="topic-card" id="card-p5-content-understanding">
+          <div id="badge-p5-content-understanding" style="width:44px;height:44px;min-width:44px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.85rem;font-weight:700;color:#f87171;margin-top:2px">03</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-2)">
+              <div style="font-family:var(--font-heading);font-size:1rem;font-weight:700;color:var(--text-primary)">🧩 Content Understanding & Knowledge Graphs</div>
+              <span style="color:var(--text-muted);font-size:1.2rem;flex-shrink:0">→</span>
+            </div>
+            <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;margin-bottom:var(--space-4)">
+              Azure AI Content Understanding — the newest addition to the knowledge mining domain.
+              Covers multimodal content extraction, knowledge graph concepts, entity linking across
+              documents, and how AI Search skillsets connect to Content Understanding for end-to-end
+              knowledge mining pipelines.
+            </p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+              <span class="topic-tag">Content Understanding</span>
+              <span class="topic-tag">Knowledge Graph</span>
+              <span class="topic-tag">Entity Linking</span>
+              <span class="topic-tag">Multimodal</span>
+              <span class="topic-tag">Skillset Pipeline</span>
+            </div>
+          </div>
+        </a>
+
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-6) var(--space-8);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap;margin-bottom:var(--space-8)">
+        <div>
+          <div style="font-family:var(--font-heading);font-size:0.95rem;font-weight:700;color:var(--text-primary)">Ready to start Part 5?</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">Start with Topic 1 — Azure AI Search is the core of this domain.</div>
+        </div>
+        <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+          <a href="flashcards.html" class="btn btn-ghost">🃏 Flashcards</a>
+          <a href="quiz.html" class="btn btn-secondary">✅ Quiz</a>
+          <a href="topics/01-ai-search.html" class="btn btn-primary" style="background:#dc2626">Start Topic 1 →</a>
+        </div>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="../part4-nlp/index.html" class="topic-nav-prev">
+          <span style="color:var(--text-muted)">←</span>
+          <div><div class="topic-nav-label">Previous Part</div><div class="topic-nav-title">Part 4 — NLP</div></div>
+        </a>
+        <a href="topics/01-ai-search.html" class="topic-nav-next">
+          <div><div class="topic-nav-label">First topic</div><div class="topic-nav-title">Azure AI Search →</div></div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../config.js"></script>
+<script src="../../scripts/common.js"></script>
+<script>
+  const _p5topics = [['p5-ai-search',1],['p5-document-intelligence',2],['p5-content-understanding',3]];
+  function _p5sync() {
+    _p5topics.forEach(([id,n]) => {
+      const card = document.getElementById(`card-${id}`);
+      const badge = document.getElementById(`badge-${id}`);
+      if (!card) return;
+      const done = ProgressManager.isComplete(id);
+      card.classList.toggle('completed', done);
+      if (badge) badge.textContent = done ? '✓' : String(n).padStart(2,'0');
+    });
+  }
+  document.addEventListener('DOMContentLoaded', _p5sync);
+  document.addEventListener('progressUpdated', () => { _p5sync(); initProgressBars(); });
+</script>
+</body>
+</html>

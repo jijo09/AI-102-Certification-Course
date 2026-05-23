@@ -1,0 +1,642 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Integration Patterns &amp; REST/SOAP | ServiceNow CSA Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span>
+        <span class="current">Integration Patterns &amp; REST/SOAP</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🔗 Part 5 · Topic 3 of 3</div>
+        <h1 class="topic-title">Integration Patterns &amp; REST/SOAP</h1>
+        <div class="topic-meta">
+          <span>⏱ ~65 min read</span>
+          <span>·</span>
+          <span>Part 5 — Migration &amp; Integration · 15% Exam Weight</span>
+        </div>
+        <div class="callout-tip" style="margin-top:var(--space-4)">
+          <strong>Exam Weight:</strong> Integration is one of the most heavily tested areas of Part 5. Know the difference between inbound and outbound flows, the Table API, REST Message configuration, and when a MID Server is required. Authentication methods (especially OAuth 2.0) are frequently tested.
+        </div>
+      </div>
+
+      <!-- Section 1: Integration Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>ServiceNow Integration Overview</h2>
+        <p>ServiceNow acts as both a consumer and a provider of integrations. Understanding the <strong>direction of data flow</strong> is the foundation for all integration questions on the CSA exam.</p>
+
+        <h3>Integration Directions</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">⬇️</div>
+            <h4>Inbound Integration</h4>
+            <p>An <strong>external system sends data into ServiceNow</strong> to create, read, or update records.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: A monitoring tool creates an Incident record in ServiceNow when an alert fires.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">⬆️</div>
+            <h4>Outbound Integration</h4>
+            <p><strong>ServiceNow sends data to an external system</strong> — to notify, synchronize, or trigger a workflow.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: When an Incident is resolved, ServiceNow posts a message to a Slack channel.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🔄</div>
+            <h4>Bidirectional Integration</h4>
+            <p>Data flows <strong>both ways</strong> between ServiceNow and an external system — records stay synchronized in real time or near-real time.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: ServiceNow and Jira sync ticket status changes in both directions.</p>
+          </div>
+        </div>
+
+        <h3>Synchronous vs. Asynchronous Integration</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Synchronous</th>
+              <th>Asynchronous</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Behavior</strong></td>
+              <td>Caller waits for a response before continuing</td>
+              <td>Caller sends the request and moves on; response arrives later</td>
+            </tr>
+            <tr>
+              <td><strong>Use case</strong></td>
+              <td>Real-time data lookups, immediate confirmations</td>
+              <td>Long-running operations, bulk processing, notifications</td>
+            </tr>
+            <tr>
+              <td><strong>Example</strong></td>
+              <td>REST GET to look up a user record</td>
+              <td>Email notification triggered by a Business Rule</td>
+            </tr>
+            <tr>
+              <td><strong>Risk</strong></td>
+              <td>Can block execution if the external system is slow</td>
+              <td>No immediate error feedback; harder to debug</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Integration Hub</h3>
+        <p>Integration Hub is ServiceNow's <strong>no-code/low-code integration platform</strong> built on Flow Designer. It provides pre-built connectors called <strong>spokes</strong> that abstract away the complexity of building integrations from scratch.</p>
+        <div class="callout-concept">
+          <strong>Key Concept:</strong> Integration Hub allows non-developers to connect ServiceNow with external systems (Slack, Jira, AWS, Salesforce, etc.) using drag-and-drop steps in Flow Designer — no scripting required for standard integrations. Many spokes require the <strong>IntegrationHub license</strong> (not included in base ServiceNow).
+        </div>
+      </div>
+
+      <!-- Section 2: REST API (Inbound) -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>REST API — Inbound Integrations</h2>
+        <p>The <strong>Table API</strong> is the most common and important inbound integration method in ServiceNow. It allows any external system to perform full CRUD operations on any ServiceNow table via standard HTTP requests.</p>
+
+        <h3>Table API</h3>
+        <div class="callout-concept">
+          <strong>Table API Endpoint Pattern:</strong>
+          <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-4);margin-top:var(--space-3);font-family:var(--font-mono);font-size:0.9rem;color:var(--text-primary)">
+            https://&lt;instance&gt;.service-now.com/api/now/table/<strong>{tableName}</strong>
+          </div>
+          <p style="margin-top:var(--space-3);font-size:0.9rem">Replace <code>{tableName}</code> with the actual table name, for example <code>incident</code>, <code>sc_request</code>, or any custom table name.</p>
+        </div>
+
+        <h3>HTTP Methods and Their Operations</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Operation</th>
+              <th>Example URL</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent)">GET</strong></td>
+              <td>Read / query records</td>
+              <td><code>/api/now/table/incident</code></td>
+              <td>Supports query params: <code>sysparm_query</code>, <code>sysparm_limit</code>, <code>sysparm_fields</code></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--green-400)">POST</strong></td>
+              <td>Create a new record</td>
+              <td><code>/api/now/table/incident</code></td>
+              <td>Body contains JSON field values; returns the created record's sys_id</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--amber-400)">PUT</strong></td>
+              <td>Full update (replace record)</td>
+              <td><code>/api/now/table/incident/{sys_id}</code></td>
+              <td>Replaces all field values; omitted fields may be cleared</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--amber-400)">PATCH</strong></td>
+              <td>Partial update</td>
+              <td><code>/api/now/table/incident/{sys_id}</code></td>
+              <td>Updates only the fields provided in the request body</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--red-400)">DELETE</strong></td>
+              <td>Delete a record</td>
+              <td><code>/api/now/table/incident/{sys_id}</code></td>
+              <td>Permanently removes the record; requires delete ACL permission</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Authentication Methods</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Basic Authentication</h4>
+            <p>Username and password encoded in the HTTP header. Simple to implement but less secure — credentials sent with every request.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Use for: development/testing environments, simple integrations where security is not critical.</p>
+          </div>
+          <div class="term-card">
+            <h4>OAuth 2.0</h4>
+            <p>Token-based authentication. The client exchanges credentials for an access token; subsequent requests use only the token. <strong>Preferred method for production integrations.</strong></p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Tokens have expiry times and can be revoked without changing credentials.</p>
+          </div>
+          <div class="term-card">
+            <h4>API Key</h4>
+            <p>A static key sent in the request header. Simpler than OAuth, more secure than Basic Auth. Appropriate for server-to-server integrations with controlled environments.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Configure in: <strong>System OAuth &gt; Application Registry</strong>.</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know:</strong> The Table API is the <strong>most common inbound integration method</strong> for the CSA exam. Know the endpoint pattern, the five HTTP methods and what each does, and that <strong>OAuth 2.0 is the preferred authentication method</strong> for modern integrations.
+        </div>
+
+        <h3>sys_rest_message — Outbound REST Configuration Table</h3>
+        <p>While the Table API handles inbound calls (external systems calling ServiceNow), outbound REST calls made by ServiceNow are configured in the <code>sys_rest_message</code> table. This distinction is important for the exam.</p>
+      </div>
+
+      <!-- Section 3: REST Message (Outbound) -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>REST Message — Outbound Integrations</h2>
+        <p>When ServiceNow needs to call an external REST API, the configuration is stored in the <strong>sys_rest_message</strong> table. This is the outbound counterpart to the inbound Table API.</p>
+
+        <h3>Configuration Components</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>REST Message Record</h4>
+            <p>The parent record stored in <code>sys_rest_message</code>. Defines the base endpoint URL, default authentication, and headers for a target external service.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate to: <strong>System Web Services &gt; Outbound &gt; REST Message</strong></p>
+          </div>
+          <div class="term-card">
+            <h4>REST Message Functions</h4>
+            <p>Child records under a REST Message. Each function represents a specific HTTP method call (GET, POST, PUT, etc.) with its own endpoint path, headers, and body template.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">One REST Message can have multiple functions for different operations on the same service.</p>
+          </div>
+          <div class="term-card">
+            <h4>Authentication Profiles</h4>
+            <p>Reusable authentication configurations referenced by REST Messages. Supports Basic, OAuth 2.0, and mutual authentication profiles stored separately for reuse across multiple integrations.</p>
+          </div>
+        </div>
+
+        <h3>Testing Outbound REST</h3>
+        <div class="callout-tip">
+          <strong>How to Test:</strong> Open the REST Message record → select a function → click the <strong>Test</strong> related link. ServiceNow sends a live HTTP request to the external endpoint and displays the response code, headers, and body directly in the platform. No scripting required to test connectivity.
+        </div>
+
+        <h3>Where REST Messages Are Called From</h3>
+        <p>Once configured, REST Message functions can be invoked from any server-side script using the <code>RESTMessageV2</code> API:</p>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Called from Business Rule, Script Include, or Flow Designer
+var rm = new sn_ws.RESTMessageV2('My External Service', 'post_incident');
+rm.setStringParameterNoEscape('incident_number', current.number);
+var response = rm.execute();
+var statusCode = response.getStatusCode();
+gs.info('External API returned: ' + statusCode);</code></pre>
+        </div>
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+          <div class="term-card"><strong>Business Rules</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">Trigger on record insert/update</p></div>
+          <div class="term-card"><strong>Script Includes</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">Reusable server-side library functions</p></div>
+          <div class="term-card"><strong>Flow Designer</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">No-code Send REST Request step</p></div>
+          <div class="term-card"><strong>Scheduled Scripts</strong><p style="font-size:0.85rem;margin:var(--space-1) 0 0">Time-based background jobs</p></div>
+        </div>
+      </div>
+
+      <!-- Section 4: SOAP Web Services -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>SOAP Web Services</h2>
+        <p>SOAP (Simple Object Access Protocol) is a legacy XML-based integration protocol. While REST has largely replaced SOAP for new integrations, many enterprise systems still use SOAP and the CSA exam tests awareness of it.</p>
+
+        <h3>Inbound SOAP</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Direct Web Service Access</h4>
+            <p>Every ServiceNow table is automatically exposed as a SOAP web service. The WSDL (Web Services Description Language) document describes the available operations.</p>
+            <p style="margin-top:var(--space-2);font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted)">WSDL URL pattern:<br><code>https://&lt;instance&gt;.service-now.com/&lt;table&gt;.do?WSDL</code></p>
+          </div>
+          <div class="term-card">
+            <h4>sys_web_service Table</h4>
+            <p>Stores inbound SOAP web service configurations. Allows customizing which operations are exposed and controlling access to the SOAP interface for a given table.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate to: <strong>System Web Services &gt; Inbound &gt; Web Services</strong></p>
+          </div>
+        </div>
+
+        <h3>Outbound SOAP</h3>
+        <p>Similar to outbound REST, outbound SOAP calls from ServiceNow are configured in the <code>sys_soap_message</code> table.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Inbound SOAP</th>
+              <th>Outbound SOAP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Table</strong></td>
+              <td><code>sys_web_service</code></td>
+              <td><code>sys_soap_message</code></td>
+            </tr>
+            <tr>
+              <td><strong>Direction</strong></td>
+              <td>External system → ServiceNow</td>
+              <td>ServiceNow → External system</td>
+            </tr>
+            <tr>
+              <td><strong>WSDL</strong></td>
+              <td>ServiceNow publishes WSDL at <code>table.do?WSDL</code></td>
+              <td>Import WSDL from external service to generate message</td>
+            </tr>
+            <tr>
+              <td><strong>Protocol</strong></td>
+              <td>XML over HTTP/HTTPS</td>
+              <td>XML over HTTP/HTTPS</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>WSDL Definition:</strong> WSDL stands for <strong>Web Services Description Language</strong>. It is an XML document that describes a SOAP web service — what operations are available, what parameters each operation takes, and what responses are returned. Think of it as the "API documentation" for a SOAP service.
+        </div>
+
+        <div class="callout-tip">
+          <strong>REST vs. SOAP — When to Use Which:</strong> For new integrations, always prefer REST — it is simpler, lighter, and supported by all modern systems. SOAP is used when integrating with legacy enterprise systems (SAP, older ERP platforms, mainframe-adjacent services) that only expose SOAP endpoints.
+        </div>
+      </div>
+
+      <!-- Section 5: Integration Hub -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Integration Hub</h2>
+        <p>Integration Hub is a Flow Designer-based integration platform that provides pre-built connectors (spokes) for popular external systems. It is designed for <strong>no-code integration</strong> — connecting systems without writing scripts.</p>
+
+        <h3>Key Concepts</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🔌</div>
+            <h4>Spokes</h4>
+            <p>Pre-built integration connectors for specific external systems. Each spoke bundles all the actions needed to interact with that system.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Examples: Slack Spoke, Jira Spoke, AWS Spoke, Salesforce Spoke, Microsoft Teams Spoke</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">⚙️</div>
+            <h4>Steps (Actions)</h4>
+            <p>Individual operations within a spoke. Dragged into a Flow Designer flow to perform specific tasks.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Common steps: Send REST Request, Look Up Record, Create Record, Post Message to Slack</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📋</div>
+            <h4>Action Designer</h4>
+            <p>The tool used to build <strong>custom spokes and actions</strong> when pre-built spokes do not cover your specific external system or use case.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate to: <strong>Flow Designer &gt; Action Designer</strong></p>
+          </div>
+        </div>
+
+        <h3>Integration Hub vs. Base Platform</h3>
+        <div class="callout-exam">
+          <strong>Critical Exam Point:</strong> Integration Hub is <strong>NOT included in the base ServiceNow platform license</strong>. It requires a separate <strong>IntegrationHub license</strong> to access most spokes. The base platform includes Flow Designer, but the spoke library (Slack, Jira, AWS, etc.) requires the add-on license.
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Base Platform</th>
+              <th>IntegrationHub License</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Flow Designer</strong></td>
+              <td>Included</td>
+              <td>Included</td>
+            </tr>
+            <tr>
+              <td><strong>Basic REST/SOAP steps</strong></td>
+              <td>Included (Send REST Request)</td>
+              <td>Included</td>
+            </tr>
+            <tr>
+              <td><strong>Pre-built spokes</strong></td>
+              <td>Limited or none</td>
+              <td>Full spoke library (Slack, Jira, AWS, etc.)</td>
+            </tr>
+            <tr>
+              <td><strong>Action Designer</strong></td>
+              <td>Included</td>
+              <td>Included</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 6: Scripted REST APIs -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Scripted REST APIs</h2>
+        <p>Scripted REST APIs allow administrators to create <strong>custom REST endpoints</strong> on the ServiceNow instance — exposing custom business logic as a REST service that external systems can call.</p>
+
+        <h3>When to Use Scripted REST APIs</h3>
+        <p>The built-in <strong>Table API</strong> covers most inbound integration scenarios, but Scripted REST APIs are needed when:</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>The required logic does not map directly to a single table (e.g., aggregated data from multiple tables)</li>
+          <li>You need to expose a specific business process (not raw CRUD) to an external system</li>
+          <li>Custom authentication or response formatting is required</li>
+          <li>You want to hide the underlying table structure from external callers</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>sys_ws_definition Table</h4>
+            <p>Stores Scripted REST API definitions. Each record defines a custom API namespace and base path.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate to: <strong>System Web Services &gt; Scripted REST APIs</strong></p>
+          </div>
+          <div class="term-card">
+            <h4>Resources</h4>
+            <p>Child records under a Scripted REST API. Each resource defines the HTTP method, URL path, and the server-side script that processes the request and builds the response.</p>
+          </div>
+          <div class="term-card">
+            <h4>Request/Response Objects</h4>
+            <p>Within the script, use <code>request</code> to read headers, query params, and body; use <code>response</code> to set the status code, headers, and response body.</p>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Example Scripted REST API resource script
+(function process(request, response) {
+  var incidentNum = request.queryParams.number[0];
+  var gr = new GlideRecord('incident');
+  gr.addQuery('number', incidentNum);
+  gr.query();
+  if (gr.next()) {
+    response.setStatus(200);
+    response.setContentType('application/json');
+    response.setBody(JSON.stringify({
+      number: gr.number.toString(),
+      state: gr.state.toString(),
+      short_description: gr.short_description.toString()
+    }));
+  } else {
+    response.setStatus(404);
+    response.setBody(JSON.stringify({ error: 'Incident not found' }));
+  }
+})(request, response);</code></pre>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Table API vs. Scripted REST:</strong> Use the <strong>Table API</strong> for standard CRUD operations on a single table. Use <strong>Scripted REST APIs</strong> when you need custom logic, aggregated data, or a specific interface contract that does not match standard table operations.
+        </div>
+      </div>
+
+      <!-- Section 7: Email Integration -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Email Integration</h2>
+        <p>Email is a foundational integration channel in ServiceNow — used both for receiving requests and for sending notifications. Email integration is configured at the instance level and operates independently of REST/SOAP.</p>
+
+        <h3>Inbound Email</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Inbound Email Actions</h4>
+            <p>Rules that process incoming emails and take automated actions — create records, update existing records, add work notes, or trigger workflows based on email content.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate to: <strong>System Policy &gt; Email &gt; Inbound Actions</strong></p>
+          </div>
+          <div class="term-card">
+            <h4>Watermark Matching</h4>
+            <p>ServiceNow embeds a unique watermark in outbound emails. When a reply arrives, the watermark is used to match the reply to the correct ServiceNow record and automatically update it.</p>
+          </div>
+          <div class="term-card">
+            <h4>POP3 / IMAP Configuration</h4>
+            <p>ServiceNow polls an inbound email mailbox using POP3 or IMAP. Emails retrieved from this mailbox are processed by Inbound Email Actions.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate to: <strong>System Mailboxes &gt; Inbound</strong></p>
+          </div>
+        </div>
+
+        <h3>Outbound Email</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Notification Rules</h4>
+            <p>Trigger-based rules that automatically send emails when specific conditions are met on a record (e.g., Incident assigned, Priority changed to Critical).</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate to: <strong>System Notification &gt; Notifications</strong></p>
+          </div>
+          <div class="term-card">
+            <h4>Email Templates</h4>
+            <p>Reusable HTML/text templates for email body content. Variables pull dynamic data from the triggering record (e.g., <code>${number}</code>, <code>${short_description}</code>).</p>
+          </div>
+          <div class="term-card">
+            <h4>SMTP Configuration</h4>
+            <p>Outbound email is sent via SMTP. Configured at the instance level under <strong>System Mailboxes &gt; Outbound</strong>. ServiceNow can use its own SMTP relay or a customer-provided mail server.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 8: MID Server -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>MID Server</h2>
+        <p>The Management, Instrumentation, and Discovery (MID) Server is a <strong>Java application</strong> that runs on a server within a customer's internal network. It acts as a secure bridge between the ServiceNow cloud instance and systems inside a private network that are not directly accessible from the internet.</p>
+
+        <h3>When Is a MID Server Required?</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>JDBC Connections</h4>
+            <p>Direct database connections (SQL Server, Oracle, MySQL) to internal databases. The MID Server executes the database queries on behalf of ServiceNow.</p>
+          </div>
+          <div class="term-card">
+            <h4>LDAP / Active Directory</h4>
+            <p>User import and authentication against internal directory services that are not exposed to the internet.</p>
+          </div>
+          <div class="term-card">
+            <h4>Internal Network REST</h4>
+            <p>Outbound REST calls to APIs hosted inside the corporate network (non-publicly accessible endpoints).</p>
+          </div>
+          <div class="term-card">
+            <h4>Discovery &amp; CMDB</h4>
+            <p>Network scanning and device discovery within internal subnets. The MID Server performs the scanning and reports findings back to ServiceNow.</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — MID Server Triggers:</strong> A MID Server is required any time ServiceNow needs to communicate with a system that is <strong>inside a private/internal network</strong> and not reachable from the public internet. Memorize these specific cases: <strong>JDBC, LDAP, internal REST, and Discovery</strong>.
+        </div>
+      </div>
+
+      <!-- Section 9: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 9</div>
+        <h2>Key Exam Facts &amp; Traps</h2>
+        <p>This section consolidates the highest-priority integration facts that appear on CSA exam questions.</p>
+
+        <div class="callout-exam">
+          <strong>Fact 1 — Table API is the most common inbound method:</strong> When an external system needs to create or update records in ServiceNow, the answer is almost always the <strong>Table API</strong> using REST. Endpoint: <code>/api/now/table/{tableName}</code>.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 2 — Outbound REST lives in sys_rest_message:</strong> When ServiceNow needs to call an external REST API, the configuration is stored in the <strong>sys_rest_message</strong> table. Do not confuse this with the Table API (which handles inbound calls).
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 3 — OAuth 2.0 is the preferred auth:</strong> For modern integrations, <strong>OAuth 2.0</strong> is the preferred authentication method. Basic Auth is acceptable for testing but not recommended for production. Know that OAuth uses access tokens, not raw credentials.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 4 — MID Server = internal network access:</strong> If an exam question mentions connecting to an internal database, on-premises LDAP, or a REST API behind a firewall, the answer involves a <strong>MID Server</strong>. No MID Server = no connection to private network resources.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 5 — IntegrationHub requires a license:</strong> Integration Hub (spokes) is <strong>NOT part of the base platform</strong>. The exam may try to trick you into thinking spokes are always available — they require a separate IntegrationHub license purchase.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 6 — Scripted REST vs. Table API:</strong> The <strong>Table API</strong> handles standard CRUD on any table. <strong>Scripted REST APIs</strong> (<code>sys_ws_definition</code>) expose custom logic as a REST endpoint — use when the Table API is not sufficient for the required operation.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 7 — WSDL = SOAP:</strong> <strong>WSDL</strong> (Web Services Description Language) is always associated with <strong>SOAP</strong>, not REST. If an exam question mentions WSDL, the integration is SOAP-based. WSDL is available at <code>&lt;table&gt;.do?WSDL</code>.
+        </div>
+
+        <h3>Integration Methods Quick Reference</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Integration Type</th>
+              <th>Direction</th>
+              <th>Table / Location</th>
+              <th>Key Fact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Table API (REST)</strong></td>
+              <td>Inbound</td>
+              <td><code>/api/now/table/{table}</code></td>
+              <td>Most common inbound method; full CRUD</td>
+            </tr>
+            <tr>
+              <td><strong>REST Message</strong></td>
+              <td>Outbound</td>
+              <td><code>sys_rest_message</code></td>
+              <td>Configured outbound REST calls from ServiceNow</td>
+            </tr>
+            <tr>
+              <td><strong>SOAP (Inbound)</strong></td>
+              <td>Inbound</td>
+              <td><code>sys_web_service</code></td>
+              <td>Legacy; WSDL at <code>table.do?WSDL</code></td>
+            </tr>
+            <tr>
+              <td><strong>SOAP Message</strong></td>
+              <td>Outbound</td>
+              <td><code>sys_soap_message</code></td>
+              <td>Configured outbound SOAP calls from ServiceNow</td>
+            </tr>
+            <tr>
+              <td><strong>Scripted REST API</strong></td>
+              <td>Inbound</td>
+              <td><code>sys_ws_definition</code></td>
+              <td>Custom endpoints; use when Table API insufficient</td>
+            </tr>
+            <tr>
+              <td><strong>Integration Hub</strong></td>
+              <td>Outbound / Both</td>
+              <td>Flow Designer &gt; Spokes</td>
+              <td>No-code; requires IntegrationHub license</td>
+            </tr>
+            <tr>
+              <td><strong>Email (Inbound)</strong></td>
+              <td>Inbound</td>
+              <td>System Policy &gt; Email &gt; Inbound Actions</td>
+              <td>Creates/updates records from email; POP3/IMAP</td>
+            </tr>
+            <tr>
+              <td><strong>Email (Outbound)</strong></td>
+              <td>Outbound</td>
+              <td>System Notification &gt; Notifications</td>
+              <td>Notification rules; SMTP; email templates</td>
+            </tr>
+            <tr>
+              <td><strong>MID Server</strong></td>
+              <td>Bridge</td>
+              <td>On-premises agent</td>
+              <td>Required for JDBC, LDAP, internal REST, Discovery</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="02-xml-migration.html" class="btn btn-secondary">← XML Migration</a>
+          <a href="../../part6-process-automation/topics/01-ui-policies-actions.html" class="btn btn-primary">Part 6: UI Policies &amp; Actions →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p5-integration-flows', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p5-integration-flows')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,755 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tables &amp; System Dictionary | ServiceNow CSA Part 2</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+
+    .field-types-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+    .field-types-table th { background:rgba(139,92,246,0.18); color:var(--violet-300,#c4b5fd); padding:var(--space-2) var(--space-3); text-align:left; font-weight:600; border-bottom:1px solid rgba(139,92,246,0.3); }
+    .field-types-table td { padding:var(--space-2) var(--space-3); border-bottom:1px solid var(--border-subtle,rgba(255,255,255,0.07)); vertical-align:top; }
+    .field-types-table tr:hover td { background:rgba(139,92,246,0.07); }
+    .field-types-table td:first-child { font-family:var(--font-mono); color:var(--violet-300,#c4b5fd); font-weight:600; white-space:nowrap; }
+    .field-types-table td:nth-child(2) { color:var(--text-muted); font-size:0.78rem; font-family:var(--font-mono); }
+
+    .inheritance-chain { display:flex; flex-direction:column; gap:var(--space-2); margin:var(--space-4) 0; }
+    .chain-row { display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap; }
+    .chain-parent { background:rgba(139,92,246,0.25); border:1px solid rgba(139,92,246,0.5); border-radius:6px; padding:var(--space-2) var(--space-4); font-family:var(--font-mono); font-size:0.85rem; color:var(--violet-200,#ddd6fe); font-weight:700; }
+    .chain-arrow { color:var(--text-muted); font-size:1.1rem; }
+    .chain-child { background:rgba(255,255,255,0.05); border:1px solid var(--border-subtle,rgba(255,255,255,0.1)); border-radius:6px; padding:var(--space-1) var(--space-3); font-family:var(--font-mono); font-size:0.8rem; color:var(--text-secondary,#94a3b8); }
+    .chain-extra { font-size:0.75rem; color:var(--text-muted); font-style:italic; }
+
+    .table-key-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:var(--space-3); margin:var(--space-4) 0; }
+    .table-key-card { background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle,rgba(255,255,255,0.08)); border-radius:8px; padding:var(--space-3) var(--space-4); }
+    .table-key-card .tbl-name { font-family:var(--font-mono); color:var(--violet-300,#c4b5fd); font-size:0.85rem; font-weight:700; margin-bottom:2px; }
+    .table-key-card .tbl-label { color:var(--text-primary,#e2e8f0); font-size:0.9rem; font-weight:600; }
+    .table-key-card .tbl-stores { color:var(--text-muted); font-size:0.78rem; margin-top:4px; }
+    .table-key-card.highlight-task { border-color:rgba(139,92,246,0.4); background:rgba(139,92,246,0.08); }
+
+    .steps-list { counter-reset:steps; list-style:none; padding:0; margin:var(--space-4) 0; display:flex; flex-direction:column; gap:var(--space-3); }
+    .steps-list li { counter-increment:steps; display:flex; gap:var(--space-3); align-items:flex-start; }
+    .steps-list li::before { content:counter(steps); display:flex; align-items:center; justify-content:center; min-width:28px; height:28px; background:rgba(139,92,246,0.25); border:1px solid rgba(139,92,246,0.5); border-radius:50%; font-weight:700; font-size:0.8rem; color:var(--violet-300,#c4b5fd); flex-shrink:0; margin-top:1px; }
+
+    .choice-demo { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin:var(--space-4) 0; }
+    .choice-side { background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle,rgba(255,255,255,0.08)); border-radius:8px; padding:var(--space-4); }
+    .choice-side h4 { margin:0 0 var(--space-3) 0; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+    .choice-row { display:flex; justify-content:space-between; align-items:center; padding:var(--space-1) 0; border-bottom:1px solid var(--border-subtle,rgba(255,255,255,0.05)); font-size:0.85rem; }
+    .choice-row:last-child { border-bottom:none; }
+    .choice-val { font-family:var(--font-mono); color:var(--amber-400,#fbbf24); }
+    .choice-lbl { color:var(--text-primary,#e2e8f0); }
+
+    @media(max-width:640px) {
+      .choice-demo { grid-template-columns:1fr; }
+      .table-key-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Tables &amp; Dictionary</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- TOPIC HEADER -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🔧 Part 2 · Topic 2 of 3</div>
+        <h1 class="topic-title">Tables &amp; System Dictionary</h1>
+        <div class="topic-meta">
+          <span class="topic-meta-item">⏱ ~55 min read</span>
+          <span class="topic-meta-item">📋 6 sections</span>
+          <span class="topic-meta-item">🎯 High exam weight</span>
+        </div>
+      </div>
+
+      <!-- SECTION 1: WHAT ARE TABLES -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>What Are Tables?</h2>
+
+        <p>ServiceNow is fundamentally a <strong>database platform</strong>. Every piece of data — incidents, users, CIs, knowledge articles, system properties — lives in a database table. Understanding how tables work is the foundation of everything else in the platform.</p>
+
+        <p>Tables have <strong>columns</strong> (fields) and <strong>rows</strong> (records). To navigate directly to any table's list view, type the table name followed by <code>.list</code> in the Application Navigator filter (e.g., <code>incident.list</code>, <code>sys_user.list</code>).</p>
+
+        <div class="callout callout-analogy">
+          <strong>Analogy:</strong> A ServiceNow table is exactly like a database table or Excel spreadsheet. Each row is one record, each column is a field. The <code>incident</code> table has one row per incident ticket — with columns for number, state, priority, description, and so on.
+        </div>
+
+        <p>Tables are themselves records in ServiceNow — every table definition is stored in the <strong><code>sys_db_object</code></strong> table. You can navigate there with <code>sys_db_object.list</code> to see every table in the instance.</p>
+
+        <h3>Table Naming Conventions</h3>
+        <p>Table names use <strong>snake_case</strong> (lowercase with underscores). The naming often reflects ownership or grouping:</p>
+        <ul>
+          <li><code>sys_</code> prefix — core system tables (e.g., <code>sys_user</code>, <code>sys_properties</code>)</li>
+          <li><code>sc_</code> prefix — Service Catalog tables (e.g., <code>sc_request</code>, <code>sc_req_item</code>)</li>
+          <li><code>cmdb_</code> prefix — Configuration Management DB (e.g., <code>cmdb_ci</code>)</li>
+          <li><code>kb_</code> prefix — Knowledge Base (e.g., <code>kb_knowledge</code>)</li>
+          <li>No prefix — core ITSM tables (e.g., <code>incident</code>, <code>problem</code>, <code>change_request</code>)</li>
+        </ul>
+
+        <h3>Key Tables to Know by Heart</h3>
+        <div class="table-key-grid">
+          <div class="table-key-card highlight-task">
+            <div class="tbl-name">task</div>
+            <div class="tbl-label">Task</div>
+            <div class="tbl-stores">Parent of ALL task-type records — foundational table</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">incident</div>
+            <div class="tbl-label">Incident</div>
+            <div class="tbl-stores">Incident records (INC prefix)</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">problem</div>
+            <div class="tbl-label">Problem</div>
+            <div class="tbl-stores">Problem records (PRB prefix)</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">change_request</div>
+            <div class="tbl-label">Change</div>
+            <div class="tbl-stores">Change requests (CHG prefix)</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">sc_request</div>
+            <div class="tbl-label">Request</div>
+            <div class="tbl-stores">Service catalog requests (REQ prefix)</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">sc_req_item</div>
+            <div class="tbl-label">Requested Item</div>
+            <div class="tbl-stores">Catalog items ordered (RITM prefix)</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">sc_task</div>
+            <div class="tbl-label">Catalog Task</div>
+            <div class="tbl-stores">Tasks created under RITMs (SCTASK prefix)</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">sys_user</div>
+            <div class="tbl-label">User</div>
+            <div class="tbl-stores">User accounts and profiles</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">sys_user_group</div>
+            <div class="tbl-label">Group</div>
+            <div class="tbl-stores">Assignment groups and teams</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">core_company</div>
+            <div class="tbl-label">Company</div>
+            <div class="tbl-stores">Company / organization records</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">cmdb_ci</div>
+            <div class="tbl-label">Configuration Item</div>
+            <div class="tbl-stores">Base class for all CIs in the CMDB</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">kb_knowledge</div>
+            <div class="tbl-label">Knowledge</div>
+            <div class="tbl-stores">Knowledge base articles</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">sysapproval_approver</div>
+            <div class="tbl-label">Approval</div>
+            <div class="tbl-stores">Approval records for workflows</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">sys_properties</div>
+            <div class="tbl-label">System Property</div>
+            <div class="tbl-stores">Instance-wide configuration settings</div>
+          </div>
+          <div class="table-key-card">
+            <div class="tbl-name">sys_update_xml</div>
+            <div class="tbl-label">Update XML</div>
+            <div class="tbl-stores">Individual records within update sets</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: TABLE INHERITANCE -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Table Inheritance <span style="font-size:0.7em;color:var(--amber-400);font-weight:600;background:rgba(251,191,36,0.12);padding:2px 8px;border-radius:4px;margin-left:8px;">CRITICAL CONCEPT</span></h2>
+
+        <p>ServiceNow uses <strong>object-oriented inheritance</strong> for tables. A <strong>parent table</strong> defines base fields shared by all its children. A <strong>child table</strong> extends the parent, adds its own fields, and <em>automatically inherits every field from the parent</em>.</p>
+
+        <div class="callout callout-exam">
+          <strong>Exam Critical:</strong> The <code>task</code> table is the parent of ALL task-type records. Fields defined on <code>task</code> — such as <code>number</code>, <code>state</code>, <code>assigned_to</code>, <code>priority</code>, <code>short_description</code>, and <code>description</code> — appear on <strong>all</strong> child tables because they are inherited.
+        </div>
+
+        <h3>The Task Inheritance Chain</h3>
+        <div class="inheritance-chain">
+          <div class="chain-row">
+            <div class="chain-parent">task</div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-child">incident</div>
+            <div class="chain-extra">+ caller_id, business_service</div>
+          </div>
+          <div class="chain-row">
+            <div class="chain-parent">task</div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-child">problem</div>
+            <div class="chain-extra">+ known_error, workaround</div>
+          </div>
+          <div class="chain-row">
+            <div class="chain-parent">task</div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-child">change_request</div>
+            <div class="chain-extra">+ type, risk, cab_required</div>
+          </div>
+          <div class="chain-row">
+            <div class="chain-parent">task</div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-child">sc_request</div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-child">sc_req_item</div>
+            <div class="chain-extra">+ cat_item, quantity</div>
+          </div>
+          <div class="chain-row">
+            <div class="chain-parent">task</div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-child">sc_task</div>
+            <div class="chain-extra">+ request_item (ref to RITM)</div>
+          </div>
+        </div>
+
+        <h3>Why Inheritance Matters Practically</h3>
+        <p>Inheritance has major consequences for security, reporting, and scripting:</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Shared Fields</div>
+            <div class="term-def">All task children share: <code>number</code>, <code>state</code>, <code>assigned_to</code>, <code>priority</code>, <code>short_description</code>, <code>description</code>, <code>opened_by</code>, <code>resolved_at</code>. These are defined once on <code>task</code> and inherited by all.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">ACL Inheritance</div>
+            <div class="term-def">An ACL (Access Control Rule) placed on the <code>task</code> table automatically protects <strong>all</strong> child tables. You don't need to duplicate security rules for each ITSM table.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Cross-Table Reporting</div>
+            <div class="term-def">A report targeting the <code>task</code> table can aggregate data from incidents, problems, and changes all at once — because they are all stored as task records at the parent level.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Business Rules</div>
+            <div class="term-def">A Business Rule on <code>task</code> fires for incidents, problems, and change requests. Be careful — rules on parent tables have very broad reach.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap:</strong> If you create an ACL on the <code>task</code> table, it <em>also</em> protects <code>incident</code>, <code>problem</code>, and <code>change_request</code>. Child tables inherit parent ACLs. This is one of the most commonly tested inheritance facts.
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap:</strong> You <strong>cannot delete a table that has child tables</strong>. You must remove or re-parent all child tables before the parent can be deleted.
+        </div>
+      </div>
+
+      <!-- SECTION 3: SYSTEM DICTIONARY -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>The System Dictionary (sys_dictionary)</h2>
+
+        <p>The <strong>System Dictionary</strong> is ServiceNow's master catalog of every field on every table. Each row in <code>sys_dictionary</code> defines one column on one table — its data type, constraints, default value, and behavior.</p>
+
+        <p>Navigate to it via: <strong>System Definition &gt; Dictionary</strong>, or type <code>sys_dictionary.list</code> in the navigator filter.</p>
+
+        <div class="callout callout-tip">
+          <strong>Navigation Tip:</strong> To find the dictionary entry for a specific field while looking at a form, right-click the field label and choose <strong>"Show in Dictionary"</strong>. This jumps straight to that field's sys_dictionary record.
+        </div>
+
+        <h3>Key Dictionary Field Properties</h3>
+
+        <div class="comparison-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>What It Controls</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Table name</code></td>
+                <td>Which table this field belongs to</td>
+                <td>Links the field definition to its table</td>
+              </tr>
+              <tr>
+                <td><code>Column name</code></td>
+                <td>The database column name (snake_case)</td>
+                <td>Cannot be changed after creation without risk</td>
+              </tr>
+              <tr>
+                <td><code>Type</code></td>
+                <td>Data type (String, Integer, Reference, etc.)</td>
+                <td>Determines storage, UI widget, and validation</td>
+              </tr>
+              <tr>
+                <td><code>Max length</code></td>
+                <td>Maximum characters allowed (String fields)</td>
+                <td>Default is 40 for most strings</td>
+              </tr>
+              <tr>
+                <td><code>Mandatory</code></td>
+                <td>Is this field required at the database level?</td>
+                <td>Dictionary mandatory vs. form-level mandatory</td>
+              </tr>
+              <tr>
+                <td><code>Default value</code></td>
+                <td>What value pre-populates on new records</td>
+                <td>Can use JavaScript or dynamic values</td>
+              </tr>
+              <tr>
+                <td><code>Read only</code></td>
+                <td>Can users edit this field?</td>
+                <td>Enforced at dictionary level, not just UI</td>
+              </tr>
+              <tr>
+                <td><code>Dependent</code></td>
+                <td>Show this field only when another field has a specific value</td>
+                <td>Used for conditional field visibility</td>
+              </tr>
+              <tr>
+                <td><code>Choices</code></td>
+                <td>For Choice fields — the list of valid dropdown values</td>
+                <td>Stored in sys_choice table (not sys_dictionary)</td>
+              </tr>
+              <tr>
+                <td><code>Reference</code></td>
+                <td>For Reference fields — which table the lookup points to</td>
+                <td>E.g., assigned_to references sys_user</td>
+              </tr>
+              <tr>
+                <td><code>Active</code></td>
+                <td>Whether this field is currently active/visible</td>
+                <td>Deactivating hides the field without deleting</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Creating a New Field (Column)</h3>
+        <p>There are two main methods to add a new field to a table:</p>
+
+        <ol class="steps-list">
+          <li>Navigate to the table's list view by typing <code>tablename.list</code> in the navigator (e.g., <code>incident.list</code>).</li>
+          <li>Right-click any column header in the list and select <strong>Configure → Table</strong>. This opens the table's field list.</li>
+          <li>Click the <strong>New</strong> button at the top of the field list to create a new field.</li>
+          <li>Fill in the required properties: <strong>Column label</strong>, <strong>Type</strong>, and optionally Column name, Max length, Default value, etc.</li>
+          <li>Save the field definition. The column is now added to the database table.</li>
+          <li>Go to <strong>Configure → Form Layout</strong> to drag the new field onto the form — <em>it won't appear automatically</em>.</li>
+        </ol>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap:</strong> Adding a field to <code>sys_dictionary</code> does <strong>NOT</strong> automatically add it to the form. You must separately go to Form Layout and drag the field into the form's sections. The field exists in the database but is hidden until you expose it via the layout.
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>Quick Method:</strong> The fastest way to add a field is from the list view — right-click a column header → Configure → Table. This opens the table definition with a new field form pre-populated with the correct table name already filled in.
+        </div>
+      </div>
+
+      <!-- SECTION 4: FIELD TYPES REFERENCE -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Field Types Reference — Comprehensive</h2>
+
+        <p>Every dictionary entry has a <strong>Type</strong>. The type controls the database storage format, the UI input widget displayed on forms, and how values are validated and queried.</p>
+
+        <div class="callout callout-exam">
+          <strong>Exam Critical:</strong> Reference fields store the <code>sys_id</code> of the referenced record, <strong>NOT</strong> the display value. When you see "John Smith" in an Assigned To field, the database column actually stores a 32-character sys_id like <code>6816f79cc0a8016401c5a33be04be441</code>. Scripts must use <code>.getReferenceValue()</code> to get the sys_id and <code>.getDisplayValue()</code> to get the readable name.
+        </div>
+
+        <div style="overflow-x:auto;margin:var(--space-4) 0;">
+          <table class="field-types-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>DB Storage</th>
+                <th>Input Widget</th>
+                <th>Example Use</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>String</td>
+                <td>VARCHAR</td>
+                <td>Single-line text box</td>
+                <td>Name, short description, subject</td>
+              </tr>
+              <tr>
+                <td>Integer</td>
+                <td>INT</td>
+                <td>Number input field</td>
+                <td>Priority (1–5), count, sequence</td>
+              </tr>
+              <tr>
+                <td>Float</td>
+                <td>FLOAT</td>
+                <td>Decimal number input</td>
+                <td>Score, percentage, rating</td>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td>TINYINT (0/1)</td>
+                <td>Checkbox</td>
+                <td>Active flag, mandatory, known error</td>
+              </tr>
+              <tr>
+                <td>Date</td>
+                <td>DATE</td>
+                <td>Date picker (calendar)</td>
+                <td>Due date, birth date, start date</td>
+              </tr>
+              <tr>
+                <td>Date/Time</td>
+                <td>DATETIME</td>
+                <td>Date + time picker</td>
+                <td>Opened at, resolved at, closed at</td>
+              </tr>
+              <tr>
+                <td>Duration</td>
+                <td>BIGINT (ms)</td>
+                <td>Duration picker (d h m s)</td>
+                <td>SLA duration, business elapsed time</td>
+              </tr>
+              <tr>
+                <td>Choice</td>
+                <td>VARCHAR</td>
+                <td>Dropdown / select list</td>
+                <td>State, category, impact, urgency</td>
+              </tr>
+              <tr>
+                <td>Reference</td>
+                <td>VARCHAR (sys_id)</td>
+                <td>Lookup popup / type-ahead</td>
+                <td>Assigned to (user), caller, CI</td>
+              </tr>
+              <tr>
+                <td>Glide List</td>
+                <td>VARCHAR (CSV sys_ids)</td>
+                <td>Multi-select lookup</td>
+                <td>Affected CIs, watch list members</td>
+              </tr>
+              <tr>
+                <td>Document ID</td>
+                <td>VARCHAR (sys_id)</td>
+                <td>Any-table lookup popup</td>
+                <td>Dynamic reference to any table's record</td>
+              </tr>
+              <tr>
+                <td>Translated Field</td>
+                <td>VARCHAR</td>
+                <td>Localized text input</td>
+                <td>Multi-language labels, descriptions</td>
+              </tr>
+              <tr>
+                <td>Journal</td>
+                <td>Separate journal table</td>
+                <td>Append-only textarea</td>
+                <td>Work notes, additional comments</td>
+              </tr>
+              <tr>
+                <td>HTML</td>
+                <td>CLOB</td>
+                <td>Rich text / WYSIWYG editor</td>
+                <td>Formatted descriptions, articles</td>
+              </tr>
+              <tr>
+                <td>URL</td>
+                <td>VARCHAR</td>
+                <td>Text field + external link icon</td>
+                <td>External links, documentation URLs</td>
+              </tr>
+              <tr>
+                <td>Email</td>
+                <td>VARCHAR</td>
+                <td>Text field (email format)</td>
+                <td>User email address</td>
+              </tr>
+              <tr>
+                <td>Phone</td>
+                <td>VARCHAR</td>
+                <td>Text field with formatting</td>
+                <td>User or company phone number</td>
+              </tr>
+              <tr>
+                <td>Currency</td>
+                <td>DECIMAL + currency code</td>
+                <td>Amount + currency selector</td>
+                <td>Cost fields, budget, price</td>
+              </tr>
+              <tr>
+                <td>Conditions</td>
+                <td>VARCHAR (encoded query)</td>
+                <td>Condition builder UI</td>
+                <td>Filter criteria, business rule conditions</td>
+              </tr>
+              <tr>
+                <td>Script</td>
+                <td>CLOB</td>
+                <td>Code editor (syntax highlight)</td>
+                <td>Business rule scripts, client scripts</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>Tip — Journal Fields:</strong> Journal fields (Work Notes, Comments) are special. They are <em>append-only</em> — each entry is stored as a separate record in a related journal table (<code>sys_journal_field</code>), not overwriting the previous value. This is why you can see the full history of all notes.
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>Tip — sys_id:</strong> Every record in ServiceNow has a <code>sys_id</code> — a 32-character hexadecimal globally unique identifier (GUID). It is the primary key for every table. You will see it in URLs, scripts, REST API responses, and update set XML everywhere.
+        </div>
+      </div>
+
+      <!-- SECTION 5: CHOICE FIELDS -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Choice Fields &amp; Choice Lists</h2>
+
+        <p>A <strong>Choice</strong> field presents users with a fixed dropdown list of options. It is one of the most common field types in ServiceNow, used for fields like State, Category, Impact, Urgency, and Priority.</p>
+
+        <p>Choice values are <em>not</em> stored in <code>sys_dictionary</code> — they live in the <strong><code>sys_choice</code></strong> table. Each row in <code>sys_choice</code> represents one option in one dropdown.</p>
+
+        <h3>Anatomy of a Choice Entry</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Table</div>
+            <div class="term-def">Which table this choice applies to (e.g., <code>incident</code>)</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Element</div>
+            <div class="term-def">The field name this choice belongs to (e.g., <code>state</code>)</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Value</div>
+            <div class="term-def">What is <strong>stored in the database</strong> (e.g., <code>1</code>, <code>2</code>, <code>6</code>)</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Label</div>
+            <div class="term-def">What the <strong>user sees</strong> in the dropdown (e.g., "New", "In Progress", "Resolved")</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Sequence</div>
+            <div class="term-def">The display order in the dropdown (lower number = higher in list)</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Language</div>
+            <div class="term-def">Supports localized labels per language code for internationalization</div>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Critical — Value vs Label:</strong> The <strong>value</strong> is what is stored in the database. The <strong>label</strong> is what users see on screen. For Incident State: Value <code>1</code> → Label "New", Value <code>2</code> → Label "In Progress", Value <code>6</code> → Label "Resolved", Value <code>7</code> → Label "Closed". Scripts always work with the <em>value</em>, not the label.
+        </div>
+
+        <h3>Value vs Label — Visual Example</h3>
+        <div class="choice-demo">
+          <div class="choice-side">
+            <h4>What the User Sees (Labels)</h4>
+            <div class="choice-row"><span class="choice-lbl">New</span></div>
+            <div class="choice-row"><span class="choice-lbl">In Progress</span></div>
+            <div class="choice-row"><span class="choice-lbl">On Hold</span></div>
+            <div class="choice-row"><span class="choice-lbl">Resolved</span></div>
+            <div class="choice-row"><span class="choice-lbl">Closed</span></div>
+            <div class="choice-row"><span class="choice-lbl">Cancelled</span></div>
+          </div>
+          <div class="choice-side">
+            <h4>What Is Stored in DB (Values)</h4>
+            <div class="choice-row"><span class="choice-val">1</span></div>
+            <div class="choice-row"><span class="choice-val">2</span></div>
+            <div class="choice-row"><span class="choice-val">3</span></div>
+            <div class="choice-row"><span class="choice-val">6</span></div>
+            <div class="choice-row"><span class="choice-val">7</span></div>
+            <div class="choice-row"><span class="choice-val">8</span></div>
+          </div>
+        </div>
+
+        <h3>Managing Choice Lists</h3>
+        <p>To view or edit the choices for a field:</p>
+        <ul>
+          <li>Right-click a Choice field on any form → <strong>"Show Choice List"</strong> — opens <code>sys_choice</code> filtered to that field</li>
+          <li>Navigate to <code>sys_choice.list</code> directly and filter by table and element</li>
+          <li>From the dictionary record for a Choice field, use the <strong>Choices</strong> related list at the bottom</li>
+        </ul>
+
+        <h3>Dependent Choice Lists</h3>
+        <p>ServiceNow supports <strong>dependent choices</strong> — a subset of choices shown based on the value of another field. For example, the <code>subcategory</code> dropdown can show only relevant options depending on what <code>category</code> was selected. This is configured in <code>sys_choice</code> using the <strong>Dependent value</strong> field on each choice record.</p>
+      </div>
+
+      <!-- SECTION 6: FORMS & LAYOUTS -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Tables, Forms &amp; Configuration</h2>
+
+        <h3>Form Layout Editor</h3>
+        <p>The <strong>Form Layout</strong> editor controls which fields appear on a form, their order, and how they are organized into sections. Adding a field to the database does not show it on the form — you must use Form Layout to expose it.</p>
+
+        <p>To access Form Layout:</p>
+        <ul>
+          <li>While viewing a form: right-click the form header → <strong>Configure → Form Layout</strong></li>
+          <li>Or: right-click any field label → <strong>Configure → Form Layout</strong></li>
+        </ul>
+
+        <p>In the Form Layout editor you can:</p>
+        <ul>
+          <li>Drag fields from <strong>Available</strong> (left) to <strong>Selected</strong> (right) to add them to the form</li>
+          <li>Create new collapsible <strong>sections</strong> to organize fields visually</li>
+          <li>Set fields as mandatory at the <em>form level</em> (different from dictionary-level mandatory)</li>
+          <li>Arrange fields in a 1-column or 2-column layout per section</li>
+          <li>Remove fields from the form without deleting them from the database</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <strong>Exam Critical — Form Mandatory vs Dictionary Mandatory:</strong> There are two separate mandatory settings. <strong>Dictionary mandatory</strong> (in sys_dictionary) enforces the requirement at the database/API level — you cannot save without a value regardless of the form. <strong>Form-level mandatory</strong> (set in Form Layout) only enforces it through the UI form, and only in that specific view. Scripts and APIs can still bypass form-level mandatory.
+        </div>
+
+        <h3>Form Views</h3>
+        <p>The same table can have <strong>multiple views</strong> of its form, each with different fields and layouts. Common built-in views include:</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Default</div>
+            <div class="term-def">The standard view shown to most users. Typically the most complete layout for IT staff.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">ITIL</div>
+            <div class="term-def">Shown to users with the ITIL role. Often has advanced fields like SLA timers, closure info, and extended attributes.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">ESS</div>
+            <div class="term-def">End-User Self Service view — simplified form shown to end users submitting tickets. Fewer technical fields.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Mobile</div>
+            <div class="term-def">Optimized for mobile devices. Minimal fields, large touch targets, essential information only.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap:</strong> Form Layout changes are <strong>view-specific</strong>. Adding a field to the "Default" view does <em>not</em> add it to the "ITIL" view, "ESS" view, or any other view. You must configure each view separately. Always confirm <em>which view</em> you are editing before saving.
+        </div>
+
+        <h3>List Layout</h3>
+        <p>Separate from Form Layout, the <strong>List Layout</strong> controls which columns appear in the list view (<code>tablename.list</code>). Access it via right-clicking a column header → <strong>Configure → List Layout</strong>. Like Form Layout, list layouts are also per-view.</p>
+
+        <h3>Script Includes (Brief Overview)</h3>
+        <p>The <strong><code>sys_script_include</code></strong> table stores reusable JavaScript class and function libraries. Script Includes are not fields or forms — they are code modules that can be called from Business Rules, Client Scripts, REST APIs, and other server-side scripts. Each Script Include has a <strong>Name</strong> (the class/function name), <strong>Script</strong> (the code), and an <strong>API Name</strong> used to invoke it.</p>
+
+        <h3>Quick Reference — Key Navigation Shortcuts</h3>
+        <div class="comparison-table">
+          <table>
+            <thead>
+              <tr>
+                <th>What you want</th>
+                <th>How to get there</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>View all records in a table</td>
+                <td>Type <code>tablename.list</code> in navigator</td>
+              </tr>
+              <tr>
+                <td>Open a new record form</td>
+                <td>Type <code>tablename.do</code> in navigator</td>
+              </tr>
+              <tr>
+                <td>See all tables in the instance</td>
+                <td>Navigate to <code>sys_db_object.list</code></td>
+              </tr>
+              <tr>
+                <td>Open the System Dictionary</td>
+                <td>System Definition → Dictionary or <code>sys_dictionary.list</code></td>
+              </tr>
+              <tr>
+                <td>Edit a specific field's dictionary entry</td>
+                <td>Right-click field label on form → Show in Dictionary</td>
+              </tr>
+              <tr>
+                <td>Edit form layout</td>
+                <td>Right-click form header → Configure → Form Layout</td>
+              </tr>
+              <tr>
+                <td>Edit list columns</td>
+                <td>Right-click column header → Configure → List Layout</td>
+              </tr>
+              <tr>
+                <td>View choice values for a dropdown</td>
+                <td>Right-click Choice field on form → Show Choice List</td>
+              </tr>
+              <tr>
+                <td>Add a new field to a table</td>
+                <td>Right-click column header → Configure → Table → New</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Summary — Must-Know Facts:</strong>
+          <ul style="margin:var(--space-2) 0 0 0;padding-left:var(--space-5);">
+            <li>The <code>task</code> table is the parent of <code>incident</code>, <code>problem</code>, <code>change_request</code>, <code>sc_request</code>, <code>sc_req_item</code>, and <code>sc_task</code></li>
+            <li>Child tables inherit ALL fields and ACLs from their parent table</li>
+            <li>Every field definition lives in <code>sys_dictionary</code></li>
+            <li>Choice values live in <code>sys_choice</code>, not <code>sys_dictionary</code></li>
+            <li>Reference fields store sys_ids, not display values</li>
+            <li>Adding a field to sys_dictionary ≠ adding it to the form (must use Form Layout separately)</li>
+            <li>Form Layout changes are view-specific — ITIL view ≠ Default view</li>
+            <li>Dictionary mandatory enforces at DB level; form mandatory enforces at UI level only</li>
+            <li>Every record has a 32-character <code>sys_id</code> as its unique primary key</li>
+            <li>You cannot delete a parent table that still has child tables</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- COMPLETE BAR -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="01-users-groups-roles.html" class="btn btn-secondary">← Users &amp; Roles</a>
+          <a href="03-instance-security.html" class="btn btn-secondary">Security &amp; Access Controls →</a>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p2-tables-dictionary', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p2-tables-dictionary')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

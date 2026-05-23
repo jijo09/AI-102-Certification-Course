@@ -1,0 +1,688 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UI Policies &amp; UI Actions | ServiceNow CSA Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span>
+        <span class="current">UI Policies &amp; UI Actions</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">⚙️ Part 6 · Topic 1 of 4</div>
+        <h1 class="topic-title">UI Policies &amp; UI Actions</h1>
+        <div class="topic-meta">
+          <span>⏱ ~55 min read</span>
+          <span>·</span>
+          <span>Part 6 — Self-Service &amp; Automation · 20% Exam Weight</span>
+        </div>
+        <div class="callout-tip" style="margin-top:var(--space-4)">
+          <strong>Exam Weight Alert:</strong> Part 6 carries <strong>20% of the CSA exam</strong>. UI Policies and UI Actions are among the most frequently tested topics — expect multiple questions distinguishing UI Policies from Client Scripts, and UI Policies from ACLs. Master the layer boundaries.
+        </div>
+      </div>
+
+      <!-- Section 1: UI Policy Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>UI Policy Overview</h2>
+        <p>A UI Policy is a no-code mechanism for dynamically controlling field behavior on a ServiceNow form. Rather than writing JavaScript, administrators define rules that automatically make fields mandatory, read-only, or hidden based on conditions evaluated in the browser.</p>
+
+        <h3>Key Characteristics</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🖥️</div>
+            <h4>Client-Side Execution</h4>
+            <p>UI Policies run entirely in the <strong>browser</strong>. They execute as JavaScript client-side, which means they fire instantly when a condition changes — no server round-trip required.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Consequence: they can be bypassed by REST API calls or direct database access.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📋</div>
+            <h4>Form-Scoped</h4>
+            <p>UI Policies apply only to <strong>forms</strong>. They have no effect on list views, integrations, API calls, background scripts, or any non-form data access path.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Use ACLs when you need enforcement across all access paths.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">⚡</div>
+            <h4>Reactive to Field Changes</h4>
+            <p>Policies can trigger <strong>when the form first loads</strong> and/or whenever a <strong>watched field changes</strong> its value, providing a responsive form experience.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Configure via the "On load" checkbox and the condition field references.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🗄️</div>
+            <h4>Storage Table</h4>
+            <p>UI Policies are stored in the <code>sys_ui_policy</code> table. Navigate via <strong>System UI &gt; UI Policies</strong> or type <code>sys_ui_policy.list</code> in the filter navigator.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Related actions stored in: <code>sys_ui_policy_action</code></p>
+          </div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Mental Model:</strong> Think of UI Policies as "smart form rules" — they watch for specific conditions on the form and instantly adjust which fields the user must fill in, can edit, or can see. They are about <strong>user experience and form behavior</strong>, not security enforcement.
+        </div>
+      </div>
+
+      <!-- Section 2: UI Policy Anatomy -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>UI Policy Anatomy</h2>
+        <p>Every UI Policy record has a set of header fields that define when and how it activates, plus a related list of UI Policy Actions that specify what happens to individual fields.</p>
+
+        <h3>Policy-Level Fields</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Table</strong></td>
+              <td>Which table this policy applies to</td>
+              <td>e.g., <code>incident</code> — policy only fires on forms for that table</td>
+            </tr>
+            <tr>
+              <td><strong>Short description</strong></td>
+              <td>Human-readable name for the policy</td>
+              <td>Used to identify the policy in lists and update sets</td>
+            </tr>
+            <tr>
+              <td><strong>Active</strong></td>
+              <td>Checkbox — enables or disables the policy</td>
+              <td>Inactive policies are completely ignored at runtime</td>
+            </tr>
+            <tr>
+              <td><strong>Conditions</strong></td>
+              <td>Filter defining when the policy activates</td>
+              <td>Built using the condition builder; evaluated against the current record's field values</td>
+            </tr>
+            <tr>
+              <td><strong>On load</strong></td>
+              <td>Run the policy when the form first loads</td>
+              <td>Without this, the policy only fires when a condition-watched field changes</td>
+            </tr>
+            <tr>
+              <td><strong>Reverse if false</strong></td>
+              <td>Undo all policy actions when the condition becomes false</td>
+              <td>Critical: without this, fields stay in the policy state even after condition clears</td>
+            </tr>
+            <tr>
+              <td><strong>Applies on</strong></td>
+              <td>Client (default) or Server</td>
+              <td>Server execution is rare and uses a different execution context</td>
+            </tr>
+            <tr>
+              <td><strong>Order</strong></td>
+              <td>Numeric priority — lower number runs first</td>
+              <td>When multiple policies affect the same field, order determines which wins</td>
+            </tr>
+            <tr>
+              <td><strong>Global</strong></td>
+              <td>Apply to all views or a specific form view</td>
+              <td>Global policies fire regardless of which form view is active</td>
+            </tr>
+            <tr>
+              <td><strong>Inherit</strong></td>
+              <td>Apply to child tables that extend this table</td>
+              <td>Useful for policies on base tables like <code>task</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — "Reverse if false":</strong> This option tells the policy to <strong>undo its actions</strong> when the condition is no longer true. Example: a policy makes "Resolution Notes" mandatory when State = Resolved. If the agent changes State back to In Progress, "Reverse if false" will un-mandate the field. Without it, the field stays mandatory even after the condition clears.
+        </div>
+
+        <div class="callout-tip">
+          <strong>Order Priority:</strong> When two UI Policies conflict on the same field, the one with the <strong>lower Order number runs first</strong>. If both fire, the last one to run wins. Plan your order numbers carefully when stacking policies on the same table.
+        </div>
+      </div>
+
+      <!-- Section 3: UI Policy Actions (Field-Level) -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>UI Policy Actions — Field-Level Control</h2>
+        <p>A UI Policy header defines the when and where. UI Policy Actions define the what — specifically, what changes to apply to individual fields when the policy condition is met.</p>
+
+        <h3>Action Structure</h3>
+        <p>Each UI Policy Action targets <strong>one field</strong> and independently controls three behavioral properties for that field:</p>
+
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+          <div class="term-card">
+            <h4>Mandatory</h4>
+            <p>Controls whether the field is required before the form can be saved.</p>
+            <ul style="font-size:0.85rem;margin:var(--space-2) 0 0 var(--space-4);line-height:2">
+              <li><strong>True</strong> — field is required</li>
+              <li><strong>False</strong> — field is not required</li>
+              <li><strong>Don't change</strong> — leave as currently set</li>
+            </ul>
+          </div>
+          <div class="term-card">
+            <h4>Read Only</h4>
+            <p>Controls whether the user can edit the field's value.</p>
+            <ul style="font-size:0.85rem;margin:var(--space-2) 0 0 var(--space-4);line-height:2">
+              <li><strong>True</strong> — field is read-only</li>
+              <li><strong>False</strong> — field is editable</li>
+              <li><strong>Don't change</strong> — leave as currently set</li>
+            </ul>
+          </div>
+          <div class="term-card">
+            <h4>Visible</h4>
+            <p>Controls whether the field is displayed on the form.</p>
+            <ul style="font-size:0.85rem;margin:var(--space-2) 0 0 var(--space-4);line-height:2">
+              <li><strong>True</strong> — field is shown</li>
+              <li><strong>False</strong> — field is hidden</li>
+              <li><strong>Don't change</strong> — leave as currently set</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Storage &amp; Navigation</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Actions are stored in the <code>sys_ui_policy_action</code> table</li>
+          <li>They appear as a <strong>related list</strong> at the bottom of each UI Policy record</li>
+          <li>You can add multiple actions to one policy — one row per field you want to control</li>
+          <li>A single policy can control many fields simultaneously</li>
+        </ul>
+
+        <h3>Practical Example</h3>
+        <div class="callout-concept">
+          <strong>Scenario:</strong> On the Incident form, when <strong>Priority = 1 - Critical</strong>, make the <strong>Short Description</strong> field mandatory and make the <strong>Impact</strong> field read-only.
+          <br><br>
+          <strong>Setup:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Create a UI Policy on table: <code>incident</code></li>
+            <li>Condition: <code>Priority is 1 - Critical</code></li>
+            <li>Check <strong>On load</strong> and <strong>Reverse if false</strong></li>
+            <li>Add Action 1: Field = <code>short_description</code>, Mandatory = <strong>True</strong></li>
+            <li>Add Action 2: Field = <code>impact</code>, Read Only = <strong>True</strong></li>
+          </ol>
+          <br>
+          Result: As soon as Priority is set to 1 - Critical (or the form loads with that value), Short Description becomes required and Impact locks. If Priority changes away from 1 - Critical, both revert.
+        </div>
+      </div>
+
+      <!-- Section 4: UI Policy vs Client Script -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>UI Policy vs. Client Script <span style="color:var(--accent);font-size:0.9rem">(High-Frequency Exam Topic)</span></h2>
+        <p>Both UI Policies and Client Scripts run client-side in the browser. The exam frequently tests when to use each — understanding the trade-offs is critical.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>UI Policy</th>
+              <th>Client Script</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Coding required</strong></td>
+              <td>None — fully declarative / no-code</td>
+              <td>Full JavaScript required</td>
+            </tr>
+            <tr>
+              <td><strong>Execution</strong></td>
+              <td>Client-side (browser)</td>
+              <td>Client-side (browser)</td>
+            </tr>
+            <tr>
+              <td><strong>Actions available</strong></td>
+              <td>Mandatory, Read Only, Visible — only these three</td>
+              <td>Any DOM/form manipulation, value setting, server calls, alerts, navigation</td>
+            </tr>
+            <tr>
+              <td><strong>Set field values</strong></td>
+              <td>No — cannot set a field's value</td>
+              <td>Yes — <code>g_form.setValue()</code></td>
+            </tr>
+            <tr>
+              <td><strong>Server lookups</strong></td>
+              <td>No</td>
+              <td>Yes — via <code>GlideAjax</code></td>
+            </tr>
+            <tr>
+              <td><strong>Complex conditions</strong></td>
+              <td>Limited — condition builder only</td>
+              <td>Full JavaScript logic: loops, regex, multi-field comparisons</td>
+            </tr>
+            <tr>
+              <td><strong>Trigger types</strong></td>
+              <td>On load, on field change (auto-detected from condition)</td>
+              <td>onLoad, onChange, onSubmit, onCellEdit</td>
+            </tr>
+            <tr>
+              <td><strong>Preferred when</strong></td>
+              <td>Simple show/hide, mandatory, read-only based on a condition</td>
+              <td>Setting values, complex logic, server lookups, validation on submit</td>
+            </tr>
+            <tr>
+              <td><strong>Storage table</strong></td>
+              <td><code>sys_ui_policy</code></td>
+              <td><code>sys_script_client</code></td>
+            </tr>
+            <tr>
+              <td><strong>Equivalent API calls</strong></td>
+              <td><em>(no-code equivalent of the below)</em></td>
+              <td><code>g_form.setMandatory()</code> / <code>g_form.setReadOnly()</code> / <code>g_form.setVisible()</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Decision Rule:</strong> Use a <strong>UI Policy</strong> when the requirement is limited to making fields mandatory, read-only, or visible/hidden based on a simple condition. Switch to a <strong>Client Script</strong> when you need to: set field values, call the server (GlideAjax), validate on submit, or implement logic that cannot be expressed in the condition builder.
+        </div>
+
+        <div class="callout-analogy">
+          <strong>Analogy:</strong> UI Policy is like a light switch — simple on/off for field behavior. Client Script is the full electrical panel — you can do anything, but you need to wire it yourself.
+        </div>
+
+        <h3>Client Script g_form Equivalents</h3>
+        <p>When you need UI Policy-style behavior inside a Client Script, use these <code>g_form</code> API methods:</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Make a field mandatory (true = mandatory, false = optional)
+g_form.setMandatory('short_description', true);
+
+// Make a field read-only (true = locked, false = editable)
+g_form.setReadOnly('impact', true);
+
+// Show or hide a field (true = visible, false = hidden)
+g_form.setVisible('resolution_notes', false);
+
+// Set a field's value (cannot be done with UI Policy alone)
+g_form.setValue('state', '6'); // Sets State to Resolved
+
+// Combined example: onLoad Client Script
+function onLoad() {
+  var priority = g_form.getValue('priority');
+  if (priority == '1') {
+    g_form.setMandatory('short_description', true);
+    g_form.setReadOnly('impact', true);
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Section 5: UI Policy vs ACL -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>UI Policy vs. ACL — The Layer Boundary</h2>
+        <p>This is perhaps the most important conceptual distinction on the entire CSA exam. UI Policies and ACLs can both make fields read-only or invisible, but they operate at fundamentally different layers with very different security implications.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>UI Policy</th>
+              <th>ACL (Access Control List)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Enforcement layer</strong></td>
+              <td>Presentation layer — browser/client</td>
+              <td>Database layer — server-side always</td>
+            </tr>
+            <tr>
+              <td><strong>Can be bypassed</strong></td>
+              <td><span style="color:var(--red-400)">YES</span> — REST API, scripts, integrations bypass it entirely</td>
+              <td><span style="color:var(--green-400)">NO</span> — enforced on every access path, no exceptions</td>
+            </tr>
+            <tr>
+              <td><strong>Read-only via UI Policy</strong></td>
+              <td>Field appears read-only on the form but CAN still be written via API</td>
+              <td>Field ACL with write deny: field is truly non-writable from any path</td>
+            </tr>
+            <tr>
+              <td><strong>Hidden via UI Policy</strong></td>
+              <td>Field is hidden visually but value is still transmitted in form data and readable via API</td>
+              <td>Field ACL with read deny: value is never transmitted or accessible</td>
+            </tr>
+            <tr>
+              <td><strong>True security control</strong></td>
+              <td><span style="color:var(--red-400)">No</span> — UX only</td>
+              <td><span style="color:var(--green-400)">Yes</span> — genuine enforcement</td>
+            </tr>
+            <tr>
+              <td><strong>Primary use</strong></td>
+              <td>Form UX: improve workflow, guide users, simplify complex forms</td>
+              <td>Data security: protect sensitive fields and records from unauthorized access</td>
+            </tr>
+            <tr>
+              <td><strong>Example use case</strong></td>
+              <td>Hide "Escalation Reason" field when Priority is not Critical</td>
+              <td>Prevent non-HR users from reading or writing salary-related fields</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-warning">
+          <strong>Critical Security Principle:</strong> A field set as <strong>read-only by a UI Policy is NOT protected</strong>. A developer making a REST API call, an integration, a background script, or even a knowledgeable user manipulating form data can still write to that field. If you need to truly prevent writes to a sensitive field, you <strong>must</strong> create an ACL with the write operation denied.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Scenario Pattern:</strong> "A company wants to ensure that only managers can modify the Salary field on the Employee record, even via API." — The answer is <strong>ACL</strong>, not UI Policy. Any answer involving UI Policy for security enforcement is wrong. UI Policies are presentation layer only.
+        </div>
+      </div>
+
+      <!-- Section 6: UI Actions -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>UI Actions</h2>
+        <p>UI Actions are configurable buttons, links, and context menu items that appear on forms and lists. They allow administrators and developers to expose custom functionality — from simple form saves to complex server-side workflows — as clickable elements in the ServiceNow UI.</p>
+
+        <h3>Key Facts</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Stored in the <code>sys_ui_action</code> table</li>
+          <li>Navigate via <strong>System UI &gt; UI Actions</strong> or type <code>sys_ui_action.list</code></li>
+          <li>Can run <strong>client-side JavaScript</strong> (browser) or <strong>server-side scripts</strong> (GlideRecord)</li>
+          <li>Appear on both <strong>forms</strong> (individual record views) and <strong>lists</strong> (table row views)</li>
+          <li>A <strong>Condition</strong> field controls when the action is visible to the user</li>
+          <li>An <strong>Action name</strong> provides a unique identifier used in scripts and ACLs</li>
+        </ul>
+
+        <h3>UI Action Types</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Form Button</h4>
+            <p>Appears as a button in the <strong>form action bar</strong> at the top/bottom of a record form.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: "Resolve", "Assign to Me", "Clone Incident" buttons on the Incident form.</p>
+          </div>
+          <div class="term-card">
+            <h4>Form Context Menu</h4>
+            <p>Appears when the user <strong>right-clicks</strong> on a form (the form's context menu).</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Used for less-frequently accessed actions that don't need a prominent button.</p>
+          </div>
+          <div class="term-card">
+            <h4>Form Link</h4>
+            <p>Appears as a <strong>hyperlink</strong> at the bottom of a form, typically in the related links section.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Suitable for navigation actions or secondary operations.</p>
+          </div>
+          <div class="term-card">
+            <h4>List Button</h4>
+            <p>Appears as a button in the <strong>list action bar</strong> — operates on selected rows in a list view.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: "Assign Selected" button on the Incident list.</p>
+          </div>
+          <div class="term-card">
+            <h4>List Context Menu</h4>
+            <p>Appears when the user right-clicks on a <strong>row in a list</strong>.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Good for row-level operations accessible without opening the full record.</p>
+          </div>
+          <div class="term-card">
+            <h4>List Link</h4>
+            <p>Appears as a link visible in <strong>list view rows</strong> or the list's related links section.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Less commonly used but available for navigational or lightweight operations.</p>
+          </div>
+        </div>
+
+        <h3>UI Action Fields</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Name</strong></td>
+              <td>Display label shown on the button or menu item</td>
+            </tr>
+            <tr>
+              <td><strong>Table</strong></td>
+              <td>Which table's forms/lists the action appears on</td>
+            </tr>
+            <tr>
+              <td><strong>Action name</strong></td>
+              <td>Unique internal identifier — used by scripts and referenced in ACLs controlling the action</td>
+            </tr>
+            <tr>
+              <td><strong>Active</strong></td>
+              <td>Enables or disables the action — inactive actions are invisible to all users</td>
+            </tr>
+            <tr>
+              <td><strong>Condition</strong></td>
+              <td>JavaScript expression evaluated to determine if the action is visible to the current user. If false, the button/link does not appear.</td>
+            </tr>
+            <tr>
+              <td><strong>Client</strong></td>
+              <td>Checkbox — if checked, the Script field runs client-side JavaScript in the browser</td>
+            </tr>
+            <tr>
+              <td><strong>Isolate script</strong></td>
+              <td>Run the server script in a separate thread (isolated from the main transaction)</td>
+            </tr>
+            <tr>
+              <td><strong>Script</strong></td>
+              <td>The JavaScript or server-side GlideRecord script to execute when the action is triggered</td>
+            </tr>
+            <tr>
+              <td><strong>Order</strong></td>
+              <td>Controls the display order of multiple actions on the same form/list</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 7: Client vs Server UI Actions -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Client vs. Server UI Actions &amp; Common Patterns</h2>
+        <p>UI Actions can execute code either in the browser (client) or on the server. Understanding when each runs and how they interact is a key exam topic.</p>
+
+        <h3>Client UI Action</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>The <strong>Client checkbox</strong> is checked on the UI Action record</li>
+          <li>Script runs as JavaScript in the <strong>user's browser</strong></li>
+          <li>Has access to <code>g_form</code>, <code>g_user</code>, <code>g_list</code>, <code>window</code>, DOM APIs</li>
+          <li>Can call <code>g_form.submit()</code> to trigger a server-side save after client validation</li>
+          <li>Cannot directly access GlideRecord — must use GlideAjax for server data lookups</li>
+          <li>Useful for: validation before save, setting field values, user confirmation dialogs, navigation</li>
+        </ul>
+
+        <h3>Server UI Action</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>The <strong>Client checkbox</strong> is unchecked — script runs on the <strong>server</strong></li>
+          <li>Has access to <code>current</code> (the active record), <code>gs</code> (GlideSystem), <code>GlideRecord</code></li>
+          <li>Used for: updating records, calling web services, running business logic, setting state</li>
+          <li>Can use <code>action.setRedirectURL()</code> to navigate the user after execution</li>
+        </ul>
+
+        <h3>Common UI Action Patterns</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>"Resolve" Button (Incident)</h4>
+            <p>Server-side action that sets <code>current.state = '6'</code> (Resolved) and <code>current.update()</code>. Condition: <code>current.state != 6</code> so it only shows on unresolved incidents.</p>
+          </div>
+          <div class="term-card">
+            <h4>Client Validation Before Submit</h4>
+            <p>Client-side action that checks field values, shows an alert if invalid, then calls <code>g_form.submit()</code> to proceed with save only if validation passes.</p>
+          </div>
+          <div class="term-card">
+            <h4>Context Menu Bulk Operation</h4>
+            <p>List context menu action that applies a category or assignment group update to all selected rows using a GlideRecord loop in server script.</p>
+          </div>
+          <div class="term-card">
+            <h4>"Assign to Me" Button</h4>
+            <p>Server-side action that sets <code>current.assigned_to = gs.getUserID()</code> and <code>current.update()</code>. Simple, common pattern seen on most task-based tables.</p>
+          </div>
+        </div>
+
+        <h3>Server UI Action Script Pattern</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Server-side UI Action — "Resolve Incident"
+// Table: incident | Client checkbox: UNCHECKED
+current.state = '6';           // Resolved
+current.close_code = 'Solved'; // Resolution code
+current.resolved_by = gs.getUserID();
+current.resolved_at = new GlideDateTime();
+current.update();
+
+// Redirect user to the incident list after resolution
+action.setRedirectURL('incident_list.do');</code></pre>
+        </div>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Client-side UI Action — validate before save
+// Table: incident | Client checkbox: CHECKED
+if (!g_form.getValue('short_description')) {
+  alert('Short Description is required before saving.');
+  return; // Stop — do not submit
+}
+g_form.submit(); // Proceed with save</code></pre>
+        </div>
+      </div>
+
+      <!-- Section 8: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Key Exam Facts &amp; Traps</h2>
+        <p>This section consolidates the highest-priority facts and the most common wrong-answer traps for UI Policies and UI Actions on the CSA exam.</p>
+
+        <div class="callout-exam">
+          <strong>Trap 1 — UI Policies Are NOT Security:</strong> UI Policies run <strong>client-side only</strong>. They cannot enforce security. A field made read-only or hidden by a UI Policy can still be written via REST API, integration, background script, or any non-form access. For real security, use an ACL.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 2 — "Reverse if false" is NOT automatic:</strong> When a UI Policy condition becomes false, fields do <strong>not automatically revert</strong> to their prior state unless you have explicitly checked <strong>Reverse if false</strong>. Without it, fields stay in their policy-applied state indefinitely within the session.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 3 — Order = Lower Number Runs First:</strong> UI Policy Order field uses <strong>ascending priority</strong>: a policy with Order 10 executes before a policy with Order 50. When multiple policies affect the same field, the last one to run (highest order number) typically wins, assuming all conditions are true.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 4 — UI Actions Can Be Server OR Client:</strong> UI Actions are NOT client-side only. They can run server-side scripts using GlideRecord. The <strong>Client checkbox</strong> on the UI Action record determines the execution context — unchecked means server-side.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 5 — Catalog UI Policies Are Different:</strong> UI Policies on standard forms use the <code>sys_ui_policy</code> table. <strong>Catalog UI Policies</strong> (for Service Catalog items and order guides) use the <code>catalog_ui_policy</code> table. They are separate records — a standard form UI Policy does NOT apply to Catalog item forms.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 6 — sys_ui_action vs sys_ui_policy:</strong> Get these tables straight for the exam:
+          <ul style="margin:var(--space-2) 0 0 var(--space-4);line-height:2">
+            <li><code>sys_ui_policy</code> — UI Policy headers (the "when" rules)</li>
+            <li><code>sys_ui_policy_action</code> — UI Policy Actions (the "what" field changes)</li>
+            <li><code>sys_ui_action</code> — UI Actions (buttons, links, menu items)</li>
+            <li><code>sys_script_client</code> — Client Scripts</li>
+          </ul>
+        </div>
+
+        <h3>Quick Reference Summary</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Table</th>
+              <th>Runs On</th>
+              <th>Can Set Values</th>
+              <th>Enforces Security</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>UI Policy</strong></td>
+              <td><code>sys_ui_policy</code></td>
+              <td>Client</td>
+              <td>No</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td><strong>Client Script</strong></td>
+              <td><code>sys_script_client</code></td>
+              <td>Client</td>
+              <td>Yes</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td><strong>UI Action (client)</strong></td>
+              <td><code>sys_ui_action</code></td>
+              <td>Client</td>
+              <td>Yes</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td><strong>UI Action (server)</strong></td>
+              <td><code>sys_ui_action</code></td>
+              <td>Server</td>
+              <td>Yes</td>
+              <td>Partial (via GlideRecord)</td>
+            </tr>
+            <tr>
+              <td><strong>ACL</strong></td>
+              <td><code>sys_security_acl</code></td>
+              <td>Server</td>
+              <td>N/A</td>
+              <td>Yes — all paths</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Putting It All Together — Decision Flow:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2.2">
+            <li>Need to make a field mandatory/read-only/hidden based on another field's value? → <strong>UI Policy</strong></li>
+            <li>Need to set a field's value or run complex conditional logic in the browser? → <strong>Client Script</strong></li>
+            <li>Need a button or menu item that triggers custom logic? → <strong>UI Action</strong></li>
+            <li>Need to protect a field from unauthorized writes at the database level? → <strong>ACL</strong></li>
+            <li>Need server-side record manipulation triggered by a button click? → <strong>UI Action (server-side, Client unchecked)</strong></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../part5-migration-integration/topics/03-integration-flows.html" class="btn btn-secondary">← Integration Flows</a>
+          <a href="02-business-rules.html" class="btn btn-primary">Business Rules →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p6-ui-policies-actions', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p6-ui-policies-actions')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

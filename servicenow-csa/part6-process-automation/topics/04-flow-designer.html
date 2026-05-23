@@ -1,0 +1,685 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flow Designer &amp; Process Automation | ServiceNow CSA Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span>
+        <span class="current">Flow Designer &amp; Process Automation</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">⚙️ Part 6 · Topic 4 of 4</div>
+        <h1 class="topic-title">Flow Designer &amp; Process Automation</h1>
+        <div class="topic-meta">
+          <span>⏱ ~65 min read</span>
+          <span>·</span>
+          <span>Self-Service &amp; Automation — 20% Exam Weight</span>
+        </div>
+        <div class="callout-tip" style="margin-top:var(--space-4)">
+          <strong>Scope:</strong> Flow Designer is ServiceNow's modern no-code/low-code automation platform, introduced in the Paris release. It replaces the legacy Workflow Editor for most use cases. The CSA exam tests understanding of triggers, actions, data pills, subflows, and the distinction between Flow Designer and the legacy Workflow Editor.
+        </div>
+      </div>
+
+      <!-- Section 1: Flow Designer Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Flow Designer Overview</h2>
+        <p>Flow Designer is ServiceNow's modern visual automation engine. It allows administrators and developers to build automated processes — without writing code — using a drag-and-drop interface of triggers, actions, and logic blocks.</p>
+
+        <h3>Core Characteristics</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🔁</div>
+            <h4>Modern Replacement</h4>
+            <p>Flow Designer is the <strong>modern replacement</strong> for the legacy Workflow Editor. While Workflow Editor is still supported, Flow Designer is the preferred tool for all new automation from the Paris release onward.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🖱️</div>
+            <h4>No-Code / Low-Code</h4>
+            <p>Flows are built visually using a point-and-click interface. No scripting is required for common automation patterns, though "Run Script" actions are available for advanced logic.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🖥️</div>
+            <h4>Server-Side Execution</h4>
+            <p>Flows run entirely on the <strong>server side</strong> — not in the browser. This is a critical exam distinction: unlike Client Scripts, Flow Designer logic executes on the ServiceNow server regardless of how the triggering event occurred.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📋</div>
+            <h4>Storage Table</h4>
+            <p>Flows are stored in the <code>sys_hub_flow</code> table. Navigate to Flow Designer via: <strong>Process Automation &gt; Flow Designer</strong> or type <code>flow_designer</code> in the Application Navigator filter.</p>
+          </div>
+        </div>
+
+        <h3>Anatomy of a Flow</h3>
+        <p>Every flow is built from three core building blocks that execute in sequence:</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Building Block</th>
+              <th>Purpose</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Trigger</strong></td>
+              <td>The event that <em>starts</em> the flow running</td>
+              <td>Record Created on <code>incident</code> table</td>
+            </tr>
+            <tr>
+              <td><strong>Actions</strong></td>
+              <td>The individual steps the flow <em>performs</em></td>
+              <td>Send Email, Create Record, Ask for Approval</td>
+            </tr>
+            <tr>
+              <td><strong>Flow Logic</strong></td>
+              <td><em>Controls path</em> — conditional branches and loops</td>
+              <td>If/Else branch, For Each loop, Wait for Condition</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Mental Model:</strong> Think of a flow as a recipe. The <strong>Trigger</strong> is what makes you start cooking (the event). The <strong>Actions</strong> are the individual steps in the recipe. The <strong>Flow Logic</strong> is the decision-making ("if no eggs, substitute flax") — branching and looping based on conditions.
+        </div>
+      </div>
+
+      <!-- Section 2: Flow Components In Depth -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Flow Components In Depth</h2>
+        <p>Understanding the distinct roles of each component type — and the reusability model — is essential for the CSA exam.</p>
+
+        <h3>Triggers</h3>
+        <p>A trigger defines <strong>what event fires the flow</strong>. Only one trigger exists per flow. The trigger also provides the initial data (for example, the triggering record) available to downstream actions.</p>
+
+        <h3>Actions</h3>
+        <p>Actions are the individual steps that do work. ServiceNow provides a large library of <strong>built-in actions</strong>. Custom actions can also be created and reused across flows.</p>
+
+        <h3>Flow Logic</h3>
+        <p>Flow Logic blocks control the execution path within a flow. They do not perform work themselves — they route which subsequent actions will execute.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>If / Else If / Else</h4>
+            <p>Evaluates a condition and routes to one of two or more branches. Only the matching branch executes — the others are skipped.</p>
+            <p style="font-size:0.8rem;margin-top:var(--space-2);color:var(--text-muted)">Example: If Priority = 1 (Critical), send a page; Else send a standard email.</p>
+          </div>
+          <div class="term-card">
+            <h4>For Each</h4>
+            <p>Loops over a list of records returned by a "Look Up Records" action and executes the same set of actions for each item in the list.</p>
+            <p style="font-size:0.8rem;margin-top:var(--space-2);color:var(--text-muted)">Example: For each open child incident, update its state to Resolved.</p>
+          </div>
+          <div class="term-card">
+            <h4>Wait for Condition</h4>
+            <p>Pauses flow execution until a specified condition becomes true — for example, waiting for an approver to respond before continuing.</p>
+            <p style="font-size:0.8rem;margin-top:var(--space-2);color:var(--text-muted)">Example: Wait until a related task record reaches Closed state.</p>
+          </div>
+        </div>
+
+        <h3>Data Pills</h3>
+        <p>Data Pills are one of the most important Flow Designer concepts for the exam. They are the mechanism for <strong>passing data between steps</strong>.</p>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — Data Pills:</strong> A Data Pill represents the <strong>output value of a previous step</strong>, made available as an <strong>input to a later step</strong>. You drag Data Pills from the output of one step and drop them onto the input field of another step. This is how data flows through the flow — you never hard-code values that came from a previous step when a Data Pill is available.
+        </div>
+
+        <p>For example: if a "Look Up Record" step finds an incident, the incident's <code>short_description</code> field becomes a Data Pill. You can then drag that pill into the "Subject" field of a "Send Email" action in a later step.</p>
+
+        <h3>Subflows</h3>
+        <p>Subflows are reusable multi-step sequences that can be called from within a flow or from another subflow. They are stored in the <code>sys_hub_subflow</code> table.</p>
+        <ul style="margin:var(--space-3) 0;padding-left:var(--space-6);line-height:2">
+          <li>Accept <strong>input variables</strong> passed in from the calling flow</li>
+          <li>Return <strong>output variables</strong> back to the calling flow</li>
+          <li>Promote reuse — define a sequence once, call it from many flows</li>
+          <li>Example: a "Create and Assign Task" subflow used across Incident, Change, and Problem flows</li>
+        </ul>
+
+        <h3>Action Types (Reusable Single Steps)</h3>
+        <p>Individual reusable action steps are stored in the <code>sys_hub_action_type</code> table. These are different from subflows — an action type is a <em>single step</em>, while a subflow is a <em>sequence of steps</em>.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Reusable Component</th>
+              <th>Table</th>
+              <th>Scope</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Subflow</strong></td>
+              <td><code>sys_hub_subflow</code></td>
+              <td>Multi-step reusable sequence; accepts inputs, returns outputs</td>
+            </tr>
+            <tr>
+              <td><strong>Action (Action Type)</strong></td>
+              <td><code>sys_hub_action_type</code></td>
+              <td>Single reusable step; the building blocks used inside flows and subflows</td>
+            </tr>
+            <tr>
+              <td><strong>Flow</strong></td>
+              <td><code>sys_hub_flow</code></td>
+              <td>Top-level automation; has a trigger; can call subflows and actions</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 3: Trigger Types -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Trigger Types</h2>
+        <p>The trigger is the entry point of every flow. ServiceNow provides several categories of triggers to cover most automation scenarios.</p>
+
+        <h3>Record-Based Triggers</h3>
+        <p>These triggers fire in response to changes on a specific table record. When configuring a record-based trigger, you specify the table and an optional condition that must also be true.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Created</h4>
+            <p>Fires when a new record is <strong>inserted</strong> into the specified table. Equivalent to a Business Rule set to "on insert."</p>
+          </div>
+          <div class="term-card">
+            <h4>Updated</h4>
+            <p>Fires when an existing record is <strong>modified</strong>. You can further filter to fire only when a specific field changes.</p>
+          </div>
+          <div class="term-card">
+            <h4>Deleted</h4>
+            <p>Fires when a record is <strong>removed</strong> from the specified table. Useful for cleanup or notification automation.</p>
+          </div>
+          <div class="term-card">
+            <h4>Created or Updated</h4>
+            <p>Fires on both insert and update. Commonly used when you want the same process to run regardless of whether the record is new or modified.</p>
+          </div>
+        </div>
+
+        <h3>Other Trigger Types</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Trigger Type</th>
+              <th>When It Fires</th>
+              <th>Common Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Schedule</strong></td>
+              <td>At a specified time or interval (daily, weekly, custom cron)</td>
+              <td>Nightly cleanup jobs, weekly report generation</td>
+            </tr>
+            <tr>
+              <td><strong>Application</strong></td>
+              <td>Triggered programmatically from another flow, subflow, or script</td>
+              <td>Chain flows together; call a flow from a Business Rule</td>
+            </tr>
+            <tr>
+              <td><strong>Inbound Email</strong></td>
+              <td>When an inbound email is received by the ServiceNow email handler</td>
+              <td>Auto-create an incident from a support email</td>
+            </tr>
+            <tr>
+              <td><strong>Service Catalog</strong></td>
+              <td>When a catalog item is ordered / submitted by a user</td>
+              <td>Fulfillment flow for a new laptop request</td>
+            </tr>
+            <tr>
+              <td><strong>Condition</strong></td>
+              <td>When a defined condition evaluates to true on a record</td>
+              <td>Escalate P1 incidents open more than 30 minutes</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Distinction — Trigger Condition vs. Flow Logic If/Else:</strong> The <strong>trigger condition</strong> determines whether the flow even starts (it is evaluated before the flow runs). The <strong>If/Else logic block</strong> controls which path the flow takes <em>after it has already started</em>. Do not confuse these two — the trigger decides "should this flow run?", If/Else decides "which branch should it follow?"
+        </div>
+      </div>
+
+      <!-- Section 4: Built-in Actions -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Built-in Actions</h2>
+        <p>ServiceNow ships with an extensive library of built-in actions covering the most common automation tasks. These can be used directly inside any flow or subflow without additional configuration.</p>
+
+        <h3>Record Management Actions</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Create Record</h4>
+            <p>Inserts a new record into any table. You specify the table and set field values — either hard-coded or via Data Pills from earlier steps.</p>
+          </div>
+          <div class="term-card">
+            <h4>Update Record</h4>
+            <p>Modifies an existing record. You supply the record (typically from a Data Pill) and specify which fields to change and what to set them to.</p>
+          </div>
+          <div class="term-card">
+            <h4>Delete Record</h4>
+            <p>Removes a record from a table. Use with care — typically combined with a condition or approval to prevent accidental deletions.</p>
+          </div>
+          <div class="term-card">
+            <h4>Look Up Record</h4>
+            <p>Finds a <strong>single record</strong> matching a specified condition. Returns the record as a Data Pill for use in later steps.</p>
+          </div>
+          <div class="term-card">
+            <h4>Look Up Records</h4>
+            <p>Finds <strong>multiple records</strong> matching a condition. Returns a list that can be iterated with a "For Each" logic block.</p>
+          </div>
+        </div>
+
+        <h3>Notification &amp; Communication Actions</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Send Email</h4>
+            <p>Sends an email notification. You can use Data Pills to dynamically populate the recipient, subject, and body from earlier step outputs.</p>
+          </div>
+          <div class="term-card">
+            <h4>Create Task</h4>
+            <p>Creates a Task record (or subclass) and assigns it to a user or group, with configurable due dates and descriptions.</p>
+          </div>
+          <div class="term-card">
+            <h4>Log</h4>
+            <p>Writes a message to the <strong>flow execution log</strong>. Invaluable for debugging — you can log variable values at key points in the flow.</p>
+          </div>
+        </div>
+
+        <h3>Approval Actions</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Ask for Approval</h4>
+            <p>Sends an approval request to a <strong>single approver or a group</strong>. The flow <strong>pauses and waits</strong> for a response before proceeding. Outcomes: Approved, Rejected, or Cancelled.</p>
+          </div>
+          <div class="term-card">
+            <h4>Request Approval</h4>
+            <p>A more configurable approval action that supports complex approval rules — multiple approvers, voting thresholds, and sequential approval stages.</p>
+          </div>
+        </div>
+
+        <h3>Utility Actions</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Wait for Condition</h4>
+            <p>Pauses the flow until a field on a record meets a condition. The flow is suspended (not blocking a thread) and resumes when the condition is satisfied.</p>
+          </div>
+          <div class="term-card">
+            <h4>Set Flow Variables</h4>
+            <p>Assigns values to flow-level variables for use in later steps. Useful for storing computed or looked-up values that will be referenced multiple times.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Flow Variables -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Flow Variables</h2>
+        <p>Flow Designer uses variables to store, pass, and return data at different scopes within the automation. Understanding each variable type is important for designing well-structured flows.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Variable Type</th>
+              <th>Scope</th>
+              <th>Direction</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Input Variables</strong></td>
+              <td>Flow or Subflow</td>
+              <td>Passed <em>into</em> the flow at trigger time</td>
+              <td>Accept parameters from the caller — e.g., a sys_id passed to a subflow</td>
+            </tr>
+            <tr>
+              <td><strong>Output Variables</strong></td>
+              <td>Subflow</td>
+              <td>Returned <em>from</em> subflow back to calling flow</td>
+              <td>Return a created record's sys_id back to the parent flow</td>
+            </tr>
+            <tr>
+              <td><strong>Flow-level Variables</strong></td>
+              <td>Flow</td>
+              <td>Internal to the flow's execution</td>
+              <td>Store intermediate values (e.g., a counter, a looked-up sys_id) for reuse later in the same flow</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Legacy Comparison — Scratchpad:</strong> In the legacy Workflow Editor, a <strong>Scratchpad</strong> object was used to pass values between Activity steps within a workflow. In Flow Designer, this role is played by <strong>Flow-level Variables</strong> and <strong>Data Pills</strong>. When you see "scratchpad" on the exam, it refers to the legacy Workflow Editor concept.
+        </div>
+
+        <div class="callout-tip">
+          <strong>Best Practice:</strong> Prefer Data Pills over flow-level variables when the data you need is the direct output of a preceding step. Use flow-level variables when you need to compute a value that will be referenced by multiple downstream steps, or when you need to accumulate data across loop iterations.
+        </div>
+      </div>
+
+      <!-- Section 6: Approval Actions in Detail -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Approval Actions in Detail</h2>
+        <p>Approval automation is one of the most common enterprise use cases for Flow Designer. Understanding how approvals are structured and stored is directly tested on the CSA exam.</p>
+
+        <h3>How Ask for Approval Works</h3>
+        <ol style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2.2">
+          <li>Flow reaches the "Ask for Approval" action step</li>
+          <li>ServiceNow creates approval records in the <code>sysapproval_approver</code> table</li>
+          <li>The flow <strong>pauses execution</strong> and waits — it is not blocking server resources; it suspends elegantly</li>
+          <li>The approver receives a notification and takes action (Approve, Reject, or Cancel)</li>
+          <li>The flow resumes and continues down the <strong>Approved</strong>, <strong>Rejected</strong>, or <strong>Cancelled</strong> outcome branch</li>
+        </ol>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Approved Outcome</h4>
+            <p>The approver clicked Approve. Flow continues on the Approved branch — typically to fulfill the request or progress the record.</p>
+          </div>
+          <div class="term-card">
+            <h4>Rejected Outcome</h4>
+            <p>The approver clicked Reject. Flow routes to the Rejected branch — typically to notify the requester and close or cancel the item.</p>
+          </div>
+          <div class="term-card">
+            <h4>Cancelled Outcome</h4>
+            <p>The approval was cancelled programmatically or by admin action. Flow routes to the Cancelled branch for appropriate handling.</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Key Exam Fact — Approval Table:</strong> Approval records created by the "Ask for Approval" action are stored in the <code>sysapproval_approver</code> table. Each approver gets one record. The state of that record (Approved / Rejected / Cancelled) is what drives the flow outcome.
+        </div>
+
+        <h3>Catalog Item Approvals</h3>
+        <p>When a Service Catalog item is ordered, Flow Designer handles the fulfillment process including approvals. The flow is triggered via the <strong>Service Catalog trigger</strong>, and "Ask for Approval" steps enforce manager or group approval before provisioning begins. This replaces the legacy catalog workflow.</p>
+      </div>
+
+      <!-- Section 7: Flow Designer vs Workflow Editor -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Flow Designer vs. Workflow Editor</h2>
+        <p>This comparison is directly tested on the CSA exam. Both tools automate processes, but they differ significantly in design philosophy, interface, and capabilities.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Flow Designer</th>
+              <th>Workflow Editor (Legacy)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Introduced</strong></td>
+              <td>Paris release (2020) and later</td>
+              <td>Much older — pre-2018 platform</td>
+            </tr>
+            <tr>
+              <td><strong>Interface</strong></td>
+              <td>Modern sequential step-list UI</td>
+              <td>Flowchart-style canvas with drag-and-drop nodes</td>
+            </tr>
+            <tr>
+              <td><strong>Data Passing</strong></td>
+              <td>Data Pills — visual drag-and-drop from step outputs</td>
+              <td>Scratchpad variables — manual coding required</td>
+            </tr>
+            <tr>
+              <td><strong>Code Required</strong></td>
+              <td>No-code/low-code — scripting is optional</td>
+              <td>Many activities require Jelly scripting or JavaScript</td>
+            </tr>
+            <tr>
+              <td><strong>Storage Table</strong></td>
+              <td><code>sys_hub_flow</code></td>
+              <td><code>wf_workflow</code></td>
+            </tr>
+            <tr>
+              <td><strong>Reusability</strong></td>
+              <td>Subflows (<code>sys_hub_subflow</code>) and Actions (<code>sys_hub_action_type</code>)</td>
+              <td>Sub-workflows — less flexible reuse model</td>
+            </tr>
+            <tr>
+              <td><strong>Testing</strong></td>
+              <td>Built-in "Test" button — runs without triggering real records</td>
+              <td>Requires manual record manipulation to test</td>
+            </tr>
+            <tr>
+              <td><strong>Execution Logging</strong></td>
+              <td>Detailed per-step execution log viewable in Flow Designer</td>
+              <td>Less granular logging; harder to debug</td>
+            </tr>
+            <tr>
+              <td><strong>IntegrationHub</strong></td>
+              <td>Full native support — spoke actions callable directly</td>
+              <td>Limited / no direct spoke support</td>
+            </tr>
+            <tr>
+              <td><strong>Status</strong></td>
+              <td>Preferred — all new automations should use this</td>
+              <td>Supported but legacy — not recommended for new builds</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-warning">
+          <strong>When Workflow Editor Is Still Needed:</strong> Some older features — particularly certain Service Catalog configurations, legacy SLA workflows, and custom Activities built before Flow Designer existed — may still rely on the Workflow Editor. Administrators must understand both tools. However, for the CSA exam, the default answer for "which tool should you use for new automation?" is always <strong>Flow Designer</strong>.
+        </div>
+      </div>
+
+      <!-- Section 8: Error Handling & Debugging -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Error Handling &amp; Debugging</h2>
+        <p>Flow Designer provides built-in mechanisms to handle errors, test flows safely, and diagnose problems when flows fail in production.</p>
+
+        <h3>Flow Execution Log</h3>
+        <p>Every time a flow runs, ServiceNow records a detailed execution log showing the result of each individual step. Access it via:</p>
+        <p style="font-family:var(--font-mono);background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius);padding:var(--space-3) var(--space-4);display:inline-block">Process Automation &gt; Flow Designer &gt; [open a flow] &gt; Executions tab</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Shows each step: name, status (Success / Error), inputs used, outputs produced</li>
+          <li>Log messages written via the <strong>Log</strong> action appear here — valuable for debugging data pill values</li>
+          <li>Failed steps are clearly highlighted with error details</li>
+        </ul>
+
+        <h3>Failed Flows — Options</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Resume</h4>
+            <p>After fixing the underlying problem (e.g., correcting data, fixing a script), you can <strong>resume</strong> a failed flow execution from the point of failure — no need to re-run from the beginning.</p>
+          </div>
+          <div class="term-card">
+            <h4>Cancel</h4>
+            <p>Permanently terminates a failed or stuck flow execution. Use this when the flow should not be retried — for example, if the triggering record no longer exists.</p>
+          </div>
+          <div class="term-card">
+            <h4>Error Trigger</h4>
+            <p>A special trigger type that fires when <em>another flow</em> encounters an error. Use it to build centralized error-handling flows — for example, creating an incident when a critical automation fails.</p>
+          </div>
+        </div>
+
+        <h3>Testing Flows Safely</h3>
+        <div class="callout-tip">
+          <strong>Built-in Test Mode:</strong> Flow Designer includes a <strong>Test</strong> button on every flow. This allows you to run the flow against a real (or specified) record in a controlled way — without waiting for the actual trigger event to fire. Test mode shows the execution log in real time, making it straightforward to verify each step's behavior before activating the flow.
+        </div>
+      </div>
+
+      <!-- Section 9: Integration with Other Tools -->
+      <div class="section-block">
+        <div class="section-label">Section 9</div>
+        <h2>Integration with Other ServiceNow Tools</h2>
+        <p>Flow Designer does not operate in isolation — it integrates with Business Rules, Client Scripts, Catalog, and IntegrationHub to form a complete automation ecosystem.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Integration Point</th>
+              <th>How They Connect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Business Rules → Flow</strong></td>
+              <td>A Business Rule can fire a Flow Designer flow programmatically using <code>gs.eventQueue()</code> or by triggering an Application trigger event. This bridges record-level server scripts with the flow automation layer.</td>
+            </tr>
+            <tr>
+              <td><strong>Flow → Script Includes</strong></td>
+              <td>Within a flow, the <strong>"Run Script" action</strong> can instantiate and call a Script Include class. This allows complex business logic housed in reusable Script Includes to be called from a no-code flow.</td>
+            </tr>
+            <tr>
+              <td><strong>Catalog Items → Flow</strong></td>
+              <td>Service Catalog items can use a flow (via the Service Catalog trigger) as their fulfillment process, replacing the legacy catalog workflow. The flow receives catalog variables as inputs.</td>
+            </tr>
+            <tr>
+              <td><strong>Approvals</strong></td>
+              <td>Flow Designer handles multi-stage approvals natively via "Ask for Approval" and "Request Approval" actions, writing to <code>sysapproval_approver</code> and routing based on outcomes.</td>
+            </tr>
+            <tr>
+              <td><strong>IntegrationHub</strong></td>
+              <td>IntegrationHub adds "Spoke" action packs (Slack, Jira, ServiceNow, REST, etc.) that appear as draggable action steps inside Flow Designer. Flows can call external APIs with no scripting required.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>The Modern Automation Stack:</strong> In a well-architected ServiceNow instance, the automation layers work together: <strong>Client Scripts</strong> handle real-time form behavior in the browser → <strong>Business Rules</strong> enforce server-side record logic → <strong>Flow Designer</strong> orchestrates multi-step processes and integrations → <strong>IntegrationHub</strong> extends flows to external systems. Each tool has its lane.
+        </div>
+      </div>
+
+      <!-- Section 10: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 10</div>
+        <h2>Key Exam Facts &amp; Quick Reference</h2>
+        <p>These are the highest-frequency exam points for Flow Designer. Review these carefully before your exam.</p>
+
+        <div class="callout-exam">
+          <strong>Fact 1 — Data Pills:</strong> Data Pills are the outputs of previous steps, made available as drag-and-drop inputs to later steps. They are how data flows through a flow without hardcoding. A Data Pill is NOT a variable — it is a reference to the live output of another step.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 2 — Subflows vs. Actions:</strong> A <strong>Subflow</strong> (<code>sys_hub_subflow</code>) is a reusable multi-step sequence. An <strong>Action</strong> (<code>sys_hub_action_type</code>) is a reusable single step. Both can accept inputs and return outputs. Subflows are used when you need to share a multi-step process; Actions when you need a single reusable step.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 3 — Server-Side Execution:</strong> Flow Designer runs entirely on the <strong>server</strong>, not in the browser. This distinguishes it from Client Scripts (which run in the browser). A flow will execute even when records are modified via REST API, import sets, or background scripts — not just through the UI.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 4 — Trigger vs. If/Else:</strong> The <strong>trigger condition</strong> determines whether the flow fires at all. The <strong>If/Else logic block</strong> controls the execution path after the flow has already started. These are evaluated at different times and serve different purposes.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 5 — Ask for Approval Pauses Execution:</strong> The "Ask for Approval" action causes the flow to <strong>suspend</strong> and wait for the approver's response. Approval records are stored in <code>sysapproval_approver</code>. The three possible outcomes that drive subsequent branching are: <strong>Approved</strong>, <strong>Rejected</strong>, <strong>Cancelled</strong>.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 6 — Execution Logs:</strong> Flow execution history and per-step logs are accessible via <strong>Process Automation &gt; Flow Designer &gt; [flow] &gt; Executions</strong>. Failed executions can be resumed (not just retried from scratch).
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 7 — Paris Release Requirement:</strong> Flow Designer requires the <strong>Paris release or later</strong>. If an exam question describes a pre-Paris instance, the Workflow Editor would be the automation tool in use.
+        </div>
+
+        <h3>Tables Quick Reference</h3>
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+          <div class="term-card">
+            <strong><code>sys_hub_flow</code></strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Flows — top-level automation with triggers</p>
+          </div>
+          <div class="term-card">
+            <strong><code>sys_hub_subflow</code></strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Subflows — reusable multi-step sequences</p>
+          </div>
+          <div class="term-card">
+            <strong><code>sys_hub_action_type</code></strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Action types — reusable single steps</p>
+          </div>
+          <div class="term-card">
+            <strong><code>sysapproval_approver</code></strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Approval records created by Ask for Approval</p>
+          </div>
+          <div class="term-card">
+            <strong><code>wf_workflow</code></strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Legacy Workflow Editor workflows</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Congratulations Callout — Final Topic of CSA Course -->
+      <div class="callout-concept" style="margin-top:var(--space-8);border-color:var(--accent);background:linear-gradient(135deg,var(--bg-card,#1a1a2e) 0%,rgba(99,102,241,0.08) 100%);padding:var(--space-6)">
+        <div style="font-size:2rem;margin-bottom:var(--space-3);text-align:center">🎓</div>
+        <h3 style="text-align:center;margin-bottom:var(--space-3);color:var(--accent)">You Have Completed the Entire CSA Study Course!</h3>
+        <p style="text-align:center;margin-bottom:var(--space-4)">
+          This is the final topic of all six parts. You have worked through every major domain of the ServiceNow Certified System Administrator exam — from platform navigation and configuration, through collaboration and database security, migration and integration, all the way to self-service and automation.
+        </p>
+        <p style="text-align:center;margin-bottom:var(--space-4)">
+          That is a substantial body of knowledge. Give yourself credit for the effort you have put in.
+        </p>
+        <div style="background:rgba(99,102,241,0.12);border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-4)">
+          <strong>Recommended next steps before exam day:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-5);line-height:2.2">
+            <li>Review the <strong>flashcards</strong> for all six parts — reinforce the key terms and tables</li>
+            <li>Revisit any topics where you felt less confident — especially ACLs, Data Pills, and Business Rules</li>
+            <li>Work through the <strong>practice quizzes</strong> for each part and review every wrong answer</li>
+            <li>Re-read the "Exam Traps" and "Key Exam Facts" sections across all topics — these are where exam marks are most commonly lost</li>
+            <li>On exam day: read each question stem carefully. ServiceNow exam questions often hinge on one precise word (server-side vs. client-side, table ACL vs. field ACL, trigger condition vs. flow logic). Take your time.</li>
+          </ol>
+        </div>
+        <p style="text-align:center;font-size:1.05rem;font-weight:600;color:var(--accent)">
+          You are prepared. Go earn that certification.
+        </p>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="03-client-scripts.html" class="btn btn-secondary">← Client Scripts</a>
+          <a href="../../index.html" class="btn btn-primary">Back to CSA Hub</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p6-flow-designer', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p6-flow-designer')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

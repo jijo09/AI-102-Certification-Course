@@ -1,0 +1,909 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Rules | ServiceNow CSA Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span>
+        <span class="current">Business Rules</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">⚙️ Part 6 · Topic 2 of 4</div>
+        <h1 class="topic-title">Business Rules</h1>
+        <div class="topic-meta">
+          <span>⏱ ~75 min read</span>
+          <span>·</span>
+          <span>Part 6 — Self-Service &amp; Automation · 20% Exam Weight</span>
+        </div>
+        <div class="callout-exam" style="margin-top:var(--space-4)">
+          <strong>Heavily Tested:</strong> Business Rules are the most heavily tested automation topic on the CSA exam. Expect multiple questions on trigger timing (Before/After/Async/Display), the g_scratchpad pattern, setAbortAction(), and the differences between current and previous objects.
+        </div>
+      </div>
+
+      <!-- Section 1: Business Rule Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Business Rule Overview</h2>
+        <p>Business Rules are <strong>server-side automation scripts</strong> that execute automatically when records are inserted, updated, deleted, or queried in ServiceNow. Unlike UI Policies (which run in the browser), Business Rules run on the server — they cannot be bypassed through the UI and apply to all access paths including REST APIs and integrations.</p>
+
+        <h3>Key Facts</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Stored In</h4>
+            <p>The <code>sys_business_rule</code> table. Navigate via <strong>System Definition &gt; Business Rules</strong> or type <code>sys_business_rule.list</code> in the filter navigator.</p>
+          </div>
+          <div class="term-card">
+            <h4>Runs Where</h4>
+            <p>Entirely on the <strong>server</strong>. Has no access to the client-side DOM. Runs during the database transaction lifecycle.</p>
+          </div>
+          <div class="term-card">
+            <h4>Key API Objects</h4>
+            <p><code>current</code> — the record being acted on.<br><code>previous</code> — field values before the change (available in Update BRs).<br><code>gs</code> — GlideSystem utility methods.</p>
+          </div>
+          <div class="term-card">
+            <h4>Applies To</h4>
+            <p>A single <strong>table</strong>. A Business Rule is scoped to one table but can query or modify any other table via GlideRecord.</p>
+          </div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Server-Side = Always Enforced:</strong> Because Business Rules execute on the server, they fire regardless of how data enters ServiceNow — whether through a form submission, REST API call, import set, or another script. This makes them the right choice for enforcing business logic and data integrity.
+        </div>
+
+        <h3>Business Rule vs. Client Script vs. UI Policy</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Business Rule</th>
+              <th>Client Script</th>
+              <th>UI Policy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Runs on</strong></td>
+              <td>Server</td>
+              <td>Client (browser)</td>
+              <td>Client (browser)</td>
+            </tr>
+            <tr>
+              <td><strong>Can be bypassed</strong></td>
+              <td>No</td>
+              <td>Yes (API, scripts)</td>
+              <td>Yes (API, scripts)</td>
+            </tr>
+            <tr>
+              <td><strong>Primary use</strong></td>
+              <td>Data validation, automation, integrity</td>
+              <td>Dynamic form behavior</td>
+              <td>Field visibility / mandatory</td>
+            </tr>
+            <tr>
+              <td><strong>Database access</strong></td>
+              <td>Yes — full GlideRecord</td>
+              <td>Limited (GlideAjax)</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td><strong>Access <code>current</code></strong></td>
+              <td>Yes — full field access + methods</td>
+              <td>Yes — via <code>g_form</code> API</td>
+              <td>Via conditions only</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 2: When Options (Trigger Timing) -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>When Options (Trigger Timing) <span style="color:var(--accent);font-size:0.9rem">— CRITICAL EXAM TOPIC</span></h2>
+        <p>The <strong>When</strong> field on a Business Rule controls at what point in the transaction lifecycle the script executes. This is the most heavily tested Business Rule concept on the CSA exam. Understand every option and its implications.</p>
+
+        <h3>The Four When Options</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">1️⃣</div>
+            <h4>Before</h4>
+            <p>Runs <strong>before</strong> the database write occurs. Has full ability to modify <code>current</code> field values — changes are automatically saved as part of the transaction (no need to call <code>current.update()</code>).</p>
+            <p style="margin-top:var(--space-3);font-size:0.82rem;color:var(--text-muted)"><strong>Can abort:</strong> Yes — <code>current.setAbortAction(true)</code> prevents the write entirely.<br><strong>sys_id available:</strong> No (record not yet inserted).</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">2️⃣</div>
+            <h4>After</h4>
+            <p>Runs <strong>after</strong> the database write completes. The record has been saved, so <code>sys_id</code> is available. To save further changes to the current record, you must call <code>current.update()</code> explicitly.</p>
+            <p style="margin-top:var(--space-3);font-size:0.82rem;color:var(--text-muted)"><strong>Can abort:</strong> No (record already written).<br><strong>sys_id available:</strong> Yes.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">3️⃣</div>
+            <h4>Async</h4>
+            <p>Runs in a <strong>separate background thread</strong> after the main transaction completes. Non-blocking — the user gets their response immediately. Ideal for slow or non-critical operations (email, REST callout, report generation).</p>
+            <p style="margin-top:var(--space-3);font-size:0.82rem;color:var(--text-muted)"><strong>Can abort:</strong> No — main transaction already finished.<br><strong>sys_id available:</strong> Yes.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">4️⃣</div>
+            <h4>Display</h4>
+            <p>Runs when a record is <strong>displayed</strong> (queried for viewing). Does not perform a database write. Primary purpose: populate the <code>g_scratchpad</code> object with server-side data for client scripts to consume.</p>
+            <p style="margin-top:var(--space-3);font-size:0.82rem;color:var(--text-muted)"><strong>Can abort:</strong> No.<br><strong>DB write:</strong> None — read-only context.</p>
+          </div>
+        </div>
+
+        <h3>Full Comparison Table</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Before</th>
+              <th>After</th>
+              <th>Async</th>
+              <th>Display</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>When it runs</strong></td>
+              <td>Before DB write</td>
+              <td>After DB write</td>
+              <td>After transaction, separate thread</td>
+              <td>On record query/display</td>
+            </tr>
+            <tr>
+              <td><strong>Modify current?</strong></td>
+              <td>Yes — auto-saved</td>
+              <td>Yes — needs <code>current.update()</code></td>
+              <td>Yes — needs <code>current.update()</code></td>
+              <td>No DB write</td>
+            </tr>
+            <tr>
+              <td><strong>Abort transaction?</strong></td>
+              <td>Yes</td>
+              <td>No</td>
+              <td>No</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td><strong>sys_id on Insert?</strong></td>
+              <td>No</td>
+              <td>Yes</td>
+              <td>Yes</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td><strong>Blocks user?</strong></td>
+              <td>Yes — synchronous</td>
+              <td>Yes — synchronous</td>
+              <td>No — background thread</td>
+              <td>Yes — before form renders</td>
+            </tr>
+            <tr>
+              <td><strong>Best for</strong></td>
+              <td>Validation, field defaulting, abort logic</td>
+              <td>Trigger actions after save, create related records</td>
+              <td>Slow ops: email, REST callouts, reports</td>
+              <td>Populate g_scratchpad for client scripts</td>
+            </tr>
+            <tr>
+              <td><strong>Example use case</strong></td>
+              <td>Prevent save if Priority = Critical and no Assignment Group</td>
+              <td>Create a child task when a parent Incident is inserted</td>
+              <td>Send notification email after incident update</td>
+              <td>Pass server-computed value to client script</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — When vs. When:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><strong>Before BR</strong>: modifying <code>current</code> saves automatically — do NOT call <code>current.update()</code> (causes infinite loop!)</li>
+            <li><strong>After BR</strong>: must call <code>current.update()</code> to persist changes; has <code>sys_id</code></li>
+            <li><strong>Async BR</strong>: cannot affect the outcome of the original transaction; purely background</li>
+            <li><strong>Display BR</strong>: only use is to populate <code>g_scratchpad</code>; never modifies the database</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 3: Operation Triggers -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Operation Triggers</h2>
+        <p>The <strong>Operation</strong> setting on a Business Rule determines which database event(s) cause the rule to fire. You can select one or more operations — multiple selections are OR'd together.</p>
+
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+          <div class="term-card">
+            <h4>Insert</h4>
+            <p>Fires when a <strong>new record</strong> is created and inserted into the table.</p>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Auto-assign a new incident to a default group on creation.</p>
+          </div>
+          <div class="term-card">
+            <h4>Update</h4>
+            <p>Fires when an <strong>existing record</strong> is modified and saved.</p>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Validate that resolution notes exist before closing an incident.</p>
+          </div>
+          <div class="term-card">
+            <h4>Delete</h4>
+            <p>Fires when a record is <strong>removed</strong> from the table.</p>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Prevent deletion of incidents still in "In Progress" state.</p>
+          </div>
+          <div class="term-card">
+            <h4>Query</h4>
+            <p>Fires when a record is <strong>read/displayed</strong>. Used exclusively with the Display <em>When</em> setting.</p>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Populate g_scratchpad before form is rendered.</p>
+          </div>
+        </div>
+
+        <h3>Combining Operations</h3>
+        <p>It is common and valid to select <strong>Insert + Update</strong> together on a single Business Rule when you want the same logic to run on both create and modify. This avoids duplicating rules.</p>
+
+        <div class="callout-tip">
+          <strong>Insert + Update pattern:</strong> For field defaulting or validation that applies whether a record is new or being edited, select both Insert and Update. The <code>current.isNewRecord()</code> method returns <code>true</code> on Insert and <code>false</code> on Update — useful if you need slightly different logic for each case within the same rule.
+        </div>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Example: Insert + Update BR — handle both cases
+if (current.isNewRecord()) {
+    // New record — set defaults
+    current.priority = 3;
+    current.state = 1;
+} else {
+    // Existing record being updated — validate
+    if (current.state == 6 && current.close_notes == '') {
+        current.setAbortAction(true);
+        gs.addErrorMessage('Close notes are required when resolving an incident.');
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Section 4: Business Rule Script — current and previous -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Business Rule Script — current &amp; previous Objects</h2>
+        <p>Inside a Business Rule script, two special GlideRecord objects are automatically available: <code>current</code> and <code>previous</code>. Knowing exactly what each provides — and when — is critical for the exam.</p>
+
+        <h3>The current Object</h3>
+        <p>The <code>current</code> object represents the <strong>record being processed</strong>. You can read and write its field values.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Read a field value (returns GlideElement — use .toString() for string)
+var state = current.state.toString();
+var caller = current.caller_id.getDisplayValue();
+
+// Write a field value (Before BR — auto-saved)
+current.priority = 2;
+current.assignment_group.setDisplayValue('Service Desk');
+
+// Check if the current record is a new insert
+if (current.isNewRecord()) {
+    current.opened_by = gs.getUserID();
+}
+
+// Check if ANY field on the record changed (Update trigger)
+if (current.changes()) {
+    gs.log('Something changed on record: ' + current.sys_id);
+}
+
+// Abort the transaction (Before BR only)
+current.setAbortAction(true);
+gs.addErrorMessage('Your error message displayed to the user.');</code></pre>
+        </div>
+
+        <h3>The previous Object</h3>
+        <p>The <code>previous</code> object holds the <strong>field values from before the update</strong>. It is only populated during <strong>Update</strong> operations — it is empty (null) on Insert.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Read previous value of a field
+var oldState = previous.state.toString();
+var newState = current.state.toString();
+
+gs.log('State changed from ' + oldState + ' to ' + newState);
+
+// Check if a specific field changed
+if (current.state.changes()) {
+    // State field changed — run specific logic
+    gs.log('Incident state was changed.');
+}
+
+// Check if a field changed TO a specific value
+if (current.state.changesTo(6)) {
+    // State just became "Resolved"
+    current.resolved_at = new GlideDateTime();
+}
+
+// Check if a field changed FROM a specific value
+if (current.state.changesFrom(1)) {
+    // State was "New" and is now something else
+    gs.log('Incident is no longer in New state.');
+}</code></pre>
+        </div>
+
+        <h3>Field Change Methods — Quick Reference</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Returns true when...</th>
+              <th>Works on</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>current.changes()</code></td>
+              <td>ANY field on the record changed</td>
+              <td>Update operations</td>
+            </tr>
+            <tr>
+              <td><code>current.field.changes()</code></td>
+              <td>That specific field changed value</td>
+              <td>Update operations</td>
+            </tr>
+            <tr>
+              <td><code>current.field.changesTo('x')</code></td>
+              <td>That field's new value equals <code>'x'</code></td>
+              <td>Update operations</td>
+            </tr>
+            <tr>
+              <td><code>current.field.changesFrom('x')</code></td>
+              <td>That field's old value was <code>'x'</code></td>
+              <td>Update operations</td>
+            </tr>
+            <tr>
+              <td><code>current.isNewRecord()</code></td>
+              <td>The record is being inserted (no sys_id yet)</td>
+              <td>Insert operations</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Trap — changes() vs. field.changes():</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><code>current.changes()</code> — true if <strong>any</strong> field changed (record-level)</li>
+            <li><code>current.state.changes()</code> — true only if the <strong>state</strong> field specifically changed</li>
+            <li>These are different methods on different objects — know the distinction</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 5: GlideRecord in Business Rules -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>GlideRecord in Business Rules</h2>
+        <p>Business Rules have full access to the GlideRecord API, allowing them to query, create, update, and delete records in any table. This is what makes Business Rules powerful for complex automation.</p>
+
+        <h3>Querying Other Records</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Basic query — iterate through all matching records
+var gr = new GlideRecord('incident');
+gr.addQuery('state', 1);            // state = "New"
+gr.addQuery('priority', 1);         // AND priority = "Critical"
+gr.query();
+
+while (gr.next()) {
+    gs.log('Found incident: ' + gr.number);
+}
+
+// Get a single record by sys_id
+var gr2 = new GlideRecord('sys_user');
+gr2.get(current.caller_id);         // get() queries by sys_id
+var callerName = gr2.name.toString();
+
+// Get a single record by field value
+var gr3 = new GlideRecord('sys_user_group');
+gr3.get('name', 'Service Desk');    // get(field, value)
+if (gr3.isValidRecord()) {
+    current.assignment_group = gr3.sys_id;
+}</code></pre>
+        </div>
+
+        <h3>Creating New Records</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Create a related task when an incident is resolved
+var task = new GlideRecord('task');
+task.initialize();                  // initialize() prepares a blank record
+task.short_description = 'Follow-up for: ' + current.short_description;
+task.assignment_group = current.assignment_group;
+task.parent = current.sys_id;       // link to parent incident
+var newSysId = task.insert();       // insert() saves and returns the new sys_id
+gs.log('Created task: ' + newSysId);</code></pre>
+        </div>
+
+        <h3>Updating Records</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Update a specific record
+var gr = new GlideRecord('incident');
+if (gr.get('INC0001234')) {         // get by number field implicitly uses display value
+    gr.setValue('state', 6);        // setValue(field, value)
+    gr.setValue('close_notes', 'Auto-closed by business rule');
+    gr.setWorkflow(false);          // prevent triggering workflows on this update
+    gr.update();                    // must call update() to save
+}
+
+// Bulk update — use updateMultiple() on a query (no loop)
+var grBulk = new GlideRecord('incident');
+grBulk.addQuery('state', 1);
+grBulk.addQuery('assigned_to', '');
+grBulk.setValue('assignment_group.name', 'Service Desk');
+grBulk.updateMultiple();            // updates all matching records at once</code></pre>
+        </div>
+
+        <h3>Deleting Records</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Delete a specific record
+var gr = new GlideRecord('task');
+gr.addQuery('parent', current.sys_id);
+gr.addQuery('state', 1);  // only delete "New" child tasks
+gr.query();
+while (gr.next()) {
+    gr.deleteRecord();
+}</code></pre>
+        </div>
+
+        <div class="callout-warning">
+          <strong>Performance Warning:</strong> Avoid running complex GlideRecord queries inside <strong>Before Business Rules</strong>. Every Before BR blocks the current user's transaction. Heavy queries cause noticeable form save delays. Move slow or non-critical operations to <strong>Async</strong> BRs wherever possible.
+        </div>
+      </div>
+
+      <!-- Section 6: Conditions -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Conditions</h2>
+        <p>A Business Rule's <strong>Condition</strong> is an additional filter that must pass before the script executes. This narrows when the BR fires beyond just the table and operation.</p>
+
+        <h3>Two Condition Types</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Filter Condition</h4>
+            <p>Built using the <strong>condition builder UI</strong> (the standard filter row interface). Generates a GlideRecord-style condition evaluated against the current record.</p>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:var(--space-2)">Example: <em>State is "Resolved" AND Priority is "1 - Critical"</em></p>
+          </div>
+          <div class="term-card">
+            <h4>Advanced Condition (Script)</h4>
+            <p>A JavaScript expression in the <strong>Advanced</strong> field that must return <code>true</code> or <code>false</code>. Runs server-side with access to <code>current</code>, <code>previous</code>, and <code>gs</code>.</p>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:var(--space-2)">Example: <code>current.priority == 1 &amp;&amp; gs.hasRole('itil')</code></p>
+          </div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Both Must Pass:</strong> If both a Filter Condition and an Advanced Condition are set, <strong>both must evaluate to true</strong> for the Business Rule script to execute. They are AND'd together, not OR'd.
+        </div>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Advanced Condition examples (these go in the Condition field, not the Script)
+
+// Only fire if the caller_id field actually changed
+current.caller_id.changes()
+
+// Only fire if state is changing TO Resolved (6)
+current.state.changesTo(6)
+
+// Only fire for Critical priority incidents assigned to a specific group
+current.priority == 1 &amp;&amp; current.assignment_group.name == 'NOC Team'
+
+// Only fire if the current user has the manager role
+gs.hasRole('manager')</code></pre>
+        </div>
+      </div>
+
+      <!-- Section 7: Order -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Order</h2>
+        <p>When multiple Business Rules are configured on the same table with the same operation and When settings, they execute in <strong>ascending order</strong> — lower order number runs first.</p>
+
+        <h3>Order Rules</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Default order value: <strong>100</strong></li>
+          <li>Lower order = runs first (e.g., order 50 runs before order 100)</li>
+          <li>Order only matters for BRs with the same table, same operation, and same When timing</li>
+          <li>A Before BR with order 100 always runs before any After BR (When timing takes precedence over Order)</li>
+          <li>If two BRs have the same order, execution sequence is undefined — avoid duplicate order numbers</li>
+        </ul>
+
+        <div class="callout-tip">
+          <strong>Best Practice:</strong> Use order increments of 10 or 25 (e.g., 10, 25, 50, 100, 200) to leave room for future BRs to be inserted between existing ones without renumbering everything.
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Business Rule Name</th>
+              <th>When</th>
+              <th>Runs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>50</td>
+              <td>Set Default Priority</td>
+              <td>Before / Insert</td>
+              <td>1st</td>
+            </tr>
+            <tr>
+              <td>100</td>
+              <td>Validate Assignment Group</td>
+              <td>Before / Insert+Update</td>
+              <td>2nd</td>
+            </tr>
+            <tr>
+              <td>200</td>
+              <td>Abort If Missing Data</td>
+              <td>Before / Insert+Update</td>
+              <td>3rd</td>
+            </tr>
+            <tr>
+              <td>100</td>
+              <td>Create Child Task</td>
+              <td>After / Insert</td>
+              <td>Runs after all Before BRs</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 8: Display Business Rules & g_scratchpad -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Display Business Rules &amp; g_scratchpad</h2>
+        <p>The <strong>Display</strong> Business Rule is a specialized type used exclusively to pass server-side data to client scripts. It runs at <strong>query time</strong> — just before a record's form is rendered — and populates the <code>g_scratchpad</code> object.</p>
+
+        <h3>Why g_scratchpad Exists</h3>
+        <p>Client scripts run in the browser and cannot directly call server-side GlideRecord queries. The g_scratchpad provides a bridge: a server-side Display BR populates it with data, which the client script then reads — all in one page load without a round-trip AJAX call.</p>
+
+        <div class="callout-concept">
+          <strong>Display BR + g_scratchpad Pattern:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>User navigates to a record form</li>
+            <li>ServiceNow fires the Display Business Rule (When = Display, Operation = Query)</li>
+            <li>The BR script populates <code>g_scratchpad.myProperty = someValue</code></li>
+            <li>The form renders; client scripts run and read <code>g_scratchpad.myProperty</code></li>
+          </ol>
+        </div>
+
+        <h3>Display BR Script (Server Side)</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Display Business Rule — runs server-side when form is displayed
+// When: Display | Operation: Query | Table: incident
+
+// Pass caller's manager to the client
+var caller = new GlideRecord('sys_user');
+if (caller.get(current.caller_id)) {
+    g_scratchpad.callerManager = caller.manager.getDisplayValue();
+    g_scratchpad.callerDept    = caller.department.getDisplayValue();
+    g_scratchpad.isVip         = (caller.u_vip_user == true);
+}
+
+// Pass a server-side computed value
+var taskCount = new GlideAggregate('task');
+taskCount.addQuery('parent', current.sys_id);
+taskCount.addAggregate('COUNT');
+taskCount.query();
+taskCount.next();
+g_scratchpad.openTaskCount = taskCount.getAggregate('COUNT');</code></pre>
+        </div>
+
+        <h3>Consuming g_scratchpad in a Client Script (Client Side)</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Client Script — onLoad
+function onLoad() {
+    // Read data populated by the Display Business Rule
+    var manager   = g_scratchpad.callerManager;
+    var dept      = g_scratchpad.callerDept;
+    var isVip     = g_scratchpad.isVip;
+    var taskCount = g_scratchpad.openTaskCount;
+
+    if (isVip) {
+        g_form.addInfoMessage('VIP Caller — Priority review required.');
+        g_form.setValue('priority', 1);
+    }
+
+    if (taskCount > 5) {
+        g_form.addInfoMessage('Warning: ' + taskCount + ' open tasks linked to this incident.');
+    }
+}</code></pre>
+        </div>
+
+        <h3>Display BR vs. GlideAjax</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Display BR + g_scratchpad</th>
+              <th>GlideAjax</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>When data is fetched</strong></td>
+              <td>At page load — before form renders</td>
+              <td>On demand — triggered by a client event</td>
+            </tr>
+            <tr>
+              <td><strong>Async?</strong></td>
+              <td>No — synchronous with form load</td>
+              <td>Yes — async callback</td>
+            </tr>
+            <tr>
+              <td><strong>Best for</strong></td>
+              <td>Data needed immediately when form opens</td>
+              <td>Data needed reactively (e.g., on field change)</td>
+            </tr>
+            <tr>
+              <td><strong>Extra round trip?</strong></td>
+              <td>No — bundled into initial page request</td>
+              <td>Yes — extra HTTP request per call</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 9: Best Practices & Pitfalls -->
+      <div class="section-block">
+        <div class="section-label">Section 9</div>
+        <h2>Best Practices &amp; Pitfalls</h2>
+        <p>Business Rules are powerful but can cause serious problems when misused. These are the most important pitfalls to know for the exam and real-world administration.</p>
+
+        <h3>Infinite Loop Prevention</h3>
+        <div class="callout-warning">
+          <strong>Classic Infinite Loop Scenario:</strong> A Before BR on the Incident table (Update trigger) modifies a field and implicitly saves via <code>current.update()</code> (which you should NOT do in a Before BR). This triggers the Update event again, firing the same BR — infinite recursion.
+        </div>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// WRONG — calling current.update() in a Before BR causes infinite loop
+// Before BR fires → modifies current → calls current.update()
+// → triggers another Update event → Before BR fires again → ...
+current.priority = 2;
+current.update();    // DO NOT DO THIS in a Before BR
+
+// CORRECT — in a Before BR, just modify current; changes are auto-saved
+current.priority = 2;
+// No current.update() needed — it happens automatically
+
+// For After/Async BRs that call current.update() and risk looping:
+// Use setWorkflow(false) to suppress re-firing workflows:
+current.setWorkflow(false);
+current.update();
+
+// Or use autoSysFields(false) to prevent last_updated timestamp changes:
+current.autoSysFields(false);
+current.setWorkflow(false);
+current.update();</code></pre>
+        </div>
+
+        <h3>setWorkflow() — Preventing Cascades</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Prevent the update from triggering workflows (but still triggers other BRs)
+gr.setWorkflow(false);
+gr.update();
+
+// Prevent triggering OTHER business rules on this update
+// (use carefully — can hide unintended side effects)
+gr.setWorkflow(false);
+gr.autoSysFields(false);
+gr.update();</code></pre>
+        </div>
+
+        <h3>Firing Events with gs.eventQueue()</h3>
+        <p>To trigger asynchronous notifications or integrations from a Business Rule without blocking the transaction, use <code>gs.eventQueue()</code> to enqueue an event.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Fire a custom event asynchronously (for notifications, integrations)
+// gs.eventQueue(event_name, gr_object, param1, param2)
+gs.eventQueue('incident.critical.created', current, current.number.toString(), gs.getUserName());
+
+// The event is picked up by a Notification or Script Action configured for that event name
+// This avoids blocking the main transaction for slow notification logic</code></pre>
+        </div>
+
+        <h3>Best Practice Checklist</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Use Conditions</h4>
+            <p>Always set a Filter Condition or Advanced Condition to narrow when the BR fires. Avoid "fire on every save" BRs — it wastes server resources.</p>
+          </div>
+          <div class="term-card">
+            <h4>No current.update() in Before BRs</h4>
+            <p>Changes to <code>current</code> in a Before BR are auto-saved. Calling <code>current.update()</code> here creates an infinite loop.</p>
+          </div>
+          <div class="term-card">
+            <h4>Use Async for Slow Ops</h4>
+            <p>REST callouts, complex queries, and report generation should be Async BRs. Before/After BRs block the user's transaction.</p>
+          </div>
+          <div class="term-card">
+            <h4>setWorkflow(false)</h4>
+            <p>When calling <code>gr.update()</code> inside a BR to update a related record, use <code>setWorkflow(false)</code> to prevent triggering additional workflows unnecessarily.</p>
+          </div>
+          <div class="term-card">
+            <h4>Use gs.eventQueue()</h4>
+            <p>Fire events via <code>gs.eventQueue()</code> for notifications and integrations rather than calling them synchronously from a Before BR.</p>
+          </div>
+          <div class="term-card">
+            <h4>Keep Scripts Focused</h4>
+            <p>Each Business Rule should do one thing. Split complex logic into multiple targeted BRs with clear names and conditions.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 10: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 10</div>
+        <h2>Key Exam Facts &amp; Quick Reference</h2>
+        <p>This section consolidates the most frequently tested Business Rule facts for fast review before the exam.</p>
+
+        <div class="callout-exam">
+          <strong>Before BR:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Runs <strong>before</strong> the database write</li>
+            <li>Changes to <code>current</code> are <strong>automatically saved</strong> — do NOT call <code>current.update()</code></li>
+            <li>Can <strong>abort the transaction</strong>: <code>current.setAbortAction(true)</code></li>
+            <li>No <code>sys_id</code> available on Insert (record not yet written)</li>
+            <li>Blocks the user's transaction — keep it fast</li>
+          </ul>
+        </div>
+
+        <div class="callout-exam">
+          <strong>After BR:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Runs <strong>after</strong> the database write completes</li>
+            <li>Must call <code>current.update()</code> to persist further changes to <code>current</code></li>
+            <li><code>sys_id</code> is available (record has been written)</li>
+            <li><strong>Cannot abort</strong> the transaction — record is already saved</li>
+          </ul>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Async BR:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Runs in a <strong>separate background thread</strong> after the transaction completes</li>
+            <li><strong>Non-blocking</strong> — user gets their response immediately</li>
+            <li>Cannot abort the main transaction (it's already done)</li>
+            <li>Use for: email notifications, REST callouts, slow queries, report generation</li>
+          </ul>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Display BR:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Runs when a record is <strong>displayed</strong> (Query operation)</li>
+            <li>Primary purpose: populate <code>g_scratchpad</code> for client scripts</li>
+            <li><strong>No database write</strong> — does not modify records</li>
+            <li>Client scripts read from <code>g_scratchpad.propertyName</code></li>
+          </ul>
+        </div>
+
+        <div class="callout-exam">
+          <strong>current vs. previous:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><code>current</code> — the record as it is NOW (new values)</li>
+            <li><code>previous</code> — the record as it WAS before the update (old values); null on Insert</li>
+            <li><code>current.changes()</code> — true if ANY field on the record changed</li>
+            <li><code>current.field.changes()</code> — true if THAT specific field changed</li>
+            <li><code>current.field.changesTo('x')</code> — true if that field's new value is <code>'x'</code></li>
+            <li><code>current.field.changesFrom('x')</code> — true if that field's old value was <code>'x'</code></li>
+          </ul>
+        </div>
+
+        <div class="callout-exam">
+          <strong>setAbortAction() Rules:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><code>current.setAbortAction(true)</code> — prevents the database write from occurring</li>
+            <li>Only works in <strong>Before BRs</strong> — in After or Async BRs it has no effect</li>
+            <li>Use with <code>gs.addErrorMessage('message')</code> to show the user why the save was rejected</li>
+          </ul>
+        </div>
+
+        <h3>Business Rule Anatomy — All Fields at a Glance</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+              <th>Key Values / Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Name</strong></td>
+              <td>Descriptive name for the BR</td>
+              <td>Should clearly describe what it does and when</td>
+            </tr>
+            <tr>
+              <td><strong>Table</strong></td>
+              <td>The table this BR applies to</td>
+              <td>One table per BR (no cross-table triggering)</td>
+            </tr>
+            <tr>
+              <td><strong>Active</strong></td>
+              <td>Whether the BR is enabled</td>
+              <td>Unchecking disables without deleting</td>
+            </tr>
+            <tr>
+              <td><strong>When</strong></td>
+              <td>Timing relative to DB write</td>
+              <td>Before / After / Async / Display</td>
+            </tr>
+            <tr>
+              <td><strong>Order</strong></td>
+              <td>Execution sequence among same-table/same-when BRs</td>
+              <td>Lower runs first; default 100</td>
+            </tr>
+            <tr>
+              <td><strong>Insert / Update / Delete / Query</strong></td>
+              <td>Operation checkboxes that trigger the BR</td>
+              <td>Multiple can be selected; Query is for Display only</td>
+            </tr>
+            <tr>
+              <td><strong>Filter Conditions</strong></td>
+              <td>Additional condition using condition builder</td>
+              <td>Both Filter + Advanced must pass</td>
+            </tr>
+            <tr>
+              <td><strong>Advanced Condition</strong></td>
+              <td>JavaScript boolean expression</td>
+              <td>Must return true or false</td>
+            </tr>
+            <tr>
+              <td><strong>Script</strong></td>
+              <td>The automation logic that runs when all conditions pass</td>
+              <td>Has access to current, previous, gs</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="01-ui-policies-actions.html" class="btn btn-secondary">← UI Policies &amp; Actions</a>
+          <a href="03-client-scripts.html" class="btn btn-primary">Client Scripts →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p6-business-rules', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p6-business-rules')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

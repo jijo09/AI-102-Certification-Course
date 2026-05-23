@@ -1,0 +1,751 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporting &amp; Dashboards | ServiceNow CSA Part 3</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 3</a>
+        <span class="sep">›</span>
+        <span class="current">Reporting &amp; Dashboards</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🤝 Part 3 · Topic 2 of 4</div>
+        <h1 class="topic-title">Reporting &amp; Dashboards</h1>
+        <div class="topic-meta">
+          <span>⏱ ~65 min read</span>
+          <span>·</span>
+          <span>Part 3 — Collaboration · 20% Exam Weight</span>
+        </div>
+        <div class="callout-tip" style="margin-top:var(--space-4)">
+          <strong>Exam Weight:</strong> Reporting and dashboards are consistently tested on the CSA. Expect questions on report types, the Report Builder anatomy, sharing controls, Performance Analytics concepts, and the key differences between PA and standard reports. Know your aggregate functions and scheduled report formats cold.
+        </div>
+      </div>
+
+      <!-- Section 1: Reports Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Reports Overview</h2>
+        <p>ServiceNow reports allow administrators and users to visualize data stored on the platform. Reports are created against a table or data source, filtered by conditions, and rendered in a variety of chart or list formats. They are stored in the <code>sys_report</code> table.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Reports are stored in: <code>sys_report</code> table</li>
+          <li>Navigate to: <strong>Reports &gt; View/Run</strong> or type <code>sys_report.list</code> in the filter navigator</li>
+          <li>Create a new report: <strong>Reports &gt; Create New</strong></li>
+          <li>Reports can be run on-demand, scheduled, or embedded in dashboards</li>
+          <li>Report scope controls whether a report is global or application-specific</li>
+        </ul>
+
+        <h3>Report Types</h3>
+        <p>ServiceNow supports a wide range of visualization types. Knowing when each type is appropriate is exam-testable.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>List</h4>
+            <p>Displays records in a flat table format — similar to a standard list view. Best for record-level detail without aggregation.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: All open incidents assigned to a specific group.</p>
+          </div>
+          <div class="term-card">
+            <h4>Bar Chart</h4>
+            <p>Aggregates data into vertical or horizontal bars grouped by a categorical field. Supports a secondary "Stack by" grouping.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Incident count grouped by Priority.</p>
+          </div>
+          <div class="term-card">
+            <h4>Pie Chart</h4>
+            <p>Shows proportional distribution of a single grouping as slices of a circle. Best for ≤6 categories.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Percentage of incidents by State.</p>
+          </div>
+          <div class="term-card">
+            <h4>Donut</h4>
+            <p>Identical to a Pie Chart but with a hollow center — often used to display a total count in the center ring.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Open vs. Closed incidents with total in the middle.</p>
+          </div>
+          <div class="term-card">
+            <h4>Line</h4>
+            <p>Plots data points connected by lines over a continuous axis. Ideal for showing trends over time.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Incident volume per week over the last quarter.</p>
+          </div>
+          <div class="term-card">
+            <h4>Trend</h4>
+            <p>Time-based bar or line chart that requires a <strong>date field</strong> for grouping. Groups records by day, week, or month.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Monthly change request volume for the past year.</p>
+          </div>
+          <div class="term-card">
+            <h4>Histogram</h4>
+            <p>Displays frequency distribution of numeric data across defined range buckets (bins).</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Distribution of incident resolution times.</p>
+          </div>
+          <div class="term-card">
+            <h4>Heatmap</h4>
+            <p>Two-dimensional grid using color intensity to represent the magnitude of values at the intersection of two dimensions.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Incident count by Day-of-Week vs. Hour-of-Day.</p>
+          </div>
+          <div class="term-card">
+            <h4>Pivot Table</h4>
+            <p>Cross-tabular analysis showing values at the intersection of row and column groupings — similar to a spreadsheet pivot table.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Incident count by Assignment Group (rows) × Priority (columns).</p>
+          </div>
+          <div class="term-card">
+            <h4>Calendar</h4>
+            <p>Plots records on a calendar grid based on a date field — useful for visualizing scheduled events or due dates.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Change requests plotted by scheduled start date.</p>
+          </div>
+          <div class="term-card">
+            <h4>Map</h4>
+            <p>Geospatial visualization that plots records on a geographic map using location data fields.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: Asset locations plotted on a world map by location field.</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — Trend vs. Line:</strong> A <strong>Trend report</strong> specifically requires a <strong>date/time field</strong> for its "Trend by" grouping and always shows data over time intervals (daily/weekly/monthly). A <strong>Line report</strong> can use any continuous axis. If the exam asks which report type requires a date field — the answer is <strong>Trend</strong>.
+        </div>
+
+        <h3>Creating a Report — Core Steps</h3>
+        <p>The standard flow for building a report in ServiceNow follows a consistent four-step pattern:</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>What You Configure</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Table</strong></td>
+              <td>Choose the source table or data source</td>
+              <td>E.g., <code>incident</code>, <code>change_request</code>, <code>cmdb_ci</code></td>
+            </tr>
+            <tr>
+              <td><strong>2. Conditions</strong></td>
+              <td>Apply filter conditions to narrow down records</td>
+              <td>Dot-walking is supported for related table fields</td>
+            </tr>
+            <tr>
+              <td><strong>3. Group By</strong></td>
+              <td>Select the field to categorize or group records</td>
+              <td>Drives the x-axis or slices in chart reports</td>
+            </tr>
+            <tr>
+              <td><strong>4. Display</strong></td>
+              <td>Choose columns, aggregates, and visual options</td>
+              <td>Set chart type, colors, and legend options here</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Report Scope: Global vs. Application</h3>
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+          <div class="term-card">
+            <h4>Global Scope</h4>
+            <p>Report is available across the entire ServiceNow instance. Visible to all users who meet the sharing criteria, regardless of the application context they are in.</p>
+          </div>
+          <div class="term-card">
+            <h4>Application Scope</h4>
+            <p>Report is scoped to a specific application or update set. Only visible when working within that application's context. Used for scoped app development.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Report Builder Anatomy -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Report Builder Anatomy</h2>
+        <p>The Report Builder is the primary interface for creating and editing reports. Each configuration field within the builder has a distinct purpose — understanding them precisely is key to answering exam scenario questions correctly.</p>
+
+        <h3>Source: Table vs. Data Source</h3>
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+          <div class="term-card">
+            <h4>Table Source</h4>
+            <p>Pulls records directly from a single ServiceNow table. Most common source. You specify the table name (e.g., <code>incident</code>) and apply conditions on top of it.</p>
+          </div>
+          <div class="term-card">
+            <h4>Data Source</h4>
+            <p>A pre-defined, reusable query configuration stored in the <code>sys_data_source</code> table. Allows joining multiple tables, applying complex filters, and reusing the same data set across multiple reports.</p>
+          </div>
+        </div>
+
+        <h3>Key Report Builder Fields</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+              <th>Supported On</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Filter Conditions</strong></td>
+              <td>Restricts the dataset using condition builder logic. Supports dot-walking to traverse reference fields to related tables.</td>
+              <td>All report types</td>
+            </tr>
+            <tr>
+              <td><strong>Group By</strong></td>
+              <td>The primary categorical dimension — groups records by a field value (e.g., Priority, Assignment Group). Becomes the x-axis label or pie slice.</td>
+              <td>Bar, Pie, Donut, Heatmap, Pivot</td>
+            </tr>
+            <tr>
+              <td><strong>Stack By</strong></td>
+              <td>A secondary grouping applied within each Group By bucket. Produces a stacked or clustered bar chart with a second dimension.</td>
+              <td>Bar Chart only</td>
+            </tr>
+            <tr>
+              <td><strong>Trend By</strong></td>
+              <td>Time-based grouping that slices data by date intervals: <strong>Daily, Weekly, Monthly</strong>. Requires a date/datetime field.</td>
+              <td>Trend, Line reports</td>
+            </tr>
+            <tr>
+              <td><strong>Aggregate</strong></td>
+              <td>The mathematical function applied to the grouped data. See aggregate types below.</td>
+              <td>All aggregate report types</td>
+            </tr>
+            <tr>
+              <td><strong>Visible to</strong></td>
+              <td>Controls who can view the report: Me (personal), Groups, Roles, or Everyone.</td>
+              <td>All report types</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Aggregate Functions</h3>
+        <p>The Aggregate field determines <em>how</em> grouped records are measured. Choosing the wrong aggregate is a common source of incorrect exam answers.</p>
+
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+          <div class="term-card">
+            <strong>COUNT</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Total number of records in each group, including duplicates.</p>
+          </div>
+          <div class="term-card">
+            <strong>COUNT DISTINCT</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Count of unique values for a specified field within each group. Removes duplicates.</p>
+          </div>
+          <div class="term-card">
+            <strong>SUM</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Adds up numeric field values across all records in a group.</p>
+          </div>
+          <div class="term-card">
+            <strong>AVG</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Calculates the arithmetic mean of a numeric field across the group.</p>
+          </div>
+          <div class="term-card">
+            <strong>MIN</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Returns the smallest numeric value of the specified field within the group.</p>
+          </div>
+          <div class="term-card">
+            <strong>MAX</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Returns the largest numeric value of the specified field within the group.</p>
+          </div>
+        </div>
+
+        <h3>Dot-Walking in Report Conditions</h3>
+        <p>Dot-walking allows report conditions to traverse reference fields and filter on fields from related (parent or child) tables. This is a powerful feature that makes it possible to filter incidents by the caller's department without needing a separate join.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Filter incidents by the caller's department (dot-walk through caller_id → sys_user → department)
+caller_id.department = "IT"
+
+// Filter incidents by the assignment group's manager (dot-walk through assignment_group → sys_user_group → manager)
+assignment_group.manager = "John Smith"
+
+// Filter CIs by their location's city (dot-walk through location → cmn_location → city)
+location.city = "New York"</code></pre>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Dot-Walking Depth:</strong> ServiceNow supports multiple levels of dot-walking in report conditions (e.g., <code>caller_id.department.head.name</code>). However, deep dot-walking can impact report performance on large tables. For the exam, know that dot-walking is supported in report filter conditions and that it traverses reference fields.
+        </div>
+      </div>
+
+      <!-- Section 3: Dashboards -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Dashboards</h2>
+        <p>Dashboards are visual workspaces that aggregate multiple reports and data widgets on a single configurable canvas. They provide at-a-glance operational visibility without requiring users to run individual reports.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to: <strong>Reports &gt; Dashboards</strong> or search "Dashboard" in the filter navigator</li>
+          <li>Dashboards are built by adding <strong>Widgets</strong> to a layout grid</li>
+          <li>Each dashboard can have multiple <strong>Tabs</strong> to organize widgets by category or audience</li>
+          <li>Dashboards support real-time or periodically refreshed data</li>
+        </ul>
+
+        <h3>Widget Types</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Report Widget</h4>
+            <p>Embeds an existing saved report directly on the dashboard. The report renders in its configured chart or list format. Clicking through a report widget can drill down to the underlying records.</p>
+          </div>
+          <div class="term-card">
+            <h4>Number Widget</h4>
+            <p>Displays a single count or aggregate value prominently — typically a large number with a label. Ideal for KPIs like "Open P1 Incidents" or "SLA Breaches Today."</p>
+          </div>
+          <div class="term-card">
+            <h4>Gauge Widget</h4>
+            <p>Displays a value on a dial or gauge scale — useful for showing progress toward a target (e.g., SLA compliance percentage). Supports configurable thresholds for color-coded status.</p>
+          </div>
+          <div class="term-card">
+            <h4>Clock / Custom</h4>
+            <p>ServiceNow also supports clock widgets for displaying current time in different time zones, and custom HTML/URL widgets for embedding external content.</p>
+          </div>
+        </div>
+
+        <h3>Dashboard Sharing</h3>
+        <p>Dashboards have a <strong>Sharing</strong> configuration that determines who can view and edit them. This is separate from report-level "Visible to" settings.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Sharing Level</th>
+              <th>Who Can See It</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Personal</strong></td>
+              <td>Only the dashboard owner</td>
+              <td>Private work dashboards; personal monitoring views</td>
+            </tr>
+            <tr>
+              <td><strong>Group</strong></td>
+              <td>All members of specified ServiceNow groups</td>
+              <td>Team-level operational dashboards shared with a squad or department</td>
+            </tr>
+            <tr>
+              <td><strong>Roles</strong></td>
+              <td>All users who have the specified role(s)</td>
+              <td>Role-based visibility — e.g., all users with the <code>itil</code> role see the IT Ops dashboard</td>
+            </tr>
+            <tr>
+              <td><strong>Everyone</strong></td>
+              <td>All authenticated users on the instance</td>
+              <td>Company-wide status dashboards, public announcement boards</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Tab Management</h3>
+        <p>Dashboards support multiple tabs, allowing you to organize widgets logically within a single dashboard. Each tab has an independent layout and can display a different set of widgets.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Add a new tab via the <strong>+</strong> icon on the dashboard tab bar</li>
+          <li>Tabs can be renamed, reordered, and deleted independently</li>
+          <li>Each tab can have its own sharing configuration (in newer ServiceNow versions)</li>
+          <li>Tabs are useful for separating views — e.g., "Overview," "SLA Status," "Team Performance"</li>
+        </ul>
+
+        <h3>Interactive Filters on Dashboards</h3>
+        <p>Interactive Filters allow dashboard viewers to slice all applicable widgets simultaneously without modifying the underlying reports. They act as a dynamic cross-dashboard filter.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Added to a dashboard as a widget — appears as a dropdown or date picker at the top of the canvas</li>
+          <li>When a user selects a value (e.g., "Priority = 1 - Critical"), all widgets that use the same source table and field update dynamically</li>
+          <li>Interactive filters are <strong>not</strong> saved to the underlying reports — they are temporary view-time overrides</li>
+          <li>Useful for executive dashboards where stakeholders need to filter by date range, region, or team without creating separate reports</li>
+        </ul>
+
+        <div class="callout-concept">
+          <strong>Dashboard vs. Homepage (Legacy):</strong> Older ServiceNow instances used "Homepages" as the primary dashboard mechanism. Homepages are the legacy approach; <strong>Dashboards are the modern replacement</strong>. For the CSA exam, know that Dashboards support widgets, tabs, and interactive filters — Homepages are simpler and less flexible. New implementations should use Dashboards.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Point — Editing Permissions:</strong> By default, only the <strong>creator</strong> of a dashboard and users with the <strong>admin</strong> role can edit the dashboard layout and configuration. Shared viewers can see the dashboard but cannot modify it. To grant edit access to others, the owner must explicitly add them as editors in the sharing settings.
+        </div>
+      </div>
+
+      <!-- Section 4: Performance Analytics (PA) -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Performance Analytics (PA)</h2>
+        <p>Performance Analytics (PA) is a licensed ServiceNow application that extends standard reporting with <strong>historical data collection</strong> and <strong>time-series trending</strong>. While standard reports reflect the current state of data, PA captures point-in-time snapshots and tracks how metrics evolve over time.</p>
+
+        <div class="callout-warning">
+          <strong>License Requirement:</strong> Performance Analytics requires a <strong>separate license</strong> on top of the base ServiceNow platform. It is not available on all instances by default. Standard reports are included with every ServiceNow license — PA is an add-on. The exam tests awareness of this distinction.
+        </div>
+
+        <h3>Core PA Concepts</h3>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">📊</div>
+            <h4>Indicators</h4>
+            <p>The metric definitions that PA tracks. An indicator describes <em>what</em> to measure — for example, "Count of open P1 incidents." Indicators are configured with a source table, a filter condition, and an aggregate function.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Stored in: <code>pa_indicators</code> table</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">📍</div>
+            <h4>Scores</h4>
+            <p>The actual point-in-time value of an indicator, collected by a scheduled data collection job. Every time the job runs, it records the current value of the indicator as a Score. Scores accumulate over time to build a historical trend.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Stored in: <code>pa_scores</code> table</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">🔀</div>
+            <h4>Breakdowns</h4>
+            <p>A dimension by which an indicator's score can be further sliced. A Breakdown defines a segmentation — for example, "by Assignment Group" or "by Priority." Enables drilldown from total to segmented views.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Stored in: <code>pa_breakdowns</code> table</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">🎯</div>
+            <h4>Targets</h4>
+            <p>A desired value for an indicator — defines what "good" looks like. For example, a target of 10 for "Open P1 incidents" means you want to keep that count at or below 10.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">⚠️</div>
+            <h4>Thresholds</h4>
+            <p>Warning and critical boundaries for an indicator's value. Used to drive color-coded status on gauge widgets — green (good), yellow (warning), red (critical). Thresholds trigger visual alerts when values cross defined limits.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">⏰</div>
+            <h4>Data Collection Jobs</h4>
+            <p>Automated scheduled jobs that collect scores for indicators at defined intervals (e.g., daily). Without a data collection job running, PA indicators have no historical score data.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Navigate to: <strong>Performance Analytics &gt; Data Collector &gt; Jobs</strong></p>
+          </div>
+        </div>
+
+        <h3>PA vs. Standard Reports — Critical Comparison</h3>
+        <p>This comparison is one of the most commonly tested topics in the reporting section of the CSA exam.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Standard Reports</th>
+              <th>Performance Analytics (PA)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Data Reflects</strong></td>
+              <td>Current state of live data at the time of report execution</td>
+              <td>Historical point-in-time snapshots collected by scheduled jobs</td>
+            </tr>
+            <tr>
+              <td><strong>Historical Trending</strong></td>
+              <td><span style="color:var(--red-400)">Limited</span> — Trend report shows current table data grouped by date field, but records that are deleted or updated are reflected at current values</td>
+              <td><span style="color:var(--green-400)">Full</span> — PA captures scores at the time of collection regardless of subsequent record changes</td>
+            </tr>
+            <tr>
+              <td><strong>License</strong></td>
+              <td>Included with all ServiceNow instances</td>
+              <td>Requires separate Performance Analytics license</td>
+            </tr>
+            <tr>
+              <td><strong>Best For</strong></td>
+              <td>Current operational state: open incidents, today's changes, current inventory</td>
+              <td>KPI trending over time: how has MTTR changed month-over-month? Is our incident backlog growing?</td>
+            </tr>
+            <tr>
+              <td><strong>Data Capture</strong></td>
+              <td>On-demand query — no pre-collection needed</td>
+              <td>Requires scheduled data collection jobs to have run — no historical data without them</td>
+            </tr>
+            <tr>
+              <td><strong>Typical Use</strong></td>
+              <td>Operational lists, ad hoc queries, form-based reports</td>
+              <td>Executive dashboards, SLA trend analysis, continuous improvement tracking</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Anchor Statement:</strong> <em>"PA = historical trending; Standard Reports = current state."</em> If a question asks which tool you use to show how a metric has changed over the past 12 months using collected historical data — the answer is <strong>Performance Analytics</strong>. If it asks about the current count of open incidents — use a <strong>standard report</strong>.
+        </div>
+
+        <h3>Automated Data Collection Jobs</h3>
+        <p>PA data collection jobs are scheduled system jobs that automatically run at configured intervals to capture indicator scores. Key facts:</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Jobs are configured under: <strong>Performance Analytics &gt; Data Collector &gt; Jobs</strong></li>
+          <li>Each job is associated with one or more indicators</li>
+          <li>Jobs can be triggered manually or run on a schedule (daily, weekly, etc.)</li>
+          <li>If a job has never run, there are <strong>no scores</strong> and no historical data to display</li>
+          <li>Backfilling historical scores is possible but requires a data collection job with a historical range configured</li>
+        </ul>
+      </div>
+
+      <!-- Section 5: Scheduled Reports -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Scheduled Reports</h2>
+        <p>Scheduled Reports automatically run a report on a defined interval and distribute the output to specified recipients via email. This eliminates the need for users to manually run reports on a recurring basis.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Scheduled reports are stored in the <code>sys_report_schedule</code> table</li>
+          <li>Navigate to: <strong>Reports &gt; Scheduled Reports</strong> or type <code>sys_report_schedule.list</code></li>
+          <li>A scheduled report is associated with one or more existing saved reports</li>
+          <li>The schedule runs a fresh query against the live data at the configured time</li>
+        </ul>
+
+        <h3>Schedule Configuration</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Description</th>
+              <th>Options / Examples</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Frequency</strong></td>
+              <td>How often the report is sent</td>
+              <td>Daily, Weekly, Monthly, Once</td>
+            </tr>
+            <tr>
+              <td><strong>Run time</strong></td>
+              <td>The time of day the scheduled job executes</td>
+              <td>E.g., 06:00 AM UTC</td>
+            </tr>
+            <tr>
+              <td><strong>Recipients — Users</strong></td>
+              <td>Specific ServiceNow users to receive the report</td>
+              <td>Reference to <code>sys_user</code> records</td>
+            </tr>
+            <tr>
+              <td><strong>Recipients — Groups</strong></td>
+              <td>All members of specified ServiceNow groups receive the report</td>
+              <td>Reference to <code>sys_user_group</code> records</td>
+            </tr>
+            <tr>
+              <td><strong>Recipients — Email Addresses</strong></td>
+              <td>Free-text email addresses — can include external addresses outside ServiceNow</td>
+              <td>E.g., <code>manager@company.com</code></td>
+            </tr>
+            <tr>
+              <td><strong>Format</strong></td>
+              <td>Output format of the emailed report attachment</td>
+              <td>PDF, Excel (.xlsx), CSV, PNG</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Formats to Know:</strong> Scheduled reports can be delivered as <strong>PDF</strong> (full visual render), <strong>Excel</strong> (data for analysis), <strong>CSV</strong> (raw data export), or <strong>PNG</strong> (image snapshot of a chart). Know all four format options — the exam may ask which format is appropriate for a given business scenario.
+        </div>
+
+        <div class="callout-tip">
+          <strong>Scheduled vs. Subscribed:</strong> "Subscribed" reports are a separate feature where users opt in to receive a report on a schedule. Scheduled reports are created by admins/owners and pushed to specific recipients. Both use <code>sys_report_schedule</code> under the hood but differ in who initiates the subscription.
+        </div>
+      </div>
+
+      <!-- Section 6: Data Sources -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Data Sources</h2>
+        <p>A Data Source is a reusable, pre-configured query definition that can serve as the basis for one or more reports. Instead of configuring the same table, joins, and filters on each report individually, a Data Source encapsulates that configuration and allows multiple reports to share it.</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Data Sources are stored in the <code>sys_data_source</code> table</li>
+          <li>Navigate to: <strong>Reports &gt; Data Sources</strong></li>
+          <li>A Data Source can reference a single table or use dot-walking to traverse related tables</li>
+          <li>Complex multi-table relationships can be modeled using dot-walked fields as virtual columns</li>
+        </ul>
+
+        <h3>Joining Tables via Dot-Walk</h3>
+        <p>ServiceNow does not have native SQL-style JOIN syntax for reports, but dot-walking through reference fields effectively achieves the same result. A Data Source based on the <code>incident</code> table can expose <code>caller_id.department</code>, <code>caller_id.location.city</code>, and <code>assignment_group.manager.name</code> as available fields — bringing in data from related tables transparently.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Example Data Source on incident table exposing cross-table fields via dot-walk
+Source Table: incident
+
+Available dot-walked fields:
+  caller_id.name              → Caller's full name (from sys_user)
+  caller_id.department.name   → Caller's department name (from cmn_department via sys_user)
+  assignment_group.name       → Assignment group name (from sys_user_group)
+  assignment_group.manager.name → Group manager name (from sys_user via sys_user_group)
+  location.city               → Location city (from cmn_location)</code></pre>
+        </div>
+
+        <h3>Encrypted Tables and Report Restrictions</h3>
+        <p>ServiceNow supports field-level encryption for sensitive data. Reports on tables with encrypted fields are subject to the following restrictions:</p>
+
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Encrypted fields <strong>cannot be used as Group By dimensions</strong> — the encrypted value cannot be aggregated or compared meaningfully</li>
+          <li>Encrypted fields <strong>cannot appear in report filter conditions</strong> unless queried with the exact encrypted hash</li>
+          <li>Users without the encryption key or appropriate role will see masked or blank values for encrypted fields in report output</li>
+          <li>Report administrators should be aware of these constraints when designing reports against HR or financial tables that use encryption</li>
+        </ul>
+
+        <div class="callout-concept">
+          <strong>Data Source vs. Table Source:</strong> For simple reports against a single table, using <strong>Table</strong> as the source is sufficient and simpler. Use a <strong>Data Source</strong> when: (1) you need the same complex query shared across multiple reports, (2) the query logic is complex enough to warrant centralizing, or (3) you need a reusable filtered view of data for a team of report authors.
+        </div>
+      </div>
+
+      <!-- Section 7: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Key Exam Facts &amp; Traps</h2>
+        <p>This section consolidates the highest-frequency exam facts for the Reporting &amp; Dashboards topic. Review these before the exam.</p>
+
+        <div class="callout-exam">
+          <strong>Fact 1 — Report Editing Permissions:</strong> By default, only the <strong>report creator</strong> and users with the <strong>admin</strong> role can edit a report's configuration. Shared viewers can run and see the report but cannot modify it. If you need to allow another user to edit, they must be granted explicit access or assigned the admin role.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 2 — "Visible to" Controls Sharing:</strong> The <strong>Visible to</strong> field on a report determines who can see and run the report. Options are: <strong>Me</strong> (personal, only the creator), <strong>Groups</strong> (specific groups), <strong>Roles</strong> (users with a role), and <strong>Everyone</strong> (all authenticated users).
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 3 — Pivot Table = Cross-Tab Analysis:</strong> A <strong>Pivot Table</strong> report type produces a cross-tabular view showing values at the intersection of two grouping dimensions (rows × columns). If an exam question asks about "cross-tab analysis" or a matrix-style report — the answer is <strong>Pivot Table</strong>.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 4 — Trend Report Requires a Date Field:</strong> A <strong>Trend report</strong> cannot be created without selecting a <strong>date or datetime field</strong> for the "Trend by" configuration. Without a date field, there is no time axis to group the data by. This is a very common exam trap question.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 5 — PA Requires a License; Standard Reports Do Not:</strong> Performance Analytics is a licensed add-on. Standard reports (List, Bar, Pie, Trend, etc.) are available on all ServiceNow instances as part of the base platform. If an exam scenario states that PA is not licensed, the answer will involve standard reports.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 6 — sys_report Table:</strong> All saved reports are stored in the <code>sys_report</code> table. Scheduled report definitions are stored in <code>sys_report_schedule</code>. Data sources are in <code>sys_data_source</code>. Know these table names — they appear in exam questions about navigating to or auditing reports.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 7 — PA Scores vs. Standard Report Data:</strong> Standard reports query <em>current</em> live table data. PA scores are <em>historical snapshots</em> collected at a point in time by scheduled jobs. A report on <code>incident</code> will show the current open count right now. A PA indicator score from last Tuesday will show the open count as it was last Tuesday — even if those records have since been resolved or deleted.
+        </div>
+
+        <h3>Quick Reference Summary</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th>Key Fact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Reports table</strong></td>
+              <td><code>sys_report</code></td>
+            </tr>
+            <tr>
+              <td><strong>Scheduled reports table</strong></td>
+              <td><code>sys_report_schedule</code></td>
+            </tr>
+            <tr>
+              <td><strong>Data sources table</strong></td>
+              <td><code>sys_data_source</code></td>
+            </tr>
+            <tr>
+              <td><strong>Trend report requirement</strong></td>
+              <td>Must have a date/datetime field for "Trend by"</td>
+            </tr>
+            <tr>
+              <td><strong>Pivot Table use case</strong></td>
+              <td>Cross-tab / matrix analysis (rows × columns)</td>
+            </tr>
+            <tr>
+              <td><strong>Stack by</strong></td>
+              <td>Secondary grouping on Bar Charts only</td>
+            </tr>
+            <tr>
+              <td><strong>PA vs. Reports</strong></td>
+              <td>PA = historical trending; Reports = current state</td>
+            </tr>
+            <tr>
+              <td><strong>PA license</strong></td>
+              <td>Required (add-on); standard reports are base platform</td>
+            </tr>
+            <tr>
+              <td><strong>Scheduled report formats</strong></td>
+              <td>PDF, Excel (.xlsx), CSV, PNG</td>
+            </tr>
+            <tr>
+              <td><strong>Report edit access</strong></td>
+              <td>Creator + admin only by default</td>
+            </tr>
+            <tr>
+              <td><strong>Dashboard vs. Homepage</strong></td>
+              <td>Dashboards are modern; Homepages are legacy</td>
+            </tr>
+            <tr>
+              <td><strong>Interactive Filters</strong></td>
+              <td>Cross-dashboard dynamic filters; do not save to reports</td>
+            </tr>
+            <tr>
+              <td><strong>PA Indicator</strong></td>
+              <td>What to measure (metric definition)</td>
+            </tr>
+            <tr>
+              <td><strong>PA Score</strong></td>
+              <td>Point-in-time value collected by a data collection job</td>
+            </tr>
+            <tr>
+              <td><strong>PA Breakdown</strong></td>
+              <td>Dimension to slice an indicator (e.g., by Priority)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-tip">
+          <strong>Visualization Selection Cheat Sheet:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><strong>Proportion/Share</strong> → Pie or Donut</li>
+            <li><strong>Category comparison</strong> → Bar Chart</li>
+            <li><strong>Category + sub-category comparison</strong> → Bar Chart with Stack by</li>
+            <li><strong>Trend over time</strong> → Trend or Line (requires date field for Trend)</li>
+            <li><strong>Frequency distribution of a number</strong> → Histogram</li>
+            <li><strong>Two-dimensional density</strong> → Heatmap</li>
+            <li><strong>Row × Column cross-analysis</strong> → Pivot Table</li>
+            <li><strong>Record-by-record detail</strong> → List</li>
+            <li><strong>Events on a calendar</strong> → Calendar</li>
+            <li><strong>Geographic distribution</strong> → Map</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="01-notifications-templates.html" class="btn btn-secondary">← Notifications &amp; Templates</a>
+          <a href="03-knowledge-management.html" class="btn btn-primary">Knowledge Management →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p3-reporting-dashboards', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p3-reporting-dashboards')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

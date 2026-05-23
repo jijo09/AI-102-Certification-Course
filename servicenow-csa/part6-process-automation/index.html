@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 6 — Self-Service & Process Automation | ServiceNow CSA Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .part-hero {
+      background: linear-gradient(135deg, rgba(248,113,113,0.1) 0%, #2d0a0a 60%);
+      border: 1px solid rgba(248,113,113,0.2);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-10) var(--space-12);
+      margin-bottom: var(--space-8);
+      position: relative; overflow: hidden;
+    }
+    .part-hero::before {
+      content: ''; position: absolute;
+      top: -60px; right: -60px; width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(248,113,113,0.15) 0%, transparent 70%);
+    }
+    .part-hero-eyebrow {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--red-400);
+      background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.25);
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm);
+      margin-bottom: var(--space-4); font-family: var(--font-heading);
+    }
+    .part-hero-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.15;
+      margin-bottom: var(--space-4);
+      background: linear-gradient(135deg, #fff1f2 0%, #fecaca 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .part-hero-desc {
+      font-size: 0.975rem; color: var(--text-secondary);
+      max-width: 600px; line-height: 1.75; margin-bottom: var(--space-8);
+    }
+    .part-hero-meta { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-value {
+      font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800;
+      color: var(--red-400); line-height: 1;
+    }
+    .meta-label { font-size: 0.7rem; color: var(--text-muted); }
+
+    .why-card {
+      background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.15);
+      border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+    .why-title {
+      font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700;
+      color: var(--red-400); margin-bottom: var(--space-4);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+
+    .topic-list { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-10); }
+    .topic-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: var(--space-6);
+      display: flex; gap: var(--space-6); align-items: flex-start;
+      text-decoration: none; transition: all var(--transition-normal);
+      position: relative; overflow: hidden;
+    }
+    .topic-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--red-400);
+      border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    }
+    .topic-card:hover {
+      border-color: rgba(248,113,113,0.4);
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(248,113,113,0.1);
+    }
+    .topic-card.completed::before { background: var(--green-500); }
+    .topic-num-badge {
+      width: 44px; height: 44px; min-width: 44px;
+      background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.25);
+      border-radius: var(--radius-md); display: flex; align-items: center;
+      justify-content: center; font-family: var(--font-heading); font-size: 0.85rem;
+      font-weight: 700; color: var(--red-400); margin-top: 2px;
+    }
+    .topic-card.completed .topic-num-badge {
+      background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.25);
+      color: var(--green-400);
+    }
+    .topic-card-body { flex: 1; }
+    .topic-card-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: var(--space-4); margin-bottom: var(--space-2);
+    }
+    .topic-card-title {
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 700;
+      color: var(--text-primary); line-height: 1.3;
+    }
+    .topic-card-desc {
+      font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: var(--space-4);
+    }
+    .topic-card-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .topic-tag {
+      font-size: 0.68rem; font-family: var(--font-mono);
+      background: var(--bg-secondary); color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 8px; border-radius: var(--radius-sm);
+    }
+    .topic-arrow {
+      color: var(--text-muted); font-size: 1.2rem; margin-top: 2px; flex-shrink: 0;
+      transition: transform var(--transition-fast);
+    }
+    .topic-card:hover .topic-arrow { transform: translateX(4px); color: var(--red-400); }
+
+    .learn-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--space-4); margin-bottom: var(--space-8);
+    }
+    .learn-item {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      display: flex; gap: var(--space-3); align-items: flex-start;
+    }
+    .learn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .learn-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+    .action-bar {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-8);
+    }
+    .action-bar-left { display: flex; flex-direction: column; gap: var(--space-1); }
+    .action-bar-title {
+      font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700;
+      color: var(--text-primary);
+    }
+    .action-bar-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 99; backdrop-filter: blur(2px);
+    }
+    #sidebar-overlay.show { display: block; }
+
+    @media (max-width: 700px) {
+      .part-hero { padding: var(--space-6); }
+      .topic-card { flex-direction: column; gap: var(--space-3); }
+      .action-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+
+<div class="app-shell">
+
+  <div id="app-sidebar"></div>
+
+  <main class="main-content">
+
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <span class="current">Part 6 — Automation</span>
+      </div>
+    </header>
+
+    <div class="page-content stagger">
+
+      <div class="part-hero animate-fade-in">
+        <div class="part-hero-eyebrow">⚡ Part 6 of 6 &nbsp;·&nbsp; Self-Service &amp; Automation</div>
+        <h1 class="part-hero-title">Self-Service &amp;<br>Process Automation</h1>
+        <p class="part-hero-desc">
+          Build the automation layer that makes ServiceNow powerful. Master UI Policies for declarative form control, Business Rules for server-side logic, Client Scripts for responsive UX, and Flow Designer for low-code process orchestration.
+        </p>
+        <div class="part-hero-meta">
+          <div class="meta-item">
+            <span class="meta-value">20%</span>
+            <span class="meta-label">Exam Weight</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-value" data-part-done-count>0/4</span>
+            <span class="meta-label">Topics Finished</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-value" data-part-done-pct>0%</span>
+            <span class="meta-label">Readiness</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-title">💡 Why Process Automation Matters</div>
+        <p style="font-size:0.875rem; line-height:1.6; color:var(--text-secondary); margin:0;">
+          At 20% exam weight, automation is where administrative knowledge becomes operational value. The exam tests when to use UI Policies vs Client Scripts vs Business Rules — the order of execution, the appropriate use cases, and the pitfalls of each. Flow Designer questions focus on trigger types, approval flows, and spoke actions.
+        </p>
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">Part 6 Study Modules</h2>
+
+      <div class="topic-list">
+
+        <a href="topics/01-ui-policies-actions.html" class="topic-card" id="card-csa-p6-ui-policies-actions">
+          <div class="topic-num-badge">01</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">UI Policies &amp; UI Actions</h3>
+            </div>
+            <p class="topic-card-desc">Apply declarative rules to make form fields mandatory, read-only, or hidden based on conditions — without scripting. Configure UI Actions to add context menu items and form buttons that trigger server-side operations.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">UI Policies</span>
+              <span class="topic-tag">UI Actions</span>
+              <span class="topic-tag">Mandatory/Read-Only</span>
+              <span class="topic-tag">Conditions</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/02-business-rules.html" class="topic-card" id="card-csa-p6-business-rules">
+          <div class="topic-num-badge">02</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">Business Rules &amp; Scripts</h3>
+            </div>
+            <p class="topic-card-desc">Write server-side JavaScript that executes on record insert, update, delete, or query. Understand the timing options (Before, After, Async, Display) and when each is appropriate for your use case.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">Before/After Rules</span>
+              <span class="topic-tag">Async Rules</span>
+              <span class="topic-tag">Display Rules</span>
+              <span class="topic-tag">GlideRecord</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/03-client-scripts.html" class="topic-card" id="card-csa-p6-client-scripts">
+          <div class="topic-num-badge">03</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">Client Scripts &amp; UI Scripts</h3>
+            </div>
+            <p class="topic-card-desc">Execute JavaScript in the browser to react to user actions in real time. Master the onLoad, onChange, and onSubmit types, use g_form API to manipulate fields, and understand UI Scripts for reusable client-side libraries.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">onLoad / onChange</span>
+              <span class="topic-tag">g_form API</span>
+              <span class="topic-tag">onSubmit</span>
+              <span class="topic-tag">UI Scripts</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/04-flow-designer.html" class="topic-card" id="card-csa-p6-flow-designer">
+          <div class="topic-num-badge">04</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">Flow Designer &amp; Workflows</h3>
+            </div>
+            <p class="topic-card-desc">Build low-code process automation using Flow Designer triggers, actions, and subflows. Compare Flow Designer with the legacy Workflow Editor and understand approval process design, SLA actions, and notification triggers.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">Flow Designer</span>
+              <span class="topic-tag">Triggers</span>
+              <span class="topic-tag">Subflows</span>
+              <span class="topic-tag">Approval Actions</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">What You'll Master</h2>
+      <div class="learn-grid">
+        <div class="learn-item">
+          <span class="learn-icon">🔴</span>
+          <span class="learn-text">Choosing between UI Policies and Client Scripts based on execution context and complexity.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔴</span>
+          <span class="learn-text">Business Rule timing: Before, After, Async, and Display — when each fires and why it matters.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔴</span>
+          <span class="learn-text">g_form API methods for reading, setting, and controlling form fields from Client Scripts.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔴</span>
+          <span class="learn-text">Flow Designer trigger types: Record-based, Schedule-based, and Application-based flows.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔴</span>
+          <span class="learn-text">Building multi-step approval flows with conditional branching and notification actions.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🔴</span>
+          <span class="learn-text">Differences between Flow Designer subflows, actions, and the legacy Workflow Editor.</span>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <div class="action-bar-title">Ready to Test Your Part 6 Knowledge?</div>
+          <div class="action-bar-sub">Run flashcard drills or attempt the scenario quiz on automation layers and scripting.</div>
+        </div>
+        <div style="display:flex; gap:var(--space-3)">
+          <a href="flashcards.html" class="btn btn-secondary">🧠 Flashcards</a>
+          <a href="quiz.html" class="btn btn-primary">🎯 Take Part Quiz</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  function updatePartPageStats() {
+    const meta = ProgressManager.getPartProgress(6);
+    document.querySelectorAll('[data-part-done-count]').forEach(el => {
+      el.textContent = `${meta.done} / ${meta.total}`;
+    });
+    document.querySelectorAll('[data-part-done-pct]').forEach(el => {
+      el.textContent = `${meta.pct}%`;
+    });
+
+    const topics = [
+      'csa-p6-ui-policies-actions',
+      'csa-p6-business-rules',
+      'csa-p6-client-scripts',
+      'csa-p6-flow-designer'
+    ];
+    topics.forEach(tid => {
+      const card = document.getElementById(`card-${tid}`);
+      if (card) card.classList.toggle('completed', ProgressManager.isComplete(tid));
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => { updatePartPageStats(); });
+  document.addEventListener('progressUpdated', () => { updatePartPageStats(); });
+</script>
+</body>
+</html>

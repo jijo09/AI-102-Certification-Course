@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topic 1 — Azure AI Search | AI-102 Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sbo { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; backdrop-filter:blur(2px); }
+    #sbo.show { display:block; }
+    .pipeline-step {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      display: flex; gap: var(--space-4); align-items: flex-start;
+    }
+    .step-num {
+      width: 32px; height: 32px; min-width: 32px;
+      background: #dc2626; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700;
+      color: #fff; margin-top: 2px;
+    }
+    .step-title { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .step-desc { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+  </style>
+</head>
+<body>
+<div id="sbo"></div>
+<div class="app-shell">
+
+  <div id="app-sidebar"></div>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span><span class="current">Azure AI Search</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header animate-fade-in">
+        <div class="topic-part-badge badge" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)">🔍 Part 5 · Topic 1 of 3</div>
+        <h1 class="topic-title">Azure AI Search</h1>
+        <p style="font-size:1rem;color:var(--text-secondary);max-width:680px;line-height:1.7;margin-top:var(--space-3)">
+          Azure AI Search is Microsoft's enterprise search platform that turns any data source into
+          a searchable knowledge base. It combines full-text search, AI enrichment via skillsets,
+          semantic ranking, and vector search into one service. It is the backbone of most
+          knowledge mining and RAG solutions on Azure.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">🐍 <strong>Python — every line explained</strong></span>
+          <span class="topic-meta-item">⏱️ <strong>~55 min</strong></span>
+          <span class="topic-meta-item">🔥 <strong>Very high exam weight</strong></span>
+        </div>
+      </div>
+
+      <!-- SECTION 1 — VOCAB -->
+      <div class="section-block" id="vocab">
+        <div class="section-label">🔤 Section 1 — New Vocabulary</div>
+        <h2>Azure AI Search terms — defined before code</h2>
+        <div class="term-grid">
+          <div class="term-card">
+            <span class="term-name">Index</span>
+            <p class="term-definition">A searchable container of documents in Azure AI Search — like a database table but optimised for search. Each document in the index has fields (title, content, category). The index schema defines which fields are searchable, filterable, sortable, and facetable.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Document (Search)</span>
+            <p class="term-definition">A single record in a search index. Like a row in a database table. Each document has fields defined by the index schema. Example: one document = one product listing with fields: id, name, description, price, category.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Field Attributes</span>
+            <p class="term-definition">Properties set on each index field: <strong>searchable</strong> (full-text search over this field), <strong>filterable</strong> (use in WHERE clauses), <strong>sortable</strong> (sort results by this field), <strong>facetable</strong> (use for category counts/navigation), <strong>retrievable</strong> (include in search results), <strong>key</strong> (unique document identifier).</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Indexer</span>
+            <p class="term-definition">An automated crawler that reads data from a data source and populates an index. Runs on a schedule or on-demand. Tracks which documents have changed since the last run (change detection). You don't push data manually — the indexer pulls it.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Data Source (Search)</span>
+            <p class="term-definition">A connection definition pointing to where the indexer should pull data from: Azure Blob Storage, Azure SQL, Cosmos DB, Azure Table Storage, SharePoint Online. Stores the connection string and container/table name.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Skillset</span>
+            <p class="term-definition">A pipeline of AI enrichment skills applied to documents during indexing. Each skill reads fields, applies AI processing (OCR, NER, sentiment, key phrase extraction, translation, custom skill), and writes enriched output back to the document. Transforms raw content into searchable knowledge.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Built-in Skill</span>
+            <p class="term-definition">A pre-made AI skill provided by Azure — no model training required. Examples: OCR (extract text from images), EntityRecognition (extract named entities), KeyPhraseExtraction, LanguageDetection, SentimentSkill, TranslationSkill, SplitSkill (chunk text), MergeSkill (combine fields).</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Custom Skill</span>
+            <p class="term-definition">Your own AI processing step in a skillset, implemented as an Azure Function or any web API. The skillset calls your endpoint with document content, your function processes it and returns enriched data. Used for domain-specific AI processing not covered by built-in skills.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Knowledge Store</span>
+            <p class="term-definition">An optional output of a skillset — enriched data saved to Azure Blob Storage or Azure Table Storage for use outside of search. Useful for downstream analytics, Power BI reporting, or feeding other pipelines with the enriched content.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Semantic Ranking</span>
+            <p class="term-definition">A re-ranking layer that uses a language model to re-order search results by semantic relevance — finding results that match the meaning of a query, not just the keywords. Returns semantic captions (highlighted relevant excerpts) and semantic answers. Requires the Standard tier or higher.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Vector Search</span>
+            <p class="term-definition">Search using numerical vector embeddings instead of keywords. Documents and queries are converted to vectors (using an embedding model like text-embedding-ada-002). Search finds documents whose vectors are most similar to the query vector. Handles semantic meaning, synonyms, and cross-language matching.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Hybrid Search (RRF)</span>
+            <p class="term-definition">Combining keyword search and vector search results using Reciprocal Rank Fusion (RRF). RRF merges two ranked lists into one — documents appearing high in both lists score highest. More robust than either search type alone. RRF is the Azure AI Search default fusion method.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Scoring Profile</span>
+            <p class="term-definition">Custom rules that boost or reduce the relevance score of documents based on field values, freshness (date), or distance (geo). Example: boost documents where category="Featured" by 2x. Applied after initial ranking, before semantic re-ranking.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Facets</span>
+            <p class="term-definition">Aggregated counts of values in filterable fields — used for navigation filters. Example: a search for "laptop" returns facets: {brand: [Dell(24), HP(18), Lenovo(15)], price_range: [under_500(12), 500_to_1000(30)]}. Facetable fields must be marked facetable in the schema.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Projection (Knowledge Store)</span>
+            <p class="term-definition">Defines the shape and destination of enriched data saved to a knowledge store. Table projections go to Azure Table Storage (structured). Object projections go to Blob Storage (JSON). File projections save extracted images to Blob Storage.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2 — CONCEPTS -->
+      <div class="section-block" id="concepts">
+        <div class="section-label">🏗️ Section 2 — How Azure AI Search Works</div>
+        <h2>The full indexing pipeline</h2>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📚</span>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — A very smart library cataloguing system</div>
+            <p>
+              Imagine a library receiving thousands of new books (your data). A cataloguing system
+              (the <strong>indexer</strong>) automatically reads each book. As it reads, a team of
+              specialists (the <strong>skillset</strong>) annotates each book — one person identifies
+              all the people mentioned, another extracts key topics, another translates the summary.
+              The annotated book is filed in a searchable catalogue (the <strong>index</strong>).
+              When a reader searches the catalogue, they can search by keyword, by topic, or by meaning —
+              and get the most relevant books ranked at the top.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">The 5-component pipeline</h3>
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-8)">
+          <div class="pipeline-step">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-title">Data Source</div>
+              <p class="step-desc">Where the data lives — Azure Blob Storage, Azure SQL, Cosmos DB, SharePoint. The data source stores the connection details. The indexer reads from here.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-title">Indexer (the crawler)</div>
+              <p class="step-desc">Reads documents from the data source, optionally passes them through the skillset, and writes enriched output to the index. Runs on a schedule or on-demand. Tracks changes to only process new/updated documents.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-title">Skillset (optional AI enrichment)</div>
+              <p class="step-desc">A chain of AI skills applied to each document during indexing. Skills can: extract text from images (OCR), detect language, extract entities, extract key phrases, generate embeddings for vector search, or call custom skills. Output fields are added to the document.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">4</div>
+            <div>
+              <div class="step-title">Index (searchable store)</div>
+              <p class="step-desc">The final searchable container. Each field has attributes (searchable, filterable, sortable, facetable). This is what your application queries at runtime. All search and filter operations happen against the index.</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">5</div>
+            <div>
+              <div class="step-title">Knowledge Store (optional output)</div>
+              <p class="step-desc">Saves enriched documents to Azure Blob or Table Storage for use outside of search — Power BI dashboards, downstream pipelines, analytics. Defined inside the skillset as projections.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:var(--space-4)">Field attributes — which to use when</h3>
+        <table class="compare-table">
+          <thead><tr><th>Attribute</th><th>What it enables</th><th>Typical fields</th></tr></thead>
+          <tbody>
+            <tr><td><strong>key</strong></td><td>Uniquely identifies each document — required on one field</td><td>id, documentId</td></tr>
+            <tr><td><strong>searchable</strong></td><td>Full-text search — the field is analysed and indexed for keyword search</td><td>title, description, content</td></tr>
+            <tr><td><strong>filterable</strong></td><td>Exact match filtering — use in $filter expressions</td><td>category, price, date</td></tr>
+            <tr><td><strong>sortable</strong></td><td>Sort results by this field — use in $orderby</td><td>date, price, rating</td></tr>
+            <tr><td><strong>facetable</strong></td><td>Generate aggregated counts for navigation filters</td><td>category, brand, location</td></tr>
+            <tr><td><strong>retrievable</strong></td><td>Include field value in search results returned to the client</td><td>Almost all fields</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam" style="margin-top:var(--space-6)">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — Field attribute scenarios</div>
+            <p>
+              <em>"Users must be able to search documents by their content."</em> → content field must be <strong>searchable</strong><br><br>
+              <em>"Users must be able to filter results to only show documents from the Legal department."</em> → department field must be <strong>filterable</strong><br><br>
+              <em>"The UI shows a list of categories with document counts next to each."</em> → category field must be <strong>facetable</strong><br><br>
+              <em>"Results must be sortable by publication date."</em> → date field must be <strong>sortable</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3 — BUILT-IN SKILLS -->
+      <div class="section-block" id="skills">
+        <div class="section-label">⚙️ Section 3 — Built-in Skills</div>
+        <h2>AI enrichment during indexing</h2>
+        <p>Skills are applied in the skillset during indexing. Each skill reads from the document's enriched field tree and writes new enriched fields back. Skills are chained — the output of one skill can be the input of the next.</p>
+
+        <table class="compare-table">
+          <thead><tr><th>Skill</th><th>What it does</th><th>Exam trigger</th></tr></thead>
+          <tbody>
+            <tr><td><strong>OcrSkill</strong></td><td>Extracts text from images embedded in documents (PDFs with scanned pages, Word docs with image attachments)</td><td>"Documents contain scanned images with text"</td></tr>
+            <tr><td><strong>MergeSkill</strong></td><td>Merges original text with OCR-extracted text into a single content field for downstream skills to process</td><td>Always used after OcrSkill to combine text streams</td></tr>
+            <tr><td><strong>EntityRecognitionSkill</strong></td><td>Extracts named entities: persons, locations, organisations, dates, quantities, URLs, emails</td><td>"Extract people or company names from documents"</td></tr>
+            <tr><td><strong>KeyPhraseExtractionSkill</strong></td><td>Extracts the key topics and concepts from document text</td><td>"Tag documents with their main topics automatically"</td></tr>
+            <tr><td><strong>LanguageDetectionSkill</strong></td><td>Detects the language of the document — output used by other skills that need language context</td><td>"Documents come in multiple languages"</td></tr>
+            <tr><td><strong>SentimentSkill</strong></td><td>Adds a sentiment score (positive/negative/neutral) to each document during indexing</td><td>"Pre-index reviews with sentiment for fast filtering"</td></tr>
+            <tr><td><strong>TranslationSkill</strong></td><td>Translates document content to a target language during indexing</td><td>"Non-English documents must be searchable in English"</td></tr>
+            <tr><td><strong>SplitSkill</strong></td><td>Breaks long documents into smaller pages or chunks — required before embedding generation for vector search</td><td>"Documents too large for embedding model's token limit"</td></tr>
+            <tr><td><strong>AzureOpenAIEmbeddingSkill</strong></td><td>Calls Azure OpenAI to generate vector embeddings for document chunks — enables vector search</td><td>"Enable semantic / vector search on the index"</td></tr>
+            <tr><td><strong>CustomWebApiSkill</strong></td><td>Calls your own Azure Function or web API as a skill — for domain-specific AI processing</td><td>"Standard skills don't cover our domain requirement"</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SECTION 4 — SEARCH TYPES -->
+      <div class="section-block" id="search-types">
+        <div class="section-label">🔍 Section 4 — Search Types</div>
+        <h2>Keyword, vector, hybrid, and semantic search</h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin-bottom:var(--space-6)">
+          <div class="card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🔤</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Full-Text (Keyword) Search</div>
+            <p style="font-size:0.83rem">Finds documents containing the exact query words (with stemming and linguistic analysis). Fast and deterministic. Best for: known terminology, structured queries, filter-heavy search. Misses synonyms and phrasing variations.</p>
+          </div>
+          <div class="card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🧮</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Vector Search</div>
+            <p style="font-size:0.83rem">Converts query to an embedding vector, finds documents whose vectors are nearest (cosine similarity). Handles semantic meaning, synonyms, cross-language matching. Best for: natural language questions, "find similar" queries. Requires embedding generation at index and query time.</p>
+          </div>
+          <div class="card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🔀</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Hybrid Search (RRF)</div>
+            <p style="font-size:0.83rem">Runs keyword AND vector search in parallel, then merges results using Reciprocal Rank Fusion (RRF). Documents appearing high in both ranked lists score highest. More robust than either alone — best of both worlds. Recommended for most production RAG scenarios.</p>
+          </div>
+          <div class="card">
+            <div style="font-size:1.3rem;margin-bottom:var(--space-2)">🧠</div>
+            <div class="card-title" style="margin-bottom:var(--space-2)">Semantic Ranking</div>
+            <p style="font-size:0.83rem">A re-ranking layer applied AFTER keyword/vector/hybrid search. A language model re-scores results by semantic relevance. Also generates semantic captions (highlighted passages) and semantic answers (direct answer extraction). Requires Standard tier+.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Search type decision — exam quick guide</div>
+            <p>
+              <strong>Keyword only</strong>: users search for exact product codes or known terms, speed is critical, no AI budget.<br><br>
+              <strong>Vector only</strong>: users ask natural language questions, cross-language matching needed, all documents have embeddings.<br><br>
+              <strong>Hybrid (RRF)</strong>: best overall relevance needed, mix of structured (keyword) and semantic (meaning) queries. <em>Most RAG solutions use this.</em><br><br>
+              <strong>Semantic ranking on top of hybrid</strong>: maximum relevance quality needed, budget for premium tier, need semantic captions/answers for display in UI.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 5 — PYTHON -->
+      <div class="section-block" id="python">
+        <div class="section-label">🐍 Section 5 — Python: Azure AI Search</div>
+        <h2>Creating an index, uploading documents, and searching</h2>
+        <p style="margin-bottom:var(--space-4)">Install: <code>pip install azure-search-documents azure-core</code></p>
+
+<pre><code><span class="token-keyword">import</span> os
+<span class="token-keyword">from</span> azure.search.documents <span class="token-keyword">import</span> SearchClient
+<span class="token-keyword">from</span> azure.search.documents.indexes <span class="token-keyword">import</span> SearchIndexClient
+<span class="token-keyword">from</span> azure.search.documents.indexes.models <span class="token-keyword">import</span> (
+    SearchIndex,          <span class="token-comment"># Represents the full index definition</span>
+    SearchField,          <span class="token-comment"># Represents one field in the index schema</span>
+    SearchFieldDataType,  <span class="token-comment"># Data types: String, Int32, Double, Boolean, etc.</span>
+    SimpleField,          <span class="token-comment"># A field that is NOT full-text searchable (filterable/sortable)</span>
+    SearchableField,      <span class="token-comment"># A field that IS full-text searchable (analysed and indexed)</span>
+)
+<span class="token-keyword">from</span> azure.core.credentials <span class="token-keyword">import</span> AzureKeyCredential
+
+<span class="token-comment"># ── Connection details ─────────────────────────────────────────────────</span>
+SEARCH_ENDPOINT = os.environ.get(<span class="token-string">"SEARCH_ENDPOINT"</span>)  <span class="token-comment"># https://your-name.search.windows.net</span>
+SEARCH_KEY      = os.environ.get(<span class="token-string">"SEARCH_KEY"</span>)      <span class="token-comment"># Admin key from the Azure portal</span>
+INDEX_NAME      = <span class="token-string">"products-index"</span>                  <span class="token-comment"># Name for our index</span>
+
+credential = AzureKeyCredential(SEARCH_KEY)
+
+<span class="token-comment"># ── Step 1: Create the index schema ───────────────────────────────────</span>
+<span class="token-comment"># SearchIndexClient manages index creation and deletion (admin operations)</span>
+index_client = SearchIndexClient(endpoint=SEARCH_ENDPOINT, credential=credential)
+
+<span class="token-comment"># Define the fields for our product index</span>
+<span class="token-comment"># SimpleField: NOT full-text searchable — used for filtering, sorting, faceting</span>
+<span class="token-comment"># SearchableField: IS full-text searchable — content is analysed and inverted</span>
+fields = [
+    SimpleField(
+        name       = <span class="token-string">"id"</span>,
+        type       = SearchFieldDataType.String,
+        key        = <span class="token-keyword">True</span>,          <span class="token-comment"># key=True makes this the unique document identifier</span>
+        filterable = <span class="token-keyword">True</span>           <span class="token-comment"># Allow filtering by id</span>
+    ),
+    SearchableField(
+        name      = <span class="token-string">"name"</span>,
+        type      = SearchFieldDataType.String,  <span class="token-comment"># Free-text product name — full-text searchable</span>
+        sortable  = <span class="token-keyword">True</span>                         <span class="token-comment"># Allow sorting results by name</span>
+    ),
+    SearchableField(
+        name = <span class="token-string">"description"</span>,
+        type = SearchFieldDataType.String        <span class="token-comment"># Long-form text — full-text searchable only</span>
+    ),
+    SimpleField(
+        name       = <span class="token-string">"category"</span>,
+        type       = SearchFieldDataType.String,
+        filterable = <span class="token-keyword">True</span>,    <span class="token-comment"># Allow filtering: $filter=category eq 'Electronics'</span>
+        facetable  = <span class="token-keyword">True</span>     <span class="token-comment"># Enable category counts for navigation filters</span>
+    ),
+    SimpleField(
+        name       = <span class="token-string">"price"</span>,
+        type       = SearchFieldDataType.Double,
+        filterable = <span class="token-keyword">True</span>,    <span class="token-comment"># Allow filtering: $filter=price lt 500</span>
+        sortable   = <span class="token-keyword">True</span>     <span class="token-comment"># Allow sorting by price</span>
+    ),
+    SimpleField(
+        name        = <span class="token-string">"in_stock"</span>,
+        type        = SearchFieldDataType.Boolean,
+        filterable  = <span class="token-keyword">True</span>    <span class="token-comment"># Allow filtering: $filter=in_stock eq true</span>
+    ),
+]
+
+<span class="token-comment"># Create the index definition and send it to Azure</span>
+index = SearchIndex(name=INDEX_NAME, fields=fields)
+index_client.create_or_update_index(index)  <span class="token-comment"># Creates if new, updates if exists</span>
+<span class="token-keyword">print</span>(<span class="token-string">f"Index '{INDEX_NAME}' created."</span>)
+
+
+<span class="token-comment"># ── Step 2: Upload documents to the index ─────────────────────────────</span>
+<span class="token-comment"># SearchClient is used for document operations (upload, search, delete)</span>
+search_client = SearchClient(
+    endpoint   = SEARCH_ENDPOINT,
+    index_name = INDEX_NAME,
+    credential = credential
+)
+
+<span class="token-comment"># Documents are plain Python dictionaries</span>
+<span class="token-comment"># Field names must exactly match the index schema</span>
+documents = [
+    {<span class="token-string">"id"</span>: <span class="token-string">"1"</span>, <span class="token-string">"name"</span>: <span class="token-string">"Dell G15 Gaming Laptop"</span>,   <span class="token-string">"description"</span>: <span class="token-string">"High-performance gaming laptop with RTX 3060"</span>, <span class="token-string">"category"</span>: <span class="token-string">"Laptops"</span>,   <span class="token-string">"price"</span>: <span class="token-number">999.99</span>,  <span class="token-string">"in_stock"</span>: <span class="token-keyword">True</span>},
+    {<span class="token-string">"id"</span>: <span class="token-string">"2"</span>, <span class="token-string">"name"</span>: <span class="token-string">"Sony WH-1000XM5 Headphones"</span>, <span class="token-string">"description"</span>: <span class="token-string">"Industry-leading noise cancelling wireless headphones"</span>, <span class="token-string">"category"</span>: <span class="token-string">"Audio"</span>,     <span class="token-string">"price"</span>: <span class="token-number">349.99</span>,  <span class="token-string">"in_stock"</span>: <span class="token-keyword">True</span>},
+    {<span class="token-string">"id"</span>: <span class="token-string">"3"</span>, <span class="token-string">"name"</span>: <span class="token-string">"Logitech MX Master 3 Mouse"</span>,  <span class="token-string">"description"</span>: <span class="token-string">"Advanced wireless mouse for productivity"</span>,              <span class="token-string">"category"</span>: <span class="token-string">"Peripherals"</span>,<span class="token-string">"price"</span>: <span class="token-number">99.99</span>,   <span class="token-string">"in_stock"</span>: <span class="token-keyword">False</span>},
+]
+
+<span class="token-comment"># upload_documents() adds or replaces documents in the index</span>
+<span class="token-comment"># Returns a list of IndexingResult objects — one per document</span>
+result = search_client.upload_documents(documents=documents)
+<span class="token-keyword">print</span>(<span class="token-string">f"Uploaded {len(result)} documents."</span>)
+
+
+<span class="token-comment"># ── Step 3: Basic keyword search ──────────────────────────────────────</span>
+<span class="token-keyword">print</span>(<span class="token-string">"\n--- Keyword Search: 'wireless' ---"</span>)
+
+<span class="token-comment"># search() returns a SearchItemPaged iterator</span>
+<span class="token-comment"># search_text: the query string (* = return all documents)</span>
+<span class="token-comment"># select: which fields to return (comma-separated)</span>
+<span class="token-comment"># filter: OData filter expression (like a WHERE clause)</span>
+results = search_client.search(
+    search_text = <span class="token-string">"wireless"</span>,
+    select      = [<span class="token-string">"name"</span>, <span class="token-string">"category"</span>, <span class="token-string">"price"</span>],
+    filter      = <span class="token-string">"in_stock eq true"</span>   <span class="token-comment"># Only return in-stock items</span>
+)
+
+<span class="token-keyword">for</span> doc <span class="token-keyword">in</span> results:
+    <span class="token-keyword">print</span>(<span class="token-string">f"  {doc['name']} | {doc['category']} | £{doc['price']}"</span>)
+
+
+<span class="token-comment"># ── Step 4: Search with facets ────────────────────────────────────────</span>
+<span class="token-keyword">print</span>(<span class="token-string">"\n--- Search with Facets ---"</span>)
+
+<span class="token-comment"># facets: request aggregated counts for specified facetable fields</span>
+<span class="token-comment"># Results include a @search.facets property with the counts</span>
+results_with_facets = search_client.search(
+    search_text = <span class="token-string">"*"</span>,       <span class="token-comment"># * = all documents</span>
+    facets      = [<span class="token-string">"category"</span>, <span class="token-string">"price,interval:100"</span>]  <span class="token-comment"># Category counts + price buckets of 100</span>
+)
+
+<span class="token-comment"># Access facet data from the result's get_facets() method</span>
+facets = results_with_facets.get_facets()
+<span class="token-keyword">print</span>(<span class="token-string">"Category facets:"</span>, facets.get(<span class="token-string">"category"</span>))
+<span class="token-keyword">print</span>(<span class="token-string">"Price facets:"</span>,    facets.get(<span class="token-string">"price"</span>))</code></pre>
+
+        <h3 style="margin-top:var(--space-8);margin-bottom:var(--space-4)">Python — Semantic search query</h3>
+        <p style="margin-bottom:var(--space-4)">
+          Semantic ranking re-ranks results by meaning. Requires the index to have semantic configuration defined
+          and the service to be on Standard tier or above.
+        </p>
+
+<pre><code><span class="token-keyword">from</span> azure.search.documents.models <span class="token-keyword">import</span> QueryType
+
+<span class="token-comment"># Semantic search query</span>
+<span class="token-comment"># query_type=QueryType.SEMANTIC activates the semantic re-ranking layer</span>
+<span class="token-comment"># semantic_configuration_name: the name of your semantic config (set in index definition)</span>
+<span class="token-comment"># query_caption: "extractive" returns highlighted excerpts from matching documents</span>
+<span class="token-comment"># query_answer: "extractive" extracts a direct answer if one is found in the results</span>
+semantic_results = search_client.search(
+    search_text                = <span class="token-string">"best laptop for gaming under 1000"</span>,
+    query_type                 = QueryType.SEMANTIC,
+    semantic_configuration_name= <span class="token-string">"my-semantic-config"</span>,
+    query_caption              = <span class="token-string">"extractive"</span>,
+    query_answer               = <span class="token-string">"extractive"</span>,
+    select                     = [<span class="token-string">"name"</span>, <span class="token-string">"description"</span>, <span class="token-string">"price"</span>],
+    top                        = <span class="token-number">3</span>   <span class="token-comment"># Return top 3 results</span>
+)
+
+<span class="token-keyword">for</span> doc <span class="token-keyword">in</span> semantic_results:
+    <span class="token-comment"># @search.reranker_score: the semantic model's relevance score (0-4)</span>
+    score = doc.get(<span class="token-string">"@search.reranker_score"</span>, <span class="token-number">0</span>)
+    <span class="token-keyword">print</span>(<span class="token-string">f"  [{score:.2f}] {doc['name']} — £{doc['price']}"</span>)
+
+    <span class="token-comment"># Semantic captions: highlighted excerpts showing WHY this document is relevant</span>
+    captions = doc.get(<span class="token-string">"@search.captions"</span>, [])
+    <span class="token-keyword">if</span> captions:
+        <span class="token-keyword">print</span>(<span class="token-string">f"    Caption: {captions[0].text}"</span>)</code></pre>
+      </div>
+
+      <!-- SECTION 6 — EXAM TIPS -->
+      <div class="section-block" id="exam-tips">
+        <div class="section-label">🎯 Section 6 — Exam Tips</div>
+        <h2>Azure AI Search — what the exam tests</h2>
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Top 6 Tested Facts</div>
+            <p>
+              <strong>1. Index → Indexer → Skillset → Data Source relationship</strong> — Know how these 4 components connect. Indexer is the component that orchestrates the pipeline (reads from data source, applies skillset, writes to index).<br><br>
+              <strong>2. Field attributes: searchable vs filterable vs facetable vs sortable</strong> — These are distinct. A field can be filterable but not searchable. Facetable fields are used for navigation counts. Key field must be unique per document.<br><br>
+              <strong>3. OcrSkill + MergeSkill always go together</strong> — OCR extracts text from images; MergeSkill combines OCR-extracted text with the original document text. Without MergeSkill, OCR output isn't part of the searchable content.<br><br>
+              <strong>4. Semantic ranking requires Standard tier+</strong> — Cannot be used on the Free or Basic tier. Re-ranks results after initial retrieval using a language model. Returns reranker_score (0-4).<br><br>
+              <strong>5. Hybrid search uses RRF (Reciprocal Rank Fusion)</strong> — Merges keyword and vector ranked lists. Documents appearing high in both lists rank highest. Most robust for production RAG pipelines.<br><br>
+              <strong>6. Knowledge Store saves enriched data outside of search</strong> — For Power BI / analytics use cases. Uses projections (table, object, file) to define shape and destination.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="section-block" id="quiz">
+        <div class="section-label">✅ Section 7 — Quick Quiz</div>
+        <h2>Test your understanding</h2>
+
+        <div class="quiz-container" id="p5t1-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Topic 1 — Azure AI Search</span>
+            <span class="quiz-question-count" data-q-counter>1 / 6</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:#ef4444;transition:width 0.4s ease;width:16.7%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <div data-question>
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A company indexes a large library of PDF documents stored in Azure Blob Storage. Many PDFs are scanned (image-only) and contain no searchable text layer. The company wants all text — including text inside scanned images — to be searchable.</div>
+                <p class="quiz-question">Which two skills must be included in the skillset together to achieve this?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">SentimentSkill + TranslationSkill</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">OcrSkill (extracts text from images) + MergeSkill (combines OCR output with original document text into a single searchable field)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">SplitSkill + AzureOpenAIEmbeddingSkill</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">OcrSkill alone is sufficient — it automatically writes to the searchable content field</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> OcrSkill extracts text from embedded images but writes it to a separate field. MergeSkill is always paired with OcrSkill — it combines the original document text with the OCR-extracted text into a single unified content field that downstream skills (and the index) can use. Without MergeSkill, OCR output exists as an isolated field not included in the main searchable content. Option D is wrong — OcrSkill writes to its own output field, not the main content field.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A search index has a "category" field. Users need to see a sidebar showing "Electronics (45)", "Books (23)", "Clothing (12)" — aggregated counts of documents per category. Which field attribute must be set on the category field?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">searchable — so users can search by category</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">facetable — generates aggregated counts for navigation filters</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">sortable — allows sorting results by category</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">retrievable — ensures the category value is returned in results</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Facetable enables the aggregation of document counts by field value — exactly what powers "Electronics (45)" style navigation filters. Searchable (A) enables full-text search within the field. Sortable (C) allows ordering results by the field. Retrievable (D) includes the field value in result documents. A field can have multiple attributes — category would typically be filterable AND facetable.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A company builds a product search engine. Users search for "affordable noise-cancelling headphones" but the keyword search misses results because documents use the term "active noise reduction" instead of "noise-cancelling". The company wants search to understand the semantic meaning of queries, not just match keywords.</div>
+                <p class="quiz-question">Which search approach should be implemented?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Add synonyms to the index — map "noise-cancelling" to "noise reduction"</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Vector search or hybrid search — converts query to an embedding vector and finds documents by semantic similarity, handling synonym and phrasing variations automatically</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Use $filter with a category filter to narrow results</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Increase the top parameter to return more results</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Vector search (or hybrid search combining vector + keyword) handles semantic similarity — it finds documents that are conceptually related to the query, even when different vocabulary is used. "Noise-cancelling" and "active noise reduction" will have similar vector representations. Synonyms (A) could work but require manual maintenance for every synonym pair. Filters (C) narrow results — they don't improve relevance. Increasing top (D) returns more results but doesn't fix the relevance problem.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is Reciprocal Rank Fusion (RRF) in Azure AI Search?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A scoring algorithm that boosts recently updated documents</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A method to merge ranked results from keyword search and vector search — documents appearing high in both lists score highest in the combined result</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A technique for compressing vector embeddings to reduce storage costs</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A method for splitting documents into chunks before embedding</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Reciprocal Rank Fusion (RRF) is the algorithm used in hybrid search to merge two ranked lists (keyword results and vector results) into a single combined ranking. A document's RRF score is calculated based on its position in each ranked list — appearing at rank 1 in both lists gives the highest combined score. This makes hybrid search more robust than either keyword or vector search alone.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <div class="quiz-scenario">Scenario: A company enriches their document index with skillsets (entity extraction, key phrase extraction, sentiment). The data science team wants to use this enriched data in Power BI dashboards and run custom analytics — but they cannot query this data directly from the search index.</div>
+                <p class="quiz-question">Which Azure AI Search feature allows enriched data to be saved outside the index for analytics use?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Scoring Profile — custom relevance rules that output to external storage</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Knowledge Store — saves enriched data to Azure Blob Storage or Table Storage via projections, making it available for Power BI and analytics pipelines</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Semantic Ranking — re-ranks and exports the top results to storage</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Custom Skill — calls an Azure Function that saves each document to a database</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Knowledge Store is specifically designed for this use case — persisting enriched data outside the search index for downstream consumption. You define projections (table projections → Azure Table Storage, object projections → Blob Storage) inside the skillset definition. Power BI can then connect directly to Table Storage. Scoring Profiles (A) affect ranking, not data persistence. Semantic Ranking (C) re-orders results — doesn't export data. Custom Skill (D) could technically work but Knowledge Store is the purpose-built Azure-native solution.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Which component in the Azure AI Search pipeline is responsible for reading data from the source, applying skills, and writing enriched documents to the index?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Skillset — it orchestrates the full pipeline from data source to index</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The Indexer — it reads from the data source, passes documents through the skillset, and writes the enriched output to the index</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Index — it pulls data directly from the data source</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Data Source — it pushes data to the index on a schedule</span></button>
+                </div>
+                <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The <strong>Indexer</strong> is the orchestration engine of the Azure AI Search pipeline. It: connects to the data source and reads documents, passes each document through the skillset for AI enrichment, writes the enriched document fields to the index, tracks changes to only process new/updated documents on subsequent runs, and can run on a schedule or be triggered on-demand. The Skillset only defines the AI processing steps — it doesn't pull data or write to the index itself.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 6</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next style="background:#dc2626">Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="completion-bar">
+        <div class="completion-checkbox" data-complete-toggle="p5-ai-search"><span class="check-icon">✓</span></div>
+        <span class="completion-label" data-complete-label>Mark this topic as complete</span>
+      </div>
+
+      <div class="topic-nav-footer">
+        <a href="../index.html" class="topic-nav-prev">
+          <span style="color:var(--text-muted)">←</span>
+          <div><div class="topic-nav-label">Back to</div><div class="topic-nav-title">Part 5 Overview</div></div>
+        </a>
+        <a href="02-document-intelligence.html" class="topic-nav-next">
+          <div><div class="topic-nav-label">Next topic</div><div class="topic-nav-title">Document Intelligence →</div></div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/common.js"></script>
+</body>
+</html>

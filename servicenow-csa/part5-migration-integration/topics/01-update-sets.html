@@ -1,0 +1,624 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Update Sets | ServiceNow CSA Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span>
+        <span class="current">Update Sets</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">📦 Part 5 · Topic 1 of 3</div>
+        <h1 class="topic-title">Update Sets</h1>
+        <div class="topic-meta">
+          <span>⏱ ~55 min read</span>
+          <span>·</span>
+          <span>Part 5 — Migration &amp; Integration · 15% Exam Weight</span>
+        </div>
+        <div class="callout-exam" style="margin-top:var(--space-4)">
+          <strong>High-Priority Topic:</strong> Update Sets are one of the most heavily tested areas in the Migration &amp; Integration domain. Expect multiple questions covering the workflow, what gets captured, states, preview/commit process, and key table names. Master every section here.
+        </div>
+      </div>
+
+      <!-- Section 1: What Update Sets Do -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>What Update Sets Do</h2>
+        <p>Update Sets are ServiceNow's built-in mechanism for moving <strong>configuration changes</strong> between instances — typically from a Development environment to Test, then to Production. They act as a container that records every metadata change made while they are active.</p>
+
+        <div class="callout-warning">
+          <strong>Most Important Concept:</strong> Update Sets capture <strong>CONFIGURATION</strong>, not <strong>DATA</strong>. They do not transport incident records, user records, or any transactional data. They capture only metadata — scripts, forms, workflows, rules, and similar platform configuration objects.
+        </div>
+
+        <h3>The Two Core Tables</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📋</div>
+            <h4>sys_update_set</h4>
+            <p>Stores the <strong>update set container</strong> — the metadata about the update set itself: its name, state, description, application scope, and who created it.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Think of this as the "folder" that holds all the changes.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">🗂️</div>
+            <h4>sys_update_xml</h4>
+            <p>Stores the <strong>individual captured changes</strong> — each row is one configuration change recorded inside an update set. The actual XML payload of each change lives here.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Think of this as each individual "file" inside the folder.</p>
+          </div>
+        </div>
+
+        <h3>Purpose: Controlled Promotion Path</h3>
+        <p>The primary use case for update sets is promoting configuration changes through a defined pipeline so that untested changes never reach production directly.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:0.95rem;line-height:2.2;color:var(--text-primary)">
+            <span style="color:var(--green-400);font-weight:700">DEV Instance</span>
+            <span style="color:var(--text-muted);margin:0 var(--space-3)">──── export XML ────▶</span>
+            <span style="color:var(--amber-400);font-weight:700">TEST Instance</span>
+            <span style="color:var(--text-muted);margin:0 var(--space-3)">──── export XML ────▶</span>
+            <span style="color:var(--accent);font-weight:700">PROD Instance</span>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Configuration changes flow through environments via Update Set XML files</p>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Why Not Just Configure PROD Directly?</strong> Configuring production directly is risky — changes can break live services. Update Sets enforce a workflow: develop in a sandbox, test in a staging environment, then promote to production only after validation.
+        </div>
+      </div>
+
+      <!-- Section 2: Update Set States -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Update Set States</h2>
+        <p>Every update set exists in one of four states. Understanding the lifecycle of an update set — and what each state means — is essential for the exam.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>State</th>
+              <th>Meaning</th>
+              <th>What You Can Do</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--green-400)">In Progress</strong></td>
+              <td>The update set is <strong>active and capturing changes</strong>. Any configuration changes made while this is the current update set are recorded here.</td>
+              <td>Add changes, set as current, rename, add description</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--amber-400)">Complete</strong></td>
+              <td>The update set has been <strong>closed</strong>. No new changes will be added. It is now ready to be exported as an XML file.</td>
+              <td>Export to XML, reopen (set back to In Progress)</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent)">Loaded</strong></td>
+              <td>The update set has been <strong>imported into a target instance</strong> (from an XML file) and is pending preview and commit. This state only exists on the receiving instance.</td>
+              <td>Preview, Commit, or mark as Ignore</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--text-muted)">Ignore</strong></td>
+              <td>The update set has been <strong>explicitly marked to skip</strong>. It will not be committed to the instance. Used when a loaded update set is not needed or superseded.</td>
+              <td>Reopen as Loaded to revisit</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Sequence:</strong> Remember the state flow: <strong>In Progress → Complete → (export XML) → Loaded → Commit</strong>. You cannot export an "In Progress" update set — it must be set to <strong>Complete</strong> first. This is a commonly tested trap question.
+        </div>
+      </div>
+
+      <!-- Section 3: What Gets Captured -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>What Gets Captured (and What Does Not)</h2>
+        <p>Knowing exactly what is and is not captured by update sets is one of the most frequently tested topics. The rule is straightforward: <strong>configuration (metadata) yes, data (records) no</strong>.</p>
+
+        <h3>Captured — Configuration Objects</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Scripting</h4>
+            <ul style="font-size:0.85rem;line-height:1.9;margin:var(--space-2) 0 0;padding-left:var(--space-4)">
+              <li>Business Rules</li>
+              <li>Client Scripts</li>
+              <li>Script Includes</li>
+              <li>Scheduled Jobs (Scheduled Scripts)</li>
+              <li>Fix Scripts</li>
+            </ul>
+          </div>
+          <div class="term-card">
+            <h4>Form &amp; UI</h4>
+            <ul style="font-size:0.85rem;line-height:1.9;margin:var(--space-2) 0 0;padding-left:var(--space-4)">
+              <li>Form layouts (sys_ui_view)</li>
+              <li>UI Policies</li>
+              <li>UI Actions</li>
+              <li>Dictionary entries (custom fields)</li>
+              <li>List layouts</li>
+            </ul>
+          </div>
+          <div class="term-card">
+            <h4>Security &amp; Access</h4>
+            <ul style="font-size:0.85rem;line-height:1.9;margin:var(--space-2) 0 0;padding-left:var(--space-4)">
+              <li>ACLs (Access Control rules)</li>
+              <li>Roles (custom roles)</li>
+              <li>System properties (sys_properties)</li>
+            </ul>
+          </div>
+          <div class="term-card">
+            <h4>Notifications &amp; Email</h4>
+            <ul style="font-size:0.85rem;line-height:1.9;margin:var(--space-2) 0 0;padding-left:var(--space-4)">
+              <li>Notification rules</li>
+              <li>Email templates</li>
+              <li>Inbound email actions</li>
+            </ul>
+          </div>
+          <div class="term-card">
+            <h4>Service Catalog</h4>
+            <ul style="font-size:0.85rem;line-height:1.9;margin:var(--space-2) 0 0;padding-left:var(--space-4)">
+              <li>Catalog items</li>
+              <li>Catalog variables</li>
+              <li>Order guides</li>
+              <li>Record producers</li>
+            </ul>
+          </div>
+          <div class="term-card">
+            <h4>Process Automation</h4>
+            <ul style="font-size:0.85rem;line-height:1.9;margin:var(--space-2) 0 0;padding-left:var(--space-4)">
+              <li>Workflows (legacy)</li>
+              <li>Flow Designer flows (partially)</li>
+              <li>SLA definitions</li>
+              <li>Assignment rules</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>NOT Captured — Data Records</h3>
+        <div class="callout-warning">
+          <strong>What Update Sets Will NEVER Capture:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><strong>Incident, Problem, Change records</strong> — transactional ITSM data</li>
+            <li><strong>User records</strong> (sys_user) — account data, profiles</li>
+            <li><strong>Group records</strong> (sys_user_group) — group memberships</li>
+            <li><strong>CMDB records</strong> — configuration items and relationships</li>
+            <li><strong>Attachments</strong> — file uploads on records</li>
+            <li><strong>Import set data</strong> — staging table contents</li>
+          </ul>
+          To move data between instances, use <strong>Data Migration</strong>, <strong>Import Sets</strong>, or <strong>XML data exports</strong> — not update sets.
+        </div>
+
+        <div class="callout-tip">
+          <strong>Flow Designer Caveat:</strong> Flow Designer flows are partially captured by update sets (the flow definition itself is captured), but any <strong>action configurations that reference specific record sys_ids</strong> in the target environment may break if those records don't exist there. Always validate after committing flows.
+        </div>
+      </div>
+
+      <!-- Section 4: Update Set Workflow -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Update Set Workflow — End to End</h2>
+        <p>The full update set workflow spans two instances: the source (where changes are made) and the target (where changes are applied). Each step must be performed in the correct order.</p>
+
+        <h3>Phase 1: Capture Changes on DEV</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Action</th>
+              <th>Where</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1</strong></td>
+              <td>Navigate to <strong>System Update Sets › Local Update Sets</strong> and create a new update set (give it a clear name)</td>
+              <td>DEV — top right corner or nav</td>
+            </tr>
+            <tr>
+              <td><strong>2</strong></td>
+              <td>Click <strong>"Set as Current"</strong> — the update set name now appears in the top-right header bar of the instance</td>
+              <td>DEV — update set record form</td>
+            </tr>
+            <tr>
+              <td><strong>3</strong></td>
+              <td>Make all configuration changes (create business rules, modify forms, build workflows, etc.)</td>
+              <td>DEV — anywhere in the instance</td>
+            </tr>
+            <tr>
+              <td><strong>4</strong></td>
+              <td>Navigate back to the update set and change its <strong>State to "Complete"</strong> — this closes it to new changes</td>
+              <td>DEV — update set record</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Phase 2: Export from DEV</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>5</strong></td>
+              <td>Open the completed update set and click <strong>"Export to XML"</strong> — downloads a <code>.xml</code> file to your computer. This file is stored as a <strong>sys_remote_update_set</strong> record.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Phase 3: Import and Apply on TARGET (TEST or PROD)</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Action</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>6</strong></td>
+              <td>Navigate to <strong>System Update Sets › Retrieved Update Sets</strong> and click <strong>"Import Update Set from XML"</strong></td>
+              <td>TARGET instance</td>
+            </tr>
+            <tr>
+              <td><strong>7</strong></td>
+              <td>Upload the exported <code>.xml</code> file. The update set appears with state <strong>Loaded</strong></td>
+              <td>TARGET — file upload dialog</td>
+            </tr>
+            <tr>
+              <td><strong>8</strong></td>
+              <td>Click <strong>"Preview Update Set"</strong> — ServiceNow checks for conflicts and missing dependencies</td>
+              <td>TARGET — ALWAYS do this before commit</td>
+            </tr>
+            <tr>
+              <td><strong>9</strong></td>
+              <td>Review any <strong>Preview Problems</strong>. Resolve issues (accept remote version, skip, or fix manually)</td>
+              <td>TARGET — review each problem row</td>
+            </tr>
+            <tr>
+              <td><strong>10</strong></td>
+              <td>Click <strong>"Commit Update Set"</strong> — applies all changes to the target instance</td>
+              <td>TARGET — this is irreversible without backout</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Critical Exam Sequence — Memorize This:</strong><br>
+          <strong>Set Current → Make Changes → Complete → Export XML → Import → Preview → Commit</strong><br>
+          Any question asking about the order of steps in an update set workflow maps to this sequence. "Preview" always comes before "Commit" — never skip it.
+        </div>
+      </div>
+
+      <!-- Section 5: Preview and Commit -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Preview and Commit — Conflict Resolution</h2>
+        <p>Preview is the most important safety gate in the update set process. It identifies problems before changes are applied to a live or production instance — making it possible to resolve conflicts without risk.</p>
+
+        <h3>What Preview Checks For</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Missing Parent Records</h4>
+            <p>A change depends on a parent record that does not exist in the target. For example, a business rule references a table that hasn't been created on the target instance.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--amber-400)">Resolution: ensure the parent object exists before committing.</p>
+          </div>
+          <div class="term-card">
+            <h4>Conflicting Changes</h4>
+            <p>The same configuration object was modified on both the source and the target since the last sync. Preview shows both versions and lets you choose which to keep.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--amber-400)">Resolution: accept remote (from update set) or keep current (target version).</p>
+          </div>
+          <div class="term-card">
+            <h4>Deleted on Target</h4>
+            <p>An object in the update set was already deleted from the target instance. The update set is trying to modify something that no longer exists.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--amber-400)">Resolution: skip the change or recreate the base object.</p>
+          </div>
+          <div class="term-card">
+            <h4>Scope Mismatches</h4>
+            <p>The application scope of a change doesn't align with an installed application on the target instance. Scoped app changes require the app to be present.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--amber-400)">Resolution: install the application scope on the target first.</p>
+          </div>
+        </div>
+
+        <h3>Preview Problem Resolutions</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Resolution Option</th>
+              <th>Meaning</th>
+              <th>When to Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Accept Remote</strong></td>
+              <td>Use the version from the incoming update set (overwrite what's on target)</td>
+              <td>The source DEV version is the correct one to use</td>
+            </tr>
+            <tr>
+              <td><strong>Skip</strong></td>
+              <td>Do not apply this particular change — leave the target as-is for this object</td>
+              <td>The target version is correct, or the change is not needed here</td>
+            </tr>
+            <tr>
+              <td><strong>Accept Local</strong></td>
+              <td>Keep the target instance's current version for this object</td>
+              <td>Equivalent to Skip in most scenarios</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Commit and Backout</h3>
+        <p>Committing applies all previewed changes to the target instance. Once committed, changes take effect immediately — there is no undo button. However, ServiceNow provides a <strong>Backout</strong> mechanism.</p>
+
+        <div class="callout-warning">
+          <strong>Backout — Not a True Undo:</strong> A committed update set can be <strong>backed out</strong>, which reverses the changes it applied. However:
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Backout only works if no subsequent changes have been made to the same objects</li>
+            <li>Backout restores the state at the time of commit — any work done after the commit on those objects may be lost</li>
+            <li>It is not a guaranteed rollback — it is a best-effort reversal</li>
+            <li>You <strong>cannot uncommit</strong> an update set — only back it out</li>
+          </ul>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact:</strong> The exam distinguishes between "uncommit" (does not exist) and "backout" (the correct term for reversing a committed update set). If a question says "you need to uncommit an update set," the correct answer involves <strong>Backout</strong>, not an uncommit operation.
+        </div>
+      </div>
+
+      <!-- Section 6: Batch Update Sets -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Batch Update Sets</h2>
+        <p>Batch Update Sets allow multiple related update sets to be grouped and deployed together as a single unit. This is critical for feature development where changes are spread across several individual update sets.</p>
+
+        <h3>Parent and Child Structure</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📁</div>
+            <h4>Parent Update Set</h4>
+            <p>The <strong>container</strong> that holds child update sets. The parent itself may contain changes, or it may be an empty container used only for grouping purposes.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Committing the parent commits all children in the correct order.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">📄</div>
+            <h4>Child Update Sets</h4>
+            <p>Individual update sets that belong to a parent. Each child captures a subset of the overall feature's changes — for example, one per developer working on the same feature.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Children can be merged into the parent before deployment.</p>
+          </div>
+        </div>
+
+        <h3>Merge Operation</h3>
+        <p>Children can be <strong>merged into the parent</strong> update set to consolidate all changes into a single deployable unit. This simplifies the deployment process — one import and one commit instead of many.</p>
+
+        <div class="callout-concept">
+          <strong>Use Case Example:</strong> A feature requires: (1) a new custom table, (2) a business rule on that table, and (3) a catalog item. Three developers work in parallel, each with their own update set. A parent update set is created to group all three. Before deployment to TEST, all three children are merged into the parent, producing a single XML export containing all the changes.
+        </div>
+
+        <div class="callout-tip">
+          <strong>Order Matters:</strong> When merging children, consider dependency order. If update set B depends on a change made in update set A, A must be committed first. Define the correct commit order when using batch update sets to avoid preview conflicts.
+        </div>
+      </div>
+
+      <!-- Section 7: Default Update Set -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>The Default Update Set</h2>
+        <p>Every ServiceNow instance has a system-provided update set called <strong>"Default"</strong>. It is always present and acts as the fallback capture container when no other update set has been set as current.</p>
+
+        <h3>How Default Works</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>The Default update set is <strong>always "In Progress"</strong> — it cannot be completed or deleted</li>
+          <li>If a user makes configuration changes without first selecting a specific update set, those changes go into Default</li>
+          <li>The current update set is always shown in the <strong>top-right corner</strong> of the ServiceNow instance header</li>
+          <li>If the header shows "Default" — changes are going into the Default update set</li>
+        </ul>
+
+        <div class="callout-warning">
+          <strong>Best Practice — Avoid Default in Production Workflows:</strong> Using the Default update set for real changes is <strong>not recommended</strong>. Because the Default set accumulates random unrelated changes from anyone who forgets to set a current update set, it becomes messy and unmanageable. Always create a named update set for each feature or change task.
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>What Happens</th>
+              <th>Recommendation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>No update set is set as current</td>
+              <td>Changes are silently captured in the Default update set</td>
+              <td>Always set a named update set as current before working</td>
+            </tr>
+            <tr>
+              <td>Developer forgets to switch update sets</td>
+              <td>Changes go to Default — mixed with other unrelated changes</td>
+              <td>Check the top-right header before making any changes</td>
+            </tr>
+            <tr>
+              <td>Trying to export Default set</td>
+              <td>Must first set it to Complete — but this blocks all future "accidental" captures</td>
+              <td>Avoid relying on Default; use named sets from the start</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 8: Global vs Application Scope -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Global Scope vs. Application Scope Update Sets</h2>
+        <p>ServiceNow distinguishes between changes made in the <strong>global application scope</strong> and changes made within a <strong>scoped application</strong>. Update sets operate differently depending on the scope context.</p>
+
+        <h3>Global Scope</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>All platform-level customizations (not inside a scoped app) are in the <strong>Global scope</strong></li>
+          <li>Global update sets capture changes to any global-scope configuration object</li>
+          <li>Most CSA exam scenarios involve global scope update sets</li>
+          <li>Created and managed via <strong>System Update Sets › Local Update Sets</strong></li>
+        </ul>
+
+        <h3>Application Scope</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Scoped applications (built with the Application Development framework) use their own update sets</li>
+          <li>Changes inside a scoped app are automatically captured by that app's update set</li>
+          <li>You cannot mix global and scoped changes in the same update set</li>
+          <li>Scoped app deployment is often handled through the <strong>Application Repository</strong> or <strong>Store</strong> rather than manual update set exports</li>
+        </ul>
+
+        <div class="callout-exam">
+          <strong>Exam Scope Distinction:</strong> If a question mentions a <strong>custom scoped application</strong>, updates to that app's configuration are managed via the app's own update set mechanism. Global update sets capture changes made directly in the global scope — not inside a scoped application's namespace.
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Global Scope</th>
+              <th>Application Scope</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Where changes live</strong></td>
+              <td>Platform-wide configuration tables</td>
+              <td>Scoped app-specific tables and records</td>
+            </tr>
+            <tr>
+              <td><strong>Update set type</strong></td>
+              <td>Standard global update set</td>
+              <td>Application-scoped update set</td>
+            </tr>
+            <tr>
+              <td><strong>Can they mix?</strong></td>
+              <td colspan="2" style="text-align:center"><span style="color:var(--red-400)">No</span> — global and scoped changes cannot share an update set</td>
+            </tr>
+            <tr>
+              <td><strong>CSA exam focus</strong></td>
+              <td><span style="color:var(--green-400)">Primary focus</span></td>
+              <td>Awareness only — not deep-dived at CSA level</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 9: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 9</div>
+        <h2>Key Exam Facts &amp; Traps</h2>
+        <p>This section consolidates every critical, frequently tested fact about update sets. Review this list before your exam.</p>
+
+        <div class="callout-exam">
+          <strong>Trap 1 — Config Not Data:</strong> Update sets capture <strong>configuration (metadata)</strong> only. They do NOT capture data records such as incidents, users, or CMDB items. If a question implies moving incident records via update sets, the answer is <strong>incorrect</strong> — use Import Sets or XML exports for data.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 2 — Must Complete Before Export:</strong> You cannot export an <strong>In Progress</strong> update set. The state must be set to <strong>Complete</strong> before the "Export to XML" option becomes available. A question asking "what must happen before export" → answer: <strong>set state to Complete</strong>.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 3 — Preview Before Commit:</strong> The correct workflow is always <strong>Preview first, then Commit</strong>. Preview identifies conflicts and missing dependencies before changes are applied. Skipping preview risks breaking the target environment. The exam tests this sequence explicitly.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 4 — sys_update_xml Stores Changes:</strong> The table <code>sys_update_xml</code> stores the <strong>individual captured changes</strong> (each row = one configuration change). The table <code>sys_update_set</code> stores the container/header. Know both table names — the exam uses them.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 5 — Current Update Set in Top-Right:</strong> The currently active update set is always shown in the <strong>top-right corner of the instance header</strong>. If the header shows "Default," changes are going into the Default update set — not a named one. This is where developers check before making changes.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 6 — No Uncommit, Only Backout:</strong> Once committed, an update set <strong>cannot be uncommitted</strong>. The only reversal mechanism is <strong>Backout</strong>, which attempts to restore the prior state. Know the terminology: "backout" not "uncommit" or "rollback."
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap 7 — Loaded State is Import-Only:</strong> The <strong>Loaded</strong> state only exists on the <strong>target/receiving instance</strong> after XML import. An update set on the source instance is never in "Loaded" state — it is either In Progress, Complete, or Ignore.
+        </div>
+
+        <h3>Quick-Reference Summary</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.82rem;line-height:2;color:var(--text-primary);overflow-x:auto"><code>Update Sets capture:   CONFIG (metadata), NOT data
+States:               In Progress → Complete → Loaded → Committed
+Export format:        XML file (sys_remote_update_set)
+Individual changes:   sys_update_xml table
+Container/header:     sys_update_set table
+Current set shown:    Top-right corner of the instance header
+Must do before export: Set state to COMPLETE
+Must do before commit: Run PREVIEW first
+Reversing a commit:   BACKOUT (not uncommit)
+Default update set:   Always exists, always In Progress, not for prod use
+Global vs Scoped:     Cannot mix in same update set</code></pre>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Putting It All Together — The Full Story:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2.2">
+            <li>A developer on DEV creates a named update set and sets it as current (visible top-right)</li>
+            <li>All configuration changes made are automatically captured in <code>sys_update_xml</code> under that update set</li>
+            <li>When done, the developer sets the update set to <strong>Complete</strong> and exports it as an XML file</li>
+            <li>A release manager imports the XML into the TEST instance — the set appears as <strong>Loaded</strong></li>
+            <li>Preview is run to check for conflicts or missing dependencies</li>
+            <li>Issues are resolved, then the update set is <strong>Committed</strong> — changes are applied to TEST</li>
+            <li>After successful testing, the same XML is imported and committed to PROD</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../part4-database-security/topics/04-auditing-archiving.html" class="btn btn-secondary">← Auditing &amp; Archiving</a>
+          <a href="02-xml-migration.html" class="btn btn-primary">XML Migration →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p5-update-sets', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p5-update-sets')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

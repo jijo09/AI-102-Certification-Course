@@ -1,0 +1,693 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lists, Filters &amp; Forms | ServiceNow CSA Part 1</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+
+    .filter-demo {
+      background: rgba(167,139,250,0.08);
+      border: 1px solid rgba(167,139,250,0.25);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin: var(--space-4) 0;
+    }
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      background: rgba(167,139,250,0.18);
+      border: 1px solid rgba(167,139,250,0.4);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      color: var(--violet-300, #c4b5fd);
+      margin: 3px 2px;
+    }
+    .filter-pill .pill-x {
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .filter-connector {
+      font-size: 0.7rem;
+      color: var(--amber-400, #fbbf24);
+      font-weight: 700;
+      padding: 0 4px;
+      text-transform: uppercase;
+    }
+    .form-anatomy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+    @media (max-width: 640px) {
+      .form-anatomy-grid { grid-template-columns: 1fr; }
+    }
+    .form-zone {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+    }
+    .form-zone-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--violet-400, #a78bfa);
+      font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+    .form-zone ul {
+      margin: 0;
+      padding-left: var(--space-4);
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+    .operator-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--space-3);
+      margin: var(--space-4) 0;
+    }
+    .operator-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+    }
+    .operator-name {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--violet-300, #c4b5fd);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .operator-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .save-controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-3);
+      margin: var(--space-4) 0;
+    }
+    .control-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+    }
+    .control-name {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .control-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .control-card.danger { border-color: rgba(239,68,68,0.35); }
+    .control-card.danger .control-name { color: #f87171; }
+    .control-card.caution { border-color: rgba(251,191,36,0.3); }
+    .control-card.caution .control-name { color: var(--amber-400, #fbbf24); }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">&#9776;</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Lists, Filters &amp; Forms</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- TOPIC HEADER -->
+      <div class="topic-header">
+        <div class="topic-part-badge">&#x2699;&#xFE0F; Part 1 &middot; Topic 2 of 4</div>
+        <h1 class="topic-title">Lists, Filters &amp; Forms</h1>
+        <div class="topic-meta">
+          <span class="topic-meta-item">&#128337; ~40 min read</span>
+          <span class="topic-meta-item">&#127919; High exam weight</span>
+          <span class="topic-meta-item">&#128203; 7 sections</span>
+        </div>
+      </div>
+
+      <!-- SECTION 1: List Anatomy -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>List Anatomy</h2>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-4)">
+          A <strong>List</strong> in ServiceNow displays multiple records from a single table in a tabular format. Understanding every part of a list is essential — the exam frequently tests this knowledge in scenario questions.
+        </p>
+
+        <div class="callout callout-analogy">
+          <strong>Analogy:</strong> A ServiceNow list is like Excel — but each row is a live database record, and every action (edit, delete, assign) is fully tracked in audit logs. You are never just editing a spreadsheet; you are interacting with a relational database.
+        </div>
+
+        <div class="term-grid" style="margin-top:var(--space-5)">
+          <div class="term-card">
+            <div class="term-name">Header Row</div>
+            <p>Displays column names. Clicking a column header sorts records <strong>ascending</strong>. Clicking again reverses to <strong>descending</strong>. An arrow indicator shows the active sort direction.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Record Rows</div>
+            <p>Each row represents one record from the table. The leftmost cell shows the row number. Clicking anywhere on a row opens that record's form view.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Row-Level Context Menu</div>
+            <p>Right-click any row to open the context menu. Options include: <em>Open in new tab, Open in split view, Assign to me, Show matching, Copy URL,</em> and more — depending on the table and your permissions.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">List Controls (Top-Right)</div>
+            <p>Icons located at the top-right of the list: <strong>Actions menu</strong> (bulk operations), <strong>Column Selector</strong> (add/remove columns), and <strong>Export</strong> (CSV, Excel, PDF, XML).</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Total Record Count</div>
+            <p>Displayed at the top-right of the list (e.g., "1–20 of 453"). This shows the total records matching the current filter, not just the current page.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Pagination Controls</div>
+            <p>Located at the bottom of the list. Default page size is typically 20 records. Users can navigate with First, Previous, Next, Last buttons. Page size is configurable per user.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Breadcrumb Filter Bar</div>
+            <p>The horizontal bar above the list showing active filter conditions as <strong>pill-shaped badges</strong>. Each pill represents one condition. This is the primary visual indicator of what filters are active.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Search Bar</div>
+            <p>Located at the top-left of the list. Performs a <strong>global text search</strong> across the visible columns. Not the same as the condition builder — it performs a LIKE query on all shown fields simultaneously.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Filtering Lists -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Filtering Lists</h2>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-4)">
+          Filtering is one of the highest-weighted topics for the CSA exam. You must understand the condition builder syntax, the breadcrumb filter system, and how AND vs OR logic works.
+        </p>
+
+        <h3 style="color:var(--text-primary);margin-bottom:var(--space-3)">Condition Builder — 3-Part Syntax</h3>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-3)">Every filter condition is built from three parts:</p>
+
+        <div class="filter-demo">
+          <span style="color:#f87171">[Field]</span>
+          &nbsp;&nbsp;<span style="color:#fbbf24">[Operator]</span>
+          &nbsp;&nbsp;<span style="color:#6ee7b7">[Value]</span>
+          <br/><br/>
+          <span style="color:#f87171">Priority</span>
+          &nbsp;&nbsp;<span style="color:#fbbf24">=</span>
+          &nbsp;&nbsp;<span style="color:#6ee7b7">1 - Critical</span>
+          &nbsp;&nbsp;<span style="color:rgba(255,255,255,0.3)">// Show only Critical priority records</span>
+          <br/>
+          <span style="color:#f87171">State</span>
+          &nbsp;&nbsp;<span style="color:#fbbf24">is</span>
+          &nbsp;&nbsp;<span style="color:#6ee7b7">In Progress</span>
+          &nbsp;&nbsp;<span style="color:rgba(255,255,255,0.3)">// AND the state must be In Progress</span>
+          <br/>
+          <span style="color:#f87171">Assigned to</span>
+          &nbsp;&nbsp;<span style="color:#fbbf24">is not empty</span>
+          &nbsp;&nbsp;<span style="color:rgba(255,255,255,0.3)">// AND must be assigned to someone</span>
+        </div>
+
+        <h3 style="color:var(--text-primary);margin:var(--space-5) 0 var(--space-3)">AND vs OR Logic</h3>
+        <div class="form-anatomy-grid">
+          <div class="form-zone">
+            <div class="form-zone-label">AND — Narrows Results</div>
+            <ul>
+              <li>All conditions must be true</li>
+              <li>Each AND reduces the result set</li>
+              <li>Example: Priority = Critical <strong>AND</strong> State = In Progress shows only critical incidents that are also in progress</li>
+              <li>Use AND when you want more specific, smaller result sets</li>
+            </ul>
+          </div>
+          <div class="form-zone">
+            <div class="form-zone-label">OR — Broadens Results</div>
+            <ul>
+              <li>At least one condition must be true</li>
+              <li>Each OR increases the result set</li>
+              <li>Example: Priority = Critical <strong>OR</strong> Priority = High shows critical and high records</li>
+              <li>Use OR when you want to include multiple acceptable values</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="color:var(--text-primary);margin:var(--space-5) 0 var(--space-3)">The Breadcrumb Filter</h3>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-3)">
+          After applying conditions, they appear as pill-shaped badges above the list. This is called the <strong>breadcrumb filter</strong>.
+        </p>
+        <div class="filter-demo" style="font-family:var(--font-sans)">
+          <div style="margin-bottom:8px;font-size:0.75rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em">Active filter breadcrumb:</div>
+          <span class="filter-pill">Priority = 1 - Critical <span class="pill-x">×</span></span>
+          <span class="filter-connector">AND</span>
+          <span class="filter-pill">State = In Progress <span class="pill-x">×</span></span>
+          <span class="filter-connector">AND</span>
+          <span class="filter-pill">Assigned to = Me <span class="pill-x">×</span></span>
+        </div>
+        <ul style="color:var(--text-secondary);padding-left:var(--space-5);line-height:1.9;margin-bottom:var(--space-4)">
+          <li>Click the <strong>× on a single pill</strong> to remove only that condition</li>
+          <li>Click anywhere on a pill (not the ×) to <strong>edit that condition</strong> in the condition builder</li>
+          <li>Click the <strong>main X at the left of the breadcrumb bar</strong> to clear ALL conditions at once</li>
+          <li>The breadcrumb persists between page loads — your filter is remembered in your session</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap:</strong> The breadcrumb shows ALL active conditions simultaneously. To clear ALL filters, you must click the <strong>X at the beginning of the breadcrumb row</strong> — not the X on individual pills. Clicking individual pill Xs removes conditions one at a time.
+        </div>
+
+        <h3 style="color:var(--text-primary);margin:var(--space-5) 0 var(--space-3)">Filter Operators Reference</h3>
+        <div class="callout callout-concept">
+          <strong>Concept:</strong> Operators define the relationship between a field and its value. The available operators depend on the <strong>field type</strong> — string fields have different operators than integer or date fields.
+        </div>
+        <div class="operator-grid">
+          <div class="operator-card">
+            <div class="operator-name">=</div>
+            <div class="operator-desc">Exact match. Field value must equal exactly the specified value.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">!=</div>
+            <div class="operator-desc">Not equal. Excludes records where the field matches the value.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">contains</div>
+            <div class="operator-desc">String contains. Performs a LIKE %value% search. Case-insensitive.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">starts with</div>
+            <div class="operator-desc">Performs a LIKE value% search. Useful for prefix searches.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">ends with</div>
+            <div class="operator-desc">Performs a LIKE %value search. Less common, used for suffix matching.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">is empty</div>
+            <div class="operator-desc">Field has no value (NULL or blank). No value input required.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">is not empty</div>
+            <div class="operator-desc">Field has any value (not NULL). Useful for "assigned" checks.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">between</div>
+            <div class="operator-desc">For dates/numbers. Requires two values: a start and end range (inclusive).</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">&gt; / &lt;</div>
+            <div class="operator-desc">Greater than / Less than. Used on numeric and date fields for range queries.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">IN</div>
+            <div class="operator-desc">Matches any value in a provided list. More efficient than multiple OR conditions.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">NOT IN</div>
+            <div class="operator-desc">Excludes records matching any value in the list. Opposite of IN.</div>
+          </div>
+          <div class="operator-card">
+            <div class="operator-name">does not contain</div>
+            <div class="operator-desc">String does not include the substring. Opposite of "contains".</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: Saving & Sharing Filters -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Saving &amp; Sharing Filters</h2>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-4)">
+          Frequently used filters can be saved so you don't need to rebuild them every time. Saved filters are accessed from the filter funnel icon in the list view.
+        </p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Saving a Filter</div>
+            <p>Build your conditions in the condition builder. Once conditions are set and visible in the breadcrumb, click the <strong>star/save icon</strong> (or "Save filter" option in the funnel dropdown). Give it a descriptive name. It is saved to your user profile.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Accessing Saved Filters</div>
+            <p>Click the <strong>funnel/filter icon</strong> in the top-left area of the list. A dropdown shows your saved filters. Clicking a saved filter name immediately applies that filter to the list.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Filter Scope</div>
+            <p>Saved filters are <strong>per-user by default</strong>. They are tied to your user account and do not appear in other users' filter lists. Table administrators can create default filters visible to all users via list administration.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Favorite Modules</div>
+            <p>You can <strong>bookmark</strong> a navigation module by clicking the star/bookmark icon next to it in the Application Navigator. Favorited modules appear in the "Favorites" section of the nav for quick access — separate from saved list filters.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>Tip:</strong> Saved filters appear in the funnel icon dropdown above the list. They are user-specific — not shared with teammates unless you export and reimport them. If you need org-wide filters, an admin can configure default list filters at the table level via List Administration.
+        </div>
+      </div>
+
+      <!-- SECTION 4: List Personalization -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>List Personalization</h2>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-4)">
+          ServiceNow allows each user to customize which columns appear in a list and in what order. These personalizations are saved to the user's profile and do not affect other users.
+        </p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Column Selector</div>
+            <p>Click the <strong>wrench/gear icon</strong> at the top-right corner of the list. A dialog appears showing available columns. Add, remove, or reorder columns using drag-and-drop. Changes apply immediately and are saved to your profile for that specific list.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Personalization Scope</div>
+            <p>Column layouts are saved <strong>per-user, per-list</strong>. Changing the Incident list columns does not affect your Task list, and your changes do not affect any other user's view. This is a fundamental ServiceNow user personalization feature.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Sort Persistence</div>
+            <p>The sort order you apply to a list (by clicking a column header) is remembered between browser sessions for your user account. When you return to that list, your last sort preference is automatically applied.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Right-Click Column Header</div>
+            <p>Right-clicking a column header reveals additional options: <strong>Group by this field</strong> (groups records by that column's values), <strong>Show Visual Task Board</strong>, <strong>Pin to top</strong>, and aggregate function options.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Aggregate Functions</div>
+            <p>For numeric columns, right-clicking reveals aggregate options: <strong>SUM</strong>, <strong>COUNT</strong>, <strong>AVG</strong>, <strong>MIN</strong>, <strong>MAX</strong>. The aggregate result appears at the bottom of the list column. Useful for quick calculations without running reports.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Admin: List Layout Editor</div>
+            <p>Admins can set <strong>default column layouts</strong> for all users via the <em>List Layout</em> editor (accessed via right-click → Configure → List Layout). This sets the baseline view, but users can still personalize on top of this default.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap:</strong> Personalizing list columns does <strong>NOT</strong> affect other users — it is strictly user-specific. Admins set default column layouts for all users via the <strong>List Layout editor</strong> (Configure &gt; List Layout), not through their own personal column selector.
+        </div>
+      </div>
+
+      <!-- SECTION 5: Form Anatomy -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Form Anatomy</h2>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-4)">
+          When you open a record from a list, you see its <strong>Form view</strong>. Forms are the primary interface for viewing and editing individual records. Every form follows a consistent structure.
+        </p>
+
+        <div class="form-anatomy-grid">
+          <div class="form-zone">
+            <div class="form-zone-label">Form Header</div>
+            <ul>
+              <li>Record number/name at top (e.g., INC0001234)</li>
+              <li>Breadcrumb path showing table and record</li>
+              <li>Form controls/action buttons</li>
+              <li>Record state indicator</li>
+              <li>Attachments icon (paperclip)</li>
+            </ul>
+          </div>
+          <div class="form-zone">
+            <div class="form-zone-label">Form Body — Fields</div>
+            <ul>
+              <li>Two-column layout (most forms)</li>
+              <li>Field label on left, input on right</li>
+              <li>Mandatory fields marked with red asterisk (*)</li>
+              <li>Read-only fields appear grayed out</li>
+              <li>Fields grouped into logical sections</li>
+            </ul>
+          </div>
+          <div class="form-zone">
+            <div class="form-zone-label">Field Decorators</div>
+            <ul>
+              <li><strong>Red asterisk (*)</strong> — mandatory field</li>
+              <li><strong>Lock icon</strong> — read-only or locked field</li>
+              <li><strong>Magnifying glass</strong> — reference field lookup</li>
+              <li><strong>Info icon (i)</strong> — field tooltip available</li>
+              <li><strong>Circular arrows</strong> — field recalculates automatically</li>
+            </ul>
+          </div>
+          <div class="form-zone">
+            <div class="form-zone-label">Related Lists (Bottom)</div>
+            <ul>
+              <li>Separate list views below the main form</li>
+              <li>Show records from OTHER tables related to this record</li>
+              <li>Example: Incident form shows "Work Notes", "Affected CIs", "Change Requests"</li>
+              <li>Each related list can be filtered/sorted independently</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout callout-concept">
+          <strong>Concept — Related Lists:</strong> Related lists show records from <strong>other tables</strong> that have a Reference field pointing back to this record. This is a foreign key relationship. For example: the "Tasks" related list on an Incident shows all Task records where <code>Task.parent = this Incident</code>. Deleting the parent record does not automatically delete related list records (configurable).
+        </div>
+
+        <h3 style="color:var(--text-primary);margin:var(--space-5) 0 var(--space-3)">Special Field Types on Forms</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Reference Fields</div>
+            <p>Display a text input with a <strong>magnifying glass icon</strong>. Clicking the magnifying glass opens a lookup dialog to search and select a record from the referenced table. You can also type directly — ServiceNow will auto-suggest matching records.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Choice Fields</div>
+            <p>Rendered as a <strong>dropdown select</strong>. The available options are defined in the Choice list for that field. Admins manage choice lists via the Choice List editor. Users cannot add ad-hoc options — only admins can.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Journal Fields (Activity Log)</div>
+            <p>Shown at the bottom of most forms as the <strong>Activity</strong> section. Displays a chronological history of all Work Notes and Comments. Journal entries are <strong>append-only</strong> — once submitted, they cannot be edited or deleted, creating an immutable audit trail.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Mandatory Fields</div>
+            <p>Marked with a <strong>red asterisk (*)</strong>. You cannot save or submit the record without providing values for all mandatory fields. If you attempt to save with empty mandatory fields, ServiceNow highlights them in red with an error message.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 6: Form Controls -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Form Controls &amp; Saving Records</h2>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-4)">
+          The buttons available on a form depend on whether you are viewing an existing record or creating a new one. Understanding the distinction between each button is a common exam topic.
+        </p>
+
+        <div class="save-controls-grid">
+          <div class="control-card">
+            <div class="control-name">Save / Update</div>
+            <div class="control-desc">Saves changes to an existing record and <strong>stays on the form</strong>. "Update" is the label used on existing records; terminology may differ by form/version.</div>
+          </div>
+          <div class="control-card">
+            <div class="control-name">Submit</div>
+            <div class="control-desc">Creates a <strong>new record</strong>. Appears on blank new-record forms. After submission, typically redirects to the list view or the newly created record.</div>
+          </div>
+          <div class="control-card">
+            <div class="control-name">Save and Stay</div>
+            <div class="control-desc">Saves the record <strong>without refreshing</strong> the page or navigating away. Useful when making many changes and wanting to preserve form state and scroll position.</div>
+          </div>
+          <div class="control-card">
+            <div class="control-name">Insert</div>
+            <div class="control-desc">Creates a <strong>copy of the current record</strong> as a brand-new record. Useful for creating similar records without re-entering data. The original record is unchanged.</div>
+          </div>
+          <div class="control-card caution">
+            <div class="control-name">Revert</div>
+            <div class="control-desc">Discards all <strong>unsaved changes</strong> on the form and reverts to the last saved version of the record. Does not affect previously saved data.</div>
+          </div>
+          <div class="control-card danger">
+            <div class="control-name">Delete</div>
+            <div class="control-desc">Permanently removes the record from the database. Requires <strong>delete permission</strong>. No confirmation screen in all versions — use with caution.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <strong>Warning:</strong> Delete is <strong>permanent</strong>. ServiceNow does not have a built-in recycle bin by default. Once a record is deleted, it cannot be recovered through the UI. Some organizations implement soft-delete by convention (setting an <code>Active = false</code> flag) rather than hard-deleting records, but this requires custom configuration and is not the default behavior.
+        </div>
+      </div>
+
+      <!-- SECTION 7: Field Types Reference -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Field Types Reference</h2>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-4)">
+          ServiceNow has a rich set of field types. The exam tests both identification (what type is used for X) and behavioral differences (how they store/display data).
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field Type</th>
+              <th>Input Control</th>
+              <th>Use Case &amp; Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>String</strong></td>
+              <td>Text box (single line)</td>
+              <td>Short text: names, titles, descriptions. Max length configurable. Supports contains/starts with operators.</td>
+            </tr>
+            <tr>
+              <td><strong>Integer</strong></td>
+              <td>Numeric input</td>
+              <td>Whole numbers: counts, priority numbers. Supports &gt;, &lt;, between operators. No decimal places.</td>
+            </tr>
+            <tr>
+              <td><strong>Boolean</strong></td>
+              <td>Checkbox</td>
+              <td>True/False only. Used for Active/Inactive flags, yes/no fields. Stored as 0 or 1 in the database.</td>
+            </tr>
+            <tr>
+              <td><strong>Choice</strong></td>
+              <td>Dropdown select</td>
+              <td>Fixed set of options defined in the Choice list. Admin manages available values. Users cannot add new options.</td>
+            </tr>
+            <tr>
+              <td><strong>Reference</strong></td>
+              <td>Lookup field with magnifying glass</td>
+              <td>Links to a record in another table (foreign key). Stores the sys_id of the related record internally.</td>
+            </tr>
+            <tr>
+              <td><strong>Glide List</strong></td>
+              <td>Multi-select reference</td>
+              <td>Multiple records from the same referenced table. Similar to Reference but allows many-to-many relationships.</td>
+            </tr>
+            <tr>
+              <td><strong>Date/Time</strong></td>
+              <td>Date/time picker</td>
+              <td>Timestamps for created, updated, resolved dates. Stored in UTC; displayed in user's local timezone.</td>
+            </tr>
+            <tr>
+              <td><strong>Journal (Work Notes / Comments)</strong></td>
+              <td>Append-only entry area</td>
+              <td>Activity log entries. <strong>Append-only — cannot edit past entries.</strong> Work Notes = private; Comments = public.</td>
+            </tr>
+            <tr>
+              <td><strong>HTML</strong></td>
+              <td>Rich text editor (WYSIWYG)</td>
+              <td>Formatted content with bold, lists, links. Used for knowledge articles, email bodies.</td>
+            </tr>
+            <tr>
+              <td><strong>Currency</strong></td>
+              <td>Number + currency selector</td>
+              <td>Financial values with currency code. Supports multi-currency environments. Stored with currency code metadata.</td>
+            </tr>
+            <tr>
+              <td><strong>URL</strong></td>
+              <td>Text input (renders as link)</td>
+              <td>Website addresses. Validates URL format. Displayed as a clickable hyperlink in read mode.</td>
+            </tr>
+            <tr>
+              <td><strong>Script</strong></td>
+              <td>Code editor (Monaco)</td>
+              <td>JavaScript code for business rules, client scripts. Syntax highlighting and validation included.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam" style="margin-top:var(--space-5)">
+          <strong>Exam Trap — Journal Fields:</strong> <strong>Work Notes</strong> are <em>private</em> — only agents and internal users with access can see them. <strong>Comments</strong> are <em>public</em> — visible to end users in the Service Portal. Both are Journal field types and are both <strong>append-only</strong> (you cannot edit or delete a previously submitted entry). This distinction is frequently tested.
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap — Sorting vs Filtering:</strong> <strong>Sorting</strong> a list by clicking a column header does <strong>NOT</strong> change which records appear — it only reorders the currently visible records. <strong>Filtering</strong> changes which records appear by applying conditions. These are two completely separate operations. Many students confuse them in scenario questions.
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>Tip — Opening Records in New Tab:</strong> You can open any record in a new browser tab by <strong>middle-clicking</strong> or <strong>right-clicking the row number</strong> on the left side of the list and selecting "Open in new tab." This lets you compare records side-by-side without losing your current list view and filter state.
+        </div>
+      </div>
+
+      <!-- QUICK REVIEW SECTION -->
+      <div class="section-block">
+        <div class="section-label">Quick Review</div>
+        <h2>Key Exam Points Summary</h2>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-4)">
+          High-priority concepts that frequently appear on the CSA exam for this topic:
+        </p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">&#128204; Filter Breadcrumb</div>
+            <p>The blue pills above the list show active conditions. Click individual pill × to remove that condition. Click the main breadcrumb X to clear ALL filters at once.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">&#128204; Saved Filters = User-Specific</div>
+            <p>Saved filters are personal by default. Accessible from the funnel icon. Admins set org-wide defaults via List Administration, not the personal filter save feature.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">&#128204; Column Personalization = User-Specific</div>
+            <p>Adding/removing/reordering columns via the gear icon only affects YOUR view. Admin uses List Layout Editor to set defaults for all users.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">&#128204; Work Notes vs Comments</div>
+            <p>Work Notes = private (agents only). Comments = public (Service Portal visible). Both are Journal fields. Both are append-only.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">&#128204; Sort ≠ Filter</div>
+            <p>Sorting only reorders records already in the list. Filtering changes which records appear. Completely independent operations.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">&#128204; Delete = Permanent</div>
+            <p>No built-in recycle bin. Deleted records are gone. Some orgs use Active=false soft-delete pattern, but this is custom — not default ServiceNow behavior.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">&#128204; Reference Field Storage</div>
+            <p>Reference fields display the record's display value (e.g., user's name) but internally store the <strong>sys_id</strong> (GUID) of the referenced record.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">&#128204; Related Lists = Other Tables</div>
+            <p>Related lists at the bottom of forms always show records from <em>different</em> tables that reference this record — not records from the same table.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLETE BAR -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">&#10003; Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="01-ui-navigation.html" class="btn btn-secondary">&larr; UI Navigation</a>
+          <a href="03-branding-properties.html" class="btn btn-secondary">Properties &amp; Branding &rarr;</a>
+        </div>
+      </div>
+
+    </div><!-- end .page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p1-lists-filters-forms', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p1-lists-filters-forms')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

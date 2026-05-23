@@ -1,0 +1,692 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMDB &amp; Relationships | ServiceNow CSA Part 4</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 4</a>
+        <span class="sep">›</span>
+        <span class="current">CMDB &amp; Relationships</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🗄️ Part 4 · Topic 2 of 4</div>
+        <h1 class="topic-title">CMDB &amp; Relationships</h1>
+        <div class="topic-meta">
+          <span>⏱ ~65 min read</span>
+          <span>·</span>
+          <span>Part 4 — Database &amp; Security (27% exam weight — HIGHEST)</span>
+        </div>
+        <div class="callout-exam" style="margin-top:var(--space-4)">
+          <strong>High-Weight Topic:</strong> Part 4 carries the highest exam weight at 27%. CMDB, relationships, and CI management are core to ITSM and appear heavily across multiple question categories. Master the table names, relationship model, and CI hierarchy cold.
+        </div>
+      </div>
+
+      <!-- Section 1: CMDB Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>CMDB Overview</h2>
+        <p>The Configuration Management Database (CMDB) is the central repository for tracking IT assets, their attributes, and how they relate to each other. It is not a separate system — it is simply a collection of tables within ServiceNow's database.</p>
+
+        <div class="callout-concept">
+          <strong>Core Definition:</strong> A <strong>Configuration Item (CI)</strong> is anything that is managed, tracked, or inventoried in the CMDB. This includes physical hardware, virtual machines, software applications, business services, network devices, contracts, and more. If you need to track it and relate it to other things, it belongs in the CMDB.
+        </div>
+
+        <h3>The Base CI Table</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4><code>cmdb_ci</code></h4>
+            <p>The <strong>root base table</strong> for all Configuration Items. Every CI class in ServiceNow extends <code>cmdb_ci</code>, either directly or through an intermediate parent class.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Contains common fields: name, sys_class_name, asset_tag, serial_number, manufacturer, install_status, etc.</p>
+          </div>
+          <div class="term-card">
+            <h4>CI vs. Asset</h4>
+            <p>CIs track <strong>operational/technical</strong> details (what is it, how does it relate to other things). Assets track <strong>financial/contractual</strong> details (cost, ownership, depreciation). They can be linked but serve different purposes.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Asset table: <code>alm_asset</code>. A server can be both a CI (<code>cmdb_ci_server</code>) and an asset (<code>alm_hardware</code>).</p>
+          </div>
+          <div class="term-card">
+            <h4>CMDB = Tables</h4>
+            <p>The CMDB is <strong>not a separate system</strong> or database. It is a logical grouping of tables in the ServiceNow platform. The <code>cmdb_ci</code> table and all its child tables form the CMDB.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate to: <strong>Configuration &gt; Base Items</strong> or type <code>cmdb_ci.list</code> in filter navigator.</p>
+          </div>
+        </div>
+
+        <h3>Key CI Classes</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table Name</th>
+              <th>What It Represents</th>
+              <th>Common Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>cmdb_ci</code></td>
+              <td>Base CI — root of all CI classes</td>
+              <td>Generic CIs; parent of entire hierarchy</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_hardware</code></td>
+              <td>Physical hardware (extends cmdb_ci)</td>
+              <td>Physical devices; parent of computer, network gear</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_computer</code></td>
+              <td>Computers — workstations, laptops, servers</td>
+              <td>End-user devices and server equipment</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_server</code></td>
+              <td>Servers specifically (extends cmdb_ci_computer)</td>
+              <td>Tracking server infrastructure</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_appl</code></td>
+              <td>Software applications</td>
+              <td>Application CIs linked to servers/services</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_service</code></td>
+              <td>Business services</td>
+              <td>IT services that users consume; top of dependency map</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_network_adapter</code></td>
+              <td>Network interface cards / adapters</td>
+              <td>Discovered automatically; linked to computer CIs</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_ip_address</code></td>
+              <td>IP address records</td>
+              <td>Network addressing; linked to network adapters</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-tip">
+          <strong>Naming Convention:</strong> All CI tables follow the pattern <code>cmdb_ci_[type]</code>. When you see a table name starting with <code>cmdb_ci_</code>, you know it is a CI class in the CMDB hierarchy. The <code>sys_class_name</code> field on any CI record tells you exactly which table (class) that record belongs to.
+        </div>
+      </div>
+
+      <!-- Section 2: CI Class Hierarchy -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>CI Class Hierarchy</h2>
+        <p>ServiceNow implements CI classification using table inheritance. Each CI class is a table that extends a parent table, inheriting all parent fields while adding its own. This creates a deep, organized hierarchy for every type of IT asset.</p>
+
+        <h3>Core Inheritance Chain</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:2;color:var(--text-primary);overflow-x:auto"><code>cmdb_ci                   ← Root base CI table (all CIs)
+  └── cmdb_ci_hardware    ← Physical hardware
+        └── cmdb_ci_computer  ← Computers (desktops, laptops, servers)
+              └── cmdb_ci_server  ← Servers specifically
+
+cmdb_ci
+  └── cmdb_ci_appl        ← Software applications
+
+cmdb_ci
+  └── cmdb_ci_service     ← Business / IT services</code></pre>
+        </div>
+
+        <h3>sys_class_name — The CI's True Identity</h3>
+        <p>Because all CI records are stored across extended tables, the <code>sys_class_name</code> field is how ServiceNow (and the platform) knows what type of CI a record actually is. This field is set automatically when a CI is created.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+              <th>Example Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sys_class_name</code></td>
+              <td>Identifies the actual table/class of the CI record</td>
+              <td><code>cmdb_ci_server</code></td>
+            </tr>
+            <tr>
+              <td><code>name</code></td>
+              <td>Human-readable CI name</td>
+              <td><code>PROD-WEB-01</code></td>
+            </tr>
+            <tr>
+              <td><code>install_status</code></td>
+              <td>Lifecycle state of the CI</td>
+              <td><code>Installed</code>, <code>In Maintenance</code>, <code>Retired</code></td>
+            </tr>
+            <tr>
+              <td><code>operational_status</code></td>
+              <td>Current operational state</td>
+              <td><code>Operational</code>, <code>Non-Operational</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>CI Class Manager</h3>
+        <p>The <strong>CI Class Manager</strong> is a visual tool within ServiceNow that lets administrators browse and manage the CI class hierarchy. Navigate to it via: <strong>Configuration &gt; CI Class Manager</strong>.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Browse Hierarchy</h4>
+            <p>View the full tree of CI classes — expand any node to see which tables extend it. Useful for understanding what attributes each class inherits.</p>
+          </div>
+          <div class="term-card">
+            <h4>Create CI Classes</h4>
+            <p>Administrators can define custom CI classes by extending an existing CI table. The new table inherits all parent fields automatically.</p>
+          </div>
+          <div class="term-card">
+            <h4>Manage Attributes</h4>
+            <p>Add, modify, or remove attributes (fields) on CI classes directly from the CI Class Manager without going to Studio or the table editor.</p>
+          </div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Inheritance &amp; Queries:</strong> Because <code>cmdb_ci_server</code> extends <code>cmdb_ci_computer</code>, querying <code>cmdb_ci_computer.list</code> returns both computer AND server records (servers are a type of computer). This is ServiceNow table inheritance at work — parent queries include child table records by default.
+        </div>
+      </div>
+
+      <!-- Section 3: Relationships -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>CI Relationships</h2>
+        <p>Relationships define how CIs connect to and depend on each other. They are the backbone of dependency mapping, impact analysis, and service modeling. Without relationships, the CMDB is just a list — with them, it becomes a dynamic map of your IT infrastructure.</p>
+
+        <h3>The Relationship Table</h3>
+        <div class="callout-concept">
+          <strong>Key Table:</strong> <code>cmdb_rel_ci</code> — this table stores every relationship between CIs. Each row in <code>cmdb_rel_ci</code> represents one relationship between two CIs and references a relationship type from <code>cmdb_rel_type</code>.
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table</th>
+              <th>Purpose</th>
+              <th>Key Fields</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>cmdb_rel_ci</code></td>
+              <td>Stores actual CI-to-CI relationships</td>
+              <td><code>parent</code> (CI), <code>child</code> (CI), <code>type</code> (rel type)</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_rel_type</code></td>
+              <td>Defines available relationship types</td>
+              <td><code>name</code> (parent label), <code>child_descriptor</code> (child label)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Relationship Direction: Parent → Child</h3>
+        <p>Every relationship in ServiceNow is <strong>directional</strong>. It goes from a <strong>parent CI</strong> to a <strong>child CI</strong>, and the relationship type provides two labels — one describing it from the parent's perspective and one from the child's perspective. These are called the <strong>type</strong> and the <strong>complement type</strong>.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:2;color:var(--text-primary);overflow-x:auto"><code>Relationship:  Parent CI  ──[type]──→  Child CI
+                                         ↑
+                             [complement type] (read from child's perspective)
+
+Example:
+  Web Server  ──[Depends on]──→  Database Server
+  Database Server  ──[Used by]──→  Web Server  (complement view)</code></pre>
+        </div>
+
+        <h3>Common Relationship Types</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Type (Parent Label)</th>
+              <th>Complement (Child Label)</th>
+              <th>Example Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Depends on</strong></td>
+              <td><strong>Used by</strong></td>
+              <td>App depends on database; most common relationship type</td>
+            </tr>
+            <tr>
+              <td><strong>Hosted on</strong></td>
+              <td><strong>Hosts</strong></td>
+              <td>Virtual machine hosted on a physical server</td>
+            </tr>
+            <tr>
+              <td><strong>Runs on</strong></td>
+              <td><strong>Runs</strong></td>
+              <td>Application runs on a server</td>
+            </tr>
+            <tr>
+              <td><strong>Contains</strong></td>
+              <td><strong>Contained by</strong></td>
+              <td>Rack contains servers; cluster contains nodes</td>
+            </tr>
+            <tr>
+              <td><strong>Connects to</strong></td>
+              <td><strong>Connected from</strong></td>
+              <td>Switch connects to router; network topology</td>
+            </tr>
+            <tr>
+              <td><strong>Owned by</strong></td>
+              <td><strong>Owns</strong></td>
+              <td>Server owned by a department</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know:</strong> <strong>"Depends on::Used by"</strong> is the most common relationship type and is heavily tested. The double-colon notation (<code>type::complement</code>) is how ServiceNow displays bidirectional relationships. Know that "Depends on" is the parent-to-child direction and "Used by" is the child-to-parent (complement) view.
+        </div>
+
+        <h3>CI Relationship Form</h3>
+        <p>Relationships can be added and viewed directly from the CI record via the <strong>Relationships tab</strong> (or related list) at the bottom of any CI form. You can also navigate to <code>cmdb_rel_ci.list</code> to see all relationships in the system.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Adding Relationships</h4>
+            <p>Open the CI record → scroll to the <strong>Relationships</strong> tab → click <strong>New</strong>. Choose the child CI and the relationship type. The complement relationship is automatically recorded in the opposite direction.</p>
+          </div>
+          <div class="term-card">
+            <h4>Viewing Relationships</h4>
+            <p>The Relationships tab shows both directions: CIs that this CI depends on, and CIs that depend on this CI. The <strong>Dependency Views</strong> application provides a visual map.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Service Mapping & Discovery -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Service Mapping &amp; Discovery</h2>
+        <p>ServiceNow provides two major automated tools for populating and maintaining the CMDB: <strong>Discovery</strong> (finds individual assets on the network) and <strong>Service Mapping</strong> (maps end-to-end business service dependencies).</p>
+
+        <h3>Discovery</h3>
+        <p>Discovery is a ServiceNow application that automatically scans your network, identifies assets, and creates or updates CI records in the CMDB without manual data entry.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>How Discovery Works</h4>
+            <p>Discovery scans IP ranges or subnets, connects to discovered devices (via SNMP, SSH, WMI), gathers inventory data, and then creates or updates CI records in the CMDB automatically.</p>
+          </div>
+          <div class="term-card">
+            <h4>MID Server (Required)</h4>
+            <p>Discovery requires a <strong>Management, Instrumentation, and Discovery (MID) Server</strong> — a Java application installed on your network that acts as a proxy between the ServiceNow instance and your internal network assets.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">The MID Server handles the actual network scanning and communicates results back to the instance.</p>
+          </div>
+          <div class="term-card">
+            <h4>Discovery Status Table</h4>
+            <p>Each Discovery run is tracked in the <code>discovery_status</code> table. You can monitor progress, view results, and review errors from this table.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Navigate to: <strong>Discovery &gt; Discovery Status</strong></p>
+          </div>
+        </div>
+
+        <h3>What Discovery Populates</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Servers (<code>cmdb_ci_server</code>) — hardware specs, OS, serial numbers</li>
+          <li>Network devices — switches, routers, load balancers</li>
+          <li>Installed software (<code>cmdb_ci_appl</code>) — applications discovered on servers</li>
+          <li>Network adapters and IP addresses — automatically linked to their parent CIs</li>
+          <li>Relationships — "Runs on" and "Hosted on" relationships created automatically</li>
+        </ul>
+
+        <h3>Service Mapping</h3>
+        <p>While Discovery finds individual assets, <strong>Service Mapping</strong> traces the path from a business service down through all its underlying infrastructure components, building a complete dependency map.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Discovery</th>
+              <th>Service Mapping</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>What it finds</strong></td>
+              <td>Individual network assets (servers, devices, apps)</td>
+              <td>End-to-end dependencies for a business service</td>
+            </tr>
+            <tr>
+              <td><strong>Starting point</strong></td>
+              <td>IP range / subnet scan</td>
+              <td>Business service entry point (URL, process, port)</td>
+            </tr>
+            <tr>
+              <td><strong>Result in CMDB</strong></td>
+              <td>CI records for discovered assets</td>
+              <td>CI records + full relationship chain for the service</td>
+            </tr>
+            <tr>
+              <td><strong>License required</strong></td>
+              <td>ITOM Discovery</td>
+              <td>ITOM Visibility (separate, additional license)</td>
+            </tr>
+            <tr>
+              <td><strong>MID Server needed</strong></td>
+              <td>Yes</td>
+              <td>Yes</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>License Exam Point:</strong> Service Mapping requires the <strong>ITOM Visibility license</strong> — it is not included in the base ServiceNow subscription or the standard ITOM Discovery license. This distinction appears in exam questions about which features are available and what additional licensing is required.
+        </div>
+
+        <h3>Business Service CI (<code>cmdb_ci_service</code>)</h3>
+        <p>A <strong>business service</strong> is a special CI class (<code>cmdb_ci_service</code>) that represents a service delivered to users — such as "Email Service," "ERP Application," or "VPN Access." Business services sit at the top of the dependency hierarchy and aggregate the health of all their underlying CIs.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Service Dependency View</h4>
+            <p>The <strong>Dependency Views</strong> application provides a visual, interactive map of all CIs related to a business service. Navigate from any CI or service record to see upstream and downstream dependencies as a diagram.</p>
+          </div>
+          <div class="term-card">
+            <h4>Impact Analysis</h4>
+            <p>When a CI fails or goes into maintenance, ServiceNow can trace upward through the relationship chain to identify which business services are affected — enabling rapid impact communication.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: CMDB Health -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>CMDB Health</h2>
+        <p>A CMDB is only useful if its data is accurate, complete, and current. ServiceNow provides a suite of tools under <strong>CMDB Health</strong> to measure and improve data quality.</p>
+
+        <h3>The Three C's of CMDB Health</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">✔</div>
+            <h4>Completeness</h4>
+            <p>Are all required fields populated on CI records? Completeness measures how many CIs have all their mandatory attributes filled in. A CI with an empty <code>serial_number</code> or missing <code>managed_by</code> scores low on completeness.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">✔</div>
+            <h4>Compliance</h4>
+            <p>Do CI records follow defined standards and policies? Compliance checks that CIs conform to the rules set by your CMDB governance policies — for example, every server must have a specific set of fields populated.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.5rem;margin-bottom:var(--space-2)">✔</div>
+            <h4>Correctness</h4>
+            <p>Is the data accurate and up to date? Correctness checks whether CI data matches reality — for example, detecting stale CIs that haven't been rediscovered recently or have conflicting attribute values from different sources.</p>
+          </div>
+        </div>
+
+        <h3>Duplicate CIs &amp; Identification Rules (IRE)</h3>
+        <p>One of the most common CMDB health problems is duplicate CI records — the same physical or logical asset having multiple CI records in the CMDB, often caused by multiple data sources (Discovery, manual entry, integrations) creating separate records.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Concept</th>
+              <th>What It Does</th>
+              <th>Where Configured</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Identification Rules (IRE)</strong></td>
+              <td>Define how ServiceNow determines if an incoming CI matches an existing record — prevents duplicate creation before it happens</td>
+              <td><strong>CMDB &gt; CI Identifiers</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Reconciliation Engine</strong></td>
+              <td>Manages data from multiple sources — defines which source "wins" when conflicting data exists for the same CI attribute</td>
+              <td><strong>CMDB &gt; Data Sources</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Duplicate CI Remediation</strong></td>
+              <td>Identifies already-existing duplicate CIs and provides tools to merge or remove them</td>
+              <td><strong>CMDB Health &gt; Remediations</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>IRE Matching Keys:</strong> Identification rules define which fields are used to match an incoming CI to an existing record. Common matching keys include <code>serial_number</code>, <code>host_name</code>, IP address, and MAC address. If a match is found, the existing CI is updated rather than a new one being created.
+        </div>
+
+        <h3>CMDB Health Dashboard</h3>
+        <p>The CMDB Health dashboard provides an at-a-glance view of your CMDB data quality. Navigate to: <strong>CMDB &gt; CMDB Health Dashboard</strong>. It shows overall scores for completeness, compliance, and correctness — along with drill-down capabilities to identify which specific CI classes and records have issues.</p>
+
+        <div class="callout-tip">
+          <strong>CSA Exam Scope:</strong> Know the three dimensions (completeness, compliance, correctness), the purpose of Identification Rules (prevent duplicates), and that reconciliation determines which source wins when data conflicts. You do not need to know the precise configuration steps for the exam.
+        </div>
+      </div>
+
+      <!-- Section 6: Configuration Items in ITSM -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Configuration Items in ITSM</h2>
+        <p>The CMDB is not just a standalone inventory — it is deeply integrated with ServiceNow's ITSM processes. CI records are linked to incidents, changes, problems, and other records to provide context, enable impact analysis, and support decision-making.</p>
+
+        <h3>The "Configuration Item" Field on Task Records</h3>
+        <p>Many task-based tables in ServiceNow — including Incident, Change Request, and Problem — include a <strong>Configuration item</strong> field (internally: <code>cmdb_ci</code>). This is a reference field pointing to the CI that is related to or affected by the task.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>ITSM Table</th>
+              <th>How CIs Are Used</th>
+              <th>Benefit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Incident (<code>incident</code>)</strong></td>
+              <td>Link the incident to the failing CI (e.g., "PROD-WEB-01 is down"). Set via the <strong>Configuration item</strong> field on the incident form.</td>
+              <td>Enables incident trend analysis by CI; shows open incidents on CI record</td>
+            </tr>
+            <tr>
+              <td><strong>Change Request (<code>change_request</code>)</strong></td>
+              <td>Specify which CIs are being changed. The <strong>Affected CIs</strong> related list captures all impacted CIs.</td>
+              <td>Impact analysis — shows what else depends on the CI being changed</td>
+            </tr>
+            <tr>
+              <td><strong>Problem (<code>problem</code>)</strong></td>
+              <td>Link the problem to the root-cause CI. Helps identify recurring incidents on the same CI.</td>
+              <td>Root cause analysis; track known errors against specific CIs</td>
+            </tr>
+            <tr>
+              <td><strong>Request Item (<code>sc_req_item</code>)</strong></td>
+              <td>Request items can reference CIs when requesting changes to existing infrastructure.</td>
+              <td>Connects service requests to the CMDB for tracking</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>CI Record — Related Lists</h3>
+        <p>Opening a CI record and scrolling to the bottom reveals related lists that show the CI's ITSM activity at a glance. These related lists pull from ITSM tables filtered by the CI's <code>sys_id</code>.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Incidents</h4>
+            <p>All open and historical incidents where this CI was identified as the affected configuration item. Useful for identifying problem-prone CIs.</p>
+          </div>
+          <div class="term-card">
+            <h4>Changes</h4>
+            <p>All change requests that affect this CI, both past and upcoming. Critical for change impact awareness and avoiding conflicting maintenance windows.</p>
+          </div>
+          <div class="term-card">
+            <h4>Relationships</h4>
+            <p>All defined CI relationships — both parent (this CI depends on) and child (other CIs depend on this one) directions are shown.</p>
+          </div>
+          <div class="term-card">
+            <h4>Problems</h4>
+            <p>Open and resolved problems associated with this CI. Helps identify chronic or systemic issues tied to a specific asset.</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Scenario:</strong> Questions may describe a scenario where an incident is created and you need to associate it with the correct infrastructure component. The answer involves setting the <strong>Configuration item</strong> field (reference to <code>cmdb_ci</code>) on the incident form. This enables automatic relationship-based impact assessment.
+        </div>
+      </div>
+
+      <!-- Section 7: Key Tables Summary -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Key Tables Summary</h2>
+        <p>The following tables are the most important to know for the CSA exam in the context of CMDB. You should be able to identify each table by name and describe its purpose.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table Name</th>
+              <th>Purpose</th>
+              <th>Navigate To</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>cmdb_ci</code></td>
+              <td>Base CI table — root of all CI classes; all CIs ultimately extend this table</td>
+              <td><code>cmdb_ci.list</code> or Configuration &gt; Base Items</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_rel_ci</code></td>
+              <td>CI Relationships — stores every directional relationship between two CI records</td>
+              <td><code>cmdb_rel_ci.list</code></td>
+            </tr>
+            <tr>
+              <td><code>cmdb_rel_type</code></td>
+              <td>Relationship type definitions — defines available relationship types and their complement labels</td>
+              <td><code>cmdb_rel_type.list</code></td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_service</code></td>
+              <td>Business service CIs — represents IT/business services that users consume</td>
+              <td>Configuration &gt; Business Services or <code>cmdb_ci_service.list</code></td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_server</code></td>
+              <td>Server CIs — represents physical and virtual servers in the infrastructure</td>
+              <td><code>cmdb_ci_server.list</code></td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_computer</code></td>
+              <td>Computer CIs — parent of server; includes workstations, laptops, desktops</td>
+              <td><code>cmdb_ci_computer.list</code></td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_appl</code></td>
+              <td>Application CIs — software applications discovered or manually added</td>
+              <td><code>cmdb_ci_appl.list</code></td>
+            </tr>
+            <tr>
+              <td><code>discovery_status</code></td>
+              <td>Discovery job tracking — status, progress, and results of each Discovery run</td>
+              <td>Discovery &gt; Discovery Status</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-tip">
+          <strong>Filter Navigator Shortcut:</strong> You can navigate directly to any table's list view by typing <code>[table_name].list</code> in the filter navigator. For example, type <code>cmdb_rel_ci.list</code> and press Enter to see all CI relationships. This technique works for any table in ServiceNow.
+        </div>
+      </div>
+
+      <!-- Section 8: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Key Exam Facts &amp; Common Traps</h2>
+        <p>This section consolidates the most frequently tested CMDB concepts and common wrong-answer traps on the CSA exam. Study these carefully — they are high-probability exam questions.</p>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 1 — CI Scope:</strong> A CI is <strong>anything managed in the CMDB</strong> — this includes servers, applications, business services, network devices, contracts, and even people (as users). The exam may try to narrow this with wrong answers. Remember: if it needs to be tracked and related to IT operations, it can be a CI.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 2 — Relationships Are Directional:</strong> All CI relationships have a <strong>type</strong> (parent perspective) and a <strong>complement type</strong> (child perspective). You must know the direction. "Depends on" goes parent → child; "Used by" is the reverse view from the child. The double-colon notation <code>Depends on::Used by</code> represents both directions of the same relationship.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 3 — "Depends on::Used by" Is Most Common:</strong> The most common relationship type in the CMDB is <strong>"Depends on::Used by"</strong>. If an exam question asks about the typical relationship between an application and its database, the answer is "Depends on" (the app depends on the database).
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 4 — Discovery Requires MID Server:</strong> Discovery cannot scan internal network assets without a <strong>MID Server</strong> installed on the customer's network. The MID Server is a required component — Discovery will not work without it. This is a frequently tested prerequisite.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 5 — Service Mapping License:</strong> Service Mapping requires the <strong>ITOM Visibility</strong> license — it is <strong>not included</strong> in Discovery or the base ServiceNow license. If an exam question asks what is needed to map business service dependencies automatically, the answer is ITOM Visibility.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 6 — CMDB Is Just Tables:</strong> The CMDB is <strong>not a separate system or external database</strong>. It is a logical collection of tables within the ServiceNow database. There is no separate "CMDB database" — it lives in the same platform alongside all other ServiceNow data.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact 7 — sys_class_name Identifies the CI Class:</strong> On any CI record, the <code>sys_class_name</code> field tells you exactly which class (table) that record belongs to. This field is automatically populated by the platform. Do not confuse it with <code>name</code> (the human-readable CI name) or <code>asset_tag</code>.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Trap — Identification Rules vs. Reconciliation:</strong> These two are often confused. <strong>Identification Rules (IRE)</strong> prevent duplicates from being created in the first place by matching incoming data to existing CIs. <strong>Reconciliation</strong> handles which data source wins when multiple sources provide conflicting values for the same CI. They are separate mechanisms serving different purposes.
+        </div>
+
+        <div class="callout-concept">
+          <strong>Putting It All Together:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Discovery (with MID Server) scans the network → creates <code>cmdb_ci_server</code>, <code>cmdb_ci_appl</code> records</li>
+            <li>IRE checks for duplicates → updates existing CIs instead of creating new ones</li>
+            <li>Relationships (<code>cmdb_rel_ci</code>) are created linking apps to servers, VMs to hosts, etc.</li>
+            <li>Service Mapping (ITOM Visibility) maps business services → builds <code>cmdb_ci_service</code> dependency chains</li>
+            <li>Incidents / Changes reference CIs via the <strong>Configuration item</strong> field</li>
+            <li>CMDB Health dashboard monitors completeness, compliance, correctness of all CI data</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="01-data-schema-imports.html" class="btn btn-secondary">← Data Schema &amp; Imports</a>
+          <a href="03-access-control-rules.html" class="btn btn-primary">Access Control Rules →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p4-cmdb-relationships', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p4-cmdb-relationships')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

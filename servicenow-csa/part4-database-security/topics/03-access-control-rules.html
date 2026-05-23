@@ -1,0 +1,954 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access Control Rules (ACLs) | ServiceNow CSA Part 4</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">&#9776;</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 4</a>
+        <span class="sep">›</span>
+        <span class="current">Access Control Rules (ACLs)</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">&#128274; Part 4 &middot; Topic 3 of 4</div>
+        <h1 class="topic-title">Access Control Rules (ACLs)</h1>
+        <div class="topic-meta">
+          <span>&#9201; ~75 min read</span>
+          <span>·</span>
+          <span>Part 4 — Database &amp; Security · 27% Exam Weight — HIGHEST</span>
+        </div>
+        <div class="callout-exam" style="margin-top:var(--space-4)">
+          <strong>Most Tested Security Topic:</strong> ACLs represent the single most heavily examined security concept in the CSA exam. Expect 6–10 questions directly testing ACL evaluation order, anatomy, role matching, and the behavior difference between standard and High Security modes. Master this topic completely.
+        </div>
+      </div>
+
+      <!-- Section 1: ACL Overview -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>ACL Overview</h2>
+        <p>Access Control Lists (ACLs) are ServiceNow's primary database-layer security mechanism. Every read, write, create, delete, or execute operation against platform data passes through ACL evaluation before being permitted or denied.</p>
+
+        <h3>What ACLs Protect</h3>
+        <p>ACLs are stored in the <code>sys_security_acl</code> table. Navigate to them via <strong>Security &gt; Access Control (ACL)</strong> or type <code>sys_security_acl.list</code> in the filter navigator. Each ACL record defines one permission rule combining a target object, an operation, and a set of requirements the user must satisfy.</p>
+
+        <div class="callout-concept">
+          <strong>Core Formula:</strong> An ACL = <strong>(Table + Field)</strong> + <strong>Operation</strong> + <strong>(Role &amp; Condition &amp; Script)</strong>. All three requirement components must individually pass for access to be granted.
+        </div>
+
+        <h3>The Four Primary Operations</h3>
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">&#128065;</div>
+            <h4>read</h4>
+            <p>View record data, field values, or list results. Controlled separately from write — a user can have read-only access.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">&#9998;</div>
+            <h4>write</h4>
+            <p>Modify an existing record or field value. Does not cover creating new records — that is governed by <strong>create</strong>.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">&#43;</div>
+            <h4>create</h4>
+            <p>Insert a new record into the table. Evaluated when a user submits a form for a new record or uses the API to POST.</p>
+          </div>
+          <div class="term-card">
+            <div style="font-size:1.4rem;margin-bottom:var(--space-2)">&#128465;</div>
+            <h4>delete</h4>
+            <p>Remove an existing record from the table. Often locked down more tightly than write to prevent accidental data loss.</p>
+          </div>
+        </div>
+
+        <h3>Additional Operations</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Operation</th>
+              <th>When It Applies</th>
+              <th>Typical Target</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>execute</code></td>
+              <td>Running a script, callable API endpoint, or service operation</td>
+              <td>Scripted REST APIs, workflow activities, processors</td>
+            </tr>
+            <tr>
+              <td><code>report_on</code></td>
+              <td>Using a field as a report filter, column, or grouping criterion</td>
+              <td>Fields that should not appear in reports for compliance reasons</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>The Three Object Types</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Record ACL</h4>
+            <p>Controls access to an <strong>entire row</strong> within a table. If the record ACL denies access, the user cannot see the record at all — no fields are returned. Row-level security is implemented here using conditions and scripts.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: <code>incident[READ]</code> — who can read any incident row?</p>
+          </div>
+          <div class="term-card">
+            <h4>Field ACL</h4>
+            <p>Controls access to a <strong>specific column</strong> within a table. Evaluated in addition to the record ACL — both must pass. Used to protect sensitive fields like salary, SSN, or medical information.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: <code>incident.short_description[READ]</code> — who can see this specific field?</p>
+          </div>
+          <div class="term-card">
+            <h4>Table ACL</h4>
+            <p>Controls table-level operations such as schema access. Less commonly encountered on the exam than record and field types. Primarily governs schema-level operations.</p>
+            <p style="margin-top:var(--space-2);font-size:0.8rem;color:var(--text-muted)">Example: Table-level execute for scripted REST APIs.</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Distinction — Record vs. Field ACLs:</strong> The exam frequently tests whether candidates understand that record ACLs and field ACLs are evaluated <strong>independently and cumulatively</strong>. A user must pass the record ACL <strong>and</strong> the field ACL to access any specific field value. Passing one does not waive the other.
+        </div>
+      </div>
+
+      <!-- Section 2: ACL Anatomy -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>ACL Anatomy — All Fields Explained</h2>
+        <p>Every ACL record in <code>sys_security_acl</code> contains the following fields. Understanding each field's purpose is essential for both the exam and real-world ACL authoring.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+              <th>Notes / Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Type</strong></td>
+              <td>Defines the object scope: <code>record</code>, <code>field</code>, or <code>table</code></td>
+              <td>Most ACLs are type <code>record</code> or <code>field</code></td>
+            </tr>
+            <tr>
+              <td><strong>Operation</strong></td>
+              <td>The access operation being controlled</td>
+              <td><code>read</code>, <code>write</code>, <code>create</code>, <code>delete</code>, <code>execute</code>, <code>report_on</code></td>
+            </tr>
+            <tr>
+              <td><strong>Name</strong></td>
+              <td>What is protected — format: <code>table.field</code> or <code>table.*</code> or <code>table</code></td>
+              <td><code>incident.caller_id</code>, <code>incident.*</code>, <code>*.*</code></td>
+            </tr>
+            <tr>
+              <td><strong>Active</strong></td>
+              <td>Checkbox — only active ACLs are evaluated</td>
+              <td>Deactivating an ACL disables it without deletion</td>
+            </tr>
+            <tr>
+              <td><strong>Requires role(s)</strong></td>
+              <td>Related list of roles; user must have <strong>at least one</strong> to pass the role check</td>
+              <td><code>itil</code>, <code>admin</code>; empty list = any authenticated user</td>
+            </tr>
+            <tr>
+              <td><strong>Condition</strong></td>
+              <td>Filter expression evaluated against the current record; must evaluate to <code>true</code></td>
+              <td><code>assigned_to=javascript:gs.getUserID()</code></td>
+            </tr>
+            <tr>
+              <td><strong>Script</strong></td>
+              <td>Advanced server-side logic; must explicitly <code>return true</code> or <code>return false</code></td>
+              <td><code>return gs.hasRole('manager');</code></td>
+            </tr>
+            <tr>
+              <td><strong>Advanced</strong></td>
+              <td>Checkbox that enables the Script field — must be checked to write ACL scripts</td>
+              <td>When unchecked, the script field is hidden and inactive</td>
+            </tr>
+            <tr>
+              <td><strong>Admin overrides</strong></td>
+              <td>When true (default), admin users bypass this ACL entirely</td>
+              <td>Set to <code>false</code> to enforce even for admins (sensitive data)</td>
+            </tr>
+            <tr>
+              <td><strong>Description</strong></td>
+              <td>Free-text explanation of the ACL's intent</td>
+              <td>Best practice: always fill in for maintainability</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>ACL Name Patterns</h3>
+        <p>The <strong>Name</strong> field determines what object the ACL protects. It follows a <code>table.field</code> convention with wildcards supported at both levels.</p>
+
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+          <div class="term-card">
+            <h4><code>incident.short_description</code></h4>
+            <p>Specific field on a specific table. Most targeted — highest specificity in evaluation.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>incident.*</code></h4>
+            <p>All fields on the incident table (and its extensions). Applies to every column not covered by a more-specific ACL.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>incident</code></h4>
+            <p>Record-level ACL for the incident table with no field qualifier. Controls access to entire rows.</p>
+          </div>
+          <div class="term-card">
+            <h4><code>task.*</code></h4>
+            <p>Wildcard covering all fields on the task table and every table that extends task (incident, problem, change).</p>
+          </div>
+          <div class="term-card">
+            <h4><code>*.*</code></h4>
+            <p>Global catch-all: applies to all fields on all tables. The fallback of last resort when no more-specific ACL matches.</p>
+          </div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Inheritance via Table Hierarchy:</strong> ServiceNow's table extension model means an ACL on <code>task.*</code> applies to <code>incident</code>, <code>problem</code>, <code>change_request</code>, and every other table that extends <code>task</code>. A more specific ACL on <code>incident.*</code> will override the inherited <code>task.*</code> ACL for incident records.
+        </div>
+      </div>
+
+      <!-- Section 3: ACL Evaluation Order -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>ACL Evaluation Order <span style="color:var(--accent);font-size:0.9rem">(CRITICAL — Most Tested)</span></h2>
+        <p>ServiceNow evaluates ACLs from <strong>most-specific to least-specific</strong>. The moment a matching ACL is found, its result (allow or deny) is applied and evaluation stops. No further ACLs are checked.</p>
+
+        <h3>Specificity Priority Order</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Priority</th>
+              <th>ACL Pattern</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent)">1 — Highest</strong></td>
+              <td><code>table.field</code> with condition</td>
+              <td>Exact table + exact field + record-level condition applied</td>
+              <td><code>incident.caller_id[READ]</code> where assigned_to = user</td>
+            </tr>
+            <tr>
+              <td><strong>2</strong></td>
+              <td><code>table.field</code></td>
+              <td>Specific table and specific field, no record condition</td>
+              <td><code>incident.caller_id[READ]</code></td>
+            </tr>
+            <tr>
+              <td><strong>3</strong></td>
+              <td><code>table.*</code></td>
+              <td>All fields on a specific table</td>
+              <td><code>incident.*[READ]</code></td>
+            </tr>
+            <tr>
+              <td><strong>4</strong></td>
+              <td><code>*.field</code></td>
+              <td>A specific field name on any table</td>
+              <td><code>*.sys_created_by[READ]</code></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--text-muted)">5 — Lowest</strong></td>
+              <td><code>*.*</code></td>
+              <td>Global fallback — all fields on all tables</td>
+              <td><code>*.*[READ]</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Same-Specificity Rules: ALL Must Pass</h3>
+        <p>When multiple ACLs exist at the <strong>same specificity level</strong> for the same table/field/operation combination, the user must pass <strong>all of them</strong>. There is no short-circuit allow at the same level — each ACL is an independent gate.</p>
+
+        <div class="callout-exam">
+          <strong>Exam Trap — Most Specific Wins, Period:</strong> If a more-specific ACL <strong>denies</strong> access, the evaluation stops immediately. A permissive wildcard ACL lower in the hierarchy will <strong>NOT</strong> rescue the user. The most specific matching ACL's decision is final.
+          <br><br>
+          <strong>Example:</strong> <code>incident.caller_id[READ]</code> denies access. The <code>incident.*[READ]</code> ACL that would allow access is <strong>never consulted</strong> because evaluation already concluded at the higher-specificity level.
+        </div>
+
+        <h3>The Three-Gate Check</h3>
+        <p>Once the most-specific matching ACL is found, the user must pass all three internal checks. These run in sequence:</p>
+
+        <div class="term-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="term-card" style="text-align:center">
+            <div style="font-size:2rem;font-weight:700;color:var(--accent)">1</div>
+            <h4>Role Check</h4>
+            <p>Does the user have <strong>at least one</strong> of the roles listed on this ACL?</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Empty role list = any authenticated user passes automatically</p>
+          </div>
+          <div class="term-card" style="text-align:center">
+            <div style="font-size:2rem;font-weight:700;color:var(--accent)">2</div>
+            <h4>Condition Check</h4>
+            <p>Does the optional filter condition evaluate to <code>true</code> for this record?</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Evaluated after role check; no condition = automatic pass</p>
+          </div>
+          <div class="term-card" style="text-align:center">
+            <div style="font-size:2rem;font-weight:700;color:var(--accent)">3</div>
+            <h4>Script Check</h4>
+            <p>Does the optional ACL script <code>return true</code>?</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Only runs if Advanced is checked; no script = automatic pass</p>
+          </div>
+        </div>
+
+        <div class="callout-exam">
+          <strong>All Three Must Pass:</strong> The role check, condition check, and script check are <strong>AND</strong> logic — all must individually succeed. If any one of them fails, the ACL denies access regardless of what the others returned.
+        </div>
+
+        <h3>Fail-Closed Behavior</h3>
+        <div class="callout-warn">
+          <strong>No Matching ACL = DENIED (Standard Mode):</strong> If ServiceNow finds <strong>no matching ACL</strong> for a given table/field/operation, access is <strong>denied by default</strong>. This fail-closed model means you must explicitly grant access — it is never granted by the absence of rules.
+          <br><br>
+          <strong>Exception — Without High Security Plugin:</strong> On instances without the High Security plugin, the default behavior for missing ACLs may be more permissive. The High Security plugin enforces strict deny-by-default across the board. See Section 9 for details.
+        </div>
+
+        <h3>Admin Bypass</h3>
+        <div class="callout-concept">
+          <strong>Default Admin Behavior:</strong> Users with the <code>admin</code> role bypass ACL evaluation entirely by default. The platform skips ACL checks for admin users, granting full access to all records and fields. This behavior can be overridden on individual ACL records by setting <strong>Admin overrides = false</strong>.
+        </div>
+      </div>
+
+      <!-- Section 4: Role Matching Logic -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Role Matching Logic</h2>
+        <p>The role check is the first gate in ACL evaluation. Understanding exactly how role matching works prevents common exam mistakes.</p>
+
+        <h3>OR Logic Across Roles</h3>
+        <p>When multiple roles are listed in an ACL's Requires role(s) list, the check uses <strong>OR logic</strong> — the user needs to have <strong>at least one</strong> of the listed roles. Possessing any single matching role is sufficient to pass the role check.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>ACL Roles Required</th>
+              <th>User's Roles</th>
+              <th>Role Check Result</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>itil</code>, <code>manager</code></td>
+              <td><code>itil</code></td>
+              <td><span style="color:var(--green-400);font-weight:700">PASS</span></td>
+              <td>User has itil — one match is enough</td>
+            </tr>
+            <tr>
+              <td><code>itil</code>, <code>manager</code></td>
+              <td><code>manager</code></td>
+              <td><span style="color:var(--green-400);font-weight:700">PASS</span></td>
+              <td>User has manager — one match is enough</td>
+            </tr>
+            <tr>
+              <td><code>itil</code>, <code>manager</code></td>
+              <td><code>itil</code>, <code>manager</code></td>
+              <td><span style="color:var(--green-400);font-weight:700">PASS</span></td>
+              <td>Has both; still passes (OR logic)</td>
+            </tr>
+            <tr>
+              <td><code>itil</code>, <code>manager</code></td>
+              <td><code>approver_user</code></td>
+              <td><span style="color:var(--red-400);font-weight:700">FAIL</span></td>
+              <td>Has neither required role</td>
+            </tr>
+            <tr>
+              <td>(empty)</td>
+              <td>any authenticated user</td>
+              <td><span style="color:var(--green-400);font-weight:700">PASS</span></td>
+              <td>Empty list = no role requirement; all users pass</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Role Hierarchy and Inheritance</h3>
+        <p>ServiceNow roles support a parent-child hierarchy. A parent role <strong>includes all permissions</strong> of its child roles. If an ACL requires role <code>itil</code> and a user has a role that contains <code>itil</code> as a child, the role check passes.</p>
+
+        <div class="callout-concept">
+          <strong>Role Containment Example:</strong> If role <code>itil_manager</code> contains <code>itil</code> as a child role, then a user with <code>itil_manager</code> automatically also has <code>itil</code>. Any ACL requiring <code>itil</code> will pass for that user even though they were not explicitly granted the <code>itil</code> role directly.
+        </div>
+
+        <h3>Empty Roles List — Important Behavior</h3>
+        <div class="callout-exam">
+          <strong>Exam-Tested Behavior:</strong> An ACL with an <strong>empty roles list</strong> means the role check is satisfied by any authenticated (logged-in) user. It does <strong>not</strong> mean the ACL is inactive or skipped — the condition and script checks still run. An empty roles list is a deliberate way to allow broad access while still enforcing conditions or scripts on the record.
+        </div>
+
+        <h3>The security_admin Role</h3>
+        <p>Creating, editing, or deleting ACL records requires the <code>security_admin</code> role. This is a separate, elevated role that is not granted automatically with <code>admin</code>.</p>
+
+        <div class="callout-warn">
+          <strong>security_admin vs. admin — Critical Distinction:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><code>admin</code> — Full platform administration, bypasses ACLs by default, cannot modify ACL records without security_admin</li>
+            <li><code>security_admin</code> — Specifically grants the ability to create, modify, and delete ACL rules; does NOT automatically include admin platform permissions</li>
+            <li>An admin user who wants to edit ACLs must also be granted <code>security_admin</code> separately (or elevate to it)</li>
+            <li>This separation prevents admins from accidentally or maliciously tampering with security controls</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 5: Condition Evaluation -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Condition Evaluation</h2>
+        <p>The Condition field on an ACL provides record-level (row-level) filtering. It is a standard ServiceNow filter expression that is evaluated against the current record being accessed.</p>
+
+        <h3>How Conditions Work</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Conditions run <strong>after</strong> the role check — if the role check fails, the condition is never evaluated</li>
+          <li>Both the role check AND the condition must pass for the ACL to allow access</li>
+          <li>If no condition is specified, that check passes automatically</li>
+          <li>The condition has access to the <code>current</code> object (the record being evaluated)</li>
+          <li>JavaScript expressions can be embedded using the <code>javascript:</code> prefix</li>
+        </ul>
+
+        <h3>Common Condition Patterns</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.9;color:var(--text-primary);overflow-x:auto"><code>// Show only records assigned to the current user
+assigned_to=javascript:gs.getUserID()
+
+// Show records belonging to any group the user is a member of
+assignment_group=javascript:gs.getMyGroups()
+
+// Records where caller is the current user
+caller_id=javascript:gs.getUserID()
+
+// Records where active flag is true
+active=true
+
+// Records in open state (1 = open in ITSM)
+state=1</code></pre>
+        </div>
+
+        <h3>GlideSystem Methods Used in Conditions</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Returns</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>gs.getUserID()</code></td>
+              <td>sys_id of current user (String)</td>
+              <td>Match records where a reference field points to the current user</td>
+            </tr>
+            <tr>
+              <td><code>gs.getUserName()</code></td>
+              <td>Username (login name) String</td>
+              <td>Match string fields storing username values</td>
+            </tr>
+            <tr>
+              <td><code>gs.getMyGroups()</code></td>
+              <td>Comma-separated list of group sys_ids</td>
+              <td>Match records assigned to any of the user's groups</td>
+            </tr>
+            <tr>
+              <td><code>gs.hasRole('rolename')</code></td>
+              <td>Boolean true/false</td>
+              <td>Conditional access based on role membership within a condition expression</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know:</strong> <code>gs.getUserID()</code> returns the <strong>sys_id</strong> (not the username) of the currently logged-in user. It is the most commonly tested GlideSystem method in ACL context. Used in conditions to implement row-level security patterns like "users can only see their own records."
+        </div>
+      </div>
+
+      <!-- Section 6: ACL Scripts -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>ACL Scripts</h2>
+        <p>The Script field enables advanced, programmatic access control logic that goes beyond what filter conditions can express. ACL scripts run server-side and have full access to the ServiceNow scripting API.</p>
+
+        <h3>Script Requirements</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>The <strong>Advanced</strong> checkbox must be checked on the ACL to enable the Script field</li>
+          <li>The script must explicitly <code>return true</code> to allow access or <code>return false</code> to deny</li>
+          <li>Script runs <strong>after</strong> both the role check and the condition check</li>
+          <li>If the script does not return anything, the behavior is undefined — always return explicitly</li>
+          <li>The <code>current</code> object provides access to the record being evaluated</li>
+        </ul>
+
+        <h3>Available Script Objects</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Object</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>current</code></td>
+              <td>GlideRecord</td>
+              <td>The record currently being evaluated for access. Access field values via <code>current.field_name</code></td>
+            </tr>
+            <tr>
+              <td><code>gs</code></td>
+              <td>GlideSystem</td>
+              <td>Platform API: user identity, role checks, session info, logging</td>
+            </tr>
+            <tr>
+              <td><code>gs.getUserID()</code></td>
+              <td>String (sys_id)</td>
+              <td>Returns the sys_id of the currently logged-in user</td>
+            </tr>
+            <tr>
+              <td><code>gs.hasRole('role')</code></td>
+              <td>Boolean</td>
+              <td>Returns true if the current user has the specified role</td>
+            </tr>
+            <tr>
+              <td><code>gs.hasRoleInGroup('role','group')</code></td>
+              <td>Boolean</td>
+              <td>Returns true if user has the role within a specific group context</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>ACL Script Examples</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.9;color:var(--text-primary);overflow-x:auto"><code>// Allow access only to manager or above
+answer = gs.hasRole('itil_manager') || gs.hasRole('admin');
+
+// Allow if current user is the caller or assigned agent
+answer = (current.caller_id == gs.getUserID() ||
+          current.assigned_to == gs.getUserID());
+
+// Allow if the record is in a specific state
+answer = (current.state == 1 || current.state == 2);
+
+// Check a related (referenced) record's field value
+var grp = new GlideRecord('sys_user_group');
+grp.get(current.assignment_group);
+answer = (grp.manager == gs.getUserID());
+
+// Combine role and field value check
+if (gs.hasRole('itil')) {
+  answer = (current.priority == 1 || current.priority == 2);
+} else {
+  answer = false;
+}</code></pre>
+        </div>
+
+        <div class="callout-concept">
+          <strong>Script vs. Condition — When to Use Each:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Use <strong>Condition</strong> for simple database-style filters (field = value, field IN list)</li>
+            <li>Use <strong>Script</strong> for multi-step logic, boolean combinations, method calls, or when you need to query related records</li>
+            <li>Scripts are more powerful but more expensive — conditions are evaluated with SQL-level efficiency, scripts require JavaScript execution</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 7: Record vs Field ACLs -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Record ACLs vs. Field ACLs</h2>
+        <p>Understanding the relationship between record-level and field-level ACLs is one of the most commonly tested topics in the security section of the CSA exam.</p>
+
+        <h3>Record ACLs</h3>
+        <p>A record ACL controls whether a user can access the <strong>entire row</strong>. It is the outer gate — if the record ACL denies access, the user cannot see the record in any form: not in list views, not via form, not via API.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Operation on Record ACL</th>
+              <th>Effect When Denied</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>read</code></td>
+              <td>Record is excluded from list results and form views; appears as if it does not exist</td>
+            </tr>
+            <tr>
+              <td><code>write</code></td>
+              <td>Record can be viewed but form fields are read-only; save operations are blocked</td>
+            </tr>
+            <tr>
+              <td><code>create</code></td>
+              <td>User cannot insert new records into the table; New/Insert operations fail</td>
+            </tr>
+            <tr>
+              <td><code>delete</code></td>
+              <td>Delete button is hidden; delete operations via API return a security error</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Field ACLs</h3>
+        <p>A field ACL controls access to a <strong>specific column</strong> within a table. Field ACLs are evaluated <strong>in addition to</strong> the record ACL — both must pass for the user to interact with a specific field.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Operation on Field ACL</th>
+              <th>Effect When Denied</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>read</code></td>
+              <td>Field is hidden on the form; field value is blank in list views; API returns empty string</td>
+            </tr>
+            <tr>
+              <td><code>write</code></td>
+              <td>Field is rendered read-only on the form; user can view the value but cannot edit it</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>The Cumulative Rule</h3>
+        <div class="callout-exam">
+          <strong>Both Must Pass — Critical Exam Rule:</strong> To access a specific field, a user must pass <strong>both</strong> the record-level ACL AND the field-level ACL. Passing the record ACL does not automatically grant access to all fields — each field ACL is checked independently on top of the record ACL result.
+          <br><br>
+          <strong>Failure Scenario:</strong> If a user passes the <code>incident[READ]</code> record ACL but fails the <code>incident.salary_band[READ]</code> field ACL, they can see the incident record but the <code>salary_band</code> field will be blank/hidden.
+        </div>
+
+        <h3>Visual Flow: Record + Field ACL Evaluation</h3>
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0;font-family:var(--font-mono);font-size:0.85rem;line-height:2;color:var(--text-primary)">
+          <div>User requests: READ incident record #INC0001234</div>
+          <div style="margin-left:2ch;color:var(--amber-400)">&#8595; Step 1: Evaluate record ACL — incident[READ]</div>
+          <div style="margin-left:4ch;color:var(--red-400)">&#10005; DENY → entire record blocked, user sees nothing</div>
+          <div style="margin-left:4ch;color:var(--green-400)">&#10003; PASS → record returned, now evaluate field ACLs</div>
+          <div style="margin-left:6ch;color:var(--amber-400)">&#8595; Step 2: For each field, evaluate field ACL</div>
+          <div style="margin-left:8ch;color:var(--green-400)">&#10003; incident.short_description[READ] PASS → shown</div>
+          <div style="margin-left:8ch;color:var(--green-400)">&#10003; incident.priority[READ] PASS → shown</div>
+          <div style="margin-left:8ch;color:var(--red-400)">&#10005; incident.salary_band[READ] DENY → field hidden</div>
+        </div>
+      </div>
+
+      <!-- Section 8: Table Wildcards -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Table Wildcards and Fallback Behavior</h2>
+        <p>Wildcard ACLs provide broad coverage when no specific rule exists. Understanding when wildcards are applied and which wildcards take precedence is essential for predicting ACL behavior.</p>
+
+        <h3>Wildcard Reference</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Applies To</th>
+              <th>Specificity</th>
+              <th>Common Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>incident.short_description</code></td>
+              <td>Exactly one field on one table</td>
+              <td>Highest (2)</td>
+              <td>Protect a single sensitive field</td>
+            </tr>
+            <tr>
+              <td><code>incident.*</code></td>
+              <td>All fields on the incident table</td>
+              <td>Medium (3)</td>
+              <td>Default field access policy for a table</td>
+            </tr>
+            <tr>
+              <td><code>task.*</code></td>
+              <td>All fields on task + all extending tables</td>
+              <td>Medium (3)</td>
+              <td>Single policy covering the full task hierarchy</td>
+            </tr>
+            <tr>
+              <td><code>*.field_name</code></td>
+              <td>A named field on any table that has it</td>
+              <td>Low (4)</td>
+              <td>Protect a field name globally (e.g., <code>*.password</code>)</td>
+            </tr>
+            <tr>
+              <td><code>*.*</code></td>
+              <td>Every field on every table</td>
+              <td>Lowest (5) — global fallback</td>
+              <td>Default platform-wide baseline access rule</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>The <code>*.*</code> Global Catch-All</h3>
+        <p>The <code>*.*</code> ACL is the fallback of last resort. When no more specific ACL matches for a given table/field/operation combination, ServiceNow falls through to the <code>*.*</code> ACL if one exists. If no <code>*.*</code> ACL exists either, the fail-closed rule applies and access is denied.</p>
+
+        <div class="callout-concept">
+          <strong>Real-World Pattern:</strong> A common architecture is to have a restrictive <code>*.*[READ]</code> ACL requiring a base authenticated user role, combined with specific ACLs on individual tables that grant access to particular user groups. This ensures baseline denial for unauthenticated access while allowing targeted grants.
+        </div>
+
+        <h3>Table Extension and Wildcard Inheritance</h3>
+        <p>The <code>task.*</code> wildcard demonstrates an important behavior: because <code>incident</code>, <code>problem</code>, and <code>change_request</code> all extend <code>task</code>, an ACL on <code>task.*</code> automatically applies to all those extended tables unless a more specific ACL exists for the extended table.</p>
+
+        <div class="callout-exam">
+          <strong>Inheritance Override:</strong> If both <code>task.*[READ]</code> and <code>incident.*[READ]</code> exist, then for incident records, only <code>incident.*[READ]</code> is evaluated (higher specificity). The <code>task.*</code> ACL is <strong>not</strong> consulted for incidents when a more specific incident-level ACL exists.
+        </div>
+      </div>
+
+      <!-- Section 9: High Security Plugin -->
+      <div class="section-block">
+        <div class="section-label">Section 9</div>
+        <h2>High Security Plugin</h2>
+        <p>The High Security Settings plugin (<code>com.glide.security.high_security</code>) enables strict security enforcement at the platform level. It is a critical topic for the CSA exam's security section.</p>
+
+        <h3>What the Plugin Does</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Strict ACL Enforcement</h4>
+            <p>Enables fully enforced <strong>fail-closed ACL behavior</strong>: if no matching ACL exists for an operation, access is denied for all users — including admin.</p>
+          </div>
+          <div class="term-card">
+            <h4>Disables Admin Bypass</h4>
+            <p>The default admin bypass of ACLs is disabled. Even users with the <code>admin</code> role must pass ACL checks like all other users. This is the most significant behavioral change.</p>
+          </div>
+          <div class="term-card">
+            <h4>security_admin Required</h4>
+            <p>Creating, editing, or deleting ACL records strictly requires the <code>security_admin</code> role. This separation of duties prevents admins from modifying their own access rules.</p>
+          </div>
+          <div class="term-card">
+            <h4>Password Policies</h4>
+            <p>Enforces configurable password strength rules: minimum length, complexity requirements (uppercase, digits, special characters), and password expiration intervals.</p>
+          </div>
+          <div class="term-card">
+            <h4>Session Controls</h4>
+            <p>Adds configurable session timeout and idle session expiration to reduce risk from unattended authenticated sessions.</p>
+          </div>
+          <div class="term-card">
+            <h4>Account Lockout</h4>
+            <p>Configures automatic account lockout after a specified number of consecutive failed login attempts to prevent brute-force attacks.</p>
+          </div>
+        </div>
+
+        <h3>Standard vs. High Security Mode</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Behavior</th>
+              <th>Standard Mode</th>
+              <th>High Security Plugin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>No matching ACL found</td>
+              <td>Access <span style="color:var(--green-400);font-weight:700">GRANTED</span> (by default on many tables)</td>
+              <td>Access <span style="color:var(--red-400);font-weight:700">DENIED</span> (strict fail-closed)</td>
+            </tr>
+            <tr>
+              <td>Admin bypass of ACLs</td>
+              <td><span style="color:var(--green-400)">Enabled</span> by default — admin skips ACL checks</td>
+              <td><span style="color:var(--red-400)">Disabled</span> — admin must pass ACLs like all users</td>
+            </tr>
+            <tr>
+              <td>Who can modify ACLs</td>
+              <td>admin or security_admin (depends on instance config)</td>
+              <td><strong>security_admin only</strong> — strictly enforced</td>
+            </tr>
+            <tr>
+              <td>Password enforcement</td>
+              <td>Basic or none by default</td>
+              <td>Configurable strength, expiry, complexity rules</td>
+            </tr>
+            <tr>
+              <td>Session timeout</td>
+              <td>Platform default</td>
+              <td>Enforced, configurable per policy</td>
+            </tr>
+            <tr>
+              <td>Account lockout</td>
+              <td>Not enforced by default</td>
+              <td>Configurable lockout after N failed attempts</td>
+            </tr>
+            <tr>
+              <td>Recommended for</td>
+              <td>Development / sandbox instances</td>
+              <td>All production instances</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Critical Exam Fact — Default Behavior Flip:</strong>
+          <ul style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li><strong>Without</strong> High Security: no matching ACL = access <strong>GRANTED</strong></li>
+            <li><strong>With</strong> High Security: no matching ACL = access <strong>DENIED</strong></li>
+          </ul>
+          This is one of the most heavily tested distinctions in the security portion of the exam. Know the direction of the default for both modes.
+        </div>
+      </div>
+
+      <!-- Section 10: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 10</div>
+        <h2>Key Exam Facts &amp; Debugging</h2>
+        <p>This section consolidates the highest-frequency exam facts for ACLs, including common trap questions and the debugging tools available on the platform.</p>
+
+        <h3>Master Fact List</h3>
+        <div class="callout-exam">
+          <strong>Exam Fact 1:</strong> <strong>Default (no plugin):</strong> if no ACL matches, access is <strong>GRANTED</strong>. With the High Security plugin, the same scenario results in <strong>DENIED</strong>. The direction of the default flips.
+        </div>
+        <div class="callout-exam">
+          <strong>Exam Fact 2:</strong> <code>security_admin</code> and <code>admin</code> are <strong>different roles</strong>. You need <code>security_admin</code> to create or edit ACL records. Having <code>admin</code> alone is not sufficient — these roles serve different purposes and are granted separately.
+        </div>
+        <div class="callout-exam">
+          <strong>Exam Fact 3:</strong> <strong>Field ACLs require the record ACL to also pass.</strong> A user cannot access a field if the record ACL has already denied them, even if they would pass the field ACL. The record ACL is the outer gate; the field ACL is the inner gate — both must be open.
+        </div>
+        <div class="callout-exam">
+          <strong>Exam Fact 4:</strong> When an ACL has <strong>multiple roles listed</strong>, the check is <strong>OR logic</strong> — the user needs at least one. When an ACL has all three checks (role + condition + script), the logic is <strong>AND</strong> — all three must pass.
+        </div>
+        <div class="callout-exam">
+          <strong>Exam Fact 5:</strong> The <strong>most specific ACL wins</strong> and evaluation stops immediately. A permissive catch-all ACL below in specificity cannot override a more-specific ACL that denied access. Most specific = most targeted table + field combination.
+        </div>
+        <div class="callout-exam">
+          <strong>Exam Fact 6:</strong> <code>gs.hasRole('admin')</code> returns <code>true</code> for users with the admin role. In standard mode, admin users bypass ACL evaluation entirely unless <strong>Admin overrides = false</strong> is set on the specific ACL. The High Security plugin removes the admin bypass globally.
+        </div>
+        <div class="callout-exam">
+          <strong>Exam Fact 7:</strong> An ACL with an <strong>empty roles list</strong> is satisfied by any authenticated user — it does not mean the ACL is permissive for unauthenticated access, and condition/script checks still apply normally.
+        </div>
+
+        <h3>Debugging ACL Issues</h3>
+        <p>When a user reports unexpected access problems, ServiceNow provides built-in tools to diagnose ACL evaluation without requiring code changes.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Access Control Related List</h4>
+            <p>Open any record and view the <strong>Access Controls</strong> related list (may need to be added via Personalize Related Lists). Shows which ACLs were evaluated for that record and their results.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Best for: quick field-level access debugging on a specific record</p>
+          </div>
+          <div class="term-card">
+            <h4>ACL Debug Logs</h4>
+            <p>Enable debug logging via <strong>System Diagnostics &gt; Session Debug &gt; Security</strong>. The system log (<code>syslog.list</code>) will show detailed ACL evaluation including which ACLs were checked and why access was granted or denied.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Best for: deep-dive diagnosis when the source of denial is unclear</p>
+          </div>
+          <div class="term-card">
+            <h4>Security ACL Simulator</h4>
+            <p>Navigate to <strong>Security &gt; Diagnose &gt; Access Control</strong>. Simulate the access path for a specific user against a specific record to see exactly which ACLs match and what their evaluation result is.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Best for: testing access configuration for a specific user scenario</p>
+          </div>
+          <div class="term-card">
+            <h4>sys_security_acl.list</h4>
+            <p>Navigate directly to the ACL table via the filter navigator. Filter by table name, operation, and active status to find the specific ACLs governing the affected record or field.</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Best for: reviewing all ACLs for a specific table</p>
+          </div>
+        </div>
+
+        <h3>Quick Reference: ACL Decision Matrix</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Standard Mode Result</th>
+              <th>High Security Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>No ACL exists for table/field/operation</td>
+              <td><span style="color:var(--green-400);font-weight:700">GRANTED</span></td>
+              <td><span style="color:var(--red-400);font-weight:700">DENIED</span></td>
+            </tr>
+            <tr>
+              <td>ACL exists, user has required role, no condition, no script</td>
+              <td><span style="color:var(--green-400);font-weight:700">GRANTED</span></td>
+              <td><span style="color:var(--green-400);font-weight:700">GRANTED</span></td>
+            </tr>
+            <tr>
+              <td>ACL exists, user does NOT have required role</td>
+              <td><span style="color:var(--red-400);font-weight:700">DENIED</span></td>
+              <td><span style="color:var(--red-400);font-weight:700">DENIED</span></td>
+            </tr>
+            <tr>
+              <td>ACL exists, role passes, condition fails</td>
+              <td><span style="color:var(--red-400);font-weight:700">DENIED</span></td>
+              <td><span style="color:var(--red-400);font-weight:700">DENIED</span></td>
+            </tr>
+            <tr>
+              <td>ACL exists, role passes, condition passes, script returns false</td>
+              <td><span style="color:var(--red-400);font-weight:700">DENIED</span></td>
+              <td><span style="color:var(--red-400);font-weight:700">DENIED</span></td>
+            </tr>
+            <tr>
+              <td>User has admin role, ACL admin overrides = true</td>
+              <td><span style="color:var(--green-400);font-weight:700">GRANTED</span> (bypasses ACL)</td>
+              <td><span style="color:var(--red-400);font-weight:700">MUST PASS ACL</span></td>
+            </tr>
+            <tr>
+              <td>User has admin role, ACL admin overrides = false</td>
+              <td><span style="color:var(--amber-400);font-weight:700">MUST PASS ACL</span></td>
+              <td><span style="color:var(--amber-400);font-weight:700">MUST PASS ACL</span></td>
+            </tr>
+            <tr>
+              <td>Record ACL denied; field ACL would allow</td>
+              <td><span style="color:var(--red-400);font-weight:700">DENIED</span> (record gate blocked first)</td>
+              <td><span style="color:var(--red-400);font-weight:700">DENIED</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Putting It All Together — The Full Access Path:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2.2">
+            <li>User navigates to a module → <strong>Role check</strong>: does the module appear in the navigator?</li>
+            <li>User opens a record list → <strong>Record ACL [READ]</strong>: which rows are returned?</li>
+            <li>Row-level condition on record ACL → <strong>Row filter</strong>: which specific records does this user see?</li>
+            <li>User opens a record form → <strong>Field ACLs [READ]</strong>: which fields are visible/populated?</li>
+            <li>User modifies a field → <strong>Field ACL [WRITE]</strong>: is this field editable?</li>
+            <li>User saves the form → <strong>Record ACL [WRITE]</strong>: is this record updatable?</li>
+            <li>User inserts a new record → <strong>Record ACL [CREATE]</strong>: can new records be created?</li>
+            <li>User clicks delete → <strong>Record ACL [DELETE]</strong>: can this record be removed?</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">&#10003; Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="02-cmdb-relationships.html" class="btn btn-secondary">&#8592; CMDB &amp; Relationships</a>
+          <a href="04-auditing-archiving.html" class="btn btn-primary">Auditing &amp; Archiving &#8594;</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p4-access-control-rules', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '&#10003; Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p4-access-control-rules')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '&#10003; Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

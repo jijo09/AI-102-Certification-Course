@@ -1,0 +1,808 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Properties &amp; Branding | ServiceNow CSA Part 1</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    /* ── Sidebar overlay ── */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 99;
+      backdrop-filter: blur(2px);
+    }
+    #sidebar-overlay.show { display: block; }
+
+    /* ── CSA theme tint ── */
+    body.theme-csa {
+      background-image:
+        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(124,58,237,0.09) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 90% 110%, rgba(168,85,247,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 100% 80% at 50% 50%, rgba(255,255,255,0.01) 0%, transparent 100%);
+    }
+
+    /* ── Topic header badge for CSA Part 1 ── */
+    .topic-part-badge.csa-p1 {
+      background: rgba(167,139,250,0.1);
+      border: 1px solid rgba(167,139,250,0.25);
+      color: var(--purple-400);
+    }
+
+    /* ── Comparison table ── */
+    .comparison-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: var(--space-6) 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--glass-1);
+      border: 1px solid var(--gb-white);
+      box-shadow: var(--shadow-card);
+    }
+    .comparison-table thead tr {
+      background: rgba(167,139,250,0.08);
+    }
+    .comparison-table th {
+      padding: var(--space-3) var(--space-5);
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--purple-300);
+      border-bottom: 1px solid rgba(167,139,250,0.2);
+      text-align: left;
+    }
+    .comparison-table td {
+      padding: var(--space-3) var(--space-5);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .comparison-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .comparison-table tbody tr:hover td {
+      background: rgba(167,139,250,0.04);
+    }
+    .comparison-table td:first-child {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.82rem;
+      white-space: nowrap;
+      min-width: 140px;
+    }
+
+    /* ── Key properties table (facts table) ── */
+    .props-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: var(--space-6) 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--glass-1);
+      border: 1px solid var(--gb-white);
+      box-shadow: var(--shadow-card);
+    }
+    .props-table thead tr {
+      background: rgba(96,165,250,0.06);
+    }
+    .props-table th {
+      padding: var(--space-3) var(--space-5);
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue-300);
+      border-bottom: 1px solid rgba(96,165,250,0.18);
+      text-align: left;
+    }
+    .props-table td {
+      padding: var(--space-3) var(--space-5);
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+      line-height: 1.5;
+    }
+    .props-table tbody tr:last-child td { border-bottom: none; }
+    .props-table tbody tr:hover td { background: rgba(96,165,250,0.03); }
+    .props-table td:first-child {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--emerald-300);
+      white-space: nowrap;
+    }
+    .props-table td:nth-child(2) {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--amber-300);
+      white-space: nowrap;
+    }
+
+    /* ── nav path chip ── */
+    .nav-path {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: var(--radius-md);
+      padding: 4px 10px;
+      color: var(--text-secondary);
+    }
+    .nav-path .sep {
+      color: var(--text-muted);
+      margin: 0 2px;
+    }
+    .nav-path strong { color: var(--emerald-300); font-weight: 500; }
+
+    /* ── feature list ── */
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin: var(--space-5) 0;
+    }
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .feature-list li::before {
+      content: '›';
+      color: var(--purple-400);
+      font-size: 1rem;
+      line-height: 1.5;
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+    .feature-list li strong { color: var(--text-primary); }
+
+    /* ── sub-section heading ── */
+    .sub-heading {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: var(--space-6) 0 var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .sub-heading::before {
+      content: '';
+      width: 3px;
+      height: 1em;
+      background: var(--purple-400);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ── highlight badge ── */
+    .badge-violet {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(167,139,250,0.12);
+      border: 1px solid rgba(167,139,250,0.28);
+      color: var(--purple-300);
+      vertical-align: middle;
+    }
+    .badge-amber {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      color: var(--amber-300);
+      vertical-align: middle;
+    }
+
+    /* ── info row ── */
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      background: var(--glass-2);
+      border: 1px solid var(--gb-white);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-3);
+      transition: border-color var(--transition-fast);
+    }
+    .info-row:hover { border-color: rgba(167,139,250,0.25); }
+    .info-row-icon {
+      font-size: 1.1rem;
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .info-row-body { flex: 1; }
+    .info-row-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .info-row-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+
+    <!-- ── Topbar ── -->
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Properties &amp; Branding</span>
+      </div>
+    </header>
+
+    <!-- ── Page Content ── -->
+    <div class="page-content">
+
+      <!-- ══════════════════════════════════════════
+           TOPIC HEADER
+      ══════════════════════════════════════════ -->
+      <div class="topic-header">
+        <div class="topic-part-badge csa-p1">⚙️ Part 1 · Topic 3 of 4</div>
+        <h1 class="topic-title">Properties &amp; Branding</h1>
+        <p style="color:var(--text-secondary);font-size:1rem;max-width:640px;margin-bottom:0">
+          Master system properties, instance-wide configuration settings, user preferences, and how to customise the look of a ServiceNow instance — all high-frequency CSA exam topics.
+        </p>
+        <div class="topic-meta">
+          <div class="topic-meta-item">⏱ ~35 min read</div>
+          <div class="topic-meta-item">📋 6 sections</div>
+          <div class="topic-meta-item">🎯 Exam-critical</div>
+          <div class="topic-meta-item">🔑 Key table: <code>sys_properties</code></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SECTION 1 — SYSTEM PROPERTIES OVERVIEW
+      ══════════════════════════════════════════ -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>System Properties Overview</h2>
+        <p>
+          System Properties are the master configuration layer of a ServiceNow instance. Every admin-controlled behaviour — from how many rows appear in a list to whether outbound email is active — is driven by a record in the <code>sys_properties</code> table.
+        </p>
+
+        <div class="callout callout-concept">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <div class="callout-title">Core Concept</div>
+            <p>System Properties are <strong>global key-value settings</strong> that control how ServiceNow behaves. Think of them as admin-level config switches — each property has a name (key), a value, and a description that tells you what flipping the switch does.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-analogy">
+          <div class="callout-icon">🧠</div>
+          <div class="callout-content">
+            <div class="callout-title">Analogy — Environment Variables</div>
+            <p>System Properties are like <strong>environment variables</strong> in programming: named settings stored outside your code that control runtime behaviour without requiring a code change or restart. Set <code>DEBUG=true</code> and the app changes — set <code>glide.email.smtp.active=false</code> and emails stop.</p>
+          </div>
+        </div>
+
+        <div class="sub-heading">How to Navigate to System Properties</div>
+
+        <div class="info-row">
+          <div class="info-row-icon">🔍</div>
+          <div class="info-row-body">
+            <div class="info-row-title">Filter Navigator — direct list access</div>
+            <div class="info-row-desc">Type <code>sys_properties.list</code> in the filter navigator and press Enter. This opens the full list of every property on the instance — use the list filter to narrow by name, category, or value.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-row-icon">📂</div>
+          <div class="info-row-body">
+            <div class="info-row-title">System Properties menu</div>
+            <div class="info-row-desc">Navigate via <strong>System Properties &gt; [category]</strong> in the application navigator. Each category (Basic Configuration, Email, Security…) provides a focused UI for related properties.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-row-icon">🌐</div>
+          <div class="info-row-body">
+            <div class="info-row-title">Direct URL query</div>
+            <div class="info-row-desc">Append <code>/sys_properties.do?sysparm_query=name%3D&lt;property.name&gt;</code> to your instance URL to jump directly to a specific property record.</div>
+          </div>
+        </div>
+
+        <div class="sub-heading">Anatomy of a System Property Record</div>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <span class="term-name">Name (key)</span>
+            <p class="term-definition">The unique identifier used to reference this property in scripts and URL queries. Follows dot-notation namespacing, e.g. <code>glide.ui.list_row_count</code>.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Value</span>
+            <p class="term-definition">The current setting. Can be a string, boolean (<code>true</code>/<code>false</code>), integer, or a comma-separated list depending on the property type.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Description</span>
+            <p class="term-definition">Human-readable explanation of what the property controls. Always read this before changing a value in production.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Type</span>
+            <p class="term-definition">Data type of the value field: <code>string</code>, <code>boolean</code>, <code>integer</code>, or <code>choice</code>. Type determines how the value is validated and displayed.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Scope</span>
+            <p class="term-definition">Either <strong>global</strong> (applies to the whole instance) or <strong>application-specific</strong> (applies only within a scoped app). Most admin-facing properties are global.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Suffix / Choices</span>
+            <p class="term-definition">Some properties list valid choices in the Choices field. Entering an invalid value can break functionality, so always check the choices or description first.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">✅</div>
+          <div class="callout-content">
+            <div class="callout-title">Exam Tip — Effect Timing</div>
+            <p>Most system property changes take effect <strong>immediately</strong> — no restart is needed. A small number of low-level properties (e.g., certain JVM-level settings) require a node restart, but these are rare and outside CSA scope.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SECTION 2 — PROPERTY CATEGORIES
+      ══════════════════════════════════════════ -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>System Properties Categories</h2>
+        <p>
+          ServiceNow organises its hundreds of properties into logical namespaces using dot-notation prefixes. Knowing which prefix governs which area of the platform lets you locate and reason about unfamiliar properties quickly.
+        </p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <span class="term-name">glide.ui.*</span>
+            <p class="term-definition">Controls UI appearance and behaviour: list row counts, date formats, default views, and classic UI display options.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">glide.email.*</span>
+            <p class="term-definition">Governs email notifications: SMTP server, from-address, outbound mail enabled/disabled, and inbound email processing.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">glide.security.*</span>
+            <p class="term-definition">Controls access, password policies, ACL enforcement, and session security parameters across the instance.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">glide.basicauth.*</span>
+            <p class="term-definition">Manages authentication settings for web services and REST API calls, including whether basic auth is required and allowed user agents.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">glide.attachment.*</span>
+            <p class="term-definition">Controls file attachment behaviour: maximum file size, allowed file types, and storage settings for uploaded files.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">glide.import.*</span>
+            <p class="term-definition">Governs import set processing: batch size, error handling, transform map defaults, and staging table cleanup.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">glide.script.*</span>
+            <p class="term-definition">Controls server-side scripting behaviour: debugger settings, script include caching, and execution quotas to prevent runaway scripts.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">css.*</span>
+            <p class="term-definition">Branding and theme properties: primary colour, banner colour, and other visual customisation values used in the classic UI.</p>
+          </div>
+        </div>
+
+        <div class="sub-heading">Key Properties You Must Know for the Exam</div>
+
+        <table class="props-table">
+          <thead>
+            <tr>
+              <th>Property Name</th>
+              <th>Default Value</th>
+              <th>What It Controls</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>glide.ui.list_row_count</td>
+              <td>20</td>
+              <td>Default number of rows displayed per page in all list views across the instance</td>
+            </tr>
+            <tr>
+              <td>glide.sys.log.level</td>
+              <td>WARNING</td>
+              <td>System log verbosity; values: DEBUG, INFO, WARNING, ERROR, CRITICAL</td>
+            </tr>
+            <tr>
+              <td>glide.basicauth.required</td>
+              <td>true</td>
+              <td>Require basic authentication for web service (SOAP/REST) access to the instance</td>
+            </tr>
+            <tr>
+              <td>glide.email.smtp.active</td>
+              <td>true</td>
+              <td>Enable or disable all outbound email from the instance (safety switch)</td>
+            </tr>
+            <tr>
+              <td>glide.attachment.max_size</td>
+              <td>varies</td>
+              <td>Maximum file size (bytes) for a single attachment upload; blocks larger files</td>
+            </tr>
+            <tr>
+              <td>css.base.color</td>
+              <td>#0070db</td>
+              <td>Instance primary branding colour used in the classic UI banner and components</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <div class="callout-title">Exam Focus — Know the Property Names</div>
+            <p>The CSA exam tests recognition of specific property names. You are most likely to see questions about <strong>glide.ui.list_row_count</strong> (rows per page), <strong>glide.email.smtp.active</strong> (disable test-instance emails), and the distinction between a system property and a user preference for the same setting.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SECTION 3 — USER PREFERENCES VS SYSTEM PROPERTIES
+      ══════════════════════════════════════════ -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>User Preferences vs System Properties</h2>
+        <p>
+          This is one of the most heavily tested distinctions on the CSA exam. Both influence how the platform behaves, but at completely different scopes — one affects a single user, the other affects every user on the instance simultaneously.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>User Preferences</th>
+              <th>System Properties</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Scope</td>
+              <td>Applies to <strong>one user only</strong></td>
+              <td>Applies to the <strong>entire instance</strong> (all users)</td>
+            </tr>
+            <tr>
+              <td>Location</td>
+              <td>User Profile &gt; Preferences (gear icon or profile menu)</td>
+              <td><code>sys_properties</code> table / System Properties menu</td>
+            </tr>
+            <tr>
+              <td>Who can change</td>
+              <td>Any user — for their own preferences only</td>
+              <td>System Administrator role (<code>sys_admin</code>) required</td>
+            </tr>
+            <tr>
+              <td>Storage table</td>
+              <td><code>sys_user_preference</code></td>
+              <td><code>sys_properties</code></td>
+            </tr>
+            <tr>
+              <td>Common examples</td>
+              <td>Date/time format, rows per page override, UI theme, language</td>
+              <td>Email server, log level, max attachment size, base colour</td>
+            </tr>
+            <tr>
+              <td>Persistence</td>
+              <td>Stored in the user's profile — survives logout/login</td>
+              <td>Stored instance-wide — changes are immediate and permanent until changed again</td>
+            </tr>
+            <tr>
+              <td>Override behaviour</td>
+              <td>User preference <strong>overrides</strong> the system property for that user</td>
+              <td>Acts as the default for any user who has not set their own preference</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <div class="callout-title">Critical Exam Rule — Scope Question</div>
+            <p>When the exam asks <em>"a user wants to change their date format"</em> → answer is <strong>User Preferences</strong>. When it asks <em>"the admin wants to change the default date format for all users"</em> → answer is <strong>System Property</strong>. Scope of the change determines the tool.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <div class="callout-title">Exam Trap — list_row_count Override</div>
+            <p>The property <code>glide.ui.list_row_count</code> sets the <strong>default</strong> row count for all users. However, individual users can override this in their own User Preferences. If the question mentions "one user sees a different number of rows than everyone else," the answer involves <strong>User Preferences</strong>, not the system property.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SECTION 4 — INSTANCE BRANDING
+      ══════════════════════════════════════════ -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Instance Branding</h2>
+        <p>
+          ServiceNow allows administrators to apply custom branding to give an instance a company-specific appearance. Branding settings are found under System Properties and the Basic Configuration module.
+        </p>
+
+        <div class="sub-heading">Classic UI Branding — Basic Configuration</div>
+
+        <p>Navigate to <strong>System Properties &gt; Basic Configuration &gt; UI</strong> — or type <strong>Basic Configuration</strong> in the filter navigator — to access the core branding panel.</p>
+
+        <div class="info-row">
+          <div class="info-row-icon">🖼️</div>
+          <div class="info-row-body">
+            <div class="info-row-title">Banner Image (Company Logo)</div>
+            <div class="info-row-desc">Upload a PNG or JPG file to replace the default ServiceNow logo in the top-left banner. Recommended dimensions: 200×46px or similar landscape ratio. Stored in the <code>db_image</code> table and referenced by a system property.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-row-icon">🎨</div>
+          <div class="info-row-body">
+            <div class="info-row-title">Banner Background Color</div>
+            <div class="info-row-desc">Hex colour code for the top navigation bar background. Controlled by the <code>css.banner.color</code> system property. Common use: match company brand colour. Changing this is reflected immediately for all users.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-row-icon">🔖</div>
+          <div class="info-row-body">
+            <div class="info-row-title">Browser Tab Icon (Favicon)</div>
+            <div class="info-row-desc">Upload a <code>.ico</code> or small PNG to replace the ServiceNow favicon shown in the browser tab. Helps users identify the instance at a glance when multiple tabs are open.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-row-icon">🏷️</div>
+          <div class="info-row-body">
+            <div class="info-row-title">System Name &amp; Instance Name</div>
+            <div class="info-row-desc">The <strong>System Name</strong> appears in the browser title bar (useful for distinguishing dev/test/prod instances). The <strong>Instance Name</strong> appears in admin notifications and emails sent from the instance.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-row-icon">🌈</div>
+          <div class="info-row-body">
+            <div class="info-row-title">Base Colour (css.base.color)</div>
+            <div class="info-row-desc">The primary accent colour applied to links, buttons, and active states in the classic UI. Default is ServiceNow blue (<code>#0070db</code>). Override with your brand's hex colour.</div>
+          </div>
+        </div>
+
+        <div class="sub-heading">Next Experience (Polaris) Branding</div>
+
+        <p>
+          The modern <strong>Next Experience UI</strong> uses a separate theming system driven by CSS custom properties. Theme configuration lives under <strong>System UI &gt; Themes</strong>.
+        </p>
+
+        <ul class="feature-list">
+          <li><strong>Theme Editor:</strong> Visual tool for editing colour variables that drive the entire Next Experience look — primary colour, secondary colour, and accent colour tokens.</li>
+          <li><strong>Color Variables:</strong> Changes propagate through the entire component library automatically — update the primary colour once, and every button, pill, and progress bar updates.</li>
+          <li><strong>Per-Theme Deployment:</strong> Multiple themes can exist on an instance; users can switch if allowed by policy.</li>
+          <li><strong>Dark / Light Mode:</strong> Next Experience supports light and dark mode toggled via user preferences.</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">✅</div>
+          <div class="callout-content">
+            <div class="callout-title">CSA Exam Scope — What to Know</div>
+            <p>For the CSA exam, know <strong>where</strong> branding settings live: classic UI branding is in <strong>System Properties &gt; Basic Configuration</strong>. Next Experience theming is in <strong>System UI &gt; Themes</strong>. You will not be tested on advanced CSS variable manipulation or theme JSON structure — just navigation and purpose.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SECTION 5 — ACCESSING PROPERTIES SAFELY
+      ══════════════════════════════════════════ -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Accessing &amp; Modifying Properties Safely</h2>
+        <p>
+          System properties are powerful — and dangerous if misused. The CSA exam tests both <em>how</em> to find properties and <em>when</em> it is safe to change them.
+        </p>
+
+        <div class="sub-heading">Role Requirements</div>
+
+        <div class="info-row">
+          <div class="info-row-icon">🔐</div>
+          <div class="info-row-body">
+            <div class="info-row-title">sys_admin role required</div>
+            <div class="info-row-desc">Only users with the <code>sys_admin</code> role can create, read, and modify records in the <code>sys_properties</code> table. Regular users and even elevated roles like <code>itil</code> or <code>admin</code> (non-sys_admin) cannot change system properties.</div>
+          </div>
+        </div>
+
+        <div class="sub-heading">How to Find a Specific Property Quickly</div>
+
+        <div class="feature-list">
+          <li>Type <code>sys_properties.list</code> in the filter navigator to open the full list.</li>
+          <li>Use the list filter column "Name contains [keyword]" — e.g., type <code>email</code> to see all email-related properties.</li>
+          <li>Use the direct URL pattern: <span class="nav-path"><strong>your-instance</strong><span class="sep">/</span>sys_properties.do?sysparm_query=name%3D<strong>property.name</strong></span></li>
+          <li>Browse by module: <strong>System Properties &gt; [Category]</strong> groups properties by functional area.</li>
+        </div>
+
+        <div class="sub-heading">Safe Change Practices</div>
+
+        <ul class="feature-list">
+          <li><strong>Test on PDI first:</strong> Your Personal Developer Instance (PDI) is the safe sandbox. Always verify the effect of a property change on a non-production instance before touching production.</li>
+          <li><strong>Document before changing:</strong> Note the original value before editing. System Properties has no built-in undo — if you break something, you need to know what to revert to.</li>
+          <li><strong>Read the description:</strong> Every property record has a Description field that explains the impact. Never change a property without reading it.</li>
+          <li><strong>Scripting properties (<code>glide.script.*</code>):</strong> These affect server-side script execution and can dramatically impact performance or security. Treat with extra caution.</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <div class="callout-title">Warning — Instance Lock-out Risk</div>
+            <p>Changing security-related properties carelessly can lock you out of the instance. For example, setting <code>glide.basicauth.required=false</code> on the wrong property could expose your web services. Disabling authentication properties without proper planning can prevent all logins. <strong>Always test on a non-production PDI first.</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SECTION 6 — SYSTEM SETTINGS (USER-ACCESSIBLE)
+      ══════════════════════════════════════════ -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>System Settings — The Gear Icon Panel</h2>
+        <p>
+          Every logged-in user (not just admins) can access a quick-settings panel via the <strong>gear icon</strong> in the top banner. This panel provides personal UI preferences — it is <em>not</em> the same as System Properties.
+        </p>
+
+        <div class="sub-heading">How to Access</div>
+        <p>Click the <strong>⚙ gear icon</strong> in the top banner (classic UI) or the Settings link in the user profile menu (Next Experience). The System Settings panel slides out on the right side of the screen.</p>
+
+        <div class="sub-heading">Available Settings for All Users</div>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <span class="term-name">Compact Mode</span>
+            <p class="term-definition">Reduces whitespace in the UI — tighter list rows, smaller form fields. Useful on small screens or for power users who prefer a dense information layout.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">High Contrast Mode</span>
+            <p class="term-definition">Increases colour contrast for accessibility. Replaces subtle glass tones with higher-contrast alternatives to meet WCAG accessibility guidelines.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Tab Bar</span>
+            <p class="term-definition">Show or hide the open-tabs bar below the top navigation. Useful for users who prefer to navigate with the application menu rather than persistent tabs.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Font Size</span>
+            <p class="term-definition">Adjust the base text size across the UI: Small, Medium (default), or Large. Stored in the user's preference — does not affect other users.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">Developer Settings</span>
+            <p class="term-definition">Shows script field names in square brackets next to field labels, and column names in list headers. Invaluable for developers building scripts and integrations.</p>
+          </div>
+          <div class="term-card">
+            <span class="term-name">UI Theme</span>
+            <p class="term-definition">If the admin has enabled multiple themes, users can switch between them here. Theme selection is stored as a user preference in <code>sys_user_preference</code>.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <div class="callout-title">Critical Distinction — Gear Icon vs System Properties</div>
+            <p><strong>System Settings (gear icon) = per-user preferences</strong> stored in <code>sys_user_preference</code>. Any logged-in user can change their own settings. <strong>System Properties (sys_properties) = admin-only global settings</strong> that affect the whole instance. The CSA exam will test whether you know which to use for a given scenario — always identify whether the change should affect ONE user or ALL users.</p>
+          </div>
+        </div>
+
+        <div class="sub-heading">Developer Settings — Exam Note</div>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">✅</div>
+          <div class="callout-content">
+            <div class="callout-title">Developer Mode in System Settings</div>
+            <p>When <strong>Developer</strong> mode is enabled in System Settings, field labels in forms appear with the internal field name in brackets, e.g. <em>Short Description [short_description]</em>. This is purely a personal preference — it does not affect other users or change any system behaviour. It is toggled per user in the gear icon panel, not in system properties.</p>
+          </div>
+        </div>
+
+        <div class="sub-heading">Exam Traps &amp; Quick-Fire Facts</div>
+
+        <div class="callout callout-exam">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <div class="callout-title">Trap 1 — list_row_count Is a Default, Not a Limit</div>
+            <p>The property <code>glide.ui.list_row_count</code> sets the <em>default</em> rows per page. Individual users can override this value in their own User Preferences (gear icon &gt; General). The system property is the fallback for users who have not set their own preference.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">✅</div>
+          <div class="callout-content">
+            <div class="callout-title">Quick Search Tip — Finding Any Property</div>
+            <p>The fastest way to locate any property: type <code>sys_properties.list</code> in the filter navigator, then use the list column filter <strong>Name contains [keyword]</strong>. For example, search <code>contains smtp</code> to find all SMTP-related properties without having to browse menus.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <div class="callout-title">Trap 2 — Where Is Branding Configured?</div>
+            <p>The CSA exam may ask where to change the company logo or banner colour. The correct path for classic UI is <strong>System Properties &gt; Basic Configuration &gt; UI</strong> (also accessible by searching "Basic Configuration" in the filter navigator). Do not confuse this with the user-facing gear icon panel, which does not contain branding options.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <div class="callout-title">Trap 3 — Table Names Matter</div>
+            <p>Know the table names: System Properties live in <strong><code>sys_properties</code></strong>. User Preferences live in <strong><code>sys_user_preference</code></strong>. The exam may ask which table a particular setting is stored in — these two are the most commonly tested.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Complete / Navigate Bar ── -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="02-lists-filters-forms.html" class="btn btn-secondary">← Lists &amp; Forms</a>
+          <a href="04-mobile-portal.html" class="btn btn-secondary">Mobile &amp; Portal →</a>
+        </div>
+      </div>
+
+    </div><!-- /.page-content -->
+  </main>
+</div><!-- /.app-shell -->
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p1-branding-properties', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!';
+    btn.classList.add('btn-primary');
+    btn.disabled = true;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p1-branding-properties')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) {
+        btn.textContent = '✓ Complete!';
+        btn.classList.add('btn-primary');
+        btn.disabled = true;
+      }
+    }
+  });
+</script>
+</body>
+</html>

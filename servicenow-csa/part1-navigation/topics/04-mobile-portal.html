@@ -1,0 +1,506 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mobile &amp; Service Portal | ServiceNow CSA Part 1</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">&#9776;</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Mobile &amp; Service Portal</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- TOPIC HEADER -->
+      <div class="topic-header">
+        <div class="topic-part-badge">&#9881;&#65039; Part 1 &middot; Topic 4 of 4</div>
+        <h1 class="topic-title">Mobile &amp; Service Portal</h1>
+        <div class="topic-meta">
+          <span class="topic-meta-item">&#128337; ~40 min read</span>
+          <span class="topic-meta-item">&#127919; Exam weight: High</span>
+          <span class="topic-meta-item">&#128196; 6 sections</span>
+        </div>
+      </div>
+
+      <!-- SECTION 1: THREE WAYS TO ACCESS -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Three Ways to Access ServiceNow</h2>
+        <p>ServiceNow is not a single interface — it provides three distinct experiences optimized for different user types. Understanding which interface serves which audience is a recurring exam topic.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Interface</th>
+              <th>Audience</th>
+              <th>URL Pattern</th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Next Experience (Polaris)</strong></td>
+              <td>IT agents &amp; admins</td>
+              <td><code>instance.service-now.com</code></td>
+              <td>Day-to-day IT work, record management, administration</td>
+            </tr>
+            <tr>
+              <td><strong>Service Portal</strong></td>
+              <td>End users (employees)</td>
+              <td><code>instance.service-now.com/sp</code></td>
+              <td>Self-service requests, catalog ordering, KB search</td>
+            </tr>
+            <tr>
+              <td><strong>ServiceNow Mobile</strong></td>
+              <td>Field techs, managers, employees</td>
+              <td>Native mobile app</td>
+              <td>On-the-go approvals, task updates, incident viewing</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <strong>Core Concept:</strong> The CSA exam covers all three interfaces. Know which is for <strong>END USERS (Service Portal)</strong> vs <strong>AGENTS (Next Experience)</strong> vs <strong>MOBILE (both, but different apps)</strong>. Confusing these is a common exam mistake.
+        </div>
+      </div>
+
+      <!-- SECTION 2: SERVICE PORTAL DEEP DIVE -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Service Portal Deep Dive</h2>
+        <p>Service Portal is a consumer-grade, widget-based self-service web interface designed so that non-IT employees can interact with IT services without needing access to the full ServiceNow back-end.</p>
+
+        <h3>What End Users Can Do in Service Portal</h3>
+        <ul>
+          <li>Submit service requests and report incidents</li>
+          <li>Track the status of their open tickets</li>
+          <li>Browse and search the Knowledge Base</li>
+          <li>Order items from the Service Catalog</li>
+          <li>Chat with virtual agents or live agents</li>
+          <li>View and manage approvals they need to take action on</li>
+        </ul>
+
+        <h3>Key Technical Facts</h3>
+        <ul>
+          <li><strong>Default URL suffix:</strong> <code>/sp</code> — fully configurable by admins</li>
+          <li><strong>Framework:</strong> Built with AngularJS (portal widgets are Angular components)</li>
+          <li><strong>Responsive design:</strong> Works in mobile browsers, but is not the same as the mobile app</li>
+          <li><strong>Authentication:</strong> Supports SSO, local login, and guest/public access if configured</li>
+        </ul>
+
+        <h3>Portal Hierarchy (Know This Structure)</h3>
+        <p>Service Portal has a strict nesting hierarchy. The exam may test your knowledge of each level:</p>
+
+        <div style="background:var(--surface-2,rgba(255,255,255,0.04));border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-5);font-family:var(--font-mono);font-size:0.85rem;line-height:2">
+          <div style="color:var(--violet-400)">&#9654; Portal</div>
+          <div style="padding-left:1.5rem;color:var(--text-secondary)">&#9654; Pages (individual screens)</div>
+          <div style="padding-left:3rem;color:var(--text-secondary)">&#9654; Rows (horizontal layout bands)</div>
+          <div style="padding-left:4.5rem;color:var(--text-secondary)">&#9654; Columns (Bootstrap 12-col grid)</div>
+          <div style="padding-left:6rem;color:var(--violet-300)">&#9654; Widgets (actual content blocks)</div>
+        </div>
+
+        <h3 style="margin-top:var(--space-6)">Key Portal Components</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Portal Record</div>
+            <div class="term-def">The top-level configuration record. Defines the portal URL suffix, home page, theme, and which Knowledge Base is linked.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Page</div>
+            <div class="term-def">A distinct screen within the portal (e.g., <code>sc_home</code> for the Service Catalog home). Each page has a unique URL path under the portal.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Widget</div>
+            <div class="term-def">A reusable AngularJS component that renders content — search boxes, catalog categories, ticket lists, KB articles, etc.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Widget Instance</div>
+            <div class="term-def">A specific placement of a widget on a specific page, with its own configuration options (title, filter, display count, etc.).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Theme</div>
+            <div class="term-def">Defines the visual appearance of the portal — colors, fonts, header/footer HTML, and CSS overrides applied globally to all pages.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">User Criteria</div>
+            <div class="term-def">Controls which catalog items, categories, and KB articles are visible in the portal to specific users or groups. Separate from ACLs.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap:</strong> Service Portal uses <strong>User Criteria</strong> to control catalog item visibility. This is <strong>different from ACLs</strong>. ACLs control database-level access everywhere; User Criteria controls what <em>appears in the portal UI</em>. Both can apply simultaneously — a user must pass User Criteria to <em>see</em> an item, and ACLs to <em>access</em> the underlying data.
+        </div>
+      </div>
+
+      <!-- SECTION 3: SERVICE CATALOG IN PORTAL -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Service Catalog in the Portal</h2>
+        <p>The primary use case for Service Portal is enabling end users to order IT services through the Service Catalog — without needing to interact with the full ServiceNow back-end application.</p>
+
+        <h3>How Catalog Ordering Works</h3>
+        <ol>
+          <li>User browses portal catalog — items displayed as cards organized in categories</li>
+          <li>User selects an item and fills out the request form (variables)</li>
+          <li>Items are added to a <strong>shopping cart</strong> — multiple items can be bundled</li>
+          <li>User submits the order — a <strong>Request (REQ)</strong> record is created</li>
+          <li>Each ordered item becomes a <strong>Requested Item (RITM)</strong> under the REQ</li>
+          <li>Fulfillment workflows or flows are triggered automatically per RITM</li>
+        </ol>
+
+        <div class="callout callout-analogy">
+          <strong>Analogy:</strong> Service Portal is like Amazon for IT. Users browse a catalog, add to cart, and submit. Behind the scenes, fulfillment workflows and Flow Designer flows do the heavy lifting — routing tasks, sending approvals, provisioning resources.
+        </div>
+
+        <h3>Other Portal Capabilities Beyond the Catalog</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Knowledge Base</div>
+            <div class="term-def">Users can search and read KB articles directly in the portal. The portal record specifies which KB is linked. Deflects tickets by surfacing self-help content.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Incident Submission</div>
+            <div class="term-def">Users can report incidents via the portal without calling the help desk. Portal forms create records in the same Incident table agents use.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">My Requests / My Tickets</div>
+            <div class="term-def">A portal page where users track all their open requests and incidents. Eliminates status-check calls to the service desk.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Chat &amp; Virtual Agent</div>
+            <div class="term-def">Embedded chat widget can connect to a live agent queue or ServiceNow Virtual Agent (AI chatbot) for conversational self-service.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>Remember:</strong> Data written through the portal goes into the <em>same tables</em> as data written through Next Experience. An incident submitted via portal creates a record in the <code>incident</code> table — the exact same table agents see in their queue. There is no separate "portal database."
+        </div>
+      </div>
+
+      <!-- SECTION 4: CONFIGURING SERVICE PORTAL -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Configuring Service Portal</h2>
+        <p>Admins configure Service Portal through a combination of the Portal record settings and the visual Page Designer tool. No coding is required for basic portal customization.</p>
+
+        <h3>How to Access Portal Configuration</h3>
+        <ul>
+          <li><strong>Portal records:</strong> Navigate to <code>Service Portal &gt; Portals</code> in the filter navigator — opens the list of configured portals</li>
+          <li><strong>Page Designer:</strong> Visual drag-and-drop editor for building and editing portal pages</li>
+          <li><strong>Widget Editor:</strong> Code editor for creating or modifying individual widgets (HTML, CSS, JS, server-side scripts)</li>
+        </ul>
+
+        <h3>Key Portal Record Settings</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>URL Suffix</td>
+              <td>The path after the instance URL that opens this portal</td>
+              <td><code>sp</code>, <code>esc</code>, <code>hr</code></td>
+            </tr>
+            <tr>
+              <td>Home Page</td>
+              <td>The page users land on when they visit the portal URL</td>
+              <td><code>index</code> (the default home page record)</td>
+            </tr>
+            <tr>
+              <td>Login Page</td>
+              <td>The page shown when unauthenticated users access the portal</td>
+              <td><code>login</code></td>
+            </tr>
+            <tr>
+              <td>Theme</td>
+              <td>The visual theme record applied to all pages in the portal</td>
+              <td>Stock &gt; Default theme</td>
+            </tr>
+            <tr>
+              <td>Knowledge Base</td>
+              <td>Which KB is searched when users search the portal</td>
+              <td>IT Knowledge Base</td>
+            </tr>
+            <tr>
+              <td>Catalog</td>
+              <td>Which Service Catalog is exposed to users in this portal</td>
+              <td>Service Catalog</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Using the Page Designer</h3>
+        <p>The Page Designer is a browser-based visual editor for building portal pages with a drag-and-drop interface.</p>
+
+        <p><strong>How to access Page Designer:</strong></p>
+        <ol>
+          <li>Browse to the portal page you want to edit (e.g., <code>/sp?id=index</code>)</li>
+          <li>Right-click on the page header → select <strong>"Edit this page"</strong></li>
+          <li><em>OR</em> navigate to <code>Service Portal &gt; Pages</code> → open a page record → click <strong>"Page Designer"</strong></li>
+        </ol>
+
+        <p><strong>Page Designer workflow:</strong></p>
+        <ol>
+          <li>Add <strong>Rows</strong> to the page canvas (horizontal bands)</li>
+          <li>Set column layout per row (12-column Bootstrap grid: halves, thirds, quarters, etc.)</li>
+          <li>Drag <strong>Widgets</strong> from the right-hand panel into columns</li>
+          <li>Click the <strong>gear icon</strong> on a placed widget to configure its instance options</li>
+          <li>Save the page</li>
+        </ol>
+
+        <div class="callout callout-tip">
+          <strong>Tip:</strong> The Page Designer is a visual, no-code tool for portal pages. You do NOT need to write AngularJS or HTML to build basic portal pages — it is fully drag-and-drop. Custom widgets require coding, but using existing widgets does not.
+        </div>
+
+        <div class="callout callout-concept">
+          <strong>Core Concept:</strong> The Page Designer edits the <em>layout</em> (which widgets appear where). The <em>Widget Editor</em> (a separate tool) edits the <em>behavior and content</em> of a widget itself. These are two different tools with different purposes.
+        </div>
+      </div>
+
+      <!-- SECTION 5: SERVICENOW MOBILE APPS -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>ServiceNow Mobile Apps</h2>
+        <p>ServiceNow provides native mobile apps for iOS and Android. There are two distinct apps targeting different user populations — not one universal mobile app.</p>
+
+        <h3>App 1: Now Mobile (Agent App)</h3>
+        <div style="background:var(--surface-2,rgba(255,255,255,0.04));border-left:3px solid var(--violet-400);border-radius:var(--radius-md);padding:var(--space-5);margin:var(--space-4) 0">
+          <p><strong>Target audience:</strong> IT agents, service desk staff, field technicians, managers</p>
+          <ul>
+            <li>View, create, and update incidents and tasks</li>
+            <li>Review and action approvals on the go</li>
+            <li>Receive push notifications for ticket assignments and updates</li>
+            <li>Access catalog ordering (agent-configured items)</li>
+            <li>Limited offline capability — can read cached data without connectivity</li>
+            <li>Native iOS and Android app (not a mobile browser wrapper)</li>
+          </ul>
+        </div>
+
+        <h3>App 2: Employee Center / Now Mobile (Employee App)</h3>
+        <div style="background:var(--surface-2,rgba(255,255,255,0.04));border-left:3px solid var(--emerald-400,#34d399);border-radius:var(--radius-md);padding:var(--space-5);margin:var(--space-4) 0">
+          <p><strong>Target audience:</strong> Non-IT employees (any staff member)</p>
+          <ul>
+            <li>Submit service requests and report issues</li>
+            <li>Check the status of their own tickets</li>
+            <li>Read Knowledge Base articles</li>
+            <li>Access a mobile-optimized Service Catalog experience</li>
+            <li>Essentially a mobile-optimized version of the Employee Service Center portal</li>
+          </ul>
+        </div>
+
+        <h3>Mobile App Configuration (Admin Perspective)</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Mobile Studio</div>
+            <div class="term-def">The configuration environment in App Engine Studio where admins build and customize mobile app experiences — layouts, applets, navigation.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Applets</div>
+            <div class="term-def">Mobile-specific mini-applications within the Now Mobile app. Each applet provides a focused capability (e.g., Approvals applet, My Tasks applet).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Push Notifications</div>
+            <div class="term-def">Real-time alerts sent to a user's device. Requires Firebase Cloud Messaging (Android) and Apple Push Notification Service (iOS) setup by admins.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Offline Capability</div>
+            <div class="term-def">Now Mobile caches certain data locally, allowing agents to view (not create) records when offline. Data syncs when connectivity is restored.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap:</strong> "Now Mobile" (the native agent app) is NOT the same as viewing Service Portal in a mobile browser. They are entirely separate experiences. Service Portal is responsive and works in any browser. Now Mobile is a dedicated native app downloaded from the App Store or Google Play.
+        </div>
+      </div>
+
+      <!-- SECTION 6: EXAM COMPARISON TABLE -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Mobile vs Portal vs Next Experience — Full Exam Comparison</h2>
+        <p>This comparison table synthesizes all three interfaces. High exam relevance — know the differences cold.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature / Dimension</th>
+              <th>Next Experience (Polaris)</th>
+              <th>Service Portal</th>
+              <th>Now Mobile</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Primary Users</strong></td>
+              <td>IT staff, administrators</td>
+              <td>End users, employees</td>
+              <td>Agents, field techs, employees</td>
+            </tr>
+            <tr>
+              <td><strong>Access Method</strong></td>
+              <td>Desktop/laptop browser</td>
+              <td>Any browser (responsive)</td>
+              <td>iOS / Android native app</td>
+            </tr>
+            <tr>
+              <td><strong>URL Pattern</strong></td>
+              <td><code>instance.service-now.com</code></td>
+              <td><code>instance.service-now.com/sp</code></td>
+              <td>Native app (no URL)</td>
+            </tr>
+            <tr>
+              <td><strong>Customization Tool</strong></td>
+              <td>UI Builder (Seismic), Form Designer</td>
+              <td>Page Designer, Widget Editor</td>
+              <td>Mobile Studio, App Engine Studio</td>
+            </tr>
+            <tr>
+              <td><strong>Underlying Technology</strong></td>
+              <td>Now Platform UI (Seismic)</td>
+              <td>AngularJS widgets</td>
+              <td>Native iOS/Android SDK</td>
+            </tr>
+            <tr>
+              <td><strong>Service Catalog</strong></td>
+              <td>Full admin/fulfiller view</td>
+              <td>Consumer/end-user view</td>
+              <td>Limited, applet-based</td>
+            </tr>
+            <tr>
+              <td><strong>ACL Enforcement</strong></td>
+              <td>Yes</td>
+              <td>Yes (plus User Criteria)</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td><strong>User Criteria</strong></td>
+              <td>No</td>
+              <td>Yes — portal-specific</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td><strong>Offline Access</strong></td>
+              <td>No</td>
+              <td>No</td>
+              <td>Limited (read-only cache)</td>
+            </tr>
+            <tr>
+              <td><strong>Knowledge Base</strong></td>
+              <td>Yes (admin/agent view)</td>
+              <td>Yes (user-facing)</td>
+              <td>Yes (read access)</td>
+            </tr>
+            <tr>
+              <td><strong>Approvals</strong></td>
+              <td>Yes (full workflow)</td>
+              <td>Yes (limited UI)</td>
+              <td>Yes (optimized for mobile)</td>
+            </tr>
+            <tr>
+              <td><strong>Incident Creation</strong></td>
+              <td>Yes (agent creates)</td>
+              <td>Yes (user self-reports)</td>
+              <td>Yes (agent creates)</td>
+            </tr>
+            <tr>
+              <td><strong>Push Notifications</strong></td>
+              <td>No</td>
+              <td>No</td>
+              <td>Yes (requires FCM/APNS)</td>
+            </tr>
+            <tr>
+              <td><strong>Guest/Public Access</strong></td>
+              <td>No</td>
+              <td>Yes (if configured)</td>
+              <td>No</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:var(--space-8)">Exam Traps &amp; High-Priority Callouts</h3>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap 1 — Technology Stack:</strong> Service Portal uses <strong>AngularJS widgets</strong>. Next Experience uses <strong>UI Builder (Seismic)</strong>. These are completely different technologies built at different times. A widget built for Service Portal does NOT work in Next Experience and vice versa.
+        </div>
+
+        <div class="callout callout-exam">
+          <strong>Exam Trap 2 — User Criteria vs ACLs:</strong> User Criteria is <strong>portal-specific</strong>. It determines who sees what catalog items and KB articles in the portal UI. ACLs apply everywhere — portal included. A user can be blocked from seeing an item by User Criteria (it won't appear) OR by ACLs (access denied error). They operate at different layers.
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>URL Tip:</strong> <code>/sp</code> is the <em>default</em> portal URL suffix but it is configurable. An organization might set it to <code>/esc</code> for Employee Service Center or <code>/hr</code> for an HR portal. The URL suffix is set in the Portal record's "URL Suffix" field.
+        </div>
+
+        <div class="callout callout-warning">
+          <strong>Warning — Shared Database:</strong> Service Portal forms and Next Experience forms <em>look completely different</em>, but they write to the <strong>same database tables</strong>. An incident submitted through the portal and an incident created by an agent in Next Experience both land in the <code>incident</code> table. There is no data separation between interfaces.
+        </div>
+
+        <div class="callout callout-concept">
+          <strong>Remember — Two Mobile Experiences:</strong> There are two mobile paths: (1) the <strong>Now Mobile native app</strong> (downloaded from app stores, for agents and employees) and (2) the <strong>mobile browser view of Service Portal</strong> (responsive web, works in any phone browser). These coexist and serve overlapping but distinct use cases.
+        </div>
+
+        <h3 style="margin-top:var(--space-8)">Part 1 Wrap-Up: What the Exam Will Test</h3>
+
+        <div class="callout callout-tip">
+          <strong>Part 1 Exam Strategy (7% of exam):</strong> Focus your review on these four areas:
+          <ol style="margin-top:var(--space-3)">
+            <li><strong>Filter navigator tricks</strong> — using table.field notation, creating bookmarks, dot-walking in filters</li>
+            <li><strong>List/breadcrumb filter behavior</strong> — how breadcrumb filters accumulate and how to clear them</li>
+            <li><strong>sys_properties vs user preferences</strong> — system-wide settings vs per-user customizations, who can change what</li>
+            <li><strong>Portal vs Next Experience audience differences</strong> — who uses what, User Criteria, AngularJS vs Seismic</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- COMPLETE BAR -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">&#10003; Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="03-branding-properties.html" class="btn btn-secondary">&#8592; Properties &amp; Branding</a>
+          <a href="../../part2-configuration/index.html" class="btn btn-primary">Part 2: Instance Config &#8594;</a>
+        </div>
+      </div>
+
+    </div><!-- end .page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p1-mobile-portal', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p1-mobile-portal')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,475 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 6 – Self-Service &amp; Process Automation Quiz · CSA</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #a78bfa; color: #c4b5fd; background: rgba(139,92,246,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(139,92,246,0.15);color:#c4b5fd;border:1px solid rgba(167,139,250,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 6 · All 4 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 6 Full Quiz</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions covering all topics in Part 6. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#a78bfa">0 / 15</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#a78bfa"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 6 — Self-Service &amp; Process Automation</span>
+          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#a78bfa;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">🔘 Topic 1 — UI Policies &amp; UI Actions</div>
+              <div class="quiz-scenario">Scenario: A business analyst configures a UI Policy that makes the "Resolution Notes" field mandatory whenever the Incident state is set to "Resolved." A user complains that she was able to resolve an Incident without entering resolution notes by calling a REST API endpoint directly. [TRAP]</div>
+              <p class="quiz-question">Why did the UI Policy fail to prevent this?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">UI Policies only apply to the Service Portal, not the main platform</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">UI Policies are client-side rules that only run in the browser; they do not protect data submitted via APIs, import sets, or background scripts</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The UI Policy had a syntax error that disabled it</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">REST APIs automatically enforce all UI Policies configured on the target table</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is the critical UI Policy trap on the CSA exam. UI Policies are client-side JavaScript rules — they execute only in the user's browser during normal form interaction. They have zero enforcement power over API calls, import set transforms, background scripts, or any data submission that bypasses the browser form. To truly enforce data integrity regardless of how data enters the system, a Before Business Rule (server-side) must be used for validation. A is wrong — UI Policies apply across the main platform. C is a distractor. D is the exact opposite of the truth.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">🔘 Topic 1 — UI Policies &amp; UI Actions</div>
+              <div class="quiz-scenario">Scenario: A form has a "VIP Customer" checkbox. When checked, the "Priority" field should automatically become read-only and the "Escalation Reason" field should become mandatory. No scripting should be required.</div>
+              <p class="quiz-question">Which ServiceNow feature is best suited to implement this behavior?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Business Rule with When = "Before"</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">UI Policy with UI Policy Actions on both fields</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">ACL with a condition script</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Flow Designer trigger on field change</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A UI Policy is specifically designed to dynamically change field characteristics (Mandatory, Read-Only, Visible/Hidden) on a form based on a condition — no scripting required. A UI Policy Action defines what happens to a specific field when the policy condition is true. The combination of one UI Policy (condition: VIP Customer is checked) with two UI Policy Actions (Priority = Read-Only; Escalation Reason = Mandatory) is the exact right tool. A Business Rule (A) runs server-side and cannot directly control field UI characteristics. An ACL (C) controls security access, not form behavior. Flow Designer (D) automates process steps, not real-time form field states.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">🔘 Topic 1 — UI Policies &amp; UI Actions</div>
+              <div class="quiz-scenario">Scenario: An admin wants to add a custom "Escalate to Manager" button that appears on the Incident form. When clicked, it should run JavaScript to update the assignment group and set the priority to Critical.</div>
+              <p class="quiz-question">Which ServiceNow object is used to create custom form buttons that execute JavaScript?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">UI Policy</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Client Script with type onSubmit</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">UI Action</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Business Rule with When = "Display"</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> A UI Action creates interactive controls on forms or lists — form buttons, list banner buttons, context menu items, and links — that execute JavaScript when clicked. UI Actions are the standard way to add custom action buttons to ServiceNow forms. A UI Policy (A) changes field characteristics based on conditions; it does not create buttons. A Client Script with onSubmit (B) runs when the form is submitted, not when a specific custom button is clicked. A Display Business Rule (D) runs before the form loads to pass server data to the client — it does not create buttons.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">⚙️ Topic 2 — Business Rules &amp; Scripts</div>
+              <div class="quiz-scenario">Scenario: A developer writes a Before Business Rule on the Incident table to validate that the "Short Description" field contains at least 10 characters. If not, she wants the save to be rejected and an error shown to the user.</div>
+              <p class="quiz-question">Why is a Before Business Rule the correct choice for this validation, rather than an After Business Rule?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">After Business Rules cannot read field values</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Before Business Rules run after submit but before the database commit, allowing the save to be cancelled and an error returned to the user before any data is written</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Before Business Rules run before the user presses the Save button</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">After Business Rules run asynchronously and cannot display error messages</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A Before Business Rule executes after the user clicks Save but BEFORE the record is written to the database. This timing is critical for validation: if validation fails, the developer can call current.setAbortAction(true) and gs.addErrorMessage() to prevent the database write and return an error to the user's form. An After Business Rule (A) executes after the database commit — the record is already saved, so it is too late to prevent it. C is wrong — it fires after Save is clicked, not before. D is wrong — Async Business Rules run in the background and cannot block saves, but After Business Rules can display messages.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">⚙️ Topic 2 — Business Rules &amp; Scripts</div>
+              <div class="quiz-scenario">Scenario: A developer writes a Before Business Rule on the Incident table that includes the following line at the end of the script: current.update(); [TRAP]</div>
+              <p class="quiz-question">What is the problem with calling current.update() inside a Before or After Business Rule?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">current.update() is not a valid method in Business Rules</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Calling current.update() triggers the Business Rule again, causing an infinite recursion loop that crashes the instance</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">current.update() only works in Client Scripts, not Business Rules</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">current.update() requires the security_admin role to execute</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is one of the most dangerous and frequently tested Business Rule traps. Calling current.update() inside a Before or After Business Rule on the same table triggers that Business Rule again (because an update event fires again), which calls current.update() again, which fires the rule again — creating an infinite recursion loop. This can crash or severely degrade the instance. The correct approach is to simply set field values directly on the current object (e.g., current.priority = 1) in a Before Business Rule, and the platform handles saving them as part of the original transaction. A is wrong — current.update() is a valid method, just dangerous here. C is wrong — it works in server-side scripts. D is wrong — no special role is required.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">⚙️ Topic 2 — Business Rules &amp; Scripts</div>
+              <div class="quiz-scenario">Scenario: A developer needs to pass a calculated server-side value (a complex risk score) to a Client Script so it can display a warning on the form without making another server round-trip. She plans to use a Display Business Rule.</div>
+              <p class="quiz-question">Which mechanism does a Display Business Rule use to pass server-side data to Client Scripts?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A shared global variable called g_form_data</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">g_scratchpad — a shared object populated in the Display Business Rule and readable in Client Scripts</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A REST API call from the Client Script back to the server</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The sys_log table, which Client Scripts can read</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> g_scratchpad is the shared bridge between Display Business Rules (server-side, runs before form is sent to the browser) and Client Scripts (client-side, runs in the browser). The Display Business Rule sets values on g_scratchpad (e.g., g_scratchpad.riskScore = 87), and Client Scripts can read those values without any additional server round-trip (e.g., var score = g_scratchpad.riskScore). A is wrong — g_form_data is not a ServiceNow standard object. C describes GlideAjax, which requires a round-trip and adds latency. D is wrong — Client Scripts cannot read the sys_log table.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(245,158,11,0.15);color:var(--amber-400)">📜 Topic 3 — Client Scripts &amp; UI Scripts</div>
+              <div class="quiz-scenario">Scenario: A developer needs to write a Client Script that runs every time a user changes the "Category" field on the Incident form, immediately updating the "Subcategory" field options based on the new category value.</div>
+              <p class="quiz-question">Which Client Script type should she use?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">onLoad</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">onSubmit</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">onChange</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">onCellEdit</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> The onChange Client Script type fires each time a specific field value changes on the form — exactly the trigger needed here. The developer specifies the field name to watch (Category) and the script runs automatically when the user changes it. onLoad (A) runs once when the form initially loads — it does not react to field changes. onSubmit (B) runs when the user clicks Save — it fires at submit time, not during field interaction. onCellEdit (D) fires when a user edits a cell in a list view, not on a form field.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(245,158,11,0.15);color:var(--amber-400)">📜 Topic 3 — Client Scripts &amp; UI Scripts</div>
+              <div class="quiz-scenario">Scenario: A developer writes a Client Script that uses a synchronous GlideRecord query (gr.query()) to look up a manager's name from the User table and display it on the form. During testing, the form freezes for several seconds after the field is changed. [TRAP]</div>
+              <p class="quiz-question">What is the root cause of the form freeze?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">GlideRecord is not available in Client Scripts</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A synchronous GlideRecord query in a Client Script locks the browser's JavaScript UI thread while waiting for the server response, freezing all UI interaction</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The User table is too large to query from the client side</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Developer's script has a syntax error causing a JavaScript exception</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is a critical client script performance trap. JavaScript in the browser is single-threaded. A synchronous GlideRecord query from a Client Script makes a blocking server round-trip — the browser's UI thread is completely frozen while waiting for the server response, making the form unresponsive. The correct alternatives are: (1) use g_scratchpad populated by a Display Business Rule (no round-trip), or (2) use GlideAjax (asynchronous — provides a callback function, does not freeze the UI). A is wrong — GlideRecord is technically available in client scripts but should never be used synchronously. C is a distractor. D is wrong — a syntax error would show a console error, not a freeze.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(245,158,11,0.15);color:var(--amber-400)">📜 Topic 3 — Client Scripts &amp; UI Scripts</div>
+              <div class="quiz-scenario">Scenario: A developer needs to check whether the currently logged-in user has the "itil" role inside a Client Script, so she can hide certain fields for non-ITIL users.</div>
+              <p class="quiz-question">Which client-side JavaScript class provides information about the currently logged-in user, including role membership?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">g_form</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">g_user</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">GlideSession</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">gs.hasRole()</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> g_user is the client-side JavaScript object that provides information about the currently logged-in user. It includes methods like g_user.hasRole('itil') to check role membership, and properties like g_user.userID and g_user.userName. g_form (A) is the client-side class for controlling form fields (getValue, setValue, setMandatory, setVisible) — it does not provide user information. GlideSession (C) is a server-side API not available in Client Scripts. gs.hasRole() (D) is also a server-side GlideSystem method, not available client-side.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(245,158,11,0.15);color:var(--amber-400)">📜 Topic 3 — Client Scripts &amp; UI Scripts</div>
+              <div class="quiz-scenario">Scenario: A developer has written a complex JavaScript function to format currency values. This function needs to be reused by multiple Client Scripts across different tables and also by Service Portal widgets.</div>
+              <p class="quiz-question">Which ServiceNow feature is designed for reusable client-side JavaScript libraries shared across scripts and portal widgets?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Business Rule with When = "Display"</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">UI Script</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Script Include</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Scheduled Job</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A UI Script is a reusable client-side JavaScript library that can be loaded and called by Client Scripts, UI Actions, and Service Portal widgets. It is the correct tool for shared client-side utility functions. A Display Business Rule (A) runs server-side before the form loads — it cannot contain reusable client JavaScript. A Script Include (C) is a server-side reusable JavaScript library — it runs on the server and is not directly accessible to client scripts (though it can be used via GlideAjax). A Scheduled Job (D) runs background server-side tasks on a schedule.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(236,72,153,0.15);color:#f9a8d4">🌊 Topic 4 — Flow Designer &amp; Workflows</div>
+              <div class="quiz-scenario">Scenario: An IT team wants to automate the following process: when a new Change Request is created and approved, (1) create a Task record, (2) send an email to the assignee, (3) wait 24 hours, (4) check if the task is complete, and (5) escalate if not. They want this built without custom coding.</div>
+              <p class="quiz-question">Which ServiceNow tool is most appropriate for building this codeless multi-step automation?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A series of interconnected Business Rules</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Flow Designer</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A complex Client Script with multiple onSubmit handlers</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">An ACL with a condition script</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Flow Designer is the modern ServiceNow tool designed for codeless multi-step process automation. It provides visual triggers (record created), actions (Create Task, Send Email), wait conditions (Wait 24 hours), decision branches (Is task complete?), and escalation actions — all without writing code. Business Rules (A) are single-event server-side scripts, not designed for multi-step flows with waits and branching. Client Scripts (C) are browser-side and cannot orchestrate server-side multi-step processes. ACLs (D) control security access, not process automation.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(236,72,153,0.15);color:#f9a8d4">🌊 Topic 4 — Flow Designer &amp; Workflows</div>
+              <div class="quiz-scenario">Scenario: A developer has built an "Onboarding Approval" flow that is used by three different parent flows: the New Employee flow, the Contractor flow, and the Vendor Access flow. Rather than duplicating the approval steps, she wants to define the approval logic once and call it from all three flows.</div>
+              <p class="quiz-question">Which Flow Designer concept allows a reusable flow block to be called inside multiple parent flows?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Spoke</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Subflow</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Business Rule with When = "Async"</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">UI Script</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A Subflow is a reusable flow block that can be called (invoked) from within one or more parent flows. It encapsulates a set of actions — in this case the approval logic — that can be maintained in one place and reused across multiple flows. Changing the approval logic in the Subflow automatically updates all parent flows that call it. A Spoke (A) is a pre-built IntegrationHub package for a third-party service, not a reusable internal flow block. Async Business Rule (C) runs a background script on a database event — it cannot be called from Flow Designer as a reusable step. UI Script (D) is a client-side JavaScript library, not a flow component.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(236,72,153,0.15);color:#f9a8d4">🌊 Topic 4 — Flow Designer &amp; Workflows</div>
+              <div class="quiz-scenario">Scenario: A junior developer is building a new automation for a Zurich-release ServiceNow instance. A colleague recommends using the Legacy Workflow Editor to create the flow because "it has more features." [TRAP]</div>
+              <p class="quiz-question">What is the correct guidance for new automations on a Zurich instance?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Legacy Workflow Editor is preferred for complex automations requiring conditions and approvals</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Flow Designer should be used for all new automations — the Legacy Workflow Editor is deprecated for new work in the Zurich release</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Both tools are equally recommended; choose based on personal preference</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Flow Designer only supports simple single-step automations; complex flows require the Legacy Workflow Editor</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> As of the Zurich release, the Legacy Workflow Editor is deprecated for new work. All new process automations should be built in Flow Designer, which provides a modern codeless interface, better performance, built-in IntegrationHub integration, and active development investment. Existing legacy workflows continue to run but should be migrated to Flow Designer over time. A is the trap — the colleague is wrong. C is wrong — ServiceNow explicitly directs new work to Flow Designer. D is wrong — Flow Designer supports complex multi-step flows with conditions, approvals, subflows, and waits.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">⚙️ Topic 2 — Business Rules &amp; Scripts</div>
+              <div class="quiz-scenario">Scenario: An admin needs a Business Rule to run after an Incident is saved to update a related parent record in another table. The update should not block the user's browser from proceeding.</div>
+              <p class="quiz-question">Which Business Rule "When" setting is most appropriate for this non-blocking background update?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Before — to run the update before the Incident is saved</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">After — to run immediately after the save and display a confirmation</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Async — to queue the related-record update as a background job that doesn't block the user's browser</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Display — to run before the form loads</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> An Async Business Rule queues a background job that runs after the main transaction completes, without blocking the user's browser. This is ideal for updating related records in another table — the user sees their Incident saved immediately and can navigate away while the background update processes. An After Business Rule (B) runs synchronously after the database save — it still holds the server response until it completes, causing the browser to wait. Before (A) runs before the save and would be wrong for post-save related updates. Display (D) runs before the form loads and cannot react to save events.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">🔘 Topic 1 — UI Policies &amp; UI Actions</div>
+              <div class="quiz-scenario">Scenario: An admin configures a UI Policy to hide the "Internal Notes" field for all users except members of the "Management" group. A manager reports she cannot see the field even though she is in the Management group. The admin verifies the group membership is correct. [TRAP]</div>
+              <p class="quiz-question">What is the most likely cause of this issue?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">UI Policies cannot check group membership — they can only check roles</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The UI Policy's "Reverse if false" option may be checked, meaning both the policy and its inverse hide the field for all users; or the condition logic is inverted</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">UI Policies always apply to admins only</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The "Internal Notes" field requires the security_admin role to be visible</span></button>
+              </div>
+              <div class="quiz-explanation">
+                <div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A common UI Policy misconfiguration trap involves the "Reverse if false" option and condition logic. If the policy condition is "user is in Management group = true → show the field" but "Reverse if false" is also checked, then when the condition is false (non-managers) the reverse action runs — hiding the field. However, if the condition or the action is inverted (hide instead of show), even managers would have the field hidden. Carefully checking the condition logic and whether Reverse if false is set correctly resolves most UI Policy visibility issues. A is wrong — UI Policies can check group membership via condition scripts. C is wrong — UI Policies apply to all users based on the condition. D is wrong — visibility is not controlled by security_admin.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div><!-- /main-quiz -->
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 15;
+  const dots = document.getElementById('q-dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => {
+      const s = window._quizState;
+      if (!s) return;
+      s.current = i;
+      QuizEngine._renderState(s);
+      updateDots(i, s);
+    });
+    dots.appendChild(d);
+  }
+
+  function updateDots(current, s) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current', 'correct', 'incorrect');
+      if (i === current) {
+        d.classList.add('current');
+      } else if (s.answered[i] !== null) {
+        const correct = s.questions[i].querySelector('[data-correct]')?.dataset.correct;
+        d.classList.add(s.answered[i] === correct ? 'correct' : 'incorrect');
+      }
+    });
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = s.score + ' / ' + TOTAL;
+    document.getElementById('qs-answered').textContent = s.answered.filter(a => a !== null).length;
+    document.getElementById('qs-prog').style.width = (((current + 1) / TOTAL) * 100) + '%';
+    const scoreEl = document.querySelector('[data-q-score]');
+    if (scoreEl) scoreEl.textContent = 'Score: ' + s.score + ' / ' + TOTAL;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('main-quiz');
+    QuizEngine.init('main-quiz');
+
+    setTimeout(() => {
+      const s = QuizEngine._getState ? QuizEngine._getState('main-quiz') : null;
+      window._quizState = s;
+
+      const patch = () => setTimeout(() => {
+        if (window._quizState) updateDots(window._quizState.current, window._quizState);
+      }, 60);
+
+      container.querySelectorAll('[data-option]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          QuizEngine.selectOption('main-quiz', btn);
+          patch();
+        });
+      });
+
+      container.querySelector('[data-q-prev]')?.addEventListener('click', () => {
+        QuizEngine.prevQuestion('main-quiz');
+        patch();
+      });
+      container.querySelector('[data-q-next]')?.addEventListener('click', () => {
+        QuizEngine.nextQuestion('main-quiz');
+        patch();
+      });
+      container.querySelector('[data-q-submit]')?.addEventListener('click', () => {
+        QuizEngine.submitQuiz('main-quiz');
+      });
+
+      if (s) updateDots(0, s);
+    }, 100);
+  });
+</script>
+</body>
+</html>

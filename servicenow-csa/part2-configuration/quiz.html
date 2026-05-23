@@ -1,0 +1,441 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 2 – Instance Configuration Quiz · CSA</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #a78bfa; color: #c4b5fd; background: rgba(139,92,246,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .q-dot.answered { border-color: var(--slate-500); color: var(--text-muted); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(139,92,246,0.15);color:#c4b5fd;border:1px solid rgba(167,139,250,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 2 · All 3 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 2 Full Quiz</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions covering all topics in Part 2. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#a78bfa">0 / 15</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#a78bfa"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 2 — Instance Configuration</span>
+          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#a78bfa;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">👥 Topic 1 — Users, Groups &amp; Roles</div>
+              <div class="quiz-scenario">Scenario: An ITIL analyst needs to be granted the "itil" role. A new admin proposes adding the role directly to the user's record in the sys_user table.</div>
+              <p class="quiz-question">[TRAP] Is this approach correct, and what is the best practice?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Correct — adding roles directly to user records is the standard ServiceNow approach</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Incorrect — roles should always be assigned to Groups, and users gain roles through group membership</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Incorrect — roles cannot be assigned to users or groups; they are only inherited through table ACLs</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Correct, but only for non-admin roles; admin role must go through groups</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> ServiceNow best practice is to ALWAYS assign roles to <strong>Groups</strong>, not directly to individual user records. Users gain roles by being members of groups. This makes role management scalable: when an employee joins a team, you add them to the relevant group and they automatically inherit the right roles. Assigning roles directly to individual users bypasses this structure, is difficult to audit, and becomes unmanageable at scale. While it is technically possible to add roles to a user directly, it is explicitly against best practice and is a trap answer on the CSA exam.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">👥 Topic 1 — Users, Groups &amp; Roles</div>
+              <div class="quiz-scenario">Scenario: A security auditor asks an admin to demonstrate how they verify that a role configuration change works correctly from a non-admin user's perspective, without creating a test user account.</div>
+              <p class="quiz-question">Which ServiceNow feature allows the admin to log in as another user to test their access?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Elevate Privilege — temporarily grants admin-level access to any user</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Impersonation — admin logs in as a specific user to see exactly what they see and can do</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">ACL Simulator — simulates another user's permissions without changing the session</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Role Inheritance Preview — shows what roles a user would have in a hypothetical configuration</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> <strong>Impersonation</strong> allows an administrator to assume the identity of another user within their current browser session. While impersonating, the admin sees exactly the same interface, menus, forms, and data that the real user would see — it is the definitive way to verify security configurations. The admin can end impersonation at any time. Elevate Privilege (A) grants the current admin additional security permissions (like security_admin) — it does not switch to another user's identity. Options C and D are not standard ServiceNow features.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">👥 Topic 1 — Users, Groups &amp; Roles</div>
+              <div class="quiz-scenario">Scenario: A user belongs to Group A (which has the "itil" role) and Group B (which has the "problem_manager" role). Group A also contains a nested sub-group with the "change_manager" role.</div>
+              <p class="quiz-question">Which roles does the user have access to?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Only "itil" and "problem_manager" — roles from nested groups do not propagate</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">"itil", "problem_manager", and "change_manager" — roles are inherited through group membership including nested groups</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only "itil" — a user only inherits roles from their primary group</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">"itil" and "change_manager" only — problem_manager cannot coexist with change_manager</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> ServiceNow role inheritance works cumulatively. A user inherits all roles from every group they belong to. Additionally, roles flow through nested group hierarchies — if a user is in Group A, they also inherit roles from any groups nested inside Group A. In this scenario: from Group A directly → "itil"; from Group A's nested sub-group → "change_manager"; from Group B → "problem_manager". The user effectively has all three roles. There is no concept of a "primary group" in ServiceNow (C), and roles do not conflict with each other (D).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">👥 Topic 1 — Users, Groups &amp; Roles</div>
+              <div class="quiz-scenario">Scenario: An admin wants to look up which ServiceNow table stores user records (e.g., employees who log in to the instance).</div>
+              <p class="quiz-question">Which table stores ServiceNow user records?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">user_table</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">sys_user</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">sys_person</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">cmdb_user</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The three core identity tables to memorise for the CSA exam are: <strong>sys_user</strong> (Users — individual accounts that log in), <strong>sys_user_group</strong> (Groups — collections of users), and <strong>sys_user_role</strong> (Roles — permission sets assigned to groups). These sys_ prefixed names are the actual database table names used in queries, ACLs, and scripts. "user_table", "sys_person", and "cmdb_user" are not valid ServiceNow table names for user records.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">📂 Topic 2 — Tables &amp; Dictionary</div>
+              <div class="quiz-scenario">Scenario: A company needs to create a "Hardware Request" table that should automatically include all fields from the Task table (such as Number, State, Priority, Assigned To) without manually recreating them.</div>
+              <p class="quiz-question">What is the correct approach in ServiceNow?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Copy the Task table — creates a duplicate with all fields pre-populated</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Extend the Task table — the new table inherits all Task fields and security rules automatically</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Import the Task table definition via an Update Set</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Use the Schema Map to link the new table to the Task table as a reference</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> In ServiceNow, <strong>Extending a table</strong> creates a parent-child inheritance relationship. The child table (Hardware Request) inherits all fields, business rules, and ACLs from the parent table (Task). The Task table is the core base class — Incident, Problem, Change, and many other standard tables all extend Task. "Copy table" (A) is not a supported ServiceNow mechanism. Update Sets (C) are for migrating configurations between instances, not creating tables. Schema Map (D) is a read-only visualisation tool, not a configuration mechanism.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">📂 Topic 2 — Tables &amp; Dictionary</div>
+              <div class="quiz-scenario">Scenario: A developer is reviewing the sys_dictionary table in ServiceNow. A colleague asks: "What exactly does sys_dictionary contain?"</div>
+              <p class="quiz-question">What is the purpose of the sys_dictionary table?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It stores the definitions of all database tables and every field on every table — the metadata schema</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">It stores a list of all records across all tables for fast lookup</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It stores all ACL rules and their associated conditions</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">It stores translated labels for all field names in different languages</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>A is correct.</strong> The <strong>sys_dictionary</strong> table is ServiceNow's schema metadata table. Every table definition and every field definition (field name, type, length, default value, mandatory flag, reference to another table, etc.) has a row in sys_dictionary. When you create a new table or add a field, a new record is written to sys_dictionary. It is the foundation of ServiceNow's metadata-driven architecture. ACLs live in sys_security_acl (C). Translations are in sys_ui_message (D). There is no "all records" lookup table as described in B.</p>
+              </div>
+              <p data-correct="A" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 — TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">📂 Topic 2 — Tables &amp; Dictionary</div>
+              <div class="quiz-scenario">Scenario: Two records appear identical on screen but a developer confirms they are different records. An auditor asks: "What uniquely identifies each record in ServiceNow?"</div>
+              <p class="quiz-question">What is a sys_id and what format does it use?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A sequential integer (e.g., INC0012345) automatically incremented for each new record</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A 32-character hexadecimal string (GUID) unique to every record across the entire instance</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A 10-digit numeric code generated from the table name and creation timestamp</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A SHA-256 hash of the record's field values at the time of creation</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Every ServiceNow record has a <strong>sys_id</strong>: a 32-character hexadecimal GUID (Globally Unique Identifier) like <code>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4</code>. It is unique across the entire instance and never changes once assigned. The human-readable "Number" field (INC0012345) in option A is a display field for users — it is not the true unique identifier and is only unique within a single table. sys_id is used internally for all record references and relationships. Options C and D describe non-existent formats.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">📂 Topic 2 — Tables &amp; Dictionary</div>
+              <div class="quiz-scenario">Scenario: An admin wants to visualise the relationship between the Incident, Problem, and Change tables, including how they relate to the Task base table and other reference tables.</div>
+              <p class="quiz-question">Which ServiceNow tool provides a graphical view of table relationships?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Table Map</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Schema Map</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Dependency Map</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Relationship Designer</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The <strong>Schema Map</strong> (accessible from any table's context menu: Configure → Schema Map) provides an interactive graphical diagram showing how tables relate to each other — including inheritance (extends relationships) and reference fields pointing to other tables. It is a read-only visualisation tool. This is the correct tool to show an auditor or architect the database structure visually. Options A (Table Map), C (Dependency Map), and D (Relationship Designer) are not standard ServiceNow tool names.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(239,68,68,0.15);color:var(--red-400)">🔒 Topic 3 — Instance Security &amp; ACLs</div>
+              <div class="quiz-scenario">Scenario: An admin with the standard "admin" role tries to create a new ACL rule. The system displays an error: "You do not have permission to create Access Control rules."</div>
+              <p class="quiz-question">What additional step must the admin take?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Request the itil role to unlock ACL creation</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Elevate Privilege to the security_admin role from the user menu (session-only activation)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Enable High Security Settings to unlock the security_admin role permanently</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Log out and log back in with a different admin account that has ACL permissions</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Creating, modifying, or deleting ACLs requires the <strong>security_admin</strong> role. Even users with the standard "admin" role cannot manage ACLs without it. The security_admin role is not permanently assigned — instead, admins <strong>Elevate Privilege</strong> to it via their profile menu for the current session only. This elevation does not persist when the session ends. High Security Settings (C) is a separate system property that adds an additional security layer — it does not grant the security_admin role. The itil role (A) is for ITSM fulfillers, completely unrelated to ACL management.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 — TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(239,68,68,0.15);color:var(--red-400)">🔒 Topic 3 — Instance Security &amp; ACLs</div>
+              <div class="quiz-scenario">Scenario: An admin elevates to security_admin, creates several ACL rules, and then logs out. The next day they log back in to create more ACL rules.</div>
+              <p class="quiz-question">[TRAP] Is the security_admin elevation still active when they log back in?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — Elevate Privilege changes persist permanently once activated</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — security_admin elevation is session-only and must be re-elevated at each login</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Yes — as long as the admin role is assigned, security_admin is always active</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">No — the elevation expires after exactly 8 hours, even within the same session</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is one of the most tested security traps in the CSA exam. Elevating to security_admin is <strong>session-only</strong> — it lasts only for the current browser session. When the admin logs out (or the session expires), the elevation is automatically revoked. The next login starts without security_admin elevation, even if the same admin logs in. This design is intentional — it forces conscious re-activation of elevated privileges, reducing the risk of accidental ACL changes. Option D is wrong: there is no time-based expiry within a session. Option A is completely wrong — there is no persistence of elevation.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(239,68,68,0.15);color:var(--red-400)">🔒 Topic 3 — Instance Security &amp; ACLs</div>
+              <div class="quiz-scenario">Scenario: An ACL rule on the Incident table has: Role check = "itil", Condition = "active=true", Script = a GlideRecord query. A user with the "itil" role tries to read an active Incident record. The role check passes and the condition evaluates to true. However, the script returns false.</div>
+              <p class="quiz-question">What happens?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Access is granted — the role check and condition both passed, which is sufficient</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Access is denied — ALL three components (Role, Condition, Script) must pass for access to be granted</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Access is granted — the script result is advisory only and does not block access</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">An error is thrown and the system logs a security violation</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> ACL evaluation follows strict AND logic: <strong>Role check AND Condition AND Script must ALL return true</strong> for access to be granted. If any single component fails, access is denied. In this scenario, even though the Role check and Condition passed, the Script returning false causes the entire ACL evaluation to fail — access is denied. Each component is a gate, not a vote. The script is authoritative, not advisory (C is wrong). No error or security violation is logged for normal ACL denial (D is wrong).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 — TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(239,68,68,0.15);color:var(--red-400)">🔒 Topic 3 — Instance Security &amp; ACLs</div>
+              <div class="quiz-scenario">Scenario: A field-level ACL on the Incident table grants the "manager" role read access to the "Salary Information" field. A user with the "manager" role does NOT have table-level read access to the Incident table itself.</div>
+              <p class="quiz-question">[TRAP] Can the manager read the "Salary Information" field on an Incident record?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — the field-level ACL grants explicit access to that field regardless of table access</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — table-level ACL must pass first. If table access is denied, field-level ACLs are never evaluated</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Yes — field ACLs bypass table ACLs when the user has an explicit field-level grant</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Yes, but only if the "manager" role also inherits from the "itil" role</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is a fundamental ACL trap. ServiceNow ACL evaluation is <strong>hierarchical</strong>: table-level ACL is always evaluated first. If the table-level ACL denies read access, the system stops immediately — field-level ACLs are never even checked. A field ACL can only <em>restrict</em> access further (not grant access if the table ACL already denies it). The key rule: <strong>a field ACL cannot grant access that the table ACL does not allow</strong>. Options A, C, and D all incorrectly suggest field ACLs can override table ACL denial.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(239,68,68,0.15);color:var(--red-400)">🔒 Topic 3 — Instance Security &amp; ACLs</div>
+              <div class="quiz-scenario">Scenario: A ServiceNow admin explains ACL operations to a trainee: "When I create an ACL, I must specify which operation the rule applies to."</div>
+              <p class="quiz-question">Which of the following is NOT a valid ACL operation in ServiceNow?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">read</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">write</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">export</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">execute</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct — "export" is NOT a standard ACL operation.</strong> The five valid ACL operations in ServiceNow are: <strong>read</strong> (view records/fields), <strong>write</strong> (edit records/fields), <strong>create</strong> (create new records), <strong>delete</strong> (delete records), and <strong>execute</strong> (run scripts/client callables). "Export" is not a separate ACL operation — exporting data is controlled via other mechanisms such as roles and High Security Settings. Knowing the exact five operations is a common exam question.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(139,92,246,0.15);color:var(--purple-400)">📂 Topic 2 — Tables &amp; Dictionary</div>
+              <div class="quiz-scenario">Scenario: A developer adds a Reference field called "Project" to the Incident table, pointing to a custom "Project" table. On the Incident form, they want to display the referenced project's "Budget" value using dot-walking.</div>
+              <p class="quiz-question">Which expression correctly dot-walks from the Incident's Project field to the Budget field on the Project table?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text"><code>project_budget</code></span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text"><code>project.budget</code></span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text"><code>Project[budget]</code></span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text"><code>project→budget</code></span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> ServiceNow dot-walking syntax uses the period (<code>.</code>) to traverse reference fields: <code>reference_field.target_field</code>. The Reference field is named "project" (its column name on the Incident table), and the target field is "budget" on the Project table — so the dot-walk expression is <code>project.budget</code>. This syntax works in conditions, field default values, reference qualifiers, and client scripts. Bracket notation (C) and arrow notation (D) are not valid ServiceNow dot-walking syntax. Option A is just a flat field name with no traversal.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(59,130,246,0.15);color:var(--blue-300)">👥 Topic 1 — Users, Groups &amp; Roles</div>
+              <div class="quiz-scenario">Scenario: A user reports they can see the Incident list but cannot open any individual Incident records — clicking a record shows an "Access Denied" page. All other users in their group can open records normally.</div>
+              <p class="quiz-question">What is the most likely cause?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The user's account is locked due to too many failed login attempts</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A table-level ACL for the "read" operation requires a role that this user does not have (but their group-mates do)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Incident table has been set to read-only for all users in the system</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The user's browser cache is corrupted — clearing it will resolve the issue</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The symptom (can see the list but cannot open individual records) points to an ACL controlling <strong>record-level read access</strong>. The user can see the list because list queries use a different access mechanism, but opening a record triggers the table or row-level ACL. Since group-mates can open records, the table isn't globally restricted (C is wrong). The most likely explanation is that a read ACL requires a specific role that this particular user is missing — perhaps their group membership wasn't saved correctly, or a role was recently added as a requirement. Option A would prevent login entirely, not just record access.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 15;
+  const dots = document.getElementById('q-dots');
+
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => {
+      const state = window._quizState?.['main-quiz'];
+      if (!state) return;
+      state.current = i;
+      QuizEngine._render('main-quiz');
+      updateDots(i, state);
+    });
+    dots.appendChild(d);
+  }
+
+  function updateDots(current, state) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current','correct','incorrect','answered');
+      if (i === current) d.classList.add('current');
+      else if (state.answered[i] !== null) {
+        const q = state.questions[i];
+        const correct = q.querySelector('[data-correct]')?.dataset.correct;
+        d.classList.add(state.answered[i] === correct ? 'correct' : 'incorrect');
+      }
+    });
+    const answered = state.answered.filter(a => a !== null).length;
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = `${state.score} / ${TOTAL}`;
+    document.getElementById('qs-answered').textContent = answered;
+    document.getElementById('qs-prog').style.width = `${((current+1)/TOTAL)*100}%`;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    QuizEngine.init('main-quiz');
+    QuizEngine.wireOptions('main-quiz');
+    window._quizState = QuizEngine._state ?? {};
+    const quiz = document.getElementById('main-quiz');
+    const patch = () => setTimeout(() => { const s = QuizEngine._state?.['main-quiz']; if(s) updateDots(s.current, s); }, 50);
+    quiz.querySelectorAll('[data-option]').forEach(btn => btn.addEventListener('click', patch));
+    quiz.querySelector('[data-q-prev]')?.addEventListener('click', patch);
+    quiz.querySelector('[data-q-next]')?.addEventListener('click', patch);
+  });
+</script>
+</body>
+</html>

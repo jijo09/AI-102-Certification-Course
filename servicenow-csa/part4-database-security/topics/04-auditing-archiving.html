@@ -1,0 +1,661 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auditing &amp; Archiving | ServiceNow CSA Part 4</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px); }
+    #sidebar-overlay.show { display:block; }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CSA Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 4</a>
+        <span class="sep">›</span>
+        <span class="current">Auditing &amp; Archiving</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-part-badge">🗄️ Part 4 · Topic 4 of 4</div>
+        <h1 class="topic-title">Auditing &amp; Archiving</h1>
+        <div class="topic-meta">
+          <span>⏱ ~65 min read</span>
+          <span>·</span>
+          <span>Part 4 — Database &amp; Security · 27% Exam Weight — HIGHEST</span>
+        </div>
+        <div class="callout-exam" style="margin-top:var(--space-4)">
+          <strong>High-Value Topic:</strong> Auditing and archiving questions appear consistently on the CSA exam. Know the difference between <code>sys_audit</code>, History Sets, and archiving rules cold — these distinctions are a common source of wrong answers.
+        </div>
+      </div>
+
+      <!-- Section 1: Field-Level Auditing -->
+      <div class="section-block">
+        <div class="section-label">Section 1</div>
+        <h2>Field-Level Auditing</h2>
+        <p>Auditing in ServiceNow records field-level changes so you have a complete, immutable history of who changed what and when. This is critical for compliance, security investigations, and change tracking.</p>
+
+        <h3>The sys_audit Table</h3>
+        <p>All audit records are stored in the <code>sys_audit</code> table. Each row in <code>sys_audit</code> represents a single field change on a single record.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>tablename</h4>
+            <p>The name of the table whose record was changed.</p>
+            <p style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: <code>incident</code></p>
+          </div>
+          <div class="term-card">
+            <h4>fieldname</h4>
+            <p>The name of the specific field that changed.</p>
+            <p style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: <code>state</code></p>
+          </div>
+          <div class="term-card">
+            <h4>oldvalue</h4>
+            <p>The value of the field <em>before</em> the change was saved.</p>
+            <p style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: <code>1</code> (New)</p>
+          </div>
+          <div class="term-card">
+            <h4>newvalue</h4>
+            <p>The value of the field <em>after</em> the change was saved.</p>
+            <p style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: <code>2</code> (In Progress)</p>
+          </div>
+          <div class="term-card">
+            <h4>sys_created_on</h4>
+            <p>Timestamp of when the change occurred (audit record creation time).</p>
+          </div>
+          <div class="term-card">
+            <h4>sys_created_by</h4>
+            <p>The username of the user who made the change.</p>
+            <p style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-2)">Example: <code>john.smith</code></p>
+          </div>
+        </div>
+
+        <h3>Enabling Auditing</h3>
+        <p>Auditing is <strong>not enabled by default</strong> for all fields and tables. It must be explicitly turned on at either the table level or the individual field level.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Level</th>
+              <th>How to Enable</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Table-level</strong></td>
+              <td>Open the Table record → set the <strong>Audit</strong> field to <em>true</em></td>
+              <td>Audits all fields on the table that have auditing turned on at the field level</td>
+            </tr>
+            <tr>
+              <td><strong>Field-level</strong></td>
+              <td>Open the Dictionary entry for the field → check the <strong>Audit</strong> checkbox</td>
+              <td>Tracks changes to that specific field only (table auditing must also be on)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know:</strong> Both the <strong>table</strong> and the <strong>field</strong> must have auditing enabled for a change to be recorded in <code>sys_audit</code>. Enabling auditing on a table alone does not automatically audit every field — each field's Dictionary entry must also have the Audit checkbox checked.
+        </div>
+
+        <div class="callout-tip">
+          <strong>Navigation Path:</strong> To enable auditing on a table, go to <strong>System Definition &gt; Tables</strong>, open the table record, and toggle the <em>Audit</em> field. To enable on a specific field, go to <strong>System Definition &gt; Dictionary</strong>, find the field's entry, and check <em>Audit</em>.
+        </div>
+
+        <h3>Viewing Audit History on a Record</h3>
+        <p>Once auditing is enabled, there are two ways to view the change history for a specific record:</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>The <strong>History</strong> related list on the record form — shows a user-friendly chronological view</li>
+          <li>Querying <code>sys_audit.list</code> directly and filtering by <code>documentkey</code> (the record's sys_id)</li>
+          <li>Using a <strong>History Set</strong> — a grouped, formatted audit view (see Section 2)</li>
+        </ul>
+
+        <div class="callout-concept">
+          <strong>Immutable Audit Trail:</strong> Audit records in <code>sys_audit</code> <strong>cannot be edited or deleted</strong> by normal users. This immutability is what makes the audit trail trustworthy for compliance purposes. Even admins cannot modify audit records through the standard UI.
+        </div>
+      </div>
+
+      <!-- Section 2: Record History / History Sets -->
+      <div class="section-block">
+        <div class="section-label">Section 2</div>
+        <h2>Record History &amp; History Sets</h2>
+        <p>While <code>sys_audit</code> stores raw audit data, <strong>History Sets</strong> provide a human-readable, structured view of record changes organized for easy interpretation.</p>
+
+        <h3>Tables Involved</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>sys_history_set</h4>
+            <p>The parent record for a History Set — one per tracked record. Links to the source table and record sys_id.</p>
+          </div>
+          <div class="term-card">
+            <h4>sys_history_line</h4>
+            <p>Individual history line items within a History Set. Each line represents one field change event at a point in time.</p>
+          </div>
+          <div class="term-card">
+            <h4>sys_audit</h4>
+            <p>The raw, low-level audit table that stores every field change. History Sets draw from this data to build their user-friendly views.</p>
+          </div>
+        </div>
+
+        <h3>History Sets vs. sys_audit — Key Differences</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>sys_audit</th>
+              <th>History Sets</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Purpose</strong></td>
+              <td>Raw, immutable audit log of every field change</td>
+              <td>User-friendly grouped view of changes</td>
+            </tr>
+            <tr>
+              <td><strong>Tables</strong></td>
+              <td><code>sys_audit</code></td>
+              <td><code>sys_history_set</code> + <code>sys_history_line</code></td>
+            </tr>
+            <tr>
+              <td><strong>Grouping</strong></td>
+              <td>Individual rows per field change</td>
+              <td>Changes grouped by save transaction</td>
+            </tr>
+            <tr>
+              <td><strong>Target audience</strong></td>
+              <td>Developers, administrators querying data</td>
+              <td>End users and agents reviewing record history</td>
+            </tr>
+            <tr>
+              <td><strong>Access path</strong></td>
+              <td>Direct table query or <code>sys_audit.list</code></td>
+              <td>"History" tab / related list on the record form</td>
+            </tr>
+            <tr>
+              <td><strong>Prerequisite</strong></td>
+              <td>Auditing enabled on table + field</td>
+              <td>Auditing must be enabled on the relevant fields</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Trap — History Requires Auditing:</strong> History Sets do <strong>not</strong> independently track changes. They are a view built on top of <code>sys_audit</code> data. If auditing is not enabled on a field, that field's changes will <strong>not</strong> appear in the History tab — even if History Sets are configured.
+        </div>
+
+        <div class="callout-tip">
+          <strong>Viewing the History Tab:</strong> On any record with auditing enabled, scroll to the related lists section at the bottom of the form and look for the <strong>History</strong> related list. Each entry shows the timestamp, user, and the before/after values of all changed fields in that save transaction.
+        </div>
+      </div>
+
+      <!-- Section 3: Session Logging -->
+      <div class="section-block">
+        <div class="section-label">Section 3</div>
+        <h2>Session Logging &amp; System Logs</h2>
+        <p>ServiceNow maintains several types of system logs that capture application activity, errors, and transaction data. Understanding which log lives in which table is a frequent exam topic.</p>
+
+        <h3>The syslog Table</h3>
+        <p>The primary application log table is <code>syslog</code>. Navigate to it at <strong>System Logs &gt; Application Logs</strong> or type <code>syslog.list</code> in the filter navigator.</p>
+
+        <h3>Log Levels</h3>
+        <div class="term-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+          <div class="term-card">
+            <strong style="color:var(--text-muted)">DEBUG</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Lowest level — verbose diagnostic output for development. Not shown in production by default.</p>
+          </div>
+          <div class="term-card">
+            <strong style="color:var(--green-400)">INFO</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Informational messages about normal application events.</p>
+          </div>
+          <div class="term-card">
+            <strong style="color:var(--amber-400)">WARNING</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Potential issues that don't prevent execution but warrant attention.</p>
+          </div>
+          <div class="term-card">
+            <strong style="color:var(--red-400)">ERROR</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Errors that impact functionality but don't crash the system.</p>
+          </div>
+          <div class="term-card">
+            <strong style="color:var(--red-400);font-weight:900">CRITICAL</strong>
+            <p style="font-size:0.85rem;margin:var(--space-1) 0 0">Highest severity — system-level failures requiring immediate attention.</p>
+          </div>
+        </div>
+
+        <h3>Application Logging API</h3>
+        <p>Server-side scripts write to the syslog using GlideSystem (<code>gs</code>) methods. These entries appear in <strong>System Logs &gt; Application</strong>.</p>
+
+        <div style="background:var(--bg-deep,#0d0d1a);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-4) 0">
+          <pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.8;color:var(--text-primary);overflow-x:auto"><code>// Write to syslog at different levels
+gs.log('This is a general log message');        // INFO level
+gs.info('Record created successfully');          // INFO level
+gs.warn('Fallback logic triggered');             // WARNING level
+gs.error('Failed to retrieve user record');      // ERROR level
+
+// All of these are visible at: System Logs > Application</code></pre>
+        </div>
+
+        <div class="callout-exam">
+          <strong>Exam Fact — gs.log() Destination:</strong> <code>gs.log()</code> writes to the <code>syslog</code> table, visible at <strong>System Logs &gt; Application</strong>. This is the correct answer when asked where application script log messages appear. Do not confuse with the transaction log or node log.
+        </div>
+
+        <h3>Other Log Types</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Log Type</th>
+              <th>Table / Location</th>
+              <th>What It Contains</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Application Log</strong></td>
+              <td><code>syslog</code> — System Logs &gt; Application</td>
+              <td>Messages written by gs.log(), gs.info(), gs.warn(), gs.error() in server-side scripts</td>
+            </tr>
+            <tr>
+              <td><strong>Transaction Log</strong></td>
+              <td>System Logs &gt; Transactions</td>
+              <td>Every HTTP transaction (page load, form save, API call) — timing, user, URL, response code</td>
+            </tr>
+            <tr>
+              <td><strong>Node Log</strong></td>
+              <td>System Diagnostics &gt; Node Log</td>
+              <td>Server-level JVM output, node startup/shutdown, infrastructure errors</td>
+            </tr>
+            <tr>
+              <td><strong>Slow Queries Log</strong></td>
+              <td>System Logs &gt; Slow Queries</td>
+              <td>Database queries that exceeded the slow query threshold — performance tuning tool</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 4: Security Incident Response -->
+      <div class="section-block">
+        <div class="section-label">Section 4</div>
+        <h2>Security Incident Response &amp; Login Tracking</h2>
+        <p>ServiceNow tracks authentication events, failed access attempts, and security incidents at the platform level. This data is critical for security investigations and compliance reporting.</p>
+
+        <h3>Login Failure and Account Lockout Tracking</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Failed login attempts are tracked in the <strong>syslog</strong> table with a source of <code>login</code></li>
+          <li>When the High Security Plugin is enabled, account lockout policies activate after a configurable number of consecutive failures</li>
+          <li>Locked-out users can be identified in <strong>User Administration &gt; Users</strong> — look for the <em>Locked out</em> checkbox on the user record</li>
+          <li>Admins can unlock users by unchecking the <em>Locked out</em> field and saving the user record</li>
+        </ul>
+
+        <h3>Failed ACL Attempt Logging</h3>
+        <div class="callout-tip">
+          <strong>High Security Plugin Required:</strong> Detailed logging of failed ACL attempts (recording which ACL denied a user and why) requires the <strong>High Security Settings</strong> plugin to be activated. Without it, denials are silently enforced without being written to a log.
+        </div>
+
+        <h3>Security Incident Response (SIR)</h3>
+        <p>The Security Incident Response (SIR) application is a separate ServiceNow product/plugin. When installed, it adds dedicated tables and workflows for managing security incidents.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>sys_security_incident</h4>
+            <p>The primary table for security incidents when the SIR application is installed. Separate from the standard <code>incident</code> table used by ITSM.</p>
+          </div>
+          <div class="term-card">
+            <h4>Scope</h4>
+            <p>SIR is beyond the CSA exam scope — awareness that it exists as a separate app/table is sufficient. The CSA focuses on platform-level auditing, not SIR workflows.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Archiving -->
+      <div class="section-block">
+        <div class="section-label">Section 5</div>
+        <h2>Archiving</h2>
+        <p>Archiving moves old records from active tables to <strong>shadow archive tables</strong>, keeping the active table performant while preserving data for compliance and reference. This is fundamentally different from deletion.</p>
+
+        <h3>Archive vs. Delete — Critical Distinction</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Archive</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Data preserved?</strong></td>
+              <td><span style="color:var(--green-400)">Yes</span> — moved to an archive table</td>
+              <td><span style="color:var(--red-400)">No</span> — permanently removed from the database</td>
+            </tr>
+            <tr>
+              <td><strong>Recoverable?</strong></td>
+              <td><span style="color:var(--green-400)">Yes</span> — can be restored to the live table</td>
+              <td><span style="color:var(--red-400)">No</span> — not recoverable through normal means</td>
+            </tr>
+            <tr>
+              <td><strong>Visible in normal lists?</strong></td>
+              <td><span style="color:var(--red-400)">No</span> — hidden from standard list/form views</td>
+              <td><span style="color:var(--red-400)">No</span> — not present at all</td>
+            </tr>
+            <tr>
+              <td><strong>Table location</strong></td>
+              <td><code>u_archive_[tablename]</code></td>
+              <td>No table — gone</td>
+            </tr>
+            <tr>
+              <td><strong>Schema preserved?</strong></td>
+              <td><span style="color:var(--green-400)">Yes</span> — archive table mirrors source table schema</td>
+              <td>N/A</td>
+            </tr>
+            <tr>
+              <td><strong>Use case</strong></td>
+              <td>Compliance retention, performance optimization, keeping old closed records</td>
+              <td>Removing truly unwanted or duplicate records</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-exam">
+          <strong>Exam Must-Know — Archive Destination:</strong> Archived records are moved to a table named <code>u_archive_[original_table_name]</code>. For example, archiving incidents moves records to <code>u_archive_incident</code>. The archive table has the <strong>same schema</strong> as the source table. Records in the archive table are hidden from standard views but can be accessed directly or restored.
+        </div>
+
+        <h3>Archive Rules — sys_archive</h3>
+        <p>Archive rules define which records get archived, when, and from which table. They are stored in the <code>sys_archive</code> table.</p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Archive Rule Field</th>
+              <th>Purpose</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Table</strong></td>
+              <td>The source table to archive records from</td>
+              <td><code>incident</code></td>
+            </tr>
+            <tr>
+              <td><strong>Condition</strong></td>
+              <td>Filter that identifies which records qualify for archiving</td>
+              <td><code>state=7 AND resolved_at &lt; javascript:gs.daysAgoStart(365)</code></td>
+            </tr>
+            <tr>
+              <td><strong>Active</strong></td>
+              <td>Whether the archive rule runs on its schedule</td>
+              <td><code>true</code></td>
+            </tr>
+            <tr>
+              <td><strong>Archive store</strong></td>
+              <td>Destination — always the corresponding <code>u_archive_*</code> table</td>
+              <td><code>u_archive_incident</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Restoring Archived Records</h3>
+        <p>To restore records from an archive back to the live table:</p>
+        <ol style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Navigate to <strong>System Archive &gt; Archive Rules</strong></li>
+          <li>Open the relevant archive rule</li>
+          <li>Use the <strong>Restore</strong> related list or function on the archive rule record</li>
+          <li>Select the records to restore and confirm — they are moved back to the source table</li>
+        </ol>
+
+        <div class="callout-exam">
+          <strong>Exam Fact — Restore Path:</strong> To restore archived records, the correct path is through <strong>Archive Rules &gt; Restore function</strong>. You do not directly edit or move records in the <code>u_archive_*</code> table — the restoration process handles the move back to the live table automatically.
+        </div>
+      </div>
+
+      <!-- Section 6: Data Retention -->
+      <div class="section-block">
+        <div class="section-label">Section 6</div>
+        <h2>Data Retention</h2>
+        <p>Data retention policies govern how long audit records and other system data are kept before being purged. This is primarily driven by compliance requirements (GDPR, SOX, HIPAA, etc.).</p>
+
+        <h3>Audit Record Retention</h3>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Retention policies define how long records in <code>sys_audit</code> are kept</li>
+          <li>The <strong>sys_audit_delete</strong> scheduled job automatically removes audit records that exceed the defined retention period</li>
+          <li>Retention periods are typically defined by your organization's compliance requirements, not set by ServiceNow defaults</li>
+          <li>Common retention drivers: GDPR (EU data protection), SOX (financial audit trails), HIPAA (healthcare records), PCI DSS (payment data)</li>
+        </ul>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>sys_audit_delete Job</h4>
+            <p>A scheduled job that scans <code>sys_audit</code> and removes records older than the configured retention period. Runs on a defined schedule to keep audit table size manageable.</p>
+          </div>
+          <div class="term-card">
+            <h4>Compliance Drivers</h4>
+            <p>Regulatory frameworks often mandate minimum retention periods. For example, SOX may require financial change audit logs to be kept for 7 years. These requirements drive retention policy configuration.</p>
+          </div>
+          <div class="term-card">
+            <h4>Retention vs. Archiving</h4>
+            <p>Retention policies apply to audit records in <code>sys_audit</code>. Archiving applies to business records (incidents, changes, etc.) in operational tables. They are separate mechanisms with separate configurations.</p>
+          </div>
+        </div>
+
+        <div class="callout-concept">
+          <strong>CSA Exam Scope:</strong> For the exam, know that <strong>retention policies control how long audit records are kept</strong>, that the <strong>sys_audit_delete</strong> job purges old audit records, and that <strong>compliance requirements drive retention periods</strong>. Deep configuration knowledge is not required at CSA level.
+        </div>
+      </div>
+
+      <!-- Section 7: Transaction Log and Stats -->
+      <div class="section-block">
+        <div class="section-label">Section 7</div>
+        <h2>Transaction Log, Active Sessions &amp; Instance Health</h2>
+        <p>ServiceNow exposes several tools and views for monitoring instance health, active sessions, and transaction performance. These are primarily admin and platform diagnostic tools.</p>
+
+        <h3>Key Tables and Views</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table / View</th>
+              <th>Purpose</th>
+              <th>Navigation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>syslog</code></td>
+              <td>Application log entries from gs.log() and platform events</td>
+              <td>System Logs &gt; Application</td>
+            </tr>
+            <tr>
+              <td><code>v_transaction</code></td>
+              <td>Virtual view of currently active sessions and in-flight HTTP transactions on the instance</td>
+              <td>System Diagnostics &gt; Sessions</td>
+            </tr>
+            <tr>
+              <td><strong>stats.do</strong></td>
+              <td>Instance health page — thread status, memory usage, active users, database pool stats. Admin-only access.</td>
+              <td>Navigate to: <code>[instance].service-now.com/stats.do</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>stats.do — Instance Health Page</h3>
+        <p>The <code>stats.do</code> page is a platform diagnostic page accessible only to admin users. It provides a real-time snapshot of instance health metrics.</p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <h4>Thread Status</h4>
+            <p>Shows active threads processing requests, waiting threads, and thread pool utilization. Useful for identifying processing bottlenecks.</p>
+          </div>
+          <div class="term-card">
+            <h4>Active Users</h4>
+            <p>Count of users currently logged into the instance with active sessions.</p>
+          </div>
+          <div class="term-card">
+            <h4>Memory Usage</h4>
+            <p>JVM heap memory utilization — used vs. available. High memory can indicate memory leaks or undersized instance.</p>
+          </div>
+          <div class="term-card">
+            <h4>Database Pool</h4>
+            <p>Database connection pool stats — active connections, idle connections, wait time. Helps diagnose DB performance issues.</p>
+          </div>
+        </div>
+
+        <div class="callout-tip">
+          <strong>CSA Exam Note:</strong> Know that <code>stats.do</code> is the <strong>instance health page</strong>, accessible only to admins, showing thread status, active users, and memory usage. You do not need to interpret the raw output for the CSA exam — awareness of its existence and purpose is sufficient.
+        </div>
+
+        <h3>v_transaction — Active Sessions</h3>
+        <p>The <code>v_transaction</code> view shows active HTTP transactions currently being processed by the instance. It is a virtual (not stored) view refreshed in real time.</p>
+        <ul style="margin:var(--space-4) 0;padding-left:var(--space-6);line-height:2">
+          <li>Shows: session ID, user, URL being accessed, time elapsed, thread state</li>
+          <li>Useful for identifying stuck transactions, runaway scripts, or heavy users</li>
+          <li>Admins can terminate stuck sessions from this view</li>
+          <li>Navigate to: <strong>System Diagnostics &gt; Sessions</strong> or type <code>v_transaction.list</code></li>
+        </ul>
+      </div>
+
+      <!-- Section 8: Key Exam Facts -->
+      <div class="section-block">
+        <div class="section-label">Section 8</div>
+        <h2>Key Exam Facts &amp; Common Traps</h2>
+        <p>This section consolidates the highest-priority exam facts for auditing and archiving. These points are the most commonly tested and the most common source of wrong answers.</p>
+
+        <div class="callout-exam">
+          <strong>Fact 1 — Auditing is not on by default:</strong> Field-level auditing must be explicitly enabled. It is <strong>not turned on by default for all fields</strong>. The table's <em>Audit</em> flag must be true AND the individual field's Dictionary entry must have <em>Audit</em> checked. Missing either one means no audit record is generated.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 2 — sys_audit tracks CHANGES, not views:</strong> The <code>sys_audit</code> table records <strong>field value changes</strong> only. It does <strong>not</strong> track when a user reads or views a record. If you need to track who viewed a record, that requires a separate custom mechanism (not part of standard platform auditing).
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 3 — Archive moves records, does not delete:</strong> When an archive rule runs, records are <strong>moved</strong> from the source table to the <code>u_archive_[tablename]</code> shadow table. They are not deleted. They remain in the database, just inaccessible from standard views.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 4 — Restoring archived records:</strong> The correct path to restore archived records is through <strong>Archive Rules &gt; Restore function</strong>. You do not manually insert records back into the live table. The platform handles the move using the archive rule's restore capability.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 5 — gs.log() writes to syslog:</strong> Application script log messages written with <code>gs.log()</code>, <code>gs.info()</code>, <code>gs.warn()</code>, and <code>gs.error()</code> all write to the <code>syslog</code> table. They are visible at <strong>System Logs &gt; Application</strong>. This is the expected exam answer for "where do script logs appear?"
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 6 — History Sets require auditing:</strong> The History tab on a record is populated from <code>sys_audit</code> data. If auditing is not enabled on a field, <strong>that field will not appear in the History tab</strong> even if History Sets are configured. Auditing is the prerequisite, not History Sets.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 7 — Audit records are immutable:</strong> Records in <code>sys_audit</code> <strong>cannot be edited</strong> through normal platform mechanisms. This immutability is intentional — it ensures the audit trail is trustworthy and cannot be tampered with. Even admin users cannot modify audit records via the standard UI.
+        </div>
+
+        <div class="callout-exam">
+          <strong>Fact 8 — Archive table naming convention:</strong> Archive tables always follow the naming pattern <code>u_archive_[source_table_name]</code>. For the <code>incident</code> table, the archive table is <code>u_archive_incident</code>. The archive table has the <strong>same schema</strong> as the source table (same columns, same field types).
+        </div>
+
+        <h3>Quick Reference — Auditing &amp; Archiving Tables</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Table / Object</th>
+              <th>Purpose</th>
+              <th>Key Fact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sys_audit</code></td>
+              <td>Raw field-change audit log</td>
+              <td>Immutable; requires auditing enabled on table + field</td>
+            </tr>
+            <tr>
+              <td><code>sys_history_set</code></td>
+              <td>Parent of a History Set grouping</td>
+              <td>One per tracked record; user-friendly audit view</td>
+            </tr>
+            <tr>
+              <td><code>sys_history_line</code></td>
+              <td>Individual history line items</td>
+              <td>Child of sys_history_set; one row per field change event</td>
+            </tr>
+            <tr>
+              <td><code>sys_archive</code></td>
+              <td>Defines archive rules</td>
+              <td>Contains condition, table, schedule for archiving</td>
+            </tr>
+            <tr>
+              <td><code>u_archive_*</code></td>
+              <td>Archive shadow tables</td>
+              <td>Same schema as source; records hidden from normal views</td>
+            </tr>
+            <tr>
+              <td><code>syslog</code></td>
+              <td>Application + platform log</td>
+              <td>Destination for gs.log() / gs.info() / gs.warn() / gs.error()</td>
+            </tr>
+            <tr>
+              <td><code>v_transaction</code></td>
+              <td>Active session/transaction view</td>
+              <td>Virtual view; real-time; admin diagnostic tool</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-concept">
+          <strong>Putting It All Together — Audit Trail Flow:</strong>
+          <ol style="margin:var(--space-3) 0 0 var(--space-4);line-height:2">
+            <li>Admin enables auditing on a table (Table record → Audit = true)</li>
+            <li>Admin enables auditing on specific fields (Dictionary entry → Audit checkbox checked)</li>
+            <li>User saves a record → changed fields are written to <code>sys_audit</code></li>
+            <li>History Sets read <code>sys_audit</code> data → visible as the History tab on the record</li>
+            <li>Retention policies + <code>sys_audit_delete</code> job purge old audit records per compliance rules</li>
+            <li>Archive rules move old closed records to <code>u_archive_[table]</code> to keep live tables lean</li>
+            <li>Restored records are moved back to the live table via the Archive Rules restore function</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Complete bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="03-access-control-rules.html" class="btn btn-secondary">← Access Control Rules</a>
+          <a href="../../part5-migration-integration/topics/01-update-sets.html" class="btn btn-primary">Part 5: Update Sets →</a>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  function markComplete() {
+    ProgressManager.setComplete('csa-p4-auditing-archiving', true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete('csa-p4-auditing-archiving')) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 1 — Navigation & Platform | ServiceNow CSA Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .part-hero {
+      background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, #022c22 60%);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-10) var(--space-12);
+      margin-bottom: var(--space-8);
+      position: relative; overflow: hidden;
+    }
+    .part-hero::before {
+      content: ''; position: absolute;
+      top: -60px; right: -60px; width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%);
+    }
+    .part-hero-eyebrow {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--emerald-300);
+      background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25);
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm);
+      margin-bottom: var(--space-4); font-family: var(--font-heading);
+    }
+    .part-hero-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.15;
+      margin-bottom: var(--space-4);
+      background: linear-gradient(135deg, #f0fdf4 0%, var(--emerald-200) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .part-hero-desc {
+      font-size: 0.975rem; color: var(--text-secondary);
+      max-width: 600px; line-height: 1.75; margin-bottom: var(--space-8);
+    }
+    .part-hero-meta {
+      display: flex; gap: var(--space-6); flex-wrap: wrap;
+    }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-value {
+      font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800;
+      color: var(--emerald-300); line-height: 1;
+    }
+    .meta-label { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* Why this part matters */
+    .why-card {
+      background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.15);
+      border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+    .why-title {
+      font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700;
+      color: var(--emerald-300); margin-bottom: var(--space-4);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+
+    /* Topic cards */
+    .topic-list { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-10); }
+
+    .topic-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: var(--space-6);
+      display: flex; gap: var(--space-6); align-items: flex-start;
+      text-decoration: none; transition: all var(--transition-normal);
+      position: relative; overflow: hidden;
+    }
+    .topic-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--emerald-400);
+      border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    }
+    .topic-card:hover {
+      border-color: rgba(16,185,129,0.4);
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(16,185,129,0.1);
+    }
+    .topic-card.completed::before { background: var(--green-500); }
+
+    .topic-num-badge {
+      width: 44px; height: 44px; min-width: 44px;
+      background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25);
+      border-radius: var(--radius-md); display: flex; align-items: center;
+      justify-content: center; font-family: var(--font-heading); font-size: 0.85rem;
+      font-weight: 700; color: var(--emerald-300); margin-top: 2px;
+    }
+    .topic-card.completed .topic-num-badge {
+      background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.25);
+      color: var(--green-400);
+    }
+
+    .topic-card-body { flex: 1; }
+    .topic-card-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: var(--space-4); margin-bottom: var(--space-2);
+    }
+    .topic-card-title {
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 700;
+      color: var(--text-primary); line-height: 1.3;
+    }
+    .topic-card-desc {
+      font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: var(--space-4);
+    }
+    .topic-card-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .topic-tag {
+      font-size: 0.68rem; font-family: var(--font-mono);
+      background: var(--bg-secondary); color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 8px; border-radius: var(--radius-sm);
+    }
+
+    .topic-arrow {
+      color: var(--text-muted); font-size: 1.2rem; margin-top: 2px; flex-shrink: 0;
+      transition: transform var(--transition-fast);
+    }
+    .topic-card:hover .topic-arrow { transform: translateX(4px); color: var(--emerald-300); }
+
+    /* What you'll learn section */
+    .learn-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--space-4); margin-bottom: var(--space-8);
+    }
+    .learn-item {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      display: flex; gap: var(--space-3); align-items: flex-start;
+    }
+    .learn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .learn-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+    /* Bottom action bar */
+    .action-bar {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-8);
+    }
+    .action-bar-left { display: flex; flex-direction: column; gap: var(--space-1); }
+    .action-bar-title {
+      font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700;
+      color: var(--text-primary);
+    }
+    .action-bar-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 99; backdrop-filter: blur(2px);
+    }
+    #sidebar-overlay.show { display: block; }
+
+    @media (max-width: 700px) {
+      .part-hero { padding: var(--space-6); }
+      .topic-card { flex-direction: column; gap: var(--space-3); }
+      .action-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body class="theme-csa">
+<div id="sidebar-overlay"></div>
+
+<div class="app-shell">
+
+  <!-- ════════ SIDEBAR ════════ -->
+  <div id="app-sidebar"></div>
+
+  <!-- ════════ MAIN ════════ -->
+  <main class="main-content">
+
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <span class="current">Part 1 — Navigation</span>
+      </div>
+    </header>
+
+    <div class="page-content stagger">
+
+      <!-- ── HERO ── -->
+      <div class="part-hero animate-fade-in">
+        <div class="part-hero-eyebrow">⚙️ Part 1 of 6 &nbsp;·&nbsp; Navigation</div>
+        <h1 class="part-hero-title">Platform Overview<br>& Navigation</h1>
+        <p class="part-hero-desc">
+          Begin your journey by mastering the primary interface architecture. Learn how to configure and navigate the modern
+          Next Experience UI framework, manipulate data lists, design forms, brand instances, and configure mobile agents.
+        </p>
+
+        <div class="part-hero-meta">
+          <div class="meta-item">
+            <span class="meta-value">7%</span>
+            <span class="meta-label">Exam Weight</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-value" data-part-done-count>0/4</span>
+            <span class="meta-label">Topics Finished</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-value" data-part-done-pct>0%</span>
+            <span class="meta-label">Readiness</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── WHY IT MATTERS ── -->
+      <div class="why-card">
+        <div class="why-title">💡 Why Platform Navigation Matters</div>
+        <p style="font-size:0.875rem; line-height:1.6; color:var(--text-secondary); margin:0;">
+          Navigating the user interface with accuracy is foundational to day-to-day administration. The exam tests your technical knowledge on Banner Frame structures, Filter Navigator operations, list filters, dot-walking field values, global properties, and native mobile client architectures.
+        </p>
+      </div>
+
+      <!-- ── TOPICS LIST ── -->
+      <h2 style="margin-bottom:var(--space-5)">Part 1 Study Modules</h2>
+      
+      <div class="topic-list">
+
+        <!-- Topic 1 -->
+        <a href="topics/01-ui-navigation.html" class="topic-card" id="card-csa-p1-ui-navigation">
+          <div class="topic-num-badge">01</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">UI Navigation & Interface</h3>
+            </div>
+            <p class="topic-card-desc">Master Unified Navigation in the Next Experience UI, including Banner menus (All, Favorites, History, Admin), searching indexed tables, and global search behaviors.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">Next Experience</span>
+              <span class="topic-tag">Filter Navigator</span>
+              <span class="topic-tag">Banner Frame</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <!-- Topic 2 -->
+        <a href="topics/02-lists-filters-forms.html" class="topic-card" id="card-csa-p1-lists-filters-forms">
+          <div class="topic-num-badge">02</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">Lists, Filters & Forms</h3>
+            </div>
+            <p class="topic-card-desc">Manipulate records using lists and filters. Learn the clear distinctions between Form Layout and Form Design, customize lists, and apply dot-walking.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">Form Design</span>
+              <span class="topic-tag">Form Layout</span>
+              <span class="topic-tag">Dot-Walking</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <!-- Topic 3 -->
+        <a href="topics/03-branding-properties.html" class="topic-card" id="card-csa-p1-branding-properties">
+          <div class="topic-num-badge">03</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">Properties & Branding</h3>
+            </div>
+            <p class="topic-card-desc">Configure global instance branding parameters using Basic Configuration UI16 properties, logos, styling rules, and Next Experience UX Theme records.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">sys_properties</span>
+              <span class="topic-tag">UI16 Configuration</span>
+              <span class="topic-tag">Branding</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <!-- Topic 4 -->
+        <a href="topics/04-mobile-portal.html" class="topic-card" id="card-csa-p1-mobile-portal">
+          <div class="topic-num-badge">04</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head">
+              <h3 class="topic-card-title">Mobile & Service Portal</h3>
+            </div>
+            <p class="topic-card-desc">Examine modern self-service portal templates. Understand the functional boundaries between native Mobile Agent and Now Mobile applications.</p>
+            <div class="topic-card-tags">
+              <span class="topic-tag">Service Portal</span>
+              <span class="topic-tag">Mobile Agent</span>
+              <span class="topic-tag">Now Mobile</span>
+            </div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+      </div>
+
+      <!-- ── WHAT YOU'LL LEARN ── -->
+      <h2 style="margin-bottom:var(--space-5)">What You'll Master</h2>
+      <div class="learn-grid">
+        <div class="learn-item">
+          <span class="learn-icon">🟢</span>
+          <span class="learn-text">Filter navigation shortcuts (.list and .do commands) to navigate rapidly.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🟢</span>
+          <span class="learn-text">Form layouts, section grids, and dot-walking reference records.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🟢</span>
+          <span class="learn-text">Modifying system properties to apply colors, logos, and header banners.</span>
+        </div>
+        <div class="learn-item">
+          <span class="learn-icon">🟢</span>
+          <span class="learn-text">Configuring widgets in the Service Portal and native mobile clients.</span>
+        </div>
+      </div>
+
+      <!-- ── ACTION BAR ── -->
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <div class="action-bar-title">Ready to Test Your Part 1 Knowledge?</div>
+          <div class="action-bar-sub">Run flashcards drills or attempt the 20-question administrative scenario quiz.</div>
+        </div>
+        <div style="display:flex; gap:var(--space-3)">
+          <a href="flashcards.html" class="btn btn-secondary">🧠 Flashcards</a>
+          <a href="quiz.html" class="btn btn-primary">🎯 Take Part Quiz</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  function updatePartPageStats() {
+    const meta = ProgressManager.getPartProgress(1);
+    document.querySelectorAll('[data-part-done-count]').forEach(el => {
+      el.textContent = `${meta.done} / ${meta.total}`;
+    });
+    document.querySelectorAll('[data-part-done-pct]').forEach(el => {
+      el.textContent = `${meta.pct}%`;
+    });
+
+    // Mark topic cards completed
+    const topics = [
+      'csa-p1-ui-navigation',
+      'csa-p1-lists-filters-forms',
+      'csa-p1-branding-properties',
+      'csa-p1-mobile-portal'
+    ];
+    topics.forEach(tid => {
+      const card = document.getElementById(`card-${tid}`);
+      if (card) {
+        card.classList.toggle('completed', ProgressManager.isComplete(tid));
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updatePartPageStats();
+  });
+
+  document.addEventListener('progressUpdated', () => {
+    updatePartPageStats();
+  });
+</script>
+</body>
+</html>
