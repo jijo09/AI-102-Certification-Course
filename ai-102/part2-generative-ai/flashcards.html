@@ -187,6 +187,7 @@
 <script src="../../scripts/common.js"></script>
 <script>
 const ALL_CARDS = STUDY_DATA.cards.filter(c => c.p === 'p2');
+const FC_KEY = 'ai102_fc_p2';
 
 const catColors = {
   t1:{ bg:'rgba(139,92,246,0.15)', color:'var(--purple-400)', label:'T1 Foundry/RAG' },
@@ -198,7 +199,7 @@ let deck=[], pointer=0, isFlipped=false, rated={};
 
 function buildDeck(cat){
   deck = cat==='all' ? [...ALL_CARDS] : ALL_CARDS.filter(c=>c.cat===cat);
-  pointer=0; isFlipped=false; rated={};
+  pointer=0; isFlipped=false; rated=FlashcardRatings.load(FC_KEY);
   show('fc-wrapper'); show('fc-nav'); show('fc-rating'); show('rating-note');
   hide('fc-complete');
   renderCard(); updateStats();
@@ -221,7 +222,7 @@ function renderCard(){
   document.getElementById('btn-next').disabled=pointer===deck.length-1;
   setRatingEnabled(false);
   document.getElementById('rating-note').textContent='Flip the card first, then rate your confidence';
-  const wasRated=rated[pointer];
+  const wasRated=rated[deck[pointer].term];
   fcEl.style.borderColor=wasRated===true?'rgba(16,185,129,0.5)':wasRated===false?'rgba(239,68,68,0.4)':'';
 }
 function flipCard(){
@@ -239,17 +240,17 @@ function navigate(dir){
   pointer=next; renderCard(); updateStats();
 }
 function rate(known){
-  rated[pointer]=known; updateStats();
+  rated[deck[pointer].term]=known; FlashcardRatings.save(FC_KEY,rated); updateStats();
   if(pointer<deck.length-1){ pointer++; renderCard(); }
   else showComplete();
 }
 function updateStats(){
   document.getElementById('stat-total').textContent=deck.length;
-  document.getElementById('stat-known').textContent=Object.values(rated).filter(v=>v===true).length;
-  document.getElementById('stat-unknown').textContent=Object.values(rated).filter(v=>v===false).length;
+  document.getElementById('stat-known').textContent=deck.filter(c=>rated[c.term]===true).length;
+  document.getElementById('stat-unknown').textContent=deck.filter(c=>rated[c.term]===false).length;
 }
 function showComplete(){
-  const kn=Object.values(rated).filter(v=>v===true).length;
+  const kn=deck.filter(c=>rated[c.term]===true).length;
   const pct=Math.round((kn/deck.length)*100);
   document.getElementById('fc-final-score').textContent=`${pct}%`;
   const msgs=['💪 Keep going — repeated practice is the key.',
@@ -274,9 +275,9 @@ function resetDeck(){
   renderCard(); updateStats();
 }
 function reviewUnknown(){
-  const unknowns=Object.entries(rated).filter(([,v])=>v===false).map(([i])=>deck[parseInt(i)]);
+  const unknowns=deck.filter(c=>rated[c.term]===false);
   if(!unknowns.length){ alert('No unknowns to review — all cards marked as known!'); return; }
-  deck=unknowns; pointer=0; isFlipped=false; rated={};
+  deck=unknowns; pointer=0; isFlipped=false; rated=FlashcardRatings.load(FC_KEY);
   show('fc-wrapper'); show('fc-nav'); show('fc-rating'); show('rating-note');
   document.getElementById('fc-complete').classList.remove('show');
   renderCard(); updateStats();
@@ -294,6 +295,10 @@ document.addEventListener('keydown',e=>{
 });
 
 buildDeck('all');
+initFCSwipe(document.getElementById('fc-card'),
+  ()=>{if(isFlipped)rate(false);},
+  ()=>{if(isFlipped)rate(true);else flipCard();}
+);
 </script>
 </body>
 </html>

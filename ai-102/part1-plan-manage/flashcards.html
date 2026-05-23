@@ -300,6 +300,7 @@
 <script src="../../scripts/common.js"></script>
 <script>
 const ALL_CARDS = STUDY_DATA.cards.filter(c => c.p === 'p1');
+const FC_KEY = 'ai102_fc_p1';
 
 // ─────────────────────────────────────────────
 // ENGINE
@@ -307,7 +308,7 @@ const ALL_CARDS = STUDY_DATA.cards.filter(c => c.p === 'p1');
 let deck       = [];        // current active deck (filtered + shuffled)
 let pointer    = 0;         // current card index
 let isFlipped  = false;
-let rated      = {};        // {index: true/false}
+let rated      = {};        // {term: true/false} — keyed by card.term for persistence
 let allCards   = [...ALL_CARDS];
 
 const catColors = {
@@ -324,7 +325,7 @@ function buildDeck(cat) {
     : allCards.filter(c => c.cat === cat);
   pointer  = 0;
   isFlipped = false;
-  rated    = {};
+  rated    = FlashcardRatings.load(FC_KEY);
   renderCard();
   updateStats();
   document.getElementById('fc-complete').classList.remove('show');
@@ -370,7 +371,7 @@ function renderCard() {
   document.getElementById('rating-note').textContent = 'Flip the card first, then rate your confidence';
 
   // Apply card border colour based on previous rating
-  const wasRated = rated[pointer];
+  const wasRated = rated[deck[pointer].term];
   fcEl.style.borderColor = wasRated === true
     ? 'rgba(16,185,129,0.5)'
     : wasRated === false
@@ -402,7 +403,8 @@ function navigate(dir) {
 }
 
 function rate(known) {
-  rated[pointer] = known;
+  rated[deck[pointer].term] = known;
+  FlashcardRatings.save(FC_KEY, rated);
   updateStats();
 
   // Auto-advance
@@ -416,15 +418,15 @@ function rate(known) {
 
 function updateStats() {
   const total   = deck.length;
-  const knownN  = Object.values(rated).filter(v => v === true).length;
-  const unknownN= Object.values(rated).filter(v => v === false).length;
+  const knownN  = deck.filter(c => rated[c.term] === true).length;
+  const unknownN = deck.filter(c => rated[c.term] === false).length;
   document.getElementById('stat-total').textContent   = total;
   document.getElementById('stat-known').textContent   = knownN;
   document.getElementById('stat-unknown').textContent = unknownN;
 }
 
 function showComplete() {
-  const knownN = Object.values(rated).filter(v => v === true).length;
+  const knownN = deck.filter(c => rated[c.term] === true).length;
   const pct    = Math.round((knownN / deck.length) * 100);
   document.getElementById('fc-final-score').textContent = `${pct}%`;
 
@@ -473,15 +475,13 @@ function resetDeck() {
 }
 
 function reviewUnknown() {
-  const unknowns = Object.entries(rated)
-    .filter(([,v]) => v === false)
-    .map(([i]) => deck[parseInt(i)]);
+  const unknowns = deck.filter(c => rated[c.term] === false);
   if (!unknowns.length) {
     alert('No unknowns to review — all cards marked as known!');
     return;
   }
   deck    = unknowns;
-  pointer = 0; isFlipped = false; rated = {};
+  pointer = 0; isFlipped = false; rated = FlashcardRatings.load(FC_KEY);
   renderCard(); updateStats();
   document.getElementById('fc-complete').classList.remove('show');
   document.getElementById('fc-wrapper').style.display = '';
@@ -510,6 +510,12 @@ document.addEventListener('keydown', e => {
 
 // Init
 buildDeck('all');
+
+// Swipe support: right = Got it, left = Need review (only after flip)
+initFCSwipe(document.getElementById('fc-card'),
+  () => { if (isFlipped) rate(false); },
+  () => { if (isFlipped) rate(true); else flipCard(); }
+);
 </script>
 </body>
 </html>

@@ -249,12 +249,26 @@ const QuizEngine = (() => {
 
   let _state = {};
 
+  function _shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
   function init(containerId) {
     const container = document.getElementById(containerId) || document.querySelector('[data-quiz]');
     if (!container) return;
 
-    const questions = Array.from(container.querySelectorAll('[data-question]'));
-    if (!questions.length) return;
+    const rawQs = Array.from(container.querySelectorAll('[data-question]'));
+    if (!rawQs.length) return;
+
+    // Shuffle questions each session for varied practice
+    const parent = rawQs[0].parentNode;
+    const questions = _shuffle(rawQs);
+    questions.forEach(q => parent.appendChild(q));
 
     const topicId = container.dataset.quiz;
 
@@ -380,6 +394,22 @@ const QuizEngine = (() => {
 
     const pct = Math.round((s.score / s.questions.length) * 100);
 
+    // Persist score history
+    let lastNote = '';
+    try {
+      const scoreKey = `ai102_quiz_${s.topicId}`;
+      const history = JSON.parse(localStorage.getItem(scoreKey) || '[]');
+      if (history.length >= 1) {
+        const prev = history[history.length - 1];
+        const diff = pct - prev.pct;
+        const col = diff >= 0 ? 'var(--green-400)' : 'var(--red-400)';
+        lastNote = `<p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:var(--space-4)">Last attempt: ${prev.pct}% &nbsp;<span style="color:${col}">${diff >= 0 ? '↑' : '↓'}${Math.abs(diff)}pp</span></p>`;
+      }
+      history.push({ pct, score: s.score, total: s.questions.length, ts: Date.now() });
+      if (history.length > 10) history.shift();
+      localStorage.setItem(scoreKey, JSON.stringify(history));
+    } catch {}
+
     let emoji = '😰', message = 'Keep studying — you\'ve got this!';
     if (pct >= 90) { emoji = '🏆'; message = 'Outstanding! Exam-ready!'; }
     else if (pct >= 75) { emoji = '✅'; message = 'Great work! Review the misses.'; }
@@ -390,7 +420,8 @@ const QuizEngine = (() => {
         <div style="font-size:3rem;margin-bottom:var(--space-4)">${emoji}</div>
         <div class="quiz-result-score">${pct}%</div>
         <p style="color:var(--text-secondary);margin-bottom:var(--space-2)">${s.score} of ${s.questions.length} correct</p>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:var(--space-8)">${message}</p>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:var(--space-4)">${message}</p>
+        ${lastNote}
         <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
           <button class="btn btn-secondary" onclick="QuizEngine.restart('${cid}')">🔄 Retry Quiz</button>
           <button class="btn btn-primary" onclick="QuizEngine.review('${cid}')">📖 Review Answers</button>
@@ -405,6 +436,10 @@ const QuizEngine = (() => {
   function restart(cid) {
     const s = _state[cid];
     if (!s) return;
+    // Re-shuffle on retry
+    const parent = s.questions[0].parentNode;
+    s.questions = _shuffle(s.questions);
+    s.questions.forEach(q => parent.appendChild(q));
     s.current = 0;
     s.score   = 0;
     s.answered = new Array(s.questions.length).fill(null);
@@ -1335,6 +1370,122 @@ function switchCourse() {
   window.location.href = '../'.repeat(segs.length) + 'index.html';
 }
 
+/* ============================================================
+   FLASHCARD RATING PERSISTENCE
+   Saves Known/Review ratings per deck across sessions.
+   Key format: 'ai102_fc_p1', 'ai102_fc_p2', etc.
+   rated object: { cardIndex: true/false }
+   ============================================================ */
+const FlashcardRatings = {
+  load(key) {
+    try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; }
+  },
+  save(key, rated) {
+    try { localStorage.setItem(key, JSON.stringify(rated)); } catch {}
+  },
+  clear(key) {
+    try { localStorage.removeItem(key); } catch {}
+  }
+};
+
+/* ============================================================
+   SWIPE SUPPORT FOR FLASHCARDS
+   Call: initFCSwipe(cardEl, onSwipeLeft, onSwipeRight)
+   Threshold: 50px horizontal movement, must exceed vertical.
+   ============================================================ */
+function initFCSwipe(cardEl, onLeft, onRight) {
+  let sx = 0, sy = 0;
+  cardEl.addEventListener('touchstart', e => {
+    sx = e.changedTouches[0].clientX;
+    sy = e.changedTouches[0].clientY;
+  }, { passive: true });
+  cardEl.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      if (dx < 0) onLeft(); else onRight();
+    }
+  });
+}
+
+/* ============================================================
+   DARK / LIGHT MODE TOGGLE
+   Toggles 'light-mode' class on body; persists to localStorage.
+   ============================================================ */
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-mode');
+  try { localStorage.setItem('ai102_theme', isLight ? 'light' : 'dark'); } catch {}
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = isLight ? '🌙' : '☀️';
+}
+
+// Apply saved theme before first render to prevent FOUC
+(function() {
+  try {
+    if (localStorage.getItem('ai102_theme') === 'light') {
+      document.body.classList.add('light-mode');
+    }
+  } catch {}
+})();
+
+/* ============================================================
+   PROGRESS EXPORT / IMPORT
+   ============================================================ */
+function exportProgress() {
+  const data = {};
+  ['ai102_progress','ai102_settings','ai102_exam_date','csa_progress'].forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v) data[k] = JSON.parse(v);
+  });
+  // Include quiz score history
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('ai102_quiz_')) {
+      try { data[k] = JSON.parse(localStorage.getItem(k)); } catch {}
+    }
+    if (k && k.startsWith('ai102_fc_')) {
+      try { data[k] = JSON.parse(localStorage.getItem(k)); } catch {}
+    }
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `study-progress-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importProgress() {
+  const input = document.createElement('input');
+  input.type  = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        Object.entries(data).forEach(([k, v]) => {
+          localStorage.setItem(k, JSON.stringify(v));
+        });
+        alert('Progress imported! Reloading...');
+        location.reload();
+      } catch {
+        alert('Invalid progress file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+window.FlashcardRatings = FlashcardRatings;
+window.initFCSwipe      = initFCSwipe;
+window.toggleTheme      = toggleTheme;
+window.exportProgress   = exportProgress;
+window.importProgress   = importProgress;
 
 const SidebarTemplate = (p) => `
 <aside class="sidebar">

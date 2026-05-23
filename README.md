@@ -1,100 +1,133 @@
-# AI-102 Study Hub
+# Certification Study Hub
 
-> A self-contained, browser-based study platform for the **Microsoft Azure AI Engineer Associate (AI-102)** certification exam.
-
-No build tools. No dependencies. Open `index.html` in any browser and start studying.
+> A self-contained, browser-based study platform for professional certification exams. No build tools. No dependencies. Open `index.html` in any browser and start studying.
 
 ---
 
-## Overview 
+## Certifications Covered
 
-The AI-102 Study Hub is a static web app that organises all six exam domains into structured topic pages, interactive flashcards, and practice quizzes — all tied together through a central Revision Center with exam-day countdown.
+| Certification | Exam | Domains | Topics | Status |
+|---|---|---|---|---|
+| Microsoft Azure AI Engineer Associate | AI-102 | 6 | 18 | Active (retires Jun 30 2026) |
+| ServiceNow Certified System Administrator | CSA · Zurich | 6 | 22+ | Active |
 
 ---
 
 ## Features
 
 ### 📖 Topic Study Pages
-Each exam objective gets a dedicated page structured for retention, not just reference:
-- **Real-world analogies** — concepts explained through hospital systems, restaurants, and other relatable comparisons before going technical
-- **Python code examples** — SDK snippets alongside every key service
-- **Term cards** — scannable definitions for every Azure service and concept
-- **Decision trees** — step-by-step guidance for choosing between services (e.g. when to use Document Intelligence vs AI Search)
-- **Exam Tips** — clearly marked callout boxes flagging exactly what the exam tests on each topic
-- **Common traps** — highlighted warnings for renamed services, legacy package names, and gotchas that trip up candidates (e.g. `azure-ai-formrecognizer` is still the pip package for Document Intelligence)
-- **Read-time estimates and exam weight indicators** per topic
+Each exam objective gets a dedicated page structured for retention:
+- **Real-world analogies** — concepts explained through relatable comparisons before going technical
+- **Code examples** — SDK snippets alongside every key service
+- **Term cards** — scannable definitions for every service and concept
+- **Decision trees** — guidance for choosing between services
+- **Exam Tips** — callout boxes flagging exactly what the exam tests
+- **Common traps** — warnings for renamed services, legacy packages, and gotchas
 
 ### 🃏 Flashcards
-- **3D flip animation** — click to reveal definition
+- **3D flip animation** — click or swipe to reveal definition
+- **Mobile swipe gestures** — swipe right = Known, swipe left = Need Review
 - **Category filter pills** — narrow cards to a specific sub-topic
-- **Self-rating** — mark each card as "Got It" or "Need Review" to track weak spots
-- **Exam Tip card type** — dedicated tip cards mixed in with term cards
+- **Self-rating** — mark each card as "Got It" or "Need Review"
+- **Persistent ratings** — Known/Review state saved across sessions
+- **Spaced repetition** — Leitner system scheduling; dashboard shows cards due today
 
 ### ✅ Practice Quizzes
-- **20 scenario-based questions per part** — written in the same style as real AI-102 exam questions
-- **Instant answer reveal** — selecting an option immediately shows whether you're right and why, with a full explanation
-- **Question navigator dots** — colour-coded (current / correct / incorrect / answered) so you can jump to any question
-- **Live score + progress bar** — updates as you answer
-- **Per-topic score breakdown** — end screen shows your score split by topic so you know exactly where to focus
+- **Scenario-based questions** — written in the same style as real exam questions
+- **Random order** — questions shuffle on each load and retake
+- **Exam mode** — answer all questions first, then review all results at once
+- **Instant answer reveal** (standard mode) — shows explanation immediately
+- **Per-topic score breakdown** — end screen shows score split by topic
+- **Persistent scores** — score history saved per course
 
 ### 🧠 Revision Center
 A unified study session without page-hopping:
-1. **Pick a domain** → select from all 6 parts
-2. **Pick a topic** → drill into a specific objective
-3. **Read the recap** — a bullet-point summary of key facts with amber-highlighted **TRAP** items for common exam mistakes
-4. **Run the flashcards** — Known / Review rating with progress stats (total cards, known count, review count)
-5. **See your score** — animated SVG score circle on completion
+1. Pick a domain, pick a topic
+2. Read the recap — bullet-point key facts with **TRAP** callouts
+3. Run the flashcards — Known / Review rating with progress stats
+4. See your score — animated SVG score circle on completion
 
 ### ⏱️ Exam Countdown
-- Set your exam date once; the dashboard and every topic page show days remaining
-- Persisted to `localStorage` — survives page refreshes
+- Set your exam date; dashboard shows days remaining
+- Persisted to `localStorage`
+
+### 🔍 Search
+- Instant client-side search across all terms and definitions
+- Works across all courses without leaving the page
+
+### 📤 Progress Export / Import
+- Download progress as JSON for cross-device sync
+- Import to restore your progress on another machine
 
 ### 🎨 Dark Glassmorphism UI
-- Consistent dark theme with glass/blur effects across all pages
-- CSS custom property design token system — colours, spacing, typography all centralised in `main.css`
-- Responsive sidebar navigation with mobile hamburger menu
+- Consistent dark theme with glass/blur effects
+- CSS custom property design token system
+- Responsive sidebar with mobile hamburger menu
+- Dark / light mode toggle
 
 ---
 
-## Exam Domains Covered
+## AI-102: Azure AI Engineer Associate
+
+### Exam Domains Covered
 
 | Part | Domain | Topics |
 |---|---|---|
-| 1 | Plan & Manage an Azure AI Solution | Azure AI Foundry services, Plan/Create/Deploy, Security & Auth, Monitoring, Responsible AI |
+| 1 | Plan & Manage an Azure AI Solution | Foundry services, Plan/Create/Deploy, Security, Monitoring, Responsible AI |
 | 2 | Implement Generative AI Solutions | Foundry & RAG, Azure OpenAI, Optimize & Operationalize |
 | 3 | Implement an Agentic Solution | Custom Agents |
 | 4 | Implement Natural Language Processing | Analyze & Translate Text, Speech, Custom Language Models |
 | 5 | Knowledge Mining & Info Extraction | Azure AI Search, Document Intelligence, Content Understanding |
 | 6 | Computer Vision | Analyze Images, Custom Vision Models, Video Analysis |
 
+> **Note:** AI-102 retires **June 30, 2026**. The replacement exam is AI-305.
+
+---
+
+## ServiceNow CSA: Certified System Administrator
+
+### Exam Domains Covered
+
+| Domain | Topics |
+|---|---|
+| UI & Navigation | Instance navigation, lists, forms, filters |
+| Instance Configuration | Branding, plugins, update sets |
+| Flow Designer | Automation, subflows, actions |
+| Database & Tables | Table schema, relationships, ACLs |
+| Security | Roles, groups, access controls |
+| Performance & Reporting | Dashboards, reports, metrics |
+
 ---
 
 ## Project Structure
 
 ```
-AI-102 Certification/
-├── index.html                    # Dashboard (exam countdown, part overview)
-├── revision.html                 # Central revision center (flashcards across all parts)
+Certification-Study-Hub/
+├── index.html                    # Course selector portal
+├── revision.html                 # AI-102 revision center
 ├── styles/
 │   └── main.css                  # Shared design system (tokens, glassmorphism)
 ├── scripts/
-│   ├── common.js                 # Shared navigation and utilities
+│   ├── common.js                 # Shared navigation, sidebar, utilities
+│   ├── engine.js                 # Generic course engine (CSA)
 │   └── study-data.js             # Centralised flashcard and topic metadata
-├── part1-plan-manage/
-│   ├── index.html                # Part overview page
-│   ├── flashcards.html           # Part-specific flashcards
-│   ├── quiz.html                 # Part-specific quiz
-│   └── topics/
-│       ├── 01-foundry-services.html
-│       ├── 02-plan-create-deploy.html
-│       ├── 03-security.html
-│       ├── 04-monitor.html
-│       └── 05-responsible-ai.html
-├── part2-generative-ai/          # Same structure
-├── part3-agentic/                # Same structure
-├── part4-nlp/                    # Same structure
-├── part5-knowledge-mining/       # Same structure
-└── part6-computer-vision/        # Same structure
+├── ai-102/
+│   ├── index.html                # AI-102 dashboard
+│   ├── config.js                 # AI-102 course root marker
+│   ├── part1-plan-manage/
+│   │   ├── index.html
+│   │   ├── flashcards.html
+│   │   ├── quiz.html
+│   │   └── topics/
+│   ├── part2-generative-ai/      # Same structure
+│   ├── part3-agentic/            # Same structure
+│   ├── part4-nlp/                # Same structure
+│   ├── part5-knowledge-mining/   # Same structure
+│   └── part6-computer-vision/    # Same structure
+└── servicenow-csa/
+    ├── index.html                # CSA dashboard
+    ├── config.js                 # CSA course config
+    └── topics/                   # CSA topic pages
 ```
 
 ---
@@ -104,9 +137,8 @@ AI-102 Certification/
 ### Local
 
 ```bash
-# Clone the repo
-git clone https://github.com/<your-username>/AI-102-Study-Hub.git
-cd AI-102-Study-Hub
+git clone https://github.com/jijo09/Certification-Study-Hub.git
+cd Certification-Study-Hub
 
 # Open in browser (no server needed)
 start index.html        # Windows
@@ -119,7 +151,7 @@ xdg-open index.html     # Linux
 1. Push to GitHub
 2. Go to **Settings → Pages**
 3. Set source to `main` branch, root `/`
-4. Site live at `https://<your-username>.github.io/<repo-name>/`
+4. Site live at `https://jijo09.github.io/Certification-Study-Hub/`
 
 ---
 
@@ -128,16 +160,15 @@ xdg-open index.html     # Linux
 - **HTML5 / CSS3 / Vanilla JS** — zero external dependencies
 - **CSS custom properties** — centralised design token system
 - **CSS 3D transforms** — flashcard flip animations
-- **localStorage** — exam date persistence
+- **localStorage** — all progress, ratings, and preferences persisted locally
 - No frameworks, no build step, no npm
 
 ---
 
-## Exam Reference
+## Exam References
 
-- **Exam:** [AI-102: Designing and Implementing a Microsoft Azure AI Solution](https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-engineer/)
-- **Format:** 40–60 questions, 120 minutes, passing score ~700/1000
-- **Skills measured:** Plan & manage · Generative AI · Agentic solutions · NLP · Knowledge mining · Computer vision
+- **AI-102:** [Designing and Implementing a Microsoft Azure AI Solution](https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-engineer/)
+- **CSA:** [ServiceNow Certified System Administrator](https://www.servicenow.com/services/training-and-certification/certified-system-administrator.html)
 
 ---
 

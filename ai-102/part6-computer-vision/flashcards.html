@@ -114,22 +114,24 @@ const cats={
   t3:{bg:'rgba(124,58,237,.15)',c:'#c084fc',l:'T3 Video & Spatial'}
 };
 const ALL = STUDY_DATA.cards.filter(c => c.p === 'p6').map(c => ({ k: c.t, t: c.term, d: c.def }));
-let deck=[...ALL],ptr=0,flipped=false,rated={};
+const FC_KEY='ai102_fc_p6';
+let deck=[...ALL],ptr=0,flipped=false,rated=FlashcardRatings.load(FC_KEY);
 const s=id=>document.getElementById(id),se=(id,d)=>{s(id).style.display=d};
-function buildDeck(cat){deck=cat==='all'?[...ALL]:ALL.filter(c=>c.k===cat);ptr=0;flipped=false;rated={};['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}
+function buildDeck(cat){deck=cat==='all'?[...ALL]:ALL.filter(c=>c.k===cat);ptr=0;flipped=false;rated=FlashcardRatings.load(FC_KEY);['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}
 document.getElementById('catbar').addEventListener('click',e=>{const p=e.target.closest('.cat-pill');if(!p)return;document.querySelectorAll('.cat-pill').forEach(x=>x.classList.remove('active'));p.classList.add('active');buildDeck(p.dataset.cat);});
-function render(){const c=deck[ptr],col=cats[c.k];s('fcc').classList.remove('flipped');flipped=false;s('fct').textContent=c.t;s('fcd').textContent=c.d;s('ftag').textContent=col.l;s('ftag').style.background=col.bg;s('ftag').style.color=col.c;s('fcctr').textContent=`${ptr+1} / ${deck.length}`;s('fcp').style.width=`${((ptr+1)/deck.length)*100}%`;s('bp').disabled=ptr===0;s('bn').disabled=ptr===deck.length-1;setR(false);s('fcnote').textContent='Flip the card first, then rate your confidence';const w=rated[ptr];s('fcc').style.borderColor=w===true?'rgba(16,185,129,.5)':w===false?'rgba(239,68,68,.4)':'';}
+function render(){const c=deck[ptr],col=cats[c.k];s('fcc').classList.remove('flipped');flipped=false;s('fct').textContent=c.t;s('fcd').textContent=c.d;s('ftag').textContent=col.l;s('ftag').style.background=col.bg;s('ftag').style.color=col.c;s('fcctr').textContent=`${ptr+1} / ${deck.length}`;s('fcp').style.width=`${((ptr+1)/deck.length)*100}%`;s('bp').disabled=ptr===0;s('bn').disabled=ptr===deck.length-1;setR(false);s('fcnote').textContent='Flip the card first, then rate your confidence';const w=rated[c.t];s('fcc').style.borderColor=w===true?'rgba(16,185,129,.5)':w===false?'rgba(239,68,68,.4)':'';}
 function flip(){s('fcc').classList.toggle('flipped');flipped=!flipped;if(flipped){setR(true);s('fcnote').textContent='How well did you know this?';}}
 function setR(e){s('bknw').disabled=!e;s('bunk').disabled=!e;}
 function nav(d){const n=ptr+d;if(n<0||n>=deck.length)return;ptr=n;render();upd();}
-function rate(k){rated[ptr]=k;upd();if(ptr<deck.length-1){ptr++;render();}else done();}
-function upd(){s('st').textContent=deck.length;s('sk').textContent=Object.values(rated).filter(v=>v===true).length;s('su').textContent=Object.values(rated).filter(v=>v===false).length;}
-function done(){const k=Object.values(rated).filter(v=>v===true).length,p=Math.round(k/deck.length*100);s('fcs').textContent=`${p}%`;s('fcmsg').textContent=['💪 Keep practising!','📚 Getting there!','✅ Great work!','🏆 Part 6 mastered!'][p>=90?3:p>=75?2:p>=50?1:0];s('fcdone').classList.add('show');['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,'none'));}
-function shuffle(){for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}ptr=0;flipped=false;rated={};['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}
-function reset(){deck=[...ALL];ptr=0;flipped=false;rated={};['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');document.querySelectorAll('.cat-pill').forEach(p=>{p.classList.toggle('active',p.dataset.cat==='all');});render();upd();}
-function reviewUnknown(){const u=Object.entries(rated).filter(([,v])=>v===false).map(([i])=>deck[parseInt(i)]);if(!u.length){alert('No unknowns!');return;}deck=u;ptr=0;flipped=false;rated={};['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}
+function rate(k){rated[deck[ptr].t]=k;FlashcardRatings.save(FC_KEY,rated);upd();if(ptr<deck.length-1){ptr++;render();}else done();}
+function upd(){s('st').textContent=deck.length;s('sk').textContent=deck.filter(c=>rated[c.t]===true).length;s('su').textContent=deck.filter(c=>rated[c.t]===false).length;}
+function done(){const k=deck.filter(c=>rated[c.t]===true).length,p=Math.round(k/deck.length*100);s('fcs').textContent=`${p}%`;s('fcmsg').textContent=['💪 Keep practising!','📚 Getting there!','✅ Great work!','🏆 Part 6 mastered!'][p>=90?3:p>=75?2:p>=50?1:0];s('fcdone').classList.add('show');['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,'none'));}
+function shuffle(){for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}ptr=0;flipped=false;rated=FlashcardRatings.load(FC_KEY);['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}
+function reset(){deck=[...ALL];ptr=0;flipped=false;rated=FlashcardRatings.load(FC_KEY);['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');document.querySelectorAll('.cat-pill').forEach(p=>{p.classList.toggle('active',p.dataset.cat==='all');});render();upd();}
+function reviewUnknown(){const u=deck.filter(c=>rated[c.t]===false);if(!u.length){alert('No unknowns!');return;}deck=u;ptr=0;flipped=false;rated=FlashcardRatings.load(FC_KEY);['fcw','fcn','fcr','fcnote'].forEach(id=>se(id,''));s('fcdone').classList.remove('show');render();upd();}
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nav(1);if(e.key==='ArrowLeft')nav(-1);if(e.key===' '&&!e.target.matches('button,input')){e.preventDefault();flip();}});
 render();upd();
+initFCSwipe(s('fcc'),()=>{if(flipped)rate(false);},()=>{if(flipped)rate(true);else flip();});
 </script>
 </body>
 </html>
