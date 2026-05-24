@@ -1415,15 +1415,16 @@ function initFCSwipe(cardEl, onLeft, onRight) {
    ============================================================ */
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light-mode');
-  try { localStorage.setItem('ai102_theme', isLight ? 'light' : 'dark'); } catch {}
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn) btn.textContent = isLight ? '🌙' : '☀️';
+  try { localStorage.setItem('prepassist_theme', isLight ? 'light' : 'dark'); } catch {}
+  document.querySelectorAll('.theme-toggle-btn').forEach(b => {
+    b.textContent = isLight ? '🌙' : '☀️';
+  });
 }
 
 // Apply saved theme before first render to prevent FOUC
 (function() {
   try {
-    if (localStorage.getItem('ai102_theme') === 'light') {
+    if (localStorage.getItem('prepassist_theme') === 'light') {
       document.body.classList.add('light-mode');
     }
   } catch {}
@@ -1591,7 +1592,7 @@ SidebarManager.injectAndInit = function() {
 
     container.outerHTML = SidebarTemplate(p);
 
-    // Inject "All Courses" button into topbar
+    // Inject "All Courses" button into topbar (left side)
     document.querySelectorAll('.topbar').forEach(topbar => {
       if (!topbar.querySelector('.back-to-hub-btn')) {
         const btn = document.createElement('button');
@@ -1599,6 +1600,17 @@ SidebarManager.injectAndInit = function() {
         btn.textContent = 'All Courses';
         btn.onclick = switchCourse;
         topbar.insertBefore(btn, topbar.firstChild);
+      }
+      // Inject theme toggle at right end of every topbar
+      if (!topbar.querySelector('.theme-toggle-btn')) {
+        const tb = document.createElement('button');
+        tb.className = 'theme-toggle-btn';
+        tb.id = 'theme-toggle-btn';
+        tb.title = 'Toggle dark/light mode';
+        tb.style.marginLeft = 'auto';
+        tb.textContent = document.body.classList.contains('light-mode') ? '🌙' : '☀️';
+        tb.onclick = toggleTheme;
+        topbar.appendChild(tb);
       }
     });
     

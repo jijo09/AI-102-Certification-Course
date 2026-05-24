@@ -790,7 +790,9 @@ function initProgressBars() {
     const _part = parseInt(_el.dataset.progressPart, 10);
     const _prog = ProgressManager.getPartProgress(_part);
     const _fill = _el.querySelector('.progress-fill');
-    const _pct  = _el.querySelector('[data-progress-pct]');
+    const _pct  = _el.querySelector('[data-progress-pct]') ||
+                  _el.closest('[class]')?.querySelector('[data-progress-pct]') ||
+                  _el.parentElement?.querySelector('[data-progress-pct]');
     if (_fill) _fill.style.width = _prog.pct + '%';
     if (_pct)  _pct.textContent  = _prog.pct + '%';
   });
@@ -1034,6 +1036,20 @@ const SidebarManager = (function () {
         }
       }
     } catch (_e) {}
+
+    // Inject theme toggle button at right end of every topbar
+    document.querySelectorAll('.topbar').forEach(function (_topbar) {
+      if (!_topbar.querySelector('.theme-toggle-btn')) {
+        var _tb = document.createElement('button');
+        _tb.className = 'theme-toggle-btn';
+        _tb.id = 'theme-toggle-btn';
+        _tb.title = 'Toggle dark/light mode';
+        _tb.style.marginLeft = 'auto';
+        _tb.textContent = document.body.classList.contains('light-mode') ? '🌙' : '☀️';
+        _tb.onclick = toggleTheme;
+        _topbar.appendChild(_tb);
+      }
+    });
 
     init();
   }
@@ -1416,6 +1432,27 @@ const CourseEngine = {
 };
 
 /* ============================================================
+   DARK / LIGHT MODE TOGGLE
+   Shared across all PrepAssist courses.
+   ============================================================ */
+function toggleTheme() {
+  var _isLight = document.body.classList.toggle('light-mode');
+  try { localStorage.setItem('prepassist_theme', _isLight ? 'light' : 'dark'); } catch (_e) {}
+  document.querySelectorAll('.theme-toggle-btn').forEach(function (_b) {
+    _b.textContent = _isLight ? '🌙' : '☀️';
+  });
+}
+
+// Apply saved theme before first render (anti-FOUC)
+(function () {
+  try {
+    if (localStorage.getItem('prepassist_theme') === 'light') {
+      document.body.classList.add('light-mode');
+    }
+  } catch (_e) {}
+})();
+
+/* ============================================================
    BOOT — auto-init on DOMContentLoaded
    ============================================================ */
 document.addEventListener('DOMContentLoaded', function () { CourseEngine.init(); });
@@ -1435,3 +1472,4 @@ window.ExamCountdown   = ExamCountdown;
 window.SidebarBuilder  = SidebarBuilder;
 window.SidebarManager  = SidebarManager;
 window.switchCourse    = switchCourse;
+window.toggleTheme     = toggleTheme;

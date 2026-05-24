@@ -175,9 +175,10 @@
 
 /* ── Light Mode Override ── */
 body.light-mode {
+  --mono-950:      #f8fafc;
   --bg-primary:    #f8fafc;
   --bg-secondary:  #f1f5f9;
-  --bg-card:       rgba(255,255,255,0.9);
+  --bg-card:       rgba(255,255,255,0.92);
   --bg-card-hover: rgba(255,255,255,1);
   --bg-deep:       #e2e8f0;
   --surface-2:     rgba(0,0,0,0.04);
@@ -195,6 +196,9 @@ body.light-mode {
   --navy-500: #64748b;
   --shadow-card: 0 2px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05);
   --shadow-glass: 0 4px 24px rgba(0,0,0,0.1), 0 1px 8px rgba(0,0,0,0.06);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(16,185,129,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(16,185,129,0.03) 0%, transparent 60%);
 }
 
 body.light-mode .sidebar {
@@ -214,6 +218,32 @@ body.light-mode .sidebar-item.active { background: rgba(16,185,129,0.1); color: 
 body.light-mode .progress-bar {
   background: rgba(0,0,0,0.1);
   border-color: rgba(0,0,0,0.08);
+}
+
+/* Ghost/secondary buttons: dark text so it's readable on light backgrounds */
+body.light-mode .btn-ghost,
+body.light-mode .btn-secondary {
+  color: #0f172a !important;
+}
+
+/* Code blocks in light mode */
+body.light-mode pre {
+  background: #f1f5f9;
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+body.light-mode code {
+  background: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.1);
+  color: #059669;
+}
+
+/* Cards in light mode */
+body.light-mode .card,
+body.light-mode .bg-card {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
 }
 
 /* Retirement warning banner */
