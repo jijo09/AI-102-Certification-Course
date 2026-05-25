@@ -1,0 +1,9 @@
+# Claude Code local settings
+.claude/
+
+# Graphify extraction cache (auto-regenerated, not for version control)
+graphify-out/cache/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -196,6 +196,33 @@ body.light-mode {
   --navy-500: #64748b;
   --shadow-card: 0 2px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05);
   --shadow-glass: 0 4px 24px rgba(0,0,0,0.1), 0 1px 8px rgba(0,0,0,0.06);
+
+  /* Mono scale: dark-mode has navy-ish darks; light-mode inverts to slate grays */
+  --mono-900: #f1f5f9;
+  --mono-800: #e2e8f0;
+  --mono-750: #cbd5e1;
+  --mono-700: #94a3b8;
+  --mono-600: #64748b;
+  --mono-500: #475569;
+  --mono-400: #334155;
+  --mono-300: #1e293b;
+  --mono-200: #0f172a;
+
+  /* Glass surfaces → subtle light grays (dark-mode uses white-transparent which vanishes on light bg) */
+  --glass-0:    rgba(0,0,0,0.01);
+  --glass-1:    rgba(0,0,0,0.025);
+  --glass-2:    rgba(0,0,0,0.045);
+  --glass-3:    rgba(0,0,0,0.07);
+  --glass-4:    rgba(0,0,0,0.10);
+  --glass-em:   rgba(16,185,129,0.07);
+  --glass-em-h: rgba(16,185,129,0.13);
+  /* Glass borders → dark-transparent (dark-mode uses white-transparent = invisible on light bg) */
+  --gb-white:   rgba(0,0,0,0.10);
+  --gb-white-h: rgba(0,0,0,0.16);
+  /* Elevated surface */
+  --bg-elevated: rgba(0,0,0,0.03);
+  --surface-2:   rgba(0,0,0,0.04);
+
   background-image:
     radial-gradient(ellipse 80% 50% at 10% -10%, rgba(16,185,129,0.04) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 90% 110%, rgba(16,185,129,0.03) 0%, transparent 60%);
@@ -205,6 +232,14 @@ body.light-mode .sidebar {
   background: #fff;
   border-right: 1px solid rgba(0,0,0,0.1);
 }
+
+body.light-mode .sidebar-logo {
+  background: rgba(255,255,255,0.95);
+  border-bottom-color: rgba(0,0,0,0.08);
+}
+
+body.light-mode .sidebar-logo-text { color: #0f172a; }
+body.light-mode .sidebar-logo-sub  { color: #64748b; }
 
 body.light-mode .topbar {
   background: rgba(255,255,255,0.95);
@@ -226,6 +261,28 @@ body.light-mode .btn-secondary {
   color: #0f172a !important;
 }
 
+/* Primary/success buttons: solid emerald bg with white text (pale glass invisible on white) */
+body.light-mode .btn-primary {
+  background: #059669 !important;
+  border-color: #047857 !important;
+  color: #ffffff !important;
+}
+body.light-mode .btn-primary:hover:not(:disabled) {
+  background: #047857 !important;
+  border-color: #065f46 !important;
+  color: #ffffff !important;
+}
+body.light-mode .btn-success {
+  background: #059669 !important;
+  border-color: #047857 !important;
+  color: #ffffff !important;
+}
+body.light-mode .btn-success:hover:not(:disabled) {
+  background: #047857 !important;
+  border-color: #065f46 !important;
+  color: #ffffff !important;
+}
+
 /* Code blocks in light mode */
 body.light-mode pre {
   background: #f1f5f9;
@@ -244,6 +301,324 @@ body.light-mode .card,
 body.light-mode .bg-card {
   background: var(--bg-card);
   border-color: var(--border-subtle);
+}
+
+/* ── Light mode element fixes ── */
+
+/* Utility text classes (global contrast fix uses !important, override here) */
+body.light-mode .text-primary  { color: #0f172a !important; }
+body.light-mode .text-secondary { color: #334155 !important; }
+
+/* Global contrast fix forces #fff on these — override for light mode */
+body.light-mode .part-btn,
+body.light-mode .topic-btn,
+body.light-mode .rating-btn,
+body.light-mode .part-btn-title,
+body.light-mode .topic-btn-title { color: var(--text-primary) !important; }
+
+/* Selector card button: glass bg + white text = invisible in light mode */
+body.light-mode .selector-card-btn {
+  color: var(--text-primary) !important;
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.1);
+}
+
+/* Back-to-hub button: glass bg looks wrong; hover white text invisible */
+body.light-mode .back-to-hub-btn {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.1);
+}
+body.light-mode .back-to-hub-btn:hover {
+  color: var(--text-primary) !important;
+  background: rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.14);
+}
+
+/* wh-footer divider: white-transparent invisible on white bg */
+body.light-mode .wh-footer { border-top-color: rgba(0,0,0,0.08); }
+
+/* em / strong inherit correctly via --text-* but amber-300 em is too pale */
+body.light-mode em { color: #92400e; }
+
+/* Links: emerald-400 (#34d399) is too pale on white; use darker emerald */
+body.light-mode a { color: #059669; }
+body.light-mode a:hover { color: #047857; }
+
+/* Topbar breadcrumb separator */
+body.light-mode .topbar-breadcrumb .sep { color: rgba(0,0,0,0.3); }
+
+/* Scrollbar */
+body.light-mode ::-webkit-scrollbar-track { background: #e2e8f0; }
+body.light-mode ::-webkit-scrollbar-thumb { background: #94a3b8; }
+
+/* Term cards — solid white so they stand out on the light bg */
+body.light-mode .term-card {
+  background: rgba(255,255,255,0.9);
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+}
+body.light-mode .term-card::before { display: none; }
+body.light-mode .term-card:hover {
+  background: #fff;
+  border-color: rgba(16,185,129,0.35);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 0 0 2px rgba(16,185,129,0.1);
+}
+
+/* Section blocks */
+body.light-mode .section-block {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(0,0,0,0.09);
+}
+
+/* Callout boxes: invisible borders & too-pale text in light mode */
+body.light-mode .callout,
+body.light-mode [class^="callout-"],
+body.light-mode [class*=" callout-"] {
+  border-top-color: rgba(0,0,0,0.06);
+  border-right-color: rgba(0,0,0,0.05);
+  border-bottom-color: rgba(0,0,0,0.06);
+}
+
+body.light-mode .callout-concept { background: rgba(59,130,246,0.07); color: #1e3a8a; }
+body.light-mode .callout-concept .callout-title,
+body.light-mode .callout-concept .callout-body strong { color: #1d4ed8; }
+
+body.light-mode .callout-exam { background: rgba(245,158,11,0.08); color: #78350f; }
+body.light-mode .callout-exam .callout-title,
+body.light-mode .callout-exam .callout-body strong { color: #92400e; }
+
+body.light-mode .callout-tip { background: rgba(16,185,129,0.08); color: #064e3b; }
+body.light-mode .callout-tip .callout-title,
+body.light-mode .callout-tip .callout-body strong { color: #065f46; }
+
+body.light-mode .callout-warning,
+body.light-mode .callout-warn { background: rgba(220,38,38,0.07); color: #7f1d1d; }
+body.light-mode .callout-warning .callout-title,
+body.light-mode .callout-warn .callout-title,
+body.light-mode .callout-warning .callout-body strong,
+body.light-mode .callout-warn .callout-body strong { color: #991b1b; }
+
+body.light-mode .callout-analogy { background: rgba(124,58,237,0.07); color: #3b0764; }
+body.light-mode .callout-analogy .callout-title,
+body.light-mode .callout-analogy .callout-body strong { color: #5b21b6; }
+
+body.light-mode .callout-info { background: rgba(14,165,233,0.07); color: #0c4a6e; }
+body.light-mode .callout-info .callout-title,
+body.light-mode .callout-info .callout-body strong { color: #0369a1; }
+
+/* Headings — gradient text (#fff → pastel) invisible on light bg */
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3,
+body.light-mode h4 {
+  -webkit-text-fill-color: var(--text-primary);
+  background: none;
+}
+
+/* Part-hero and topic-header — page-specific dark gradient backgrounds */
+body.light-mode .part-hero {
+  background: linear-gradient(135deg, rgba(16,185,129,0.10) 0%, rgba(16,185,129,0.04) 100%) !important;
+  border-color: rgba(16,185,129,0.25) !important;
+}
+body.light-mode .part-hero::before {
+  background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%);
+}
+body.light-mode .topic-header {
+  background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(99,102,241,0.04) 100%) !important;
+  border-color: rgba(99,102,241,0.2) !important;
+}
+body.light-mode .topic-header::before {
+  background: radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%);
+}
+
+/* Part-hero text — gradient text needs solid color in light mode */
+body.light-mode .part-hero-title,
+body.light-mode .part-hero-desc,
+body.light-mode .topic-title {
+  -webkit-text-fill-color: var(--text-primary);
+  background: none;
+  color: var(--text-primary);
+}
+
+/* Part-hero eyebrow & meta readable in light mode */
+body.light-mode .part-hero-eyebrow { color: #065f46; background: rgba(16,185,129,0.1); }
+body.light-mode .meta-value { color: #047857; }
+body.light-mode .meta-label { color: var(--text-muted); }
+
+/* Dashboard hero — hardcoded dark gradients in both AI-102 and CSA */
+body.light-mode .hero {
+  background: linear-gradient(135deg, rgba(255,255,255,0.97) 0%, #f1f5f9 100%) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
+}
+body.light-mode .hero::before,
+body.light-mode .hero::after { opacity: 0.4; }
+
+/* Accent text: violet/blue light variants unreadable on white */
+/* CSA violet theme */
+body.light-mode.theme-csa .hero-eyebrow {
+  color: #5b21b6;
+  background: rgba(124,58,237,0.08);
+  border-color: rgba(124,58,237,0.22);
+}
+body.light-mode.theme-csa .op-pct        { color: #5b21b6; }
+body.light-mode.theme-csa .next-up-title { color: #5b21b6; }
+body.light-mode.theme-csa .part-mini-link:hover { color: #5b21b6; }
+
+/* AI-102 blue theme */
+body.light-mode.theme-ai102 .hero-eyebrow {
+  color: #1d4ed8;
+  background: rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.22);
+}
+body.light-mode.theme-ai102 .op-pct { color: #1d4ed8; }
+
+/* Weight chart track: rgba(255,255,255,0.05) vanishes on white */
+body.light-mode .weight-bar-wrap { background: rgba(0,0,0,0.08); }
+
+/* Part card hover: heavy dark shadow looks wrong on light bg */
+body.light-mode .part-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06) !important;
+}
+
+/* Hero title gradient text — h1.hero-title uses -webkit-text-fill-color */
+body.light-mode .hero-title {
+  -webkit-text-fill-color: var(--text-primary);
+  background: none;
+}
+body.light-mode .hero-sub  { color: var(--text-secondary); }
+body.light-mode .hero-stat-label { color: var(--text-muted); }
+body.light-mode .hero-stat-value { color: var(--text-primary); }
+
+/* Revision center: specific overrides that vars alone don't cover */
+body.light-mode .fc-front { background: linear-gradient(145deg, #e8edf5, #f0f4fb); }
+body.light-mode .fc-back  { background: linear-gradient(145deg, #dde4f0, #e8edf5); }
+body.light-mode .part-btn-icon { background: rgba(0,0,0,0.05); }
+body.light-mode .recap-item { border-bottom-color: rgba(0,0,0,0.06); }
+body.light-mode .recap-item.recap-trap { color: #92400e; }
+body.light-mode .recap-trap-label { color: #92400e; background: rgba(245,158,11,0.12); }
+body.light-mode .topic-btn.active { color: #065f46; }
+body.light-mode .rating-btn.need-review:not(:disabled):hover { color: #991b1b; }
+body.light-mode .rating-btn.got-it:not(:disabled):hover { color: #065f46; }
+
+/* Quiz: correct/incorrect feedback colors too pale on white */
+body.light-mode .quiz-option.correct  .quiz-option-text { color: #065f46; }
+body.light-mode .quiz-option.incorrect .quiz-option-text { color: #991b1b; }
+body.light-mode .quiz-option.selected .quiz-option-letter,
+body.light-mode .quiz-option.correct  .quiz-option-letter { color: #065f46; }
+body.light-mode .quiz-option.incorrect .quiz-option-letter { color: #991b1b; }
+
+/* Quiz sub-sections: rgba(255,255,255,*) bg invisible on white */
+body.light-mode .quiz-header { background: rgba(0,0,0,0.02); }
+body.light-mode .quiz-footer { background: rgba(0,0,0,0.02); }
+body.light-mode .quiz-explanation { background: rgba(0,0,0,0.03); }
+
+/* Tab active: emerald-300 (#6ee7b7) too pale on white */
+body.light-mode .tab-btn.active { color: #047857; }
+body.light-mode .tab-btn:hover  { color: var(--text-primary); }
+
+/* Copy button: emerald-300 too pale on white */
+body.light-mode .copy-btn:hover { color: #047857; }
+body.light-mode .copy-btn.copied { color: #047857; }
+
+/* Badges: pale tints invisible on white bg */
+body.light-mode .badge-blue   { color: #1d4ed8; background: rgba(59,130,246,0.08);  border-color: rgba(59,130,246,0.25); }
+body.light-mode .badge-amber  { color: #92400e; background: rgba(245,158,11,0.1);   border-color: rgba(245,158,11,0.3); }
+body.light-mode .badge-green  { color: #065f46; background: rgba(16,185,129,0.1);   border-color: rgba(16,185,129,0.3); }
+body.light-mode .badge-red    { color: #991b1b; background: rgba(220,38,38,0.08);   border-color: rgba(220,38,38,0.25); }
+body.light-mode .badge-purple { color: #5b21b6; background: rgba(124,58,237,0.08);  border-color: rgba(124,58,237,0.25); }
+body.light-mode .badge-cyan   { color: #0e7490; background: rgba(6,182,212,0.08);   border-color: rgba(6,182,212,0.25); }
+body.light-mode .badge-slate  { color: #334155; background: rgba(100,116,139,0.08); border-color: rgba(100,116,139,0.2); }
+
+/* Sidebar groups: hardcoded rgba(255,255,255,0.02) bg + border = invisible on white */
+body.light-mode .sidebar-group {
+  background: rgba(0,0,0,0.02);
+  border-color: rgba(0,0,0,0.07);
+}
+body.light-mode .sidebar-group-body { background: rgba(0,0,0,0.015); }
+body.light-mode .sidebar-item.sidebar-nav-tab {
+  background: rgba(0,0,0,0.025);
+  border-color: rgba(0,0,0,0.07);
+}
+body.light-mode .sidebar-item.sidebar-nav-tab:hover { border-color: rgba(0,0,0,0.12); }
+body.light-mode .sidebar-back-sep { background: rgba(0,0,0,0.06); }
+body.light-mode .sidebar-group-header { color: #475569; }
+body.light-mode .sidebar-group-header:hover { color: #065f46; background: rgba(16,185,129,0.07); }
+body.light-mode .sidebar-item.sidebar-nav-tab { color: #475569; }
+body.light-mode .sidebar-item.sidebar-nav-tab:hover { color: #047857; background: rgba(16,185,129,0.07); }
+body.light-mode .sidebar-item.sidebar-nav-tab.active { color: #065f46; }
+
+/* Settings panel: dark rgba(5,6,10,0.88) bg not adapting */
+body.light-mode .sidebar-settings-panel {
+  background: rgba(255,255,255,0.97);
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+/* Dividers and topic-nav-footer: rgba(255,255,255,0.05-0.06) invisible */
+body.light-mode .divider { background: rgba(0,0,0,0.08); }
+body.light-mode .topic-nav-footer { border-top-color: rgba(0,0,0,0.08); }
+
+/* Comparison table: invisible borders and bg on white */
+body.light-mode .comparison-table table th,
+body.light-mode table.comparison-table th {
+  background: rgba(0,0,0,0.03);
+  border-bottom-color: rgba(0,0,0,0.08);
+}
+body.light-mode .comparison-table table td,
+body.light-mode table.comparison-table td {
+  background: transparent;
+  border-bottom-color: rgba(0,0,0,0.05);
+}
+body.light-mode .comparison-table table tr:hover td,
+body.light-mode table.comparison-table tr:hover td { background: rgba(16,185,129,0.04); }
+
+/* Selector portal: hardcoded #ffffff text + invisible glass surfaces */
+body.light-mode .selector-title {
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+body.light-mode .selector-eyebrow {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.08);
+}
+body.light-mode .selector-card {
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(0,0,0,0.08);
+}
+body.light-mode .selector-card:hover {
+  background: #ffffff;
+  border-color: var(--accent-color);
+}
+body.light-mode .selector-card-title { color: #0f172a; }
+body.light-mode .selector-card-icon {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.08);
+}
+body.light-mode .selector-card-progress {
+  background: rgba(0,0,0,0.03);
+  border-color: rgba(0,0,0,0.07);
+}
+body.light-mode .selector-prog-bar { background: rgba(0,0,0,0.08); }
+body.light-mode .selector-prog-pct { color: #0f172a; }
+
+/* Tryit spinner: white-transparent track invisible on white */
+body.light-mode .tryit-spinner { border-color: rgba(0,0,0,0.1); }
+
+/* Sidebar collapsed hover: rgba(255,255,255,0.03) invisible */
+body.light-mode.sidebar-collapsed .sidebar-item:hover,
+body.light-mode.sidebar-collapsed .sidebar-group-header:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+/* Quiz result score: gradient end (#6ee7b7 or #bfdbfe) too pale on white; use themed accent vars */
+body.light-mode .quiz-result-score {
+  background: linear-gradient(135deg, var(--emerald-600), var(--emerald-700));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Retirement warning banner */

@@ -356,17 +356,6 @@
       color: var(--emerald-300);
     }
 
-    /* ── Progress bar ── */
-    .progress-bar {
-      height: 6px; background: rgba(255,255,255,0.07);
-      border-radius: 99px; overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%; border-radius: 99px;
-      background: linear-gradient(90deg, var(--violet-400), var(--violet-300));
-      transition: width var(--transition-slow);
-    }
-
     @media (max-width: 600px) {
       .topic-header { padding: var(--space-6) var(--space-5); }
       .section-block { padding: var(--space-5) var(--space-4); }
@@ -409,12 +398,6 @@
           <span class="topic-meta-item">⏱ <strong>~25 min read</strong></span>
           <span class="topic-meta-item">🎯 <strong>~8% exam weight</strong></span>
           <span class="topic-meta-item">🏷 <strong>Platform Overview</strong></span>
-        </div>
-        <div style="margin-top:var(--space-6)">
-          <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-2);font-size:0.75rem;color:var(--text-muted)">
-            <span>Topic progress</span><span id="pct-label">0 / 7 sections</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" id="topic-progress" style="width:0%"></div></div>
         </div>
       </div>
 
@@ -1074,26 +1057,6 @@
       }
     }
 
-    /* Simple section-read progress indicator */
-    const sections = document.querySelectorAll('.section-block[id]');
-    const total = sections.length;
-    let read = 0;
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          read = Math.min(read + 1, total);
-          const pct = Math.round((read / total) * 100);
-          const fill = document.getElementById('topic-progress');
-          const lbl  = document.getElementById('pct-label');
-          if (fill) fill.style.width = pct + '%';
-          if (lbl)  lbl.textContent  = read + ' / ' + total + ' sections';
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.4 });
-
-    sections.forEach(s => observer.observe(s));
   });
 </script>
 </body>
