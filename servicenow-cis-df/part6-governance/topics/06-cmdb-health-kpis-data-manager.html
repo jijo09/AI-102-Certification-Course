@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMDB Health KPIs &amp; Data Manager | CIS-DF Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6: Governance</a>
+        <span class="sep">›</span>
+        <span class="current">CMDB Health KPIs &amp; Data Manager</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 6 · Topic 6</div>
+        <h1 class="topic-title">CMDB Health KPIs &amp; CMDB Data Manager — Measuring and Managing Data Quality</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Governance without measurement is guesswork. ServiceNow provides two complementary tools:
+          CMDB Health measures data quality across five dimensions and produces scored KPIs for each
+          CI class, while CMDB Data Manager provides bulk data management capabilities for
+          aging, archiving, and cleaning up CI data at scale. Together, they are the operational
+          dashboard and control panel for CMDB governance.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>9 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~35% exam weight (GOVERN domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>CMDB Health · KPIs · Data Manager · Aging · Staleness · Completeness</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: CMDB Health Overview -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>CMDB Health — The Quality Scorecard</h2>
+        <p>
+          CMDB Health is ServiceNow's built-in framework for measuring data quality across your CMDB.
+          It evaluates CIs across five dimensions and produces a health score for each CI class.
+          This score tells you — at a glance — where your data quality is strong and where it
+          needs attention.
+        </p>
+        <p>
+          Navigate to <strong>Configuration → CMDB Health → Dashboard</strong> to access it.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📊</span>
+          <div class="callout-body">
+            <strong>Analogy — CMDB Health as a Credit Score</strong>
+            Just as a credit score combines multiple financial factors (payment history,
+            debt level, credit age) into a single number, CMDB Health combines multiple
+            data quality factors into a single score per CI class. A low score tells you
+            there's a problem; the sub-scores tell you exactly which dimension needs improvement.
+            Like a credit score, CMDB Health improves gradually as you fix underlying issues —
+            there's no instant fix.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: The Five CMDB Health Dimensions -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>The Five CMDB Health Dimensions</h2>
+        <p>
+          CMDB Health evaluates each CI class across five independent dimensions.
+          Each dimension contributes to the overall health score:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>What It Measures</th>
+              <th>Example Failure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Completeness</td>
+              <td>Are required fields populated? Are mandatory attributes present on each CI?</td>
+              <td>40% of server CIs have no support_group or owned_by value</td>
+            </tr>
+            <tr>
+              <td>Compliance</td>
+              <td>Do CI values conform to defined rules? Are there invalid values, format violations, or field constraint breaches?</td>
+              <td>IP address field contains "Unknown" (string) instead of a valid IP format</td>
+            </tr>
+            <tr>
+              <td>Correctness</td>
+              <td>Is the data accurate and consistent? Does it match authoritative sources?</td>
+              <td>Discovery reports ip_address=10.0.1.5 but CI shows ip_address=10.0.1.6</td>
+            </tr>
+            <tr>
+              <td>Staleness</td>
+              <td>How recently was the CI data last verified or updated? Is it current?</td>
+              <td>80% of network device CIs haven't been discovered in over 90 days</td>
+            </tr>
+            <tr>
+              <td>Duplicate</td>
+              <td>Are there duplicate CI records for the same physical or logical entity?</td>
+              <td>25 server CIs flagged as potential duplicates awaiting deduplication</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Each Dimension Has Independent Scoring</strong>
+            A CI class can score 95% on Completeness but 40% on Staleness (all fields are
+            filled in, but no Discovery has run in months). Or it can score well on Staleness
+            but poorly on Duplicates (Discovery runs daily but keeps creating duplicates because
+            Identification Rules are broken). Each dimension is a separate signal.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: Health Rules -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>CMDB Health Rules — Configuring What Gets Measured</h2>
+        <p>
+          CMDB Health works by evaluating <span class="hl-teal">Health Rules</span> against CIs.
+          A Health Rule defines:
+        </p>
+        <ul>
+          <li>Which CI class the rule applies to</li>
+          <li>Which dimension it measures (Completeness, Compliance, Correctness, Staleness, Duplicate)</li>
+          <li>The specific check to perform (e.g., "support_group must not be null")</li>
+          <li>The weight of this rule in the overall health score</li>
+          <li>The threshold for passing vs. failing</li>
+        </ul>
+
+        <h3>Out-of-Box Health Rules</h3>
+        <p>
+          ServiceNow ships hundreds of pre-configured Health Rules covering all major CI classes.
+          These rules encode industry best practices for CMDB data quality. You can:
+        </p>
+        <ul>
+          <li>Activate or deactivate existing rules</li>
+          <li>Adjust the weight of rules to reflect your organization's priorities</li>
+          <li>Create custom rules for organization-specific requirements</li>
+        </ul>
+
+        <h3>Creating a Custom Health Rule</h3>
+        <p>
+          Navigate to <strong>Configuration → CMDB Health → Health Rules → New</strong>.
+          Define:
+        </p>
+        <ol>
+          <li><strong>Name:</strong> Descriptive name for the rule</li>
+          <li><strong>CI class:</strong> Which class to evaluate</li>
+          <li><strong>Dimension:</strong> Which of the five dimensions</li>
+          <li><strong>Condition:</strong> The ServiceNow filter that defines "passing" CIs</li>
+          <li><strong>Weight:</strong> 1-100, reflecting importance relative to other rules</li>
+        </ol>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Health Rules Are Configurable</strong>
+            CMDB Health is not a fixed measurement — it reflects what your organization
+            considers important. A Health Rule that requires "location" field populated
+            matters for physical servers (location = data center rack) but may be irrelevant
+            for cloud VMs (they don't have a physical location). The exam may ask why a
+            Health Rule should be deactivated for a specific CI class — the answer is that
+            the rule doesn't apply to that class's characteristics.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Health Scoring and Dashboard -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Health Scoring, Thresholds, and Dashboard Navigation</h2>
+        <p>
+          CMDB Health produces scores from 0-100 for each dimension and an overall weighted score.
+          Color coding makes the dashboard immediately interpretable:
+        </p>
+        <ul>
+          <li><strong style="color:#4ade80">Green (80-100):</strong> Healthy — data quality meets or exceeds targets</li>
+          <li><strong style="color:#facc15">Yellow (60-79):</strong> Caution — attention needed; quality is declining or below target</li>
+          <li><strong style="color:#f87171">Red (0-59):</strong> Critical — significant data quality issues requiring immediate remediation</li>
+        </ul>
+
+        <h3>The CMDB Health Dashboard — Key Sections</h3>
+        <ul>
+          <li>
+            <strong>Overall Health by CI Class:</strong> Table showing each CI class with its
+            overall score and per-dimension scores. Sort by lowest score to prioritize remediation.
+          </li>
+          <li>
+            <strong>Health Trend:</strong> Chart showing how scores have changed over time.
+            Declining trends trigger investigation; improving trends validate remediation efforts.
+          </li>
+          <li>
+            <strong>Top Issues:</strong> Specific failing Health Rules with CI count.
+            "1,234 Windows server CIs are missing support_group" — actionable, not abstract.
+          </li>
+          <li>
+            <strong>Drill-Down:</strong> Click any score to see the specific CIs that failed
+            each Health Rule, enabling targeted remediation.
+          </li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Use the Drill-Down for Targeted Remediation</strong>
+            Don't try to fix all CIs in a class when a Health score is low. Use the
+            Health Dashboard drill-down to find the specific failing CIs and the specific
+            failing rules. If 500 of 2,000 server CIs are failing the "support_group required"
+            rule, start with those 500 — not all 2,000. Targeted remediation is more efficient
+            and shows measurable improvement faster.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Staleness and the Last Scanned Concept -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Staleness — The Time-Dimension of Data Quality</h2>
+        <p>
+          Staleness is unique among the five dimensions: it measures not what data is in
+          the CMDB, but <em>how recently</em> that data was verified. A CI can have all
+          fields populated and zero duplicates, but if it hasn't been scanned in 6 months,
+          you can't trust the data is still current.
+        </p>
+
+        <h3>How Staleness Is Calculated</h3>
+        <p>
+          Staleness uses the <span class="code-inline">last_discovered</span> field on CIs.
+          A Health Rule for Staleness might say:
+          "Flag this CI as stale if last_discovered is more than 30 days ago."
+          The threshold varies by CI class:
+        </p>
+        <ul>
+          <li><strong>High-change environments (cloud VMs, containers):</strong> 24-hour staleness threshold</li>
+          <li><strong>Stable environments (physical servers, network devices):</strong> 30-90 day threshold</li>
+          <li><strong>Non-discoverable CIs (contracts, physical assets):</strong> 90-365 day threshold with manual review trigger</li>
+        </ul>
+
+        <h3>Stale CIs and Decommission Detection</h3>
+        <p>
+          Staleness also helps detect decommissioned CIs. If a server is decommissioned
+          without going through the proper CI lifecycle process, Discovery stops finding it.
+          The <span class="code-inline">last_discovered</span> timestamp stops updating.
+          Eventually, the Staleness score drops, triggering investigation:
+          "Is this server actually decommissioned? Should its operational_status be set to Retired?"
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Staleness Is the Health Signal for Discovery Gaps</strong>
+            When Staleness scores drop across a specific CI class, investigate:
+            Is Discovery not running for that IP range? Did a subnet change? Did Discovery
+            credentials expire? A sudden staleness increase for a whole class often signals
+            a Discovery configuration problem, not a data quality issue.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: CMDB Data Manager -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>CMDB Data Manager — Bulk CI Lifecycle Management</h2>
+        <p>
+          CMDB Health tells you <em>what</em> is wrong with your data. CMDB Data Manager
+          is the tool that helps you fix it at scale — and more importantly, helps you
+          manage what happens to CI data over time through automated lifecycle policies.
+        </p>
+        <p>
+          Navigate to <strong>Configuration → CMDB Data Manager</strong>.
+        </p>
+
+        <h3>What CMDB Data Manager Does</h3>
+        <ul>
+          <li>
+            <strong>Aging:</strong> Automatically moves CIs through lifecycle stages based on
+            how long since they were last discovered. A CI not seen in 60 days might be moved
+            to "Review" status; not seen in 90 days might be automatically Retired.
+          </li>
+          <li>
+            <strong>Archiving:</strong> Moves old, inactive CIs out of the primary CMDB tables
+            into archive tables. Keeps the CMDB lean and responsive. Archived CIs can be
+            restored if needed.
+          </li>
+          <li>
+            <strong>Deletion:</strong> Permanently removes CI records that have been archived
+            for a configured period and are confirmed no longer needed. Irreversible.
+          </li>
+          <li>
+            <strong>Field cleanup:</strong> Bulk update of field values across many CIs.
+            For example: set all CIs with location="Unknown" to a specific default location,
+            or blank out a deprecated field across an entire CI class.
+          </li>
+        </ul>
+
+        <h3>Data Manager Policies</h3>
+        <p>
+          CMDB Data Manager works through <span class="hl-teal">Policies</span> — configured rules
+          that define what action to take, under what conditions, and for which CI class.
+          A Policy might say:
+          <em>"For class cmdb_ci_server: if last_discovered is older than 90 days AND operational_status = Operational, change operational_status to Absent."</em>
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Test Aging Policies on a Small Subset First</strong>
+            CMDB Data Manager policies can affect thousands of CIs automatically. A misconfigured
+            aging policy that sets all servers to "Retired" instead of "Absent" is catastrophic —
+            it breaks ITSM workflows, incident routing, and CSDM impact analysis for every
+            affected CI. Always test policies with a small scoped dataset before enabling
+            auto-execution on the entire CI class.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: CI Lifecycle States -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>CI Lifecycle States — Operational Status Values</h2>
+        <p>
+          A CI's <span class="code-inline">operational_status</span> field tracks where it
+          is in its lifecycle. Understanding these states is critical for both Data Manager
+          configuration and exam questions:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Status Value</th>
+              <th>Meaning</th>
+              <th>CMDB Health Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1 — Operational</td>
+              <td>CI is in active production use and should be discoverable</td>
+              <td>All Health Rules fully apply. Staleness monitored strictly.</td>
+            </tr>
+            <tr>
+              <td>2 — Non-Operational</td>
+              <td>CI exists but is not actively in service (e.g., in storage, powered off)</td>
+              <td>Health Rules may apply with relaxed staleness thresholds</td>
+            </tr>
+            <tr>
+              <td>3 — Repair in Progress</td>
+              <td>CI is being serviced or repaired</td>
+              <td>Staleness exemption applies — known reason for not being discovered</td>
+            </tr>
+            <tr>
+              <td>4 — DR Standby</td>
+              <td>CI is a disaster recovery standby, not normally in production</td>
+              <td>Staleness threshold extended — DR systems may not be scanned as frequently</td>
+            </tr>
+            <tr>
+              <td>5 — Absent</td>
+              <td>CI was expected but not found in the last Discovery scan — may be decommissioned or offline</td>
+              <td>Data Manager aging often sets CIs to Absent before Retired. Investigation triggered.</td>
+            </tr>
+            <tr>
+              <td>6 — Retired</td>
+              <td>CI has been formally decommissioned. No longer in use. Kept for audit history.</td>
+              <td>Health Rules largely suspended. Staleness monitoring not relevant.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Absent vs. Retired</strong>
+            Absent (5) = Discovery didn't find the CI on its last run. Could be a network issue,
+            a decommission that wasn't documented, or a temporary outage. Requires investigation.
+            Retired (6) = The CI has been formally decommissioned through the change management process.
+            This is a deliberate, governed state change.
+            Data Manager typically sets stale CIs to Absent first (letting humans investigate),
+            then to Retired only after confirmation. Never auto-retire without human review.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: Health KPIs as Executive Reporting -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>CMDB Health as Executive KPIs</h2>
+        <p>
+          CMDB Health scores serve as KPIs for executive reporting on CMDB program success.
+          The CMDB Manager uses these to report program health to the CMDB Owner and IT leadership:
+        </p>
+        <ul>
+          <li><strong>Overall CMDB Health Score:</strong> Single number summarizing CMDB quality. Target: 80+</li>
+          <li><strong>Completeness rate by critical CI class:</strong> "92% of Production server CIs have all required fields"</li>
+          <li><strong>Staleness rate:</strong> "98% of CIs were discovered within the last 30 days"</li>
+          <li><strong>Duplicate rate:</strong> "0.3% duplicate rate across all CI classes" (target: &lt;1%)</li>
+          <li><strong>CSDM completeness:</strong> "85% of Business Applications have Application Services linked"</li>
+        </ul>
+
+        <p>
+          Trend reporting is more useful than point-in-time scores: showing that the
+          Completeness score improved from 65% to 82% over the quarter demonstrates
+          the governance program is working.
+        </p>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>CMDB Health KPIs &amp; Data Manager — Key Facts</h2>
+        <ul>
+          <li><strong>Five CMDB Health dimensions:</strong> Completeness, Compliance, Correctness, Staleness, Duplicate.</li>
+          <li><strong>Health Rules</strong> define what's measured. Configurable per class. ServiceNow ships hundreds out-of-box.</li>
+          <li><strong>Traffic light scoring:</strong> Green (80-100) = healthy, Yellow (60-79) = caution, Red (0-59) = critical.</li>
+          <li><strong>Staleness uses last_discovered field.</strong> Threshold varies by CI class and environment volatility.</li>
+          <li><strong>Absent (5)</strong> = not found in Discovery. Requires investigation. NOT the same as Retired.</li>
+          <li><strong>Retired (6)</strong> = formally decommissioned through change management. Deliberate state.</li>
+          <li><strong>CMDB Data Manager</strong> provides bulk CI lifecycle management: aging, archiving, deletion, field cleanup.</li>
+          <li><strong>Data Manager Policies</strong> = automated rules for moving CIs through lifecycle states based on conditions.</li>
+          <li><strong>Test Data Manager policies on a small subset</strong> before bulk execution — misconfiguration affects thousands of CIs.</li>
+          <li><strong>Use Health Dashboard drill-down</strong> to find specific failing CIs for targeted remediation — don't try to fix all at once.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">CMDB Health</div>
+            <div class="term-def">ServiceNow framework measuring CMDB data quality across five dimensions (Completeness, Compliance, Correctness, Staleness, Duplicate). Produces 0-100 scores per CI class. Primary governance measurement tool.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Health Rule</div>
+            <div class="term-def">Configurable evaluation rule within CMDB Health. Defines which CI class to evaluate, which dimension to measure, the specific condition, and the weight in overall score calculation.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Staleness (Health Dimension)</div>
+            <div class="term-def">CMDB Health dimension measuring how recently CI data was last verified by Discovery. Uses the last_discovered field. Stale CIs may be decommissioned or have Discovery coverage gaps.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CMDB Data Manager</div>
+            <div class="term-def">ServiceNow tool for bulk CI lifecycle management. Supports aging (auto-setting operational_status based on staleness), archiving, deletion, and field cleanup across large CI populations.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Absent (operational_status=5)</div>
+            <div class="term-def">CI lifecycle state set when Discovery does not find the CI on its last scan. Indicates the CI may be decommissioned, offline, or have a Discovery coverage gap. Requires human investigation before proceeding to Retired.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Data Manager Policy</div>
+            <div class="term-def">Configured rule in CMDB Data Manager defining automated CI lifecycle actions (e.g., "set operational_status=Absent if last_discovered > 90 days"). Can run on a schedule or on-demand.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. The CMDB Health dashboard shows a Completeness score of 45% (Red) for cmdb_ci_linux_server. The CMDB Manager wants to understand specifically which fields are failing and for which CIs. What should she do?</div>
+          <div class="cq-options">
+            <div>A) Run a new Discovery scan to repopulate missing fields</div>
+            <div>B) Use the CMDB Health dashboard drill-down to see which specific Health Rules are failing and which specific CIs are missing required fields</div>
+            <div>C) Export all Linux server CIs to Excel and manually check for empty fields</div>
+            <div>D) Activate more Health Rules to increase the score</div>
+          </div>
+          <div class="cq-hint">💡 CMDB Health provides a specific drill-down feature for exactly this purpose.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — The CMDB Health dashboard provides drill-down functionality: clicking the 45% Completeness score for cmdb_ci_linux_server shows which specific Health Rules are failing (e.g., "support_group required," "owned_by required") and lists the specific CIs that fail each rule. This targeted view enables efficient remediation without touching CIs that are already compliant. Discovery re-run (A) might help if fields can be auto-populated, but most completeness failures (business fields like owned_by, support_group) require human input, not automation.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. CMDB Health shows the Staleness dimension for network devices suddenly dropped from 88% to 32% overnight. All other dimensions remain stable. What is the most likely root cause?</div>
+          <div class="cq-options">
+            <div>A) 70% of network devices were decommissioned overnight</div>
+            <div>B) A Discovery configuration change (credentials expiration, schedule deletion, or IP range change) broke Discovery for network devices — last_discovered timestamps stopped updating</div>
+            <div>C) The CMDB Health staleness threshold was accidentally lowered from 90 days to 1 day</div>
+            <div>D) Network device CIs were reclassified to a different class</div>
+          </div>
+          <div class="cq-hint">💡 Staleness = time since last_discovered update. A sudden drop across an entire class suggests the data source (Discovery) stopped running for that class.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — A sudden, class-wide Staleness drop is the signature of a Discovery configuration failure. When Discovery stops running for a category of devices (credential expiration is the most common cause — SNMP community string changed, or SSH key expired), no CIs in that class get their last_discovered timestamp updated. Within a few days, the staleness threshold is breached for all of them simultaneously. Check: did any Discovery schedules change? Did network device credentials expire? Option C is possible but less likely — changing the threshold would affect multiple CI classes, not just network devices.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. A CMDB Data Manager policy is configured to automatically set operational_status=Retired for any server CI with last_discovered > 60 days. A server CI for a disaster recovery standby that is only powered on during DR tests (every 6 months) is now showing as Retired. What went wrong and what should be done?</div>
+          <div class="cq-options">
+            <div>A) The policy should be deleted — automatic retirement is never appropriate</div>
+            <div>B) The DR standby CI's operational_status should be set to DR Standby (4), and the Data Manager policy should be configured to exclude CIs with operational_status=4 from the aging rule</div>
+            <div>C) The CI should be deleted and recreated manually every 6 months</div>
+            <div>D) The staleness threshold should be increased to 365 days for all CIs</div>
+          </div>
+          <div class="cq-hint">💡 There's a specific operational_status value for DR standby devices. How should aging policies handle known exceptions?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — The DR standby server is correctly not found by Discovery (it's powered off most of the year), but this is expected and known behavior, not a decommission. The correct fix has two parts: (1) Set the CI's operational_status to "DR Standby" (4) to reflect its true state. (2) Modify the Data Manager policy to exclude CIs already in DR Standby status from the 60-day aging rule. DR systems have intentionally different discovery patterns and need explicit exemptions in aging policies. Increasing the threshold for ALL CIs (D) would hide real decommission events for normal servers.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. An administrator wants to create a custom CMDB Health Rule for the cmdb_ci_business_app class that flags any Business Application record where the business_criticality field is blank. Which Health dimension is most appropriate for this rule?</div>
+          <div class="cq-options">
+            <div>A) Compliance — the field value violates a format rule</div>
+            <div>B) Completeness — a required field is missing</div>
+            <div>C) Staleness — the record hasn't been updated recently</div>
+            <div>D) Correctness — the data doesn't match an authoritative source</div>
+          </div>
+          <div class="cq-hint">💡 A missing required field is measured by which Health dimension?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Completeness measures whether required fields are populated. A blank business_criticality field means the record is incomplete — missing data that should be present. Compliance (A) would apply if the field had an invalid value (e.g., "Very High" when only 1-4 numeric values are allowed). Staleness (C) measures time since update. Correctness (D) measures accuracy vs. authoritative sources. "Field is empty when it should have a value" = Completeness dimension.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. A CMDB Manager reports to the CIO that the overall CMDB Health score improved from 58% to 79% over the past quarter. The CIO asks "What does this mean for the business?" What is the most meaningful business-aligned response?</div>
+          <div class="cq-options">
+            <div>A) "It means we have fewer CIs in the database"</div>
+            <div>B) "It means our data quality improved from Red to Yellow threshold — CIs now have more complete records, fewer duplicates, and more current data, which should reduce incident MTTR and improve change impact accuracy"</div>
+            <div>C) "It means our IT team did more database maintenance work this quarter"</div>
+            <div>D) "It means the CMDB Health tool is now configured more leniently, so the score appears higher"</div>
+          </div>
+          <div class="cq-hint">💡 Connect the metric improvement to the business outcomes it enables.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — A CMDB Health score improvement from 58% (Red/Critical) to 79% (Yellow/Caution) means real, measurable improvements: more CIs have complete required fields (fewer incidents routed to wrong teams), fewer duplicates exist (more accurate impact analysis), and more CIs have current data (change risk assessment is more reliable). The business translation: faster incident resolution, fewer failed changes, better IT planning data. This is the kind of language that resonates with the CIO — outcomes, not technical metrics.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="05-governance-framework.html" class="btn btn-secondary">← Governance Framework</a>
+          <a href="../../part7-reporting-analytics/topics/05-cmdb-workspace-nlq.html" class="btn btn-secondary">Part 7: CMDB Workspace →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p6_t6_06';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

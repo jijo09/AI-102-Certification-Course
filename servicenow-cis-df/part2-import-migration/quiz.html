@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 2 – Import Sets Quiz · CIS-DF</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #22d3ee; color: #67e8f9; background: rgba(8,145,178,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .q-dot.answered { border-color: var(--slate-500); color: var(--text-muted); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 2 · All 6 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 2 Full Quiz — Import Sets &amp; Data Migration</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions on Import Set lifecycle, Transform Maps, Data Sources, and coalesce. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 15</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0891b2"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 2 — Import Sets &amp; Data Migration</span>
+          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#0891b2;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">📥 Topic 1 — Import Sets Architecture</div>
+              <div class="quiz-scenario">Scenario: A JDBC import loads 500 employee records into ServiceNow. An admin asks about the correct processing order.</div>
+              <p class="quiz-question">What is the correct order of the three phases in Import Set processing?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Transform → Load → Cleanup</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Load → Cleanup → Transform</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Load → Transform → Cleanup</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Cleanup → Load → Transform</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Import Set processing always follows: <strong>1. Load</strong> — raw data is read from the source and written to the staging (import set) table; <strong>2. Transform</strong> — Transform Map rules run against staging records, mapping and writing to the target production table; <strong>3. Cleanup</strong> — staging records are optionally deleted or marked complete. Transforming before Loading (A) is impossible because the data doesn't exist yet.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">📥 Topic 1 — Import Sets Architecture</div>
+              <div class="quiz-scenario">Scenario: An admin loads a CSV file into ServiceNow via Import Set. The data appears in a u_import_employees table but has NOT yet been transformed.</div>
+              <p class="quiz-question">What does the Import Set staging table represent?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The permanent production target where clean data lives after transformation</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A temporary buffer where raw imported data lands BEFORE transformation occurs</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A log table that records each Transform Map execution result</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Transform Map configuration storage area</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The Import Set staging table (named with <code>u_import_</code> prefix by convention) is a <strong>temporary holding area</strong>. Raw data lands here exactly as imported — no transformation, no field mapping, no validation. Only after a Transform Map runs does the data flow to the target production table. The staging table is NOT the target (A), NOT a log (C), and NOT config storage (D).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">📥 Topic 1 — Import Sets Architecture</div>
+              <div class="quiz-scenario">Scenario: An import runs successfully and transforms 500 records to the target table. Three weeks later, the admin notices the staging table still has 500 rows.</div>
+              <p class="quiz-question">[TRAP] Is this expected behavior?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">No — records are automatically deleted from staging immediately after transformation</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Yes — staging records persist until manually deleted or a scheduled cleanup job runs; they are NOT automatically removed after transform</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">No — staging records auto-purge after 24 hours by default</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">No — they are archived to an _archive table once transformation completes</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is a common exam trap. Import Set staging records are <strong>NOT automatically deleted</strong> after transformation completes. They remain in the staging table and accumulate over time. Cleanup requires either a manual delete, a scheduled Import Set cleanup job, or configuring "Auto-cleanup" in Import Set configuration. Left unmanaged, staging tables grow indefinitely and can consume significant database space.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">📥 Topic 1 — Import Sets Architecture</div>
+              <div class="quiz-scenario">Scenario: A developer needs to configure which source fields map to which target fields, and what transformation logic should apply to each field during an Import Set run.</div>
+              <p class="quiz-question">Which record type is the PRIMARY place to define field-level mapping from staging to target?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">sys_import_set — the Import Set run record</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">sys_transform_map — the Transform Map with its Field Maps</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">sys_import_set_row — each individual row record in staging</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">sys_data_source — the Data Source connection record</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The <strong>Transform Map</strong> (sys_transform_map) is where all field-to-field mapping is configured, along with Transform Scripts, coalesce settings, and target table definition. Each Transform Map contains multiple <strong>Field Maps</strong> that specify individual field mappings. <code>sys_import_set</code> is the run-level record, <code>sys_import_set_row</code> is the data, and <code>sys_data_source</code> is the connection config.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔄 Topic 2 — Transform Maps &amp; Field Maps</div>
+              <div class="quiz-scenario">Scenario: A Transform Map field map maps the staging "first_name" column to the target "u_first_name" field.</div>
+              <p class="quiz-question">What does a Transform Map Field Map define?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Conditions under which the entire Import Set run is skipped</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The mapping of a specific source (staging) field value to a specific destination (target table) field</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The coalesce key fields used to match existing records</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The post-transform cleanup schedule for staging rows</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>Field Map</strong> defines one field-to-field mapping: source field (staging column) → target field (production column). It can also include a "Use source script" transform script to modify the value during mapping. One Field Map = one field pair. Coalesce (C) is configured per field map but is a setting, not the definition. Cleanup (D) and run conditions (A) are separate Transform Map settings.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔄 Topic 2 — Transform Maps &amp; Field Maps</div>
+              <div class="quiz-scenario">Scenario: A Transform Map has "Run Business Rules" checked. An import of 100 records begins against the User [sys_user] target table.</div>
+              <p class="quiz-question">What is the effect of "Run Business Rules" being checked?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Business Rules on the STAGING import table fire for each row</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Business Rules configured on the TARGET table (sys_user) fire during each record's transformation</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">All Business Rules globally on the instance are re-evaluated</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A scheduled Business Rule runs once after all 100 rows are transformed</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> When "Run Business Rules" is enabled on a Transform Map, Business Rules on the <strong>target table</strong> execute during each record's transformation — just as they would on a normal form save. This allows validation, auto-population, and notification Business Rules to fire during imports. When unchecked (default), Business Rules are bypassed for faster bulk processing. Use with caution on large imports.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔄 Topic 2 — Transform Maps &amp; Field Maps</div>
+              <div class="quiz-scenario">Scenario: An import needs to UPDATE existing employee records when a matching Employee ID is found, or CREATE a new record if none exists.</div>
+              <p class="quiz-question">[TRAP] What specific mechanism achieves this upsert (update-or-insert) behavior?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Checking the "Check for Coalesce" checkbox on the Transform Map itself</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Setting "Coalesce = true" on the Employee ID field map in the Transform Map</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A Business Rule on the target table that checks for existing records before insert</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Enabling "Upsert Mode" in the Import Set configuration</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Coalesce is configured at the <strong>Field Map level</strong> by checking the "Coalesce" checkbox on the specific field that should be used as the match key (e.g., Employee ID). ServiceNow then looks up the target table for a record where that field matches the staging value — updating if found, creating if not. There is no separate "Upsert Mode" (D) or global "Check for Coalesce" checkbox on the Transform Map itself (A). Using a Business Rule (C) is possible but not the built-in mechanism.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔄 Topic 2 — Transform Maps &amp; Field Maps</div>
+              <div class="quiz-scenario">Scenario: A Transform Script on a field map contains: <code>answer = source.u_cost.toString();</code></div>
+              <p class="quiz-question">What does the <code>answer</code> variable represent in this context?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The value written back to the staging field</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The value that will be written to the mapped TARGET field</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A boolean — if true, the record is imported; if false, it is skipped</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The coalesce key value used to look up existing records</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> In a Transform Script (field-level), the <code>answer</code> variable is the standard output variable — whatever you assign to <code>answer</code> becomes the value written to the mapped target field. The <code>source</code> object represents the current staging row (input). So this script reads the cost from staging, converts it to a string, and writes that string value to the target field. This pattern is foundational to all field-level transform scripting.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(20,184,166,0.15);color:#5eead4">🌐 Topic 3 — Data Sources &amp; Scheduled Imports</div>
+              <div class="quiz-scenario">Scenario: An IT team needs to pull employee data nightly from an external HR system's database using JDBC.</div>
+              <p class="quiz-question">What does a Data Source record in ServiceNow define?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The transform logic that converts staging records to target records</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The connection details and file format for WHERE imported data originates (JDBC URL, FTP server, HTTP endpoint, etc.)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The schedule that determines when Transform Maps execute</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The target table and coalesce field definitions</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>Data Source</strong> record defines the <em>origin</em> of the data: connection type (JDBC, FTP, HTTP, File), server address, credentials, file format (CSV, Excel, XML, JSON), and data structure. It answers "where does the data come from?" The transform logic (A) lives in the Transform Map. The schedule (C) is in a Scheduled Import. Coalesce/target (D) is in the Transform Map's Field Maps.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(20,184,166,0.15);color:#5eead4">🌐 Topic 3 — Data Sources &amp; Scheduled Imports</div>
+              <div class="quiz-scenario">Scenario: An admin wants the HR employee import to run every night at 2 AM without manual intervention.</div>
+              <p class="quiz-question">Where is the nightly schedule for an automatic Import Set run configured?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">In the Transform Map's "Run Schedule" field</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">In a Scheduled Import record linked to the Data Source</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">In a custom Scheduled Job (sys_trigger) that calls the Import Set API</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">In the Data Source's built-in "Auto Schedule" field</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>Scheduled Import</strong> record (found under System Import Sets → Administration → Scheduled Imports) links a Data Source to a schedule. It controls when the import loads data from the source AND optionally triggers Transform Map execution. The Transform Map itself has no schedule field (A). While a custom sys_trigger (C) is technically possible, it's not the standard mechanism. Data Source records (D) do not have a built-in auto-schedule field.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(20,184,166,0.15);color:#5eead4">🌐 Topic 3 — Data Sources &amp; Scheduled Imports</div>
+              <div class="quiz-scenario">Scenario: A company uses an HTTP Data Source to pull data from a REST API that returns deeply nested JSON objects.</div>
+              <p class="quiz-question">[TRAP] How does ServiceNow's Import Set framework handle nested JSON structures?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Import Sets natively flatten nested JSON into related staging table rows automatically</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Import Sets treat each row as a flat record; nested objects require Transform Scripts or pre-processing to flatten the data</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Enable "JSON Nesting" in the Data Source configuration to handle nested structures</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Use JSONPath expressions in the Import Set field definitions</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Import Sets work with <strong>flat, tabular data</strong>. Each row in the staging table represents one flat record. Deeply nested JSON must be pre-flattened before loading (either via a pre-import script, an external ETL tool, or custom scripting in the Data Source processing). There is no "JSON Nesting" option (C) or JSONPath expressions (D) in standard Import Set configuration. Transform Scripts can handle simple dot-notation field extractions but not deep recursive nesting.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(34,197,94,0.15);color:#86efac">⚙️ Topic 4 — Coalesce Behaviors &amp; Scripts</div>
+              <div class="quiz-scenario">Scenario: A coalesce field on "email" is configured. During an import, the email value "john@example.com" matches TWO existing user records.</div>
+              <p class="quiz-question">What does ServiceNow do by default when coalesce finds multiple matching records?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Creates a new record anyway, ignoring both matches</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Updates the first matching record found (ordered by sys_id)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The import row is skipped/errors — multiple matches cause a coalesce failure for that row</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Automatically merges both existing records into one</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Coalesce requires a unique match. When multiple existing records match the coalesce key value, ServiceNow <strong>cannot determine which record to update</strong> — the import row is marked as an error and skipped. It does not arbitrarily pick one (B), create a new record (A), or merge records (D). Preventing multiple matches requires maintaining data uniqueness on the coalesce field in your target table.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(34,197,94,0.15);color:#86efac">⚙️ Topic 4 — Coalesce Behaviors &amp; Scripts</div>
+              <div class="quiz-scenario">Scenario: A Transform Map has an "onComplete" script configured.</div>
+              <p class="quiz-question">When does an onComplete script execute?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">After each individual record is transformed</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Once, after ALL records in the entire Import Set run have been transformed</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Before each record is transformed (a pre-processing hook)</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Only when the field value from staging is null</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The <strong>onComplete</strong> script fires <em>once</em> after the entire transform run finishes — all rows processed. It is used for post-import actions like sending a summary notification, triggering a follow-up workflow, or updating a "last import" timestamp. Compare with: <strong>onBefore</strong> script (fires before each row), <strong>onAfter</strong> script (fires after each row), and <strong>onReject</strong> (fires when a row is rejected). These are distinct hooks with different timing.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(34,197,94,0.15);color:#86efac">⚙️ Topic 4 — Coalesce Behaviors &amp; Scripts</div>
+              <div class="quiz-scenario">Scenario: An import is configured with coalesce on the "email" field. Every run creates new records even though matching emails exist in the target table. Everything looks correct in the Transform Map.</div>
+              <p class="quiz-question">[TRAP] What is the most likely root cause?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Coalesce requires a Business Rule to be enabled on the target table</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The email values in the staging table have extra whitespace (leading/trailing spaces) that prevents them from matching target values</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Coalesce only works on sys_id and number fields, not email strings</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Transform Map does not have "Create or Update" action set — it is set to "Insert Only"</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The most common real-world coalesce failure is <strong>whitespace mismatch</strong>. If staging data has " john@example.com" (with a space) and the target has "john@example.com", they do not match — so coalesce silently falls through to a CREATE. Other causes: case mismatch (if case-sensitive), wrong field mapped for coalesce, or the Transform Map action set to Insert Only (D — also a valid answer, but the "everything looks correct" clue points to a data quality issue). Always trim staging data before coalesce fields.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(34,197,94,0.15);color:#86efac">⚙️ Topic 4 — Coalesce Behaviors &amp; Scripts</div>
+              <div class="quiz-scenario">Scenario: A Transform Script references the variable <code>source</code>.</div>
+              <p class="quiz-question">What does the <code>source</code> variable refer to in a Transform Map script?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Data Source connection record</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The current staging (Import Set) row being processed</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The target record being created or updated</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Transform Map configuration record itself</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> In Transform Map scripts, three key objects are available: <code>source</code> = the current staging row (GlideRecord of the import set table — the input), <code>target</code> = the target record being created/updated (GlideRecord of the production table — the output), and <code>answer</code> = the output value for field-level scripts. <code>source.u_email</code> reads the staging email column. <code>target.email</code> reads/writes the production email field. Confusing source and target is a common exam trap.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 15;
+  const dots = document.getElementById('q-dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => { const state = window._quizState?.['main-quiz']; if (!state) return; state.current = i; QuizEngine._render('main-quiz'); updateDots(i, state); });
+    dots.appendChild(d);
+  }
+  function updateDots(current, state) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current','correct','incorrect','answered');
+      if (i === current) d.classList.add('current');
+      else if (state.answered[i] !== null) { const q = state.questions[i]; const correct = q.querySelector('[data-correct]')?.dataset.correct; d.classList.add(state.answered[i] === correct ? 'correct' : 'incorrect'); }
+    });
+    const answered = state.answered.filter(a => a !== null).length;
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = `${state.score} / ${TOTAL}`;
+    document.getElementById('qs-answered').textContent = answered;
+    document.getElementById('qs-prog').style.width = `${((current+1)/TOTAL)*100}%`;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    QuizEngine.init('main-quiz');
+    QuizEngine.wireOptions('main-quiz');
+    window._quizState = QuizEngine._state ?? {};
+    const quiz = document.getElementById('main-quiz');
+    const patch = () => setTimeout(() => { const s = QuizEngine._state?.['main-quiz']; if(s) updateDots(s.current, s); }, 50);
+    quiz.querySelectorAll('[data-option]').forEach(btn => btn.addEventListener('click', patch));
+    quiz.querySelector('[data-q-prev]')?.addEventListener('click', patch);
+    quiz.querySelector('[data-q-next]')?.addEventListener('click', patch);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coalesce Behaviors &amp; Advanced Scripts | CIS-DF Part 2</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Coalesce Behaviors &amp; Scripts</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 2 · Topic 4</div>
+        <h1 class="topic-title">Coalesce Behaviors &amp; Advanced Scripts</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Deep dive into coalesce mechanics, how multiple coalesce fields interact, and how
+          to use Transform Scripts to handle complex import scenarios like conditional inserts,
+          field lookups, and creating related records.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>4 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~18 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~8% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Migration</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Coalesce Deep Dive</h2>
+        <p>
+          We introduced coalesce in Topic 2 — it is the mechanism that prevents duplicate records by
+          checking whether a matching record already exists before deciding to insert or update.
+          Here we go deeper into exactly how the matching works and edge cases you need to know
+          for the exam.
+        </p>
+
+        <h3>The Coalesce Query</h3>
+        <p>
+          When the Transform Map processes a row, it builds a GlideRecord query using all fields
+          marked as "Coalesce." It queries the target table for a record where each coalesced field
+          equals the corresponding staging value. For example, if <span class="code-inline">email</span>
+          is the coalesce field and the staging row has email = <span class="code-inline">jane@example.com</span>,
+          ServiceNow runs:
+          <span class="code-inline">SELECT * FROM sys_user WHERE email = 'jane@example.com'</span>
+        </p>
+        <p>
+          If one record is found: update it. If zero records found: insert a new one.
+          If multiple records found: the behavior depends on the Transform Map's
+          <strong>"Enforce mandatory fields"</strong> and error handling settings — usually it
+          updates the first match and logs a warning.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Coalesce on Reference Fields</strong>
+            If you coalesce on a Reference field (e.g., <code>assigned_to</code> which points to
+            <code>sys_user</code>), the coalesce query tries to match the staging value against the
+            <em>display value</em> of the reference (the user's name). If the staging data contains
+            the sys_id instead of the name, coalesce will fail to match and always insert new records.
+            Always verify what format the staging value is in for reference fields.
+          </div>
+        </div>
+
+        <h3>Coalesce Priority — Field Map Order</h3>
+        <p>
+          When multiple fields are marked as coalesce, ServiceNow AND's all the conditions together
+          for the lookup. There is no priority ordering between coalesce fields — they all must match.
+          If you want OR logic (match on email OR employee_id), you need to write a custom script
+          in the onBefore hook to perform your own lookup and force the action.
+        </p>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Insert vs. Update vs. Ignore — Controlling the Action</h2>
+        <p>
+          By default, coalesce determines whether to insert or update. But you can override this
+          behavior using the <span class="code-inline">action</span> variable in onBefore scripts.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>action value</th><th>Effect</th><th>When to Use</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>INSERT</code></td>
+              <td>Always create a new record — ignore coalesce result</td>
+              <td>When you know this row should always be new (e.g., event log entries)</td>
+            </tr>
+            <tr>
+              <td><code>UPDATE</code></td>
+              <td>Always update an existing record — fail if no match</td>
+              <td>When rows should only update and never create (e.g., syncing status back)</td>
+            </tr>
+            <tr>
+              <td><code>IGNORE</code> (via <code>ignore=true</code>)</td>
+              <td>Skip this row entirely — no insert, no update</td>
+              <td>When row fails validation or should be filtered out</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style="font-family:var(--font-mono);font-size:0.82rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 16px;color:#22d3ee">
+          // In onBefore script — force update only; skip rows that don't already exist<br>
+          var gr = new GlideRecord('cmdb_ci_server');<br>
+          gr.addQuery('serial_number', source.u_serial_number);<br>
+          gr.query();<br>
+          if (!gr.next()) {<br>
+          &nbsp;&nbsp;ignore = true;  // skip this row — no matching CI found<br>
+          } else {<br>
+          &nbsp;&nbsp;action = 'UPDATE';  // force update, don't insert<br>
+          }
+        </p>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Advanced onAfter Scripts — Creating Related Records</h2>
+        <p>
+          The <span class="code-inline">onAfter</span> script fires after each row is processed
+          (inserted or updated). It has access to <span class="code-inline">target</span>
+          (the GlideRecord of the record just written) and <span class="code-inline">source</span>
+          (the staging table row). This is where you create related records, fire workflows,
+          or perform post-processing.
+        </p>
+
+        <h3>Creating Related Records in onAfter</h3>
+        <p>
+          Example: after importing a CI from a CSV, you want to create a CI Relationship record
+          linking it to its parent rack. The CSV has a "rack_name" column. In onAfter:
+        </p>
+        <p style="font-family:var(--font-mono);font-size:0.82rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 16px;color:#22d3ee">
+          // Find the rack CI by name<br>
+          var rack = new GlideRecord('cmdb_ci_rack');<br>
+          rack.addQuery('name', source.u_rack_name);<br>
+          rack.query();<br>
+          if (rack.next()) {<br>
+          &nbsp;&nbsp;// Create a "Hosted on" relationship<br>
+          &nbsp;&nbsp;var rel = new GlideRecord('cmdb_rel_ci');<br>
+          &nbsp;&nbsp;rel.parent = rack.sys_id;<br>
+          &nbsp;&nbsp;rel.child = target.sys_id;<br>
+          &nbsp;&nbsp;rel.type = '&lt;Hosted on::Hosts&gt;';  // relationship type sys_id or name<br>
+          &nbsp;&nbsp;rel.insert();<br>
+          }
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Use target.isNewRecord() in onAfter</strong>
+            In the onAfter script, <code>target.operation()</code> returns either <code>'insert'</code>
+            or <code>'update'</code>. Use this to distinguish first-time inserts from updates.
+            For example, you may only want to create a relationship on first insert, not every time
+            the CI is updated.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Copy Empty Fields Behavior</h2>
+        <p>
+          The <span class="hl-teal">"Copy empty fields"</span> setting on the Transform Map controls
+          what happens when the staging row has a blank/empty value for a mapped field and the target
+          record already has a value for that field.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Setting</th><th>Behavior</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Copy empty fields = true (checked)</td>
+              <td>Blank staging value OVERWRITES existing target value — the target field becomes blank</td>
+              <td>When source data is authoritative and blanks mean "clear this field"</td>
+            </tr>
+            <tr>
+              <td>Copy empty fields = false (unchecked)</td>
+              <td>Blank staging value is ignored — existing target value is preserved</td>
+              <td>When source data is partial and you don't want to lose data previously entered in SN</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Unexpected Data Loss with Copy Empty Fields</strong>
+            A common real-world and exam scenario: a team imports user records from HR. The HR export
+            doesn't include phone numbers. With "Copy empty fields" checked, every import wipes out
+            the phone numbers that help desk agents had entered manually. Always determine whether
+            the source is the authoritative source for every field before enabling this setting.
+          </div>
+        </div>
+
+        <h3>Run Business Rules Setting</h3>
+        <p>
+          The Transform Map also has a <strong>"Run business rules"</strong> checkbox. When enabled,
+          Business Rules on the target table fire as if the record were being saved normally via
+          the UI. When disabled, Business Rules are bypassed — useful for performance in large loads
+          but dangerous if Business Rules enforce data integrity or kick off workflows.
+        </p>
+        <p>
+          For CMDB imports, disable business rules is sometimes used to speed up large initial loads,
+          but you must ensure data integrity is maintained another way. For user imports, leaving
+          Business Rules enabled ensures notifications and automations fire correctly.
+        </p>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Coalesce &amp; Scripts</h2>
+        <ul>
+          <li>Multiple coalesce fields use <strong>AND logic</strong> — all must match for an update to occur</li>
+          <li>Coalescing on a Reference field matches against the <strong>display value</strong>, not sys_id</li>
+          <li>Set <code>ignore = true</code> in onBefore to skip a row; set <code>action = 'INSERT'</code> or <code>'UPDATE'</code> to override coalesce decision</li>
+          <li>onAfter has access to <code>target</code> (the written record) and <code>source</code> (staging row) — use <code>target.operation()</code> to check insert vs. update</li>
+          <li>"Copy empty fields" = true will overwrite existing data with blanks from source — causes unexpected data loss</li>
+          <li>"Run business rules" = false skips Business Rules on target table — use cautiously</li>
+          <li>Transform hook order: onStart → per row (onBefore → fields → onAfter) → onComplete</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <span style="color:var(--text-muted);font-size:0.82rem;align-self:center">Part 3:</span>
+          <a href="../../part6-governance/topics/01-data-policies-dictionary-overrides.html" class="btn btn-secondary">Data Policies →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p2_t4_04';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

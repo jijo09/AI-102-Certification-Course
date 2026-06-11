@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MID Server Deep Dive | CIS-DF Part 3</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 3: Discovery</a>
+        <span class="sep">›</span>
+        <span class="current">MID Server Deep Dive</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 3 · Topic 2</div>
+        <h1 class="topic-title">MID Server Deep Dive — Architecture, Configuration &amp; Operations</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          You were introduced to the MID Server concept in Part 2 (SGC). Now that you understand
+          how Discovery works, this topic goes deep: installation, the ECC Queue protocol,
+          worker threads, cluster configuration, performance tuning, and every troubleshooting
+          scenario the exam tests. The MID Server is the backbone of all on-premise integrations
+          — mastering it is essential.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>10 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~19% exam weight (INGEST domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>MID Server · ECC Queue · Worker Threads · Cluster · Validation</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: MID Server Architecture -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>MID Server Architecture — What It Is and How It Works</h2>
+        <p>
+          The <span class="hl-teal">Management, Instrumentation, and Discovery (MID) Server</span>
+          is a Java application that runs on a server inside your network. Its job is to act as a
+          secure, bidirectional proxy between your ServiceNow cloud instance and resources that
+          live inside firewalled private networks.
+        </p>
+        <p>
+          The critical insight — repeated from Part 2 because it's exam-tested so frequently —
+          is that the MID Server makes <strong>outbound</strong> connections only. It reaches
+          out to ServiceNow; ServiceNow does not reach in to the MID Server. This means:
+        </p>
+        <ul>
+          <li>No inbound firewall holes required</li>
+          <li>Only outbound HTTPS (port 443) to your ServiceNow instance must be allowed</li>
+          <li>The MID Server maintains a persistent polling connection to the ECC Queue</li>
+        </ul>
+
+        <h3>The Three Layers of MID Server Communication</h3>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">ServiceNow Instance</div>
+            <div class="flow-note">cloud platform</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-arrow">↕</div>
+            <div class="flow-box">ECC Queue (ecc_queue table)</div>
+            <div class="flow-note">message bus inside ServiceNow</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-arrow">↕ HTTPS outbound poll</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">MID Server Process</div>
+            <div class="flow-note">Java process on your server</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-arrow">↕ local network</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">Target Resources</div>
+            <div class="flow-note">servers, network devices, databases, cloud APIs</div>
+          </div>
+        </div>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — ECC Queue Is Inside ServiceNow</strong>
+            The External Communication Channel (ECC) Queue is a table (<span class="code-inline">ecc_queue</span>)
+            inside ServiceNow — not a separate service. It has an Input side (messages going TO the MID Server,
+            such as "scan this IP range") and an Output side (results coming FROM the MID Server).
+            The MID Server polls ServiceNow's ECC Queue regularly to pick up new instructions.
+            This polling model is what makes it firewall-friendly.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: Installation and Setup -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>MID Server Installation and Initial Setup</h2>
+        <p>
+          Understanding the installation process helps you answer "what is required for a MID Server
+          to start working?" questions on the exam.
+        </p>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li><strong>Java 11 or later</strong> — MID Server is a Java application. Java must be installed on the host server.</li>
+          <li><strong>64-bit OS</strong> — Windows Server 2012 R2+ or RHEL/CentOS/Ubuntu Linux (64-bit)</li>
+          <li><strong>RAM:</strong> Minimum 2 GB dedicated to the MID Server process; 4–8 GB recommended for high-load environments</li>
+          <li><strong>Network:</strong> Outbound HTTPS (port 443) to <code>your-instance.service-now.com</code> must not be blocked</li>
+          <li><strong>Service account:</strong> A dedicated Windows or Linux user account (not a personal account) to run the MID Server process</li>
+        </ul>
+
+        <h3>Installation Steps (Conceptual)</h3>
+        <ol>
+          <li>
+            <strong>Download the installer</strong> from your ServiceNow instance:
+            Navigate to <strong>MID Server → Downloads</strong> and download the Windows installer or Linux package.
+          </li>
+          <li>
+            <strong>Run the installer</strong> on your host server. It installs the MID Server files
+            and creates the base directory structure.
+          </li>
+          <li>
+            <strong>Configure <code>config.xml</code></strong> — This file inside the MID Server
+            installation directory contains the connection settings:
+            <ul>
+              <li><code>url</code> — Your ServiceNow instance URL</li>
+              <li><code>mid.instance.username</code> — ServiceNow service account username</li>
+              <li><code>mid.instance.password</code> — ServiceNow service account password (stored encrypted)</li>
+              <li><code>name</code> — The MID Server name (must match what you register in ServiceNow)</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Start the MID Server</strong> as a Windows service or Linux daemon.
+          </li>
+          <li>
+            <strong>Register and Validate</strong> in ServiceNow. The MID Server appears under
+            <strong>MID Server → Servers</strong> as "Pending Validation." An admin must validate it.
+          </li>
+        </ol>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — config.xml Contains the ServiceNow Credentials</strong>
+            The MID Server's ServiceNow credentials (the username and password of the service
+            account used to connect to ServiceNow) are stored in <code>config.xml</code> on the
+            MID Server host. This is separate from the target device credentials (SSH keys,
+            SNMP community strings) which are stored in ServiceNow's Credential Vault.
+            Many candidates confuse these two types of credentials.
+          </div>
+        </div>
+
+        <h3>The MID Server Service Account in ServiceNow</h3>
+        <p>
+          The ServiceNow user account that the MID Server uses must have the
+          <span class="code-inline">mid_server</span> role in ServiceNow. This role grants:
+        </p>
+        <ul>
+          <li>Access to read from and write to the ECC Queue</li>
+          <li>Access to read Credential records (so it can retrieve target device credentials)</li>
+          <li>Access to create and update CMDB records (via IRE, not direct writes)</li>
+          <li>Access to Discovery schedule and behavior configurations</li>
+        </ul>
+        <p>
+          Best practice: use a dedicated service account with <em>only</em> the
+          <span class="code-inline">mid_server</span> role. Do not give it admin access.
+        </p>
+      </div>
+
+      <!-- S3: Validation -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>MID Server Validation — The Gate Before It Can Work</h2>
+        <p>
+          After a MID Server starts and connects to ServiceNow, it enters a
+          <span class="hl-teal">Pending Validation</span> state. It cannot process any work
+          until a ServiceNow administrator validates it. This is a deliberate security control —
+          it prevents unauthorized MID Servers from being used to scan your network.
+        </p>
+
+        <h3>Validation Process</h3>
+        <ol>
+          <li>Navigate to <strong>MID Server → Servers</strong></li>
+          <li>Find the new MID Server in the list (state = "Pending Validation")</li>
+          <li>Open the record and verify: server name, IP, OS version, Java version, MID Server version</li>
+          <li>Click <strong>Validate</strong></li>
+          <li>ServiceNow sends a validation challenge to the MID Server, which must respond correctly</li>
+          <li>State changes to "Up" — the MID Server is now active and can receive work</li>
+        </ol>
+
+        <h3>Validation States</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>State</th>
+              <th>Meaning</th>
+              <th>Action Required</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pending Validation</td>
+              <td>MID Server connected but not yet approved</td>
+              <td>Admin must validate</td>
+            </tr>
+            <tr>
+              <td>Up</td>
+              <td>Validated and actively polling ECC Queue</td>
+              <td>None — fully operational</td>
+            </tr>
+            <tr>
+              <td>Down</td>
+              <td>MID Server process stopped or lost connectivity</td>
+              <td>Check MID Server process; check network connectivity</td>
+            </tr>
+            <tr>
+              <td>Skipped</td>
+              <td>MID Server intentionally excluded from receiving work</td>
+              <td>Admin set skipped — intentional</td>
+            </tr>
+            <tr>
+              <td>Upgraded</td>
+              <td>MID Server was upgraded; requires re-validation</td>
+              <td>Admin must re-validate after upgrade</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Critical Exam Fact — Re-Validation Required After Upgrade</strong>
+            When ServiceNow upgrades a MID Server (auto-upgrade), the MID Server must be
+            re-validated before it can resume work. This is a common exam scenario:
+            "After a scheduled upgrade, Discovery stopped running. What is the most likely cause?"
+            Answer: the MID Server requires re-validation after the upgrade.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: ECC Queue Deep Dive -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>The ECC Queue — ServiceNow's Message Bus to MID Servers</h2>
+        <p>
+          The <span class="hl-teal">External Communication Channel (ECC) Queue</span> is a table
+          in ServiceNow (<span class="code-inline">ecc_queue</span>) that acts as the message bus
+          between ServiceNow and all MID Servers. Understanding the ECC Queue is critical for
+          debugging Discovery issues.
+        </p>
+
+        <h3>ECC Queue Input vs. Output</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Queue Side</th>
+              <th>Direction</th>
+              <th>Contains</th>
+              <th>Who Writes It</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Input Queue</td>
+              <td>ServiceNow → MID Server</td>
+              <td>Instructions: "Scan this IP," "Run this probe," "Fetch this API"</td>
+              <td>ServiceNow (Discovery schedule, SGC scheduler)</td>
+            </tr>
+            <tr>
+              <td>Output Queue</td>
+              <td>MID Server → ServiceNow</td>
+              <td>Results: raw probe data, connection logs, error messages</td>
+              <td>MID Server (after executing instructions)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>ECC Queue Record Fields</h3>
+        <ul>
+          <li><strong>Agent:</strong> Which MID Server this message targets or came from</li>
+          <li><strong>Topic:</strong> The type of instruction (e.g., "DiscoveryProbe", "REST")</li>
+          <li><strong>Name:</strong> Specific operation name</li>
+          <li><strong>Payload:</strong> XML or JSON payload containing the actual data or result</li>
+          <li><strong>State:</strong> ready/processing/processed/error</li>
+          <li><strong>Error string:</strong> If state is error, what went wrong</li>
+        </ul>
+
+        <h3>Monitoring the ECC Queue for Errors</h3>
+        <p>
+          When Discovery or SGC seems stuck or not producing results, check the ECC Queue:
+          navigate to <strong>MID Server → ECC Queue</strong>. Look for:
+        </p>
+        <ul>
+          <li>Messages in "error" state — read the error_string field</li>
+          <li>Messages stuck in "ready" state for a long time — MID Server may be down</li>
+          <li>Messages stuck in "processing" — a probe is taking too long; may be a timeout issue</li>
+        </ul>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📬</span>
+          <div class="callout-body">
+            <strong>Analogy — ECC Queue as an In/Out Box</strong>
+            The ECC Queue is like a physical in/out box on a manager's desk. ServiceNow
+            puts assignment slips (Input Queue) in the "in" box. The MID Server employee
+            picks them up, does the work, and puts the results in the "out" box (Output Queue).
+            If the out box overflows with "error" slips, you know something went wrong.
+            If the in box piles up and nothing gets moved to the out box, the employee
+            (MID Server) is absent or overwhelmed.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Worker Threads -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Worker Threads — MID Server Concurrency</h2>
+        <p>
+          A MID Server doesn't process one Discovery job at a time. It has a pool of
+          <span class="hl-teal">worker threads</span> that allow it to handle multiple
+          probe executions simultaneously. This is how a single MID Server can scan
+          thousands of IP addresses efficiently.
+        </p>
+
+        <h3>How Worker Threads Work</h3>
+        <p>
+          When the MID Server polls the ECC Queue and finds work items:
+        </p>
+        <ol>
+          <li>It picks up multiple items from the Input Queue at once (configurable batch size)</li>
+          <li>Each work item is assigned to an available worker thread</li>
+          <li>Worker threads execute probes in parallel</li>
+          <li>Results are posted to the Output Queue as each thread completes</li>
+          <li>Threads return to the pool and pick up more work</li>
+        </ol>
+
+        <h3>Configuring Worker Thread Count</h3>
+        <p>
+          The thread count is configured in the MID Server's system properties (not config.xml;
+          these are set in ServiceNow under <strong>MID Server → Properties</strong> for that
+          specific MID Server):
+        </p>
+        <ul>
+          <li><span class="code-inline">mid.discovery.script.max_count</span> — Maximum concurrent Discovery probes</li>
+          <li><span class="code-inline">mid.perfmon.max_count</span> — Maximum concurrent performance monitoring probes</li>
+          <li>Default is typically 100 threads; can be increased for high-volume environments</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Too Many Threads Can Overwhelm the MID Server Host</strong>
+            Each thread consumes memory and CPU. Setting thread count too high can cause the
+            MID Server process to run out of heap memory (Java OOM errors) or cause the host
+            OS to thrash. Rule of thumb: start with defaults, monitor CPU and memory under load,
+            and increase gradually. More MID Servers (horizontal scaling) is often better than
+            more threads per MID Server (vertical scaling).
+          </div>
+        </div>
+
+        <h3>Throttling and Rate Limiting</h3>
+        <p>
+          ServiceNow provides throttling mechanisms to prevent Discovery from overwhelming your
+          network or target devices:
+        </p>
+        <ul>
+          <li><strong>Max simultaneous probes per MID Server:</strong> Limits how many concurrent connections the MID Server makes to target devices</li>
+          <li><strong>Discovery timing policies:</strong> Slow down scans during business hours</li>
+          <li><strong>Per-IP rate limiting:</strong> Limit how quickly probes run against any single target</li>
+        </ul>
+      </div>
+
+      <!-- S6: IP Ranges and Applications -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>IP Range Assignment and Application Routing</h2>
+        <p>
+          Two key configurations control which MID Server handles which work:
+          <span class="hl-teal">IP Range Assignment</span> (for Discovery) and
+          <span class="hl-teal">Application Assignment</span> (for all work types).
+        </p>
+
+        <h3>IP Range Assignment</h3>
+        <p>
+          Every MID Server record has a related list of <span class="hl-teal">IP Ranges</span>.
+          When a Discovery Schedule fires for an IP range, ServiceNow looks at which MID Server
+          "owns" that range and routes the job there.
+        </p>
+        <p>
+          Example:
+        </p>
+        <ul>
+          <li>MID-US-East owns ranges 10.0.0.0/16 and 172.16.0.0/24</li>
+          <li>MID-US-West owns ranges 192.168.0.0/16 and 10.100.0.0/16</li>
+        </ul>
+        <p>
+          When a Discovery Schedule runs against 10.0.5.0/24, ServiceNow routes it to
+          MID-US-East automatically. If no MID Server owns a particular IP range, Discovery
+          will fail for that range.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Overlapping IP Ranges</strong>
+            If two MID Servers have overlapping IP ranges, ServiceNow selects the MID Server
+            with the most specific (smallest) range. If ranges are equal, ServiceNow may use
+            either. Best practice: design IP ranges so they don't overlap. Overlapping ranges
+            cause unpredictable routing and can result in the wrong MID Server trying to reach
+            an IP it physically cannot access.
+          </div>
+        </div>
+
+        <h3>Application Assignment</h3>
+        <p>
+          Each MID Server can be assigned one or more
+          <span class="hl-teal">Applications</span> — the types of work it handles:
+        </p>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Application</th>
+              <th>What It Enables</th>
+              <th>Typical Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Discovery</td>
+              <td>Run Discovery probes and patterns against network devices</td>
+              <td>All on-premise infrastructure scanning</td>
+            </tr>
+            <tr>
+              <td>Service Graph Connector</td>
+              <td>Proxy API calls from SGC to on-premise data sources</td>
+              <td>VMware vCenter, on-premise monitoring tools</td>
+            </tr>
+            <tr>
+              <td>Orchestration</td>
+              <td>Execute workflow activities on remote systems (install software, run scripts)</td>
+              <td>IT automation flows</td>
+            </tr>
+            <tr>
+              <td>Event Management</td>
+              <td>Receive inbound alerts from monitoring tools (SNMP traps, REST alerts)</td>
+              <td>AIOps / Event Management integration</td>
+            </tr>
+            <tr>
+              <td>IntegrationHub</td>
+              <td>Execute spoke actions against on-premise systems</td>
+              <td>Flow Designer integrations with internal systems</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          A single MID Server can have all applications enabled, or you can specialize MID Servers
+          (one for Discovery only, one for SGC only) for performance isolation.
+        </p>
+      </div>
+
+      <!-- S7: MID Server Clusters -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>MID Server Clusters — High Availability and Load Distribution</h2>
+        <p>
+          A single MID Server is a single point of failure for all on-premise Discovery and
+          integrations. If it goes down, Discovery stops, SGC stops, orchestration stops.
+          <span class="hl-teal">MID Server Clusters</span> solve this by grouping multiple
+          MID Servers so they can share and distribute work.
+        </p>
+
+        <h3>How Cluster Work Distribution Works</h3>
+        <ul>
+          <li>Cluster members share a common IP range assignment pool</li>
+          <li>ServiceNow distributes work items across available cluster members in round-robin or load-based fashion</li>
+          <li>If one member goes down, the others pick up its queued work</li>
+          <li>New cluster members can be added dynamically without disrupting ongoing work</li>
+        </ul>
+
+        <h3>Primary and Secondary MID Servers</h3>
+        <p>
+          Within a cluster, you can designate a <span class="hl-teal">Primary</span> and one or
+          more <span class="hl-teal">Secondary</span> MID Servers. For work types that require
+          consistency (like certain SGC connections that maintain session state), ServiceNow
+          prefers the Primary. If the Primary is down, a Secondary takes over.
+        </p>
+
+        <h3>Cluster vs. Individual MID Server — When to Use Each</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Recommendation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Small environment (&lt; 500 CIs)</td>
+              <td>Single MID Server is sufficient</td>
+            </tr>
+            <tr>
+              <td>Production environment requiring 99%+ uptime</td>
+              <td>Minimum 2-node cluster (Primary + Secondary)</td>
+            </tr>
+            <tr>
+              <td>Large environment with many IP ranges and CI classes</td>
+              <td>Multiple MID Servers per network segment; cluster within segment</td>
+            </tr>
+            <tr>
+              <td>Geographically distributed infrastructure</td>
+              <td>One MID Server per site; IP ranges assigned by site</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — MID Servers Must Be in the Same Network Segment to Be Useful Together</strong>
+            Clustering two MID Servers that are on different network segments (e.g., one in
+            US-East and one in US-West) doesn't help for Discovery — work distributed to the
+            wrong-segment MID Server will fail to reach the target IPs. Cluster members for
+            Discovery should share network access to the same IP ranges.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: MID Server Auto-Upgrade -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>MID Server Auto-Upgrade and Version Management</h2>
+        <p>
+          ServiceNow instances are upgraded regularly (twice a year for major releases, plus
+          patches). The MID Server version must stay compatible with the ServiceNow instance version.
+          <span class="hl-teal">Auto-upgrade</span> handles this automatically.
+        </p>
+
+        <h3>How Auto-Upgrade Works</h3>
+        <ol>
+          <li>After a ServiceNow instance upgrade, it checks the version of each connected MID Server</li>
+          <li>If the MID Server version is outdated, ServiceNow pushes the new MID Server installer to the host via the ECC Queue</li>
+          <li>The MID Server process installs the upgrade and restarts</li>
+          <li>After restart, the MID Server must be <strong>re-validated</strong> before it resumes work</li>
+        </ol>
+
+        <h3>Controlling Auto-Upgrade</h3>
+        <ul>
+          <li><strong>Auto-upgrade enabled (default):</strong> MID Server upgrades automatically when the instance upgrades</li>
+          <li><strong>Auto-upgrade disabled:</strong> Admin must manually upgrade each MID Server. Risky — an incompatible version may cause errors or disconnection</li>
+          <li><strong>Upgrade window:</strong> You can configure when auto-upgrade is allowed to run (e.g., only during maintenance windows)</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Scenario — Discovery Stopped After Instance Upgrade</strong>
+            "After the organization's ServiceNow instance was upgraded to the latest release,
+            all Discovery schedules stopped producing results. The MID Server status shows
+            'Upgraded.' What must be done?"
+            Answer: The MID Server was auto-upgraded and now requires re-validation.
+            Navigate to MID Server → Servers → Validate.
+          </div>
+        </div>
+      </div>
+
+      <!-- S9: MID Server Troubleshooting -->
+      <div class="section-block" id="s9">
+        <span class="section-label">Section 9</span>
+        <h2>MID Server Troubleshooting — Common Failure Patterns</h2>
+
+        <h3>MID Server Shows "Down" in ServiceNow</h3>
+        <p>
+          ServiceNow marks a MID Server as "Down" when it stops receiving heartbeat messages
+          from the MID Server process.
+        </p>
+        <ul>
+          <li>Check if the MID Server process/service is running on the host (Task Manager on Windows, <code>systemctl status mid-server</code> on Linux)</li>
+          <li>Check network: can the host reach <code>your-instance.service-now.com:443</code>?</li>
+          <li>Check for proxy changes: many MID Servers run behind a corporate proxy — if the proxy changed, update <code>config.xml</code></li>
+          <li>Check MID Server logs at <code>INSTALL_DIR/logs/agent0.log.0</code> for Java stack traces or connection errors</li>
+        </ul>
+
+        <h3>MID Server Is Up but Discovery Produces No Results</h3>
+        <ul>
+          <li>Check IP range assignment: does the MID Server own the IP range in the Discovery Schedule?</li>
+          <li>Check Application assignment: is "Discovery" enabled for this MID Server?</li>
+          <li>Check ECC Queue for stuck messages</li>
+          <li>Check Discovery Behavior: are the correct probes included?</li>
+          <li>Check if firewall rules on the MID Server host allow it to reach the target IP range</li>
+        </ul>
+
+        <h3>MID Server Memory / Performance Issues</h3>
+        <ul>
+          <li><strong>Java heap OOM:</strong> MID Server ran out of memory. Increase heap size in <code>wrapper.conf</code>: set <code>wrapper.java.maxmemory=2048</code> (in MB)</li>
+          <li><strong>High CPU:</strong> Too many concurrent worker threads. Reduce thread count or add another MID Server</li>
+          <li><strong>Slow probe results:</strong> Target devices are slow to respond. Increase probe timeout in Discovery behavior settings</li>
+        </ul>
+
+        <h3>MID Server Logs</h3>
+        <p>
+          Key log files in the MID Server installation directory:
+        </p>
+        <ul>
+          <li><code>logs/agent0.log.0</code> — Main MID Server process log. Shows startup, connectivity, probe execution</li>
+          <li><code>logs/boot.log</code> — Startup and JVM initialization</li>
+          <li><code>logs/mid-upgrade.log</code> — Auto-upgrade events</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Enable Debug Logging for Difficult Issues</strong>
+            MID Server log verbosity can be increased via the ServiceNow MID Server record
+            by setting the log level to DEBUG. This captures much more detail about probe
+            execution, ECC Queue communication, and target connection attempts.
+            Remember to return it to INFO after debugging — DEBUG logging significantly
+            increases log volume.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>MID Server — Key Facts</h2>
+        <ul>
+          <li><strong>MID Server = Java app</strong> installed on-premise. Makes outbound HTTPS to ServiceNow only. No inbound ports needed.</li>
+          <li><strong>ECC Queue = message bus.</strong> Input = instructions from ServiceNow to MID. Output = results from MID to ServiceNow.</li>
+          <li><strong>config.xml</strong> = connection config file on MID Server host. Contains ServiceNow URL and service account credentials.</li>
+          <li><strong>Service account needs <code>mid_server</code> role</strong> in ServiceNow. Not admin.</li>
+          <li><strong>Validation required</strong> before any work can be processed. State: Pending → Up.</li>
+          <li><strong>Re-validation required after upgrade.</strong> MID Server goes to "Upgraded" state — admin must re-validate.</li>
+          <li><strong>IP Range assignment</strong> routes Discovery work to the correct MID Server.</li>
+          <li><strong>Application assignment</strong> controls which types of work (Discovery, SGC, Orchestration) the MID Server handles.</li>
+          <li><strong>Clusters provide HA.</strong> Members share IP ranges and distribute work. Cluster members must be in same network segment for Discovery.</li>
+          <li><strong>Worker threads</strong> = concurrency. Too many → OOM. Too few → slow. Default 100 threads.</li>
+          <li><strong>MID Server logs</strong> are in <code>INSTALL_DIR/logs/agent0.log.0</code>.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">config.xml</div>
+            <div class="term-def">MID Server configuration file. Contains ServiceNow instance URL, service account credentials, and MID Server name. Lives on the MID Server host.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">ECC Queue Input</div>
+            <div class="term-def">Messages from ServiceNow to MID Server. Contains instructions: scan this IP, run this probe, call this API.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">ECC Queue Output</div>
+            <div class="term-def">Messages from MID Server to ServiceNow. Contains probe results, raw data, error messages.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Worker Thread</div>
+            <div class="term-def">Concurrent execution unit within the MID Server process. Each thread handles one probe execution at a time. Default pool: ~100 threads.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">MID Server Validation</div>
+            <div class="term-def">Admin approval step that changes MID Server state from "Pending Validation" to "Up." Required after installation and after each upgrade.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">mid_server Role</div>
+            <div class="term-def">ServiceNow role assigned to the MID Server's service account. Grants access to ECC Queue, Credential Vault, and CMDB write operations.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. After setting up a new MID Server, an administrator starts the MID Server process. It shows as "Pending Validation" in ServiceNow. No Discovery jobs are running. What must the administrator do next?</div>
+          <div class="cq-options">
+            <div>A) Assign IP ranges to the MID Server</div>
+            <div>B) Restart the MID Server service on the host</div>
+            <div>C) Validate the MID Server in ServiceNow under MID Server → Servers</div>
+            <div>D) Update config.xml with the Discovery schedule name</div>
+          </div>
+          <div class="cq-hint">💡 What gates the MID Server from processing any work?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — A MID Server in "Pending Validation" state cannot process any work. The administrator must navigate to MID Server → Servers, open the record, and click Validate. This is a required security step to approve the new MID Server before it can run Discovery or any other jobs.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. Where are the ServiceNow instance URL and service account credentials for a MID Server stored?</div>
+          <div class="cq-options">
+            <div>A) In the ServiceNow Credential Vault (mid_credential table)</div>
+            <div>B) In config.xml on the MID Server host server</div>
+            <div>C) In the Discovery behavior record in ServiceNow</div>
+            <div>D) In the MID Server record's properties tab in ServiceNow</div>
+          </div>
+          <div class="cq-hint">💡 These are credentials for the MID Server to connect TO ServiceNow, not credentials for scanning targets.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — The MID Server's connection credentials (the ServiceNow URL and the service account username/password) are stored in config.xml on the MID Server host. These are separate from target device credentials (SSH keys, SNMP strings) which are stored in ServiceNow's Credential Vault and retrieved by the MID Server at scan time.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. A MID Server that was previously working shows "Down" in ServiceNow. The MID Server host is online and network connectivity appears normal. What should be checked first?</div>
+          <div class="cq-options">
+            <div>A) Whether the Discovery schedule is set to Active</div>
+            <div>B) Whether the MID Server Java process/service is still running on the host</div>
+            <div>C) Whether the ServiceNow instance has been upgraded</div>
+            <div>D) Whether the ECC Queue is full</div>
+          </div>
+          <div class="cq-hint">💡 "Down" means ServiceNow stopped receiving heartbeats. The most basic cause is the process stopped.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — ServiceNow marks a MID Server as "Down" when it stops receiving heartbeat messages. The first thing to check is whether the MID Server Java process/Windows service is actually running on the host — it may have crashed, been stopped by someone, or failed to start after a reboot. Check with Task Manager (Windows) or systemctl (Linux).</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. An organization has MID Servers in US-East and US-West data centers. A Discovery Schedule for the IP range 10.10.0.0/24 (located in US-East) runs, but the MID-US-West server processes it. The scan fails because it cannot reach those IPs. What is the root cause?</div>
+          <div class="cq-options">
+            <div>A) The Discovery behavior is misconfigured</div>
+            <div>B) The IP range 10.10.0.0/24 is assigned to MID-US-West instead of MID-US-East</div>
+            <div>C) The MID-US-East server is not validated</div>
+            <div>D) The Discovery Schedule has the wrong MID Server specified</div>
+          </div>
+          <div class="cq-hint">💡 Which configuration tells ServiceNow which MID Server handles which IP range?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — IP Range assignment on the MID Server record controls routing. If 10.10.0.0/24 is assigned to MID-US-West (incorrectly), ServiceNow routes that work to MID-US-West, which physically cannot reach those IPs. The fix: remove the IP range from MID-US-West and assign it to MID-US-East.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. An organization wants their MID Server to handle Discovery AND receive inbound SNMP alerts from monitoring tools. What configuration change is needed?</div>
+          <div class="cq-options">
+            <div>A) Install two separate MID Servers — one for each function</div>
+            <div>B) Enable both the "Discovery" and "Event Management" applications on the MID Server record</div>
+            <div>C) This is not possible — a MID Server can only handle one application type</div>
+            <div>D) Configure two separate ECC Queues for the MID Server</div>
+          </div>
+          <div class="cq-hint">💡 A single MID Server can handle multiple application types.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — A single MID Server can have multiple Applications enabled. Navigate to the MID Server record and add both "Discovery" and "Event Management" to the Applications related list. This allows the same MID Server to run Discovery probes AND receive SNMP alerts from monitoring tools in your network.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">6. After a major ServiceNow upgrade, all MID Servers show state "Upgraded" and no Discovery jobs are running. What is the correct sequence of actions?</div>
+          <div class="cq-options">
+            <div>A) Reinstall all MID Servers from scratch — the upgrade corrupted them</div>
+            <div>B) Restart the Discovery schedules manually</div>
+            <div>C) Validate each MID Server in ServiceNow under MID Server → Servers</div>
+            <div>D) Increase MID Server worker thread count to compensate for the backlog</div>
+          </div>
+          <div class="cq-hint">💡 "Upgraded" is a specific MID Server state that requires one specific admin action.</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — After an auto-upgrade, MID Servers enter "Upgraded" state and require re-validation before resuming work. The administrator navigates to MID Server → Servers, selects each MID Server showing "Upgraded," and clicks Validate. This is expected behavior after every upgrade — not a bug. Re-validation is the gate.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="01-discovery-architecture.html" class="btn btn-secondary">← Discovery Architecture</a>
+          <a href="03-patterns-probes-credentials.html" class="btn btn-secondary">Patterns, Probes &amp; Credentials →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p3d_t2_02';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

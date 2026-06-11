@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMDB Workspace &amp; Natural Language Query | CIS-DF Part 7</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 7: Reporting</a>
+        <span class="sep">›</span>
+        <span class="current">CMDB Workspace &amp; Natural Language Query</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 7 · Topic 5</div>
+        <h1 class="topic-title">CMDB Workspace &amp; Natural Language Query — Making CMDB Data Accessible to Everyone</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          All the configuration data in the world is worthless if users can't access it without
+          writing complex database queries. CMDB Workspace is ServiceNow's modern interface for
+          exploring CI data — and Natural Language Query (NLQ) lets users ask questions in plain
+          English instead of filter conditions. Together with the CI 360 view, they transform
+          the CMDB from a technical repository into a usable operational tool.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>8 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~30 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~20% exam weight (INSIGHT domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>CMDB Workspace · NLQ · CI 360 · Source Attribution · INSIGHT</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: CMDB Workspace Overview -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>CMDB Workspace — The Modern CMDB Interface</h2>
+        <p>
+          Before CMDB Workspace, exploring the CMDB meant navigating to specific tables
+          (cmdb_ci, cmdb_ci_server, etc.), building filter conditions manually, and
+          having enough technical knowledge to know which table held which data.
+          CMDB Workspace changes this by providing a unified, visual starting point for
+          all CMDB exploration.
+        </p>
+        <p>
+          Navigate to <strong>Configuration → CMDB Workspace</strong>.
+        </p>
+
+        <h3>What CMDB Workspace Provides</h3>
+        <ul>
+          <li>
+            <strong>Unified search across all CI classes:</strong> Type a hostname, IP address,
+            or application name and get results from every relevant table — no need to know
+            whether the CI is in cmdb_ci_server, cmdb_ci_linux_server, or cmdb_ci_vm_instance.
+          </li>
+          <li>
+            <strong>CI 360 View:</strong> Clicking any CI opens a comprehensive view of that CI's
+            data, relationships, health, source attribution, and linked ITSM records (incidents,
+            changes, problems) in one screen.
+          </li>
+          <li>
+            <strong>Natural Language Query (NLQ):</strong> Ask questions in plain English.
+            ServiceNow translates the question into a structured CMDB query automatically.
+          </li>
+          <li>
+            <strong>CMDB Health integration:</strong> Health scores are surfaced in the Workspace
+            so users can see data quality context alongside CI data.
+          </li>
+          <li>
+            <strong>Relationship visualization:</strong> Navigate from a CI to its connected
+            CIs through the relationship map without writing queries.
+          </li>
+        </ul>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🔍</span>
+          <div class="callout-body">
+            <strong>Analogy — CMDB Workspace as a Search Engine for IT Infrastructure</strong>
+            Old CMDB access was like using a library catalogue where you had to know the Dewey
+            Decimal number to find a book. CMDB Workspace is like Google — type what you're
+            looking for and get relevant results, regardless of which internal "section" it's stored in.
+            NLQ goes further: instead of keywords, you can ask full questions — like asking a librarian.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: Natural Language Query -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Natural Language Query (NLQ) — Asking the CMDB Questions in Plain English</h2>
+        <p>
+          Natural Language Query (NLQ) allows users to type questions in conversational English
+          and get structured CMDB results without knowing filter syntax or table names.
+          ServiceNow's NLQ engine translates the plain-English question into a GlideRecord
+          query behind the scenes.
+        </p>
+
+        <h3>Example NLQ Queries</h3>
+        <ul>
+          <li>"Show me all Linux servers in the Production environment"</li>
+          <li>"Which servers were discovered in the last 7 days?"</li>
+          <li>"Find all CIs owned by the database team with an incident in the past month"</li>
+          <li>"List cloud VMs running in us-east-1 with more than 8 CPUs"</li>
+          <li>"Which applications depend on the Oracle database PROD-ORA-01?"</li>
+        </ul>
+
+        <p>
+          NLQ translates these into structured queries against the CMDB tables and returns
+          a list view of matching CIs. The generated query is also visible so technically
+          skilled users can verify or refine it.
+        </p>
+
+        <h3>NLQ Limitations (Important for Exam)</h3>
+        <ul>
+          <li>
+            <strong>NLQ works best with well-populated, consistent data.</strong> If field values
+            are inconsistent (mix of "Production" and "Prod" and "PROD" for the environment field),
+            NLQ may miss records. Data quality directly affects NLQ effectiveness.
+          </li>
+          <li>
+            <strong>NLQ cannot make inferences.</strong> It translates what you say literally.
+            "Find servers at risk" requires the user to define what "at risk" means — NLQ
+            can't derive risk from multiple fields automatically.
+          </li>
+          <li>
+            <strong>Complex multi-hop relationship queries</strong> ("Find all applications that
+            depend on CIs owned by teams with an active change freeze") may exceed NLQ's
+            translation capability and require manual query building or custom reports.
+          </li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — NLQ Effectiveness Depends on Data Quality</strong>
+            NLQ is a query interface, not a data quality tool. If the CMDB has poor completeness
+            or inconsistent field values, NLQ returns incomplete or incorrect results. Improving
+            NLQ result accuracy requires improving the underlying CMDB data quality (higher
+            Completeness and Compliance Health scores) — not changing NLQ configuration.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: CI 360 View -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>CI 360 View — The Complete Single-CI Dashboard</h2>
+        <p>
+          When you click on any CI in CMDB Workspace or NLQ results, you are taken to the
+          <span class="hl-teal">CI 360 View</span> — a comprehensive single-screen view of
+          everything ServiceNow knows about that CI.
+        </p>
+
+        <h3>What CI 360 Displays</h3>
+        <ul>
+          <li>
+            <strong>CI Details tab:</strong> All standard CI attributes — name, class, IP address,
+            operational_status, support_group, owned_by, location, and all class-specific fields.
+          </li>
+          <li>
+            <strong>Source Attribution tab:</strong> Which discovery source populated each field.
+            This is the critical tab for diagnosing multi-source CMDB conflicts.
+          </li>
+          <li>
+            <strong>Relationships tab:</strong> Visual map of all CIs related to this CI,
+            with relationship type labels. Navigable — click any related CI to open its 360 view.
+          </li>
+          <li>
+            <strong>CMDB Health tab:</strong> This CI's specific Health scores across all five
+            dimensions. Shows which specific Health Rules are failing for this CI.
+          </li>
+          <li>
+            <strong>ITSM Records tab:</strong> All open incidents, problems, and changes linked
+            to this CI. Allows technicians to see operational context alongside configuration data.
+          </li>
+          <li>
+            <strong>Timeline tab:</strong> History of changes to the CI record — field-level
+            change history showing what changed, when, and by what source.
+          </li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — CI 360 Is the Primary Diagnostic Starting Point</strong>
+            When troubleshooting any CMDB data quality issue for a specific CI, always start
+            with the CI 360 view. It consolidates in one screen: what data is there,
+            which source put it there (Source Attribution), what's wrong with it (Health tab),
+            and what operational impact it has (ITSM Records tab). This eliminates the need
+            to navigate 4-5 different tables to gather this information.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Source Attribution View -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Source Attribution — Who Populated Which Field?</h2>
+        <p>
+          Source Attribution is one of the most important features in CMDB Workspace and
+          directly tests your knowledge of IRE (Identity and Reconciliation Engine) in practice.
+          The Source Attribution tab on a CI 360 view shows a field-by-field breakdown of
+          which discovery source last successfully wrote each field value.
+        </p>
+
+        <h3>Why Source Attribution Matters</h3>
+        <p>
+          In a multi-source CMDB environment (Discovery + SGC + SCCM + Manual), different
+          sources may have different "authority" over different fields (as defined by
+          Reconciliation Rules). When a field has an unexpected value, Source Attribution
+          tells you which source wrote that value — which is the first step in diagnosing
+          the problem.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📋</span>
+          <div class="callout-body">
+            <strong>Analogy — Source Attribution as a Document Revision History</strong>
+            Think of a CI as a shared document that multiple people can edit. Source Attribution
+            is the revision history that shows who last changed each paragraph (field).
+            If "Paragraph 3" (the cpu_count field) says the wrong value, you check revision
+            history to see who last edited it — then you know whether to fix their source
+            data or fix the Reconciliation Rule that allowed them to overwrite the authoritative value.
+          </div>
+        </div>
+
+        <h3>Source Attribution Fields</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field on CI</th>
+              <th>Source Attribution Shows</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ip_address</td>
+              <td>Source: Discovery | Last Updated: 2026-06-01</td>
+              <td>Discovery owns IP — expected. If SGC shows here, Reconciliation Rule may be misconfigured.</td>
+            </tr>
+            <tr>
+              <td>owned_by</td>
+              <td>Source: Manual | Last Updated: 2025-11-15</td>
+              <td>Manual owns ownership — expected. Stale date may indicate field hasn't been reviewed in 7 months.</td>
+            </tr>
+            <tr>
+              <td>instance_type</td>
+              <td>Source: Service Graph Connector | Last Updated: 2026-06-09</td>
+              <td>SGC owns cloud instance type — correct. Populated yesterday so data is fresh.</td>
+            </tr>
+            <tr>
+              <td>cpu_count</td>
+              <td>Source: SCCM | Last Updated: 2024-03-01</td>
+              <td>Stale source (SCCM) over 2 years old. Discovery should own this but may have been outcompeted by a misconfigured Reconciliation Rule.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Source Attribution Connects IRE Theory to Practice</strong>
+            Exam questions often describe a scenario: "A CI shows cpu_count=4 but the server
+            physically has 16 CPUs. How do you identify the problem?" The answer starts with
+            Source Attribution (CI 360 Source tab) — which source wrote cpu_count? Then check
+            if that source has correct data, and whether the Reconciliation Rule for cpu_count
+            is configured correctly for field authority. This is the IRE diagnostic workflow
+            applied to a real scenario.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Relationship Visualization -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Relationship Visualization — Navigating CI Dependencies</h2>
+        <p>
+          The Relationships tab in CI 360 displays all CI-to-CI relationships in a visual map.
+          Relationships in ServiceNow CMDB are stored in the <span class="code-inline">cmdb_rel_ci</span>
+          table. Each relationship has a type (e.g., "Runs on", "Hosted on", "Depends on",
+          "Connected to") and a direction (parent CI → child CI).
+        </p>
+
+        <h3>How Relationship Navigation Works</h3>
+        <ul>
+          <li>
+            Starting from any CI, the Relationships tab shows direct connections (depth=1 by default).
+          </li>
+          <li>
+            You can expand to show 2nd-degree connections (CIs connected to connected CIs).
+          </li>
+          <li>
+            Clicking any CI in the relationship map opens its CI 360 view, allowing you to
+            navigate the dependency chain without losing context.
+          </li>
+          <li>
+            The "Impact" view shows what would be affected if this CI failed —
+            tracing upward through the "Depends on" and "Hosted on" chains to Application Services
+            and Business Applications (the CSDM impact propagation chain you learned in Part 5).
+          </li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Use Relationship Navigation for Change Impact Assessment</strong>
+            Before raising a change request for a CI, use the Relationships tab to understand
+            the downstream impact. If you're planning maintenance on a database server,
+            the relationship map shows which application servers depend on it, which Application
+            Services those servers support, and which Business Applications are therefore at risk.
+            This is the CMDB delivering value to Change Management.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: CMDB Workspace vs Classic Navigation -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>CMDB Workspace vs Classic Table Navigation</h2>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Classic Table Navigation</th>
+              <th>CMDB Workspace + NLQ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Finding a CI</td>
+              <td>Must know which table the CI class uses; navigate to that table; apply filter conditions using field names</td>
+              <td>Type hostname or IP in universal search; results from all relevant CI classes</td>
+            </tr>
+            <tr>
+              <td>Viewing CI details</td>
+              <td>Open CI record form — flat field list; relationships in separate related lists; health not shown</td>
+              <td>CI 360 view — tabbed interface: details, relationships, health, source, ITSM records all on one screen</td>
+            </tr>
+            <tr>
+              <td>Asking a question</td>
+              <td>Must translate question into filter conditions manually; requires knowing field names and values</td>
+              <td>Type natural language question; NLQ translates to query automatically; visible generated query for review</td>
+            </tr>
+            <tr>
+              <td>Navigating relationships</td>
+              <td>Scroll down to "Relationships" related list; each row is text; click to open each related CI separately</td>
+              <td>Visual relationship map in CI 360 Relationships tab; navigable; impact view available</td>
+            </tr>
+            <tr>
+              <td>Data quality context</td>
+              <td>Not visible inline; must navigate to CMDB Health separately</td>
+              <td>Health scores visible in CI 360 Health tab; source attribution visible in Source tab</td>
+            </tr>
+            <tr>
+              <td>Target audience</td>
+              <td>CMDB administrators, technical staff with table knowledge</td>
+              <td>All IT roles — operations, help desk, app owners, CMDB team</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S7: Who Uses CMDB Workspace -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Who Uses CMDB Workspace (Persona Map)</h2>
+        <p>
+          CMDB Workspace serves multiple IT personas, each using it differently:
+        </p>
+        <ul>
+          <li>
+            <strong>Help Desk / Service Desk:</strong> Looks up a CI by name or IP when
+            logging an incident. Views the CI's support_group and owned_by to route correctly.
+            Checks the ITSM Records tab to see if there's already an open incident for this CI.
+          </li>
+          <li>
+            <strong>Change Manager:</strong> Uses relationship navigation to assess change impact
+            before approving. Looks up "who owns this CI?" and "what does it support?"
+          </li>
+          <li>
+            <strong>Application Owner:</strong> Uses NLQ to find all CIs associated with their
+            application. Checks that all CIs show correct ownership fields.
+          </li>
+          <li>
+            <strong>CMDB Data Steward:</strong> Uses Source Attribution to investigate data
+            quality issues — "which source wrote this wrong value?" Uses Health tab to see
+            per-CI Health Rule failures.
+          </li>
+          <li>
+            <strong>Security Team:</strong> Uses NLQ to find CIs with specific attributes —
+            "show me all Windows Server 2008 CIs still in production" for vulnerability assessment.
+          </li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — CMDB Workspace Serves the INSIGHT Domain</strong>
+            The INSIGHT exam domain (20% of exam) is about making CMDB data useful for
+            decision-making. CMDB Workspace, NLQ, and CI 360 are the primary tools that
+            serve this domain — they transform raw CMDB data into accessible, actionable
+            information for all IT stakeholders, not just the technical CMDB team.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>CMDB Workspace &amp; NLQ — Key Facts</h2>
+        <ul>
+          <li><strong>CMDB Workspace</strong> = unified modern interface for CMDB exploration. Navigate: Configuration → CMDB Workspace.</li>
+          <li><strong>NLQ (Natural Language Query)</strong> = plain-English question → structured CMDB query. Shows generated query for review.</li>
+          <li><strong>NLQ result quality depends on data quality.</strong> Inconsistent field values = incomplete NLQ results. Fix: improve Completeness and Compliance Health scores.</li>
+          <li><strong>CI 360 View</strong> = comprehensive single-CI dashboard with tabs: Details, Source Attribution, Relationships, Health, ITSM Records, Timeline.</li>
+          <li><strong>Source Attribution tab</strong> = field-by-field breakdown of which source last populated each value. Primary diagnostic tool for multi-source conflicts.</li>
+          <li><strong>Relationship visualization</strong> = visual CI dependency map from CI 360 Relationships tab. Impact view shows CSDM propagation chain upward.</li>
+          <li><strong>CMDB Workspace serves the INSIGHT exam domain</strong> (20% of exam) — making CMDB data accessible and actionable for all IT roles.</li>
+          <li><strong>NLQ cannot make inferences.</strong> Complex multi-hop relationship queries may require manual filter building or custom reports.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">CMDB Workspace</div>
+            <div class="term-def">ServiceNow's unified modern interface for CMDB exploration. Provides universal CI search, CI 360 view, NLQ, relationship visualization, and integrated CMDB Health context.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Natural Language Query (NLQ)</div>
+            <div class="term-def">CMDB Workspace feature that translates plain-English questions into structured CMDB queries. Result quality depends on underlying CMDB data quality (completeness and consistency).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CI 360 View</div>
+            <div class="term-def">Comprehensive single-CI dashboard in CMDB Workspace. Displays CI details, source attribution, relationships, CMDB Health scores, linked ITSM records, and change timeline in one screen.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Source Attribution</div>
+            <div class="term-def">Feature in CI 360 View that shows which discovery source last populated each field on a CI, and when. Primary diagnostic tool for identifying the source of incorrect CI field values in multi-source CMDB environments.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">INSIGHT Domain</div>
+            <div class="term-def">CIS-DF exam domain (20% weight) covering how CMDB data is made accessible and useful for decision-making. Primary tools: CMDB Workspace, NLQ, CI 360 View, dashboards, and reporting.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Relationship Visualization</div>
+            <div class="term-def">Visual CI dependency map in CI 360 Relationships tab. Shows connected CIs, relationship types, and supports impact analysis by navigating the CSDM impact propagation chain upward from CI to Business Application.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. An application owner is using NLQ to find all CIs associated with her application "HRMS" but is getting fewer results than expected. She knows the CMDB has more CIs for HRMS. What is the most likely cause and recommended fix?</div>
+          <div class="cq-options">
+            <div>A) NLQ is not enabled for the application owner role — she needs the cmdb_admin role</div>
+            <div>B) NLQ is translating her query literally, and some CIs use different values (e.g., "HR Management System", "HRMS Portal") for the field NLQ is searching against. Fix: standardize field values through CMDB data quality remediation</div>
+            <div>C) NLQ can only search 50 CIs maximum — she needs to run multiple queries</div>
+            <div>D) The CMDB Workspace is only available in the IT Operations Management (ITOM) module, which is not licensed</div>
+          </div>
+          <div class="cq-hint">💡 NLQ quality depends on what? Think about the relationship between NLQ and data quality.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — NLQ translates questions literally. If CIs use inconsistent values (HRMS vs. "HR Management System" vs. "HRMS Portal") for the field being searched, NLQ searching for "HRMS" only finds CIs that use that exact value or very close synonyms. The fix is data quality remediation: standardize how the application name is recorded across CIs. This is a Compliance dimension issue (inconsistent values) that directly degrades NLQ accuracy. There is no inherent role requirement to use NLQ (A) or a result count limit (C).</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. A CMDB administrator discovers that a production server CI shows cpu_count=4, but the physical server has 16 CPUs. Discovery should be authoritative for cpu_count per the Reconciliation Rules. Where should he look first to identify what populated the wrong value?</div>
+          <div class="cq-options">
+            <div>A) The IRE Log (cmdb_ire_event) for the CI's last ingestion event</div>
+            <div>B) The Source Attribution tab on the CI 360 View, which shows which source last wrote the cpu_count field</div>
+            <div>C) The CMDB Health dashboard, which shows the Correctness score for the server class</div>
+            <div>D) The Discovery schedule to verify Discovery ran for this CI recently</div>
+          </div>
+          <div class="cq-hint">💡 The question asks where to look FIRST to identify what populated the wrong value — which specific view shows field-level source information?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Source Attribution tab in CI 360 View shows exactly which source wrote each field last, and when. If cpu_count was last written by SCCM (not Discovery), that explains the wrong value — SCCM has outdated data and its Reconciliation Rule configuration may be incorrectly granting it authority over cpu_count, or Discovery wrote 16 but SCCM later overwrote it with 4. The IRE Log (A) is valuable for understanding why IRE made a decision, but Source Attribution is the faster first step. CMDB Health (C) would show the Correctness score is low, but not which source is responsible. Discovery schedule (D) is a secondary check after confirming what source is responsible.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. During a major incident, the help desk receives alerts about a failed database server. They use CMDB Workspace to search for the CI and open its CI 360 view. Which tab should they check FIRST to understand the operational impact — which application services and business applications are at risk?</div>
+          <div class="cq-options">
+            <div>A) The Health tab — check the CMDB Health score of the failed CI</div>
+            <div>B) The Source Attribution tab — identify which discovery tool last updated the CI</div>
+            <div>C) The Relationships tab — use the Impact view to see which Application Services and Business Applications depend on this database server</div>
+            <div>D) The ITSM Records tab — look for previous incidents on this server</div>
+          </div>
+          <div class="cq-hint">💡 Impact during an active incident = which services depend on this CI? Which CI 360 tab shows CI dependencies?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — During an active major incident, the priority is understanding business impact. The Relationships tab with Impact view traces the CSDM propagation chain upward: Database Server → Application Servers → Application Service → Business Application → Business Owner. This tells the help desk which business services are affected and who to notify. The Health tab (A) is useful for CMDB governance but irrelevant during an incident. Source Attribution (B) is a diagnostic tool for data quality, not operational impact. ITSM Records (D) shows historical incidents but not current business impact scope.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. Which of the following tasks is BEST suited for CMDB Workspace NLQ versus manual filter building?</div>
+          <div class="cq-options">
+            <div>A) Finding all CIs where (operational_status=1 AND sys_class_name='cmdb_ci_linux_server' AND last_discovered&lt;=javascript:gs.daysAgo(7)) — complex multi-field query with relative date calculation</div>
+            <div>B) "Show me all Linux servers discovered in the last 7 days" — direct, well-defined question with standard CMDB fields</div>
+            <div>C) "Find all applications that would be impacted by failures in any CI that shares a subnet with the legacy infrastructure" — multi-hop reasoning across relationship chains</div>
+            <div>D) Generating a scheduled report comparing CMDB Health scores month-over-month across 15 CI classes</div>
+          </div>
+          <div class="cq-hint">💡 NLQ is best for direct questions that translate cleanly to standard filter conditions. What are NLQ's limitations?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — "Show me all Linux servers discovered in the last 7 days" is exactly what NLQ excels at: a direct question that maps clearly to filter conditions (class=Linux Server, last_discovered within 7 days). Option A describes the same query but as explicit filter conditions — NLQ would handle this naturally, so manually writing those conditions is unnecessary when NLQ can do it. Option C is a multi-hop relationship inference ("shares a subnet" → find related CIs → trace impact") which exceeds NLQ's translation capability. Option D is a scheduled reporting task — a different feature entirely, not NLQ.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. A security team member uses CMDB Workspace to search for all Windows Server 2008 CIs still showing operational_status=Operational. She successfully finds 47 CIs via NLQ. What does this result demonstrate about the relationship between CMDB quality and security operations?</div>
+          <div class="cq-options">
+            <div>A) The security team doesn't need CMDB access — they should use their own security scanning tools</div>
+            <div>B) The CMDB, when populated with accurate and complete data, enables security use cases like identifying end-of-life OS instances at risk of unpatched vulnerabilities — a direct INSIGHT domain outcome</div>
+            <div>C) NLQ results cannot be trusted for security decisions because CMDB data is never fully accurate</div>
+            <div>D) The CMDB can only be used for infrastructure management, not security operations</div>
+          </div>
+          <div class="cq-hint">💡 What does this scenario demonstrate about CMDB as a source of operational intelligence for non-infrastructure teams?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — This scenario demonstrates the INSIGHT domain in action: accurate CMDB data (correct OS version fields, current operational_status) enables the security team to perform vulnerability assessment without running separate scans. The CMDB becomes a source of operational intelligence across IT disciplines. This is why CMDB data quality matters — it's not just about keeping records; it's about enabling informed decisions across operations, security, finance, and compliance. The result depends on Discovery accurately populating OS version fields, which connects back to the entire ingestion pipeline taught in prior topics.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../part6-governance/topics/06-cmdb-health-kpis-data-manager.html" class="btn btn-secondary">← CMDB Health KPIs</a>
+          <a href="06-foundation-dashboards-cmdb360.html" class="btn btn-secondary">Foundation Dashboards →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p7_t5_05';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CI Relationships &amp; Dependency View | CIS-DF Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .frame-diagram{background:rgba(0,0,0,0.25);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-family:var(--font-mono);font-size:0.84rem;color:var(--text-secondary);line-height:2}
+    .frame-diagram .node{color:#22d3ee;font-weight:700}
+    .frame-diagram .rel{color:var(--amber-300)}
+    .frame-diagram .arrow{color:var(--text-muted)}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span>
+        <span class="current">CI Relationships &amp; Dependency View</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 5 · Topic 2</div>
+        <h1 class="topic-title">CI Relationships &amp; Dependency View</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          CI Relationships connect CIs to model real-world dependencies. The Dependency View and
+          Unified Map visualize these connections — telling you which CIs are upstream (what your
+          CI depends on) and downstream (what depends on your CI).
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~20 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~10% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>CMDB · Relationships · Impact</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>The cmdb_rel_ci Table</h2>
+        <p>
+          CI Relationships in ServiceNow are stored in the <span class="code-inline">cmdb_rel_ci</span>
+          table — a self-referential many-to-many (M2M) table where both parent and child
+          reference <code>cmdb_ci</code>. This design means any CI can be related to any other CI.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🧩</span>
+          <div class="callout-body">
+            <strong>Analogy — Train Map</strong>
+            Think of each CI as a city on a train map. The <code>cmdb_rel_ci</code> table is
+            the list of all train routes — each row says "City A connects to City B, and the
+            type of route is 'Express'." Without this table, the cities exist but you can't
+            know which are connected or how. The Dependency View draws the map visually.
+          </div>
+        </div>
+
+        <h3>cmdb_rel_ci Key Fields</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Field</th><th>Type</th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>parent</td><td>Reference → cmdb_ci</td><td>The CI that depends on the child (the "from" end)</td></tr>
+            <tr><td>child</td><td>Reference → cmdb_ci</td><td>The CI being depended on (the "to" end)</td></tr>
+            <tr><td>type</td><td>Reference → cmdb_rel_type</td><td>The relationship type (e.g., "Runs on", "Connected by")</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          The <span class="code-inline">cmdb_rel_type</span> table defines available relationship
+          types. Each type has an <strong>outbound descriptor</strong> (how the parent relates to the child)
+          and an <strong>inbound descriptor</strong> (how the child relates to the parent).
+          For example, the "Runs on" type: parent "Runs on" child, and child is "Used by" parent.
+        </p>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Upstream vs. Downstream</h2>
+        <p>
+          Understanding direction is crucial for impact analysis. When an incident affects a CI,
+          you need to know which services and users are impacted (downstream) and what infrastructure
+          components could have caused the issue (upstream).
+        </p>
+
+        <div class="frame-diagram">
+          <span class="node">Database Server</span> <span class="arrow">←——</span> <span class="node">App Server</span> <span class="arrow">←——</span> <span class="node">Web Frontend</span><br>
+          <span style="color:var(--text-muted);font-size:0.75rem">
+          &nbsp;&nbsp;&nbsp;Upstream of App Server&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Downstream of App Server
+          </span><br><br>
+          &nbsp;&nbsp;→ <span class="rel">App Server "Runs on" Database Server</span> (DB is upstream)<br>
+          &nbsp;&nbsp;→ <span class="rel">Web Frontend "Depends on" App Server</span> (Web is downstream)
+        </div>
+
+        <h3>Definitions</h3>
+        <ul>
+          <li><strong>Upstream CIs</strong> — CIs that the selected CI <em>depends on</em>. If an upstream CI fails, the selected CI may fail. Example: The App Server's upstream is the Database Server it queries.</li>
+          <li><strong>Downstream CIs</strong> — CIs that <em>depend on</em> the selected CI. If the selected CI fails, downstream CIs are impacted. Example: The App Server's downstream is the Web Frontend that calls it.</li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Impact Flows Downstream</strong>
+            When a CI has an outage, <em>impact propagates downstream</em> — the services that depend
+            on it are affected. This is why impact analysis starts at a failed CI and traverses
+            downstream to find affected services and users.
+            Root cause analysis goes upstream — following the chain to find which upstream
+            component caused the failure.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Dependency View</h2>
+        <p>
+          The <span class="hl-teal">Dependency View</span> is a visual graph that opens from any
+          CI record. It shows the selected CI at the center with its related CIs branching outward
+          by relationship type. You can expand each branch to follow the dependency chain.
+        </p>
+        <p>
+          To open: navigate to any CI record → click the <strong>Dependency Views</strong> related
+          list → choose a saved view (or use the icon in the CI header).
+        </p>
+
+        <h3>What You Can Do in Dependency View</h3>
+        <ul>
+          <li><strong>Expand/collapse</strong> — click any CI node to show its relationships</li>
+          <li><strong>Filter by relationship type</strong> — show only "Runs on" or only "Connected by" relationships</li>
+          <li><strong>Highlight impact</strong> — trace downstream to identify affected services</li>
+          <li><strong>Open CI records</strong> — double-click any node to open the CI record in a new tab</li>
+          <li><strong>Show CI details</strong> — hover over a node to see class, status, and key attributes</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Dependency View Reads cmdb_rel_ci Only</strong>
+            The Dependency View only shows relationships stored in <code>cmdb_rel_ci</code>.
+            It does NOT show reference field relationships (like "assigned_to") or table hierarchy
+            relationships (parent/child class). If you want to show that Server A "Runs" Application B,
+            you must create a relationship row in <code>cmdb_rel_ci</code> — a reference field pointing
+            from one CI to another is NOT enough to appear in Dependency View.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Unified Map</h2>
+        <p>
+          The <span class="hl-teal">Unified Map</span> (also called Service Map) is an
+          enhanced visualization that goes beyond the individual CI view. While Dependency View
+          is CI-centric, Unified Map is <em>service-centric</em> — it starts from a Business Service
+          or Application Service and shows the full infrastructure dependency map for that service.
+        </p>
+        <p>
+          The Unified Map is the primary tool for:
+        </p>
+        <ul>
+          <li><strong>Service impact analysis</strong> — when an incident is raised against a CI, which business services are affected?</li>
+          <li><strong>Change impact assessment</strong> — before approving a change to a server, see all services that depend on it</li>
+          <li><strong>Root cause navigation</strong> — follow the graph upstream from an impacted service to find the failing CI</li>
+        </ul>
+
+        <h3>Layers in the Unified Map</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Layer</th><th>What It Shows</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Business Services</td><td>Top-level services visible to business users (Email, HR Portal)</td></tr>
+            <tr><td>Application Services</td><td>Technical implementations powering Business Services</td></tr>
+            <tr><td>Application Tier</td><td>Application servers, web servers, middleware</td></tr>
+            <tr><td>Database Tier</td><td>Database instances and servers</td></tr>
+            <tr><td>Infrastructure Tier</td><td>Physical/virtual servers, storage, network</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Relationship Quality Determines Map Quality</strong>
+            The Unified Map is only as good as the relationships in <code>cmdb_rel_ci</code>.
+            If Discovery hasn't run Service Mapping, or if relationships weren't created during
+            import, the map will be incomplete. A CMDB with poor relationship coverage will show
+            isolated nodes with no connections — the map is a diagnostic for relationship data quality.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Common Relationship Types</h2>
+        <p>
+          The exam tests which relationship type to use for given scenarios. These are the
+          most commonly tested:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Relationship Type</th><th>Outbound (Parent → Child)</th><th>Inbound (Child → Parent)</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Runs on</td><td>Runs on</td><td>Hosts</td><td>Application "Runs on" Server</td></tr>
+            <tr><td>Depends on::Used by</td><td>Depends on</td><td>Used by</td><td>Service "Depends on" Database</td></tr>
+            <tr><td>Connected by</td><td>Connected by</td><td>Connects</td><td>Server "Connected by" Switch</td></tr>
+            <tr><td>Members of</td><td>Members of</td><td>Contains</td><td>VMs "Members of" Cluster</td></tr>
+            <tr><td>Virtualized by</td><td>Virtualized by</td><td>Virtualizes</td><td>VM "Virtualized by" Hypervisor</td></tr>
+            <tr><td>Uses::Used by</td><td>Uses</td><td>Used by</td><td>App "Uses" Shared Library</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Relationship Direction in cmdb_rel_ci</strong>
+            In <code>cmdb_rel_ci</code>, the <strong>parent</strong> field is the CI that "does" the
+            relationship (e.g., the Application that "Runs on" the Server). The <strong>child</strong>
+            is the target. This can be counterintuitive: the Application (parent) runs on the
+            Server (child) — but in physical terms, the Server is the foundation. Think of parent/child
+            as "who initiates the relationship," not who is physically on top.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — CI Relationships &amp; Dependency View</h2>
+        <ul>
+          <li>All CI relationships stored in <code>cmdb_rel_ci</code> (M2M table with parent, child, type)</li>
+          <li>Dependency View only shows <code>cmdb_rel_ci</code> data — reference fields don't appear there</li>
+          <li><strong>Upstream</strong> = what a CI depends on; <strong>Downstream</strong> = what depends on the CI</li>
+          <li>Impact propagates <em>downstream</em>; root cause analysis goes <em>upstream</em></li>
+          <li>Unified Map is service-centric (starts from Business/Application Service); Dependency View is CI-centric</li>
+          <li>In <code>cmdb_rel_ci</code>: parent "does" the relationship to child (App parent "Runs on" Server child)</li>
+          <li>Relationship type is in <code>cmdb_rel_type</code> — has outbound and inbound descriptors</li>
+          <li>Map quality depends entirely on relationship completeness — missing relationships = disconnected nodes</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="03-discovery-ire.html" class="btn btn-secondary">Discovery &amp; IRE Deep Dive →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p4_t2_02';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

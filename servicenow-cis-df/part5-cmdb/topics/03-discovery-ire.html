@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discovery &amp; IRE Deep Dive | CIS-DF Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .flow-steps{display:flex;flex-direction:column;gap:var(--space-2);margin:var(--space-5) 0}
+    .flow-step{display:flex;gap:var(--space-4);align-items:flex-start;padding:var(--space-4) var(--space-5);background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.14);border-radius:var(--radius-lg)}
+    .flow-step-num{width:28px;height:28px;border-radius:50%;background:rgba(8,145,178,0.2);border:1px solid rgba(8,145,178,0.35);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;color:#22d3ee;flex-shrink:0}
+    .flow-step-body{flex:1}
+    .flow-step-title{font-size:0.88rem;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+    .flow-step-desc{font-size:0.82rem;color:var(--text-muted);line-height:1.5}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-3);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.07);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card-name{font-size:0.82rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-1);font-family:var(--font-heading)}
+    .term-card-desc{font-size:0.82rem;color:var(--text-muted);line-height:1.5}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .priority-badge{display:inline-block;background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:#f87171;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:var(--radius-sm);margin-left:var(--space-2)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span>
+        <span class="current">Discovery &amp; IRE Deep Dive</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 5 · Topic 3</div>
+        <h1 class="topic-title">Discovery &amp; IRE Deep Dive</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          The Identification and Reconciliation Engine (IRE) is the gatekeeper for all CI data entering
+          the CMDB. It prevents duplicates, manages conflicts between data sources, and determines the
+          authoritative value for every field. Understanding IRE is the single most important skill for CIS-DF.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>7 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~18% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>IRE · Discovery · Reconciliation</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Why IRE Exists <span class="priority-badge">High Priority</span></h2>
+        <p>
+          Without a gatekeeper, every import and every Discovery run would simply overwrite CI data.
+          Imagine: Discovery finds a server and sets its hostname to "WEB-01". An hour later, a CSV
+          import from the asset management system arrives with hostname "web-server-01" for the same
+          physical machine. Without IRE, whichever ran last wins — creating either duplicates or
+          incorrect overwrites.
+        </p>
+        <p>
+          The <span class="hl-teal">Identification and Reconciliation Engine (IRE)</span> solves this
+          in two phases:
+        </p>
+        <ol>
+          <li><strong>Identification</strong> — Is this CI already in the CMDB? Find the existing record, or create a new one if it's genuinely new. Never create a duplicate.</li>
+          <li><strong>Reconciliation</strong> — Multiple sources are reporting values for this CI. Which source should win for each field? Apply the authoritative source rules.</li>
+        </ol>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🧩</span>
+          <div class="callout-body">
+            <strong>Analogy — Passport Control + Customs</strong>
+            IRE is like an airport's arrival process. Identification is Passport Control:
+            "Is this person already in our system? Match them to their existing profile."
+            Reconciliation is Customs: "Multiple agencies (TSA, border patrol, airline)
+            all have data about this traveler. Whose data do we trust for each field?
+            We use the passport for nationality, the airline for seat assignment."
+            IRE applies the same logic to CI data from Discovery, Import Sets, and SGCs.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Identification Rules &amp; Identification Entries <span class="priority-badge">High Priority</span></h2>
+        <p>
+          <span class="hl-teal">Identification Rules</span> define how IRE determines if an
+          incoming CI payload matches an existing CI in the CMDB. There is one Identification Rule
+          per CI class (or inherited from a parent class).
+        </p>
+        <p>
+          Each Identification Rule contains one or more <span class="hl-teal">Identification Entries</span>.
+          Each Entry specifies a set of fields that, when matched, uniquely identify a CI. Think of
+          Identification Entries as the "fingerprints" — multiple fingerprints can identify the same person.
+        </p>
+
+        <h3>How Identification Works Step-by-Step</h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Payload Arrives</div>
+              <div class="flow-step-desc">An incoming CI payload arrives with a set of fields. IRE looks up the Identification Rule for the CI class specified in the payload.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Apply Identification Entries in Priority Order</div>
+              <div class="flow-step-desc">IRE evaluates each Identification Entry in priority order (lower number = higher priority). For each Entry, it checks if all the specified fields match an existing CI.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Match Found → Update Existing CI</div>
+              <div class="flow-step-desc">If an Entry matches exactly one existing CI, IRE identifies that CI as the target. It does not create a new record.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Multiple Matches → Duplicate Candidate</div>
+              <div class="flow-step-desc">If the Entry matches more than one existing CI, IRE raises a "multiple match" condition. The CMDB Dedupe dashboard tracks these for manual resolution.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">No Match → Create New CI</div>
+              <div class="flow-step-desc">If no Identification Entry matches any existing CI, IRE creates a new CI record. This is a genuine new CI being added to the CMDB.</div>
+            </div>
+          </div>
+        </div>
+
+        <h3>Identification Entry Configuration</h3>
+        <p>
+          Each Identification Entry has:
+        </p>
+        <ul>
+          <li><strong>Priority</strong> — Integer (1 = highest priority). IRE tries entries in order; the first match wins.</li>
+          <li><strong>Attributes</strong> — one or more field names from the CI class that must ALL match (AND logic). Example: "serial_number" alone, or "name + ip_address".</li>
+          <li><strong>Qualifier</strong> — optional filter to restrict which CIs this entry applies to (e.g., only apply if OS = Linux).</li>
+          <li><strong>Related Entries</strong> — match via related CI values (e.g., match the server by its network adapter's MAC address).</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — All Fields in an Entry Must Match (AND Logic)</strong>
+            If an Identification Entry lists "name" and "ip_address," BOTH fields must match
+            an existing CI for that entry to succeed. It's not enough for just name to match —
+            both must. Entries within a rule use OR logic (any entry can succeed), but attributes
+            within an entry use AND logic (all must match).
+          </div>
+        </div>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Inherited Identification Rules</strong>
+            Identification Rules can be inherited from parent CI classes. If <code>cmdb_ci_computer</code>
+            has an Identification Rule, <code>cmdb_ci_server</code> inherits it unless a more
+            specific rule is defined for servers. This means you don't need to create separate
+            rules for every subclass — define at the right level of the hierarchy.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Reconciliation Rules <span class="priority-badge">High Priority</span></h2>
+        <p>
+          Once IRE identifies the target CI, it moves to the second phase:
+          <span class="hl-teal">Reconciliation</span>. Multiple data sources may all report
+          different values for the same CI field. Reconciliation Rules determine which source
+          wins for each field.
+        </p>
+        <p>
+          Each <strong>Reconciliation Rule</strong> specifies:
+        </p>
+        <ul>
+          <li><strong>CI Class</strong> — which CI type this rule applies to</li>
+          <li><strong>Field</strong> — which specific field is being governed (e.g., <code>ip_address</code>)</li>
+          <li><strong>Data source precedence</strong> — ordered list of data sources; higher position = higher authority</li>
+          <li><strong>Action</strong> — what to do: Accept (use the value), Reject (ignore this source's value), or Merge</li>
+        </ul>
+
+        <h3>Reconciliation Precedence Example</h3>
+        <p>
+          For the <code>os_version</code> field on servers, you might configure:
+        </p>
+        <ol>
+          <li>Discovery (highest authority — it read the OS directly from the server)</li>
+          <li>ServiceNow CMDB Agent</li>
+          <li>Third-party ITSM import (lowest authority — manual data entry is less reliable)</li>
+        </ol>
+        <p>
+          If Discovery reports "Windows Server 2022" and the ITSM import reports "Windows 2019,"
+          Discovery wins. The ITSM value is stored but not applied to the active field value.
+        </p>
+
+        <h3>What Happens When No Rule Matches</h3>
+        <p>
+          If no Reconciliation Rule covers a specific field/source combination:
+        </p>
+        <ul>
+          <li>By default, the incoming value <strong>overwrites</strong> the existing value (last-write-wins)</li>
+          <li>This is the dangerous default — it means any source can overwrite any field if no rule protects it</li>
+          <li>Best practice: create Reconciliation Rules for all fields that could be updated by multiple sources</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — No Rule = Last Writer Wins</strong>
+            If no Reconciliation Rule exists for a field, the most recent import or Discovery
+            run overwrites the previous value regardless of source quality. This is a common
+            cause of "my CMDB data keeps reverting" issues — a low-quality import is overwriting
+            high-quality Discovery data because no Reconciliation Rule protects the field.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Discovery Architecture</h2>
+        <p>
+          ServiceNow <span class="hl-teal">Discovery</span> is the automated process of scanning
+          your network to find and inventory CIs. It runs on a schedule or on demand, communicates
+          with devices and applications, and sends the discovered data through IRE into the CMDB.
+        </p>
+
+        <h3>Key Discovery Components</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-card-name">MID Server</div>
+            <div class="term-card-desc">Management, Instrumentation, and Discovery server. A Java agent installed in your network that executes Discovery probes and sends results back to ServiceNow.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">IP Range / Discovery Schedule</div>
+            <div class="term-card-desc">Defines what to scan (IP ranges or CIDR blocks) and when. The Discovery Schedule triggers the scan and tracks its status.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Probes</div>
+            <div class="term-card-desc">Scripts that collect data from devices (SSH, WMI, SNMP). Each probe collects a specific type of data (OS info, running processes, installed software).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Sensors</div>
+            <div class="term-card-desc">Process probe results and create CI payloads. Sensors transform raw probe output into structured CMDB data that IRE can consume.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Patterns</div>
+            <div class="term-card-desc">Declarative discovery definitions (JSON/YAML) that describe how to discover a specific technology. Patterns replace custom probes/sensors for certified technologies.</div>
+          </div>
+        </div>
+
+        <h3>Discovery → CMDB Flow</h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Scan → Horizontal Discovery</div>
+              <div class="flow-step-desc">MID Server pings IP ranges, identifies live devices. Classifies each device type (server, router, printer) using port scanning and SNMP.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Probe → Vertical Discovery</div>
+              <div class="flow-step-desc">For each device, runs detailed probes (SSH/WMI for servers, SNMP for network gear) to collect CI attribute data.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Sensor Processes Probe Output</div>
+              <div class="flow-step-desc">Sensor transforms raw probe output into a structured CI payload with class, identification attributes, and field values.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">IRE Receives Payload</div>
+              <div class="flow-step-desc">IRE runs identification (match or create) then reconciliation (apply authoritative values). The CMDB CI record is created or updated.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Service Graph Connectors and IRE</h2>
+        <p>
+          <span class="hl-teal">Service Graph Connectors (SGCs)</span> are the recommended integration
+          pattern for getting third-party data into the CMDB. Unlike raw Import Sets that write directly
+          to tables, SGCs explicitly route data through IRE.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Feature</th><th>Service Graph Connector</th><th>Import Set (direct write)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>IRE Identification</td><td>✓ Always passes through IRE</td><td>✗ Bypasses IRE by default</td></tr>
+            <tr><td>Duplicate prevention</td><td>✓ IRE deduplicates</td><td>✗ Can create duplicates</td></tr>
+            <tr><td>Reconciliation rules honored</td><td>✓ Yes</td><td>✗ No — writes directly</td></tr>
+            <tr><td>Source tagging</td><td>✓ Tagged for reconciliation</td><td>Limited</td></tr>
+            <tr><td>Setup complexity</td><td>Higher (requires SGC install)</td><td>Lower</td></tr>
+            <tr><td>Recommended for CMDB</td><td>✓ Yes</td><td>Only if SGC not available</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          SGC payloads include the <strong>source system identifier</strong> and the <strong>CI class</strong>
+          with identification attributes. IRE uses these to match the incoming payload against existing CIs
+          and apply the configured Reconciliation Rules for that source.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-body">
+            <strong>Warning — Direct Import Set Writes Bypass IRE</strong>
+            If a Transform Map writes directly to <code>cmdb_ci_server</code> (target table is the CI table),
+            IRE is not involved. This means no duplicate checking, no reconciliation rules, and no
+            source tagging. This is the main reason direct Import Set writes to CMDB tables are
+            discouraged — they undermine CMDB data integrity.
+            To route Import Sets through IRE, use the CMDB Identification Utility (IRE API) in transform scripts.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6 -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Duplicate CIs and CMDB Deduplication</h2>
+        <p>
+          Despite IRE's best efforts, duplicates can still enter the CMDB — especially through
+          legacy Import Sets that bypass IRE, or when Identification Rules are misconfigured.
+          ServiceNow provides tools to detect and resolve duplicates.
+        </p>
+
+        <h3>CMDB Dedupe Dashboard</h3>
+        <ul>
+          <li>Shows CI records flagged as potential duplicates by IRE (multiple match condition)</li>
+          <li>Allows viewing duplicate pairs side by side to compare field values</li>
+          <li>Provides actions: Merge (combine into one), Delete (remove the less accurate one), or Mark as Not Duplicate</li>
+        </ul>
+
+        <h3>Merge Behavior</h3>
+        <p>
+          When merging two duplicate CIs, ServiceNow must decide which field values to keep.
+          The merge process:
+        </p>
+        <ol>
+          <li>Designates one as the "winner" (master) and one as the "loser" (duplicate)</li>
+          <li>Applies Reconciliation Rule logic to determine which value survives for each field</li>
+          <li>Updates all references (incidents, changes, relationships) that pointed to the loser to point to the winner</li>
+          <li>Marks the loser record as decommissioned or deletes it</li>
+        </ol>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Merging Does Not Delete Referenced Records</strong>
+            When two CIs are merged, relationships (cmdb_rel_ci rows) pointing to the loser CI
+            are re-pointed to the winner CI — they are NOT deleted. Incidents or changes linked
+            to the loser are also re-linked to the winner. The merge is a pointer update, not
+            a data deletion.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7 -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>IRE Tables Reference</h2>
+        <p>
+          IRE configuration lives in a small set of tables. Knowing these table names is tested:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Table</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>cmdb_identifier</td><td>Identification Rule — one per CI class; links to Identification Entries</td></tr>
+            <tr><td>cmdb_identifier_entry</td><td>Identification Entry — the specific field combinations used for matching</td></tr>
+            <tr><td>cmdb_reconciliation_rule</td><td>Reconciliation Rule — field-level authoritative source configuration</td></tr>
+            <tr><td>cmdb_datasource_filter</td><td>Data Source Filter — restrict which CIs a source can create/update</td></tr>
+            <tr><td>cmdb_ire_log</td><td>IRE processing log — tracks each payload processed, result, and any errors</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Discovery &amp; IRE</h2>
+        <ul>
+          <li>IRE has two phases: <strong>Identification</strong> (find/create CI) then <strong>Reconciliation</strong> (apply authoritative field values)</li>
+          <li>Identification Rule = one per CI class; contains one or more Identification Entries</li>
+          <li>Identification Entry attributes = AND logic (all must match); multiple Entries = OR logic</li>
+          <li>Priority on Entries: lower number = tried first</li>
+          <li>No Reconciliation Rule = last writer wins (dangerous default)</li>
+          <li>SGCs route through IRE; direct Import Set writes to CMDB tables bypass IRE</li>
+          <li>Discovery updates CIs through IRE — never updates Asset records</li>
+          <li>MID Server = Java agent in your network; runs probes, sends results to ServiceNow</li>
+          <li>Probes collect raw data; Sensors transform probe output into CI payloads</li>
+          <li>Merge re-points all references from loser to winner — does NOT delete referenced records</li>
+          <li>IRE tables: <code>cmdb_identifier</code>, <code>cmdb_identifier_entry</code>, <code>cmdb_reconciliation_rule</code></li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="04-cmdb-health-governance.html" class="btn btn-secondary">CMDB Health &amp; Governance →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p4_t3_03';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSDM Service Modeling | CIS-DF Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5: CMDB &amp; CSDM</a>
+        <span class="sep">›</span>
+        <span class="current">CSDM Service Modeling</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 5 · Topic 7</div>
+        <h1 class="topic-title">CSDM Service Modeling — Building the Service Map in Practice</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          You now understand CSDM's four domains conceptually. This topic focuses on
+          the practical implementation: how do you actually build the service model?
+          How do Application Services get populated? How do Business Applications link to them?
+          How does change impact analysis use the service model? And what are the common
+          modeling mistakes that make CSDM fail to deliver value?
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>9 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~11% exam weight (CSDM domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Application Service · Service Mapping · Business Impact · Owned By</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: The Two Approaches to Building Application Services -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Two Ways to Build Application Service Maps</h2>
+        <p>
+          An Application Service record in CSDM is the container for all CIs that make
+          an application work. There are two primary ways to populate it:
+        </p>
+
+        <h3>Approach 1: Service Mapping (Automated — Recommended)</h3>
+        <p>
+          Service Mapping (covered in Part 3 Topic 4) discovers application dependencies
+          automatically by starting from an Entry Point (URL or IP) and tracing all
+          connected infrastructure. The output is automatically written as an Application
+          Service CI with all discovered CIs linked as members.
+        </p>
+        <p>
+          Advantages:
+        </p>
+        <ul>
+          <li>Accurate — reflects actual runtime dependencies, not assumed ones</li>
+          <li>Auto-updates when the infrastructure changes (new servers added, services moved)</li>
+          <li>Doesn't require IT staff to manually document what "supports" what</li>
+        </ul>
+
+        <h3>Approach 2: Manual Service Modeling</h3>
+        <p>
+          An administrator manually creates an Application Service CI and manually relates
+          individual CIs to it using the CI relationships editor. Used when:
+        </p>
+        <ul>
+          <li>Service Mapping can't reach the application (air-gapped environment, non-HTTP entry point)</li>
+          <li>The application uses protocols Service Mapping doesn't support</li>
+          <li>A quick approximation is needed before Service Mapping is configured</li>
+        </ul>
+        <p>
+          Disadvantage: manual models drift — as infrastructure changes, someone must remember
+          to update the model. Service Mapping keeps it current automatically.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Service Mapping = Preferred CSDM Population Method</strong>
+            When an exam question asks "how should an Application Service in CSDM be populated
+            for an enterprise web application?", the answer is Service Mapping — because it
+            automates the discovery and keeps the model current. Manual modeling is only
+            acceptable when Service Mapping is not applicable.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: Connecting Business Applications to Application Services -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Linking Business Applications to Application Services</h2>
+        <p>
+          Once Application Services are populated (either by Service Mapping or manual modeling),
+          the next step is connecting them to Business Applications. This creates the CSDM
+          Domain 1 ↔ Domain 2 link — the connection between the business perspective and the
+          technical implementation.
+        </p>
+
+        <h3>How to Create the Link</h3>
+        <p>
+          ServiceNow provides two ways:
+        </p>
+        <ol>
+          <li>
+            <strong>From the Business Application CI:</strong> Open the Business Application record
+            (<span class="code-inline">cmdb_ci_business_app</span>). In the related lists at the bottom,
+            find "Supported by Services" and add the relevant Application Service records.
+          </li>
+          <li>
+            <strong>From the Application Service CI:</strong> Open the Application Service record.
+            Use the "Supports Business Applications" related list to link to Business Applications.
+          </li>
+        </ol>
+        <p>
+          Both approaches create the same underlying relationship. The relationship type is
+          "Provided by" — the Application Service is provided by (i.e., supports) the Business Application.
+        </p>
+
+        <h3>One Business Application Can Have Multiple Application Services</h3>
+        <p>
+          Real enterprise applications often run as multiple services:
+        </p>
+        <ul>
+          <li>Business Application: "HR Self-Service" (cmdb_ci_business_app)</li>
+          <li>← Supported by: "HR Portal Application Service" (web tier)</li>
+          <li>← Supported by: "HR Database Application Service" (data tier)</li>
+          <li>← Supported by: "HR Auth Application Service" (authentication tier)</li>
+        </ul>
+        <p>
+          All three Application Services are linked to the same Business Application.
+          If any one fails, the Business Application is impacted.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — The Impact Propagation Chain</strong>
+            Once the full CSDM chain is built: CI → Application Service → Business Application →
+            Business Capability, ServiceNow can automatically propagate impact. An incident on a
+            server CI automatically shows which Application Services are affected, which Business
+            Applications those services support, and which Business Capabilities are at risk.
+            This is the core value proposition of CSDM.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: Service Owner and Accountability -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Ownership Fields in CSDM — Accountability Chain</h2>
+        <p>
+          CSDM is only useful if someone is accountable for each layer. ServiceNow CSDM
+          defines ownership fields at multiple levels:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>CSDM Object</th>
+              <th>Ownership Field</th>
+              <th>Who Should Own It</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Business Capability</td>
+              <td>Business owner</td>
+              <td>VP or Director of the business unit that depends on this capability</td>
+            </tr>
+            <tr>
+              <td>Business Application</td>
+              <td>Application owner + IT owner</td>
+              <td>Business: the department head. IT: the application manager or product owner</td>
+            </tr>
+            <tr>
+              <td>Application Service</td>
+              <td>Support group + Managed by</td>
+              <td>The IT operations team responsible for this service's availability</td>
+            </tr>
+            <tr>
+              <td>Technical Service</td>
+              <td>Managed by</td>
+              <td>The platform or infrastructure team owning the shared service</td>
+            </tr>
+            <tr>
+              <td>Infrastructure CI (Domain 4)</td>
+              <td>Owned by + Managed by</td>
+              <td>Owned by: the cost center / department. Managed by: the ops team</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          These ownership fields enable:
+        </p>
+        <ul>
+          <li><strong>Incident routing:</strong> Incidents auto-assign to the support group of the affected Application Service</li>
+          <li><strong>Change approval:</strong> Change requests automatically notify the Business Application owner for impact assessment</li>
+          <li><strong>Accountability reporting:</strong> "Show me all Business Applications where the IT owner field is blank" — CMDB governance gap</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — "Managed by" vs "Owned by" in CSDM</strong>
+            "Owned by" typically means business/financial ownership — who pays for it and is accountable for the business outcome.
+            "Managed by" typically means operational responsibility — who maintains, supports, and monitors it.
+            For a server CI: Owned by = Finance department (they allocated the budget), Managed by = Infrastructure team (they do patching and monitoring). Both fields should be populated for complete CSDM data.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Change Impact Analysis Using CSDM -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Change Impact Analysis — CSDM in Action</h2>
+        <p>
+          One of the most tangible benefits of a complete CSDM model is automated
+          Change Impact Analysis. When a Change Request is created in ServiceNow for a CI,
+          the system can automatically determine which Business Applications will be affected.
+        </p>
+
+        <h3>How Change Impact Analysis Works with CSDM</h3>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Change Request: Patch server DB-PROD-01 on Saturday 2am</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">System: DB-PROD-01 (cmdb_ci_db_instance) is member of Application Service "HR Database"</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Application Service "HR Database" supports Business Application "HR Self-Service"</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Business Application "HR Self-Service" is owned by VP of HR</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">System auto-notifies: "Your application is affected by Change CHG12345. Approval needed."</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Change Calendar shows HR Self-Service as impacted during the Saturday window</div>
+          </div>
+        </div>
+
+        <p>
+          Without CSDM, this chain of reasoning requires manual investigation.
+          With CSDM, it happens automatically every time a Change Request references a CI.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — CSDM Enables Automated Business Impact in Change Management</strong>
+            Expect exam questions asking "what is required for ServiceNow to automatically identify
+            which business applications are affected by a change to an infrastructure CI?"
+            The answer is: a complete CSDM model — specifically, the CI must be linked to an
+            Application Service, which must be linked to a Business Application. Without these
+            relationships, impact analysis is only manual.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Incident Management and CSDM -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Incident Management with CSDM Context</h2>
+        <p>
+          CSDM also enhances Incident Management by providing business context to every incident:
+        </p>
+        <ul>
+          <li>
+            <strong>Automatic business service detection:</strong> When an alert fires for a CI,
+            the incident is automatically associated with all Application Services that CI belongs to,
+            and all Business Applications those services support
+          </li>
+          <li>
+            <strong>Priority enrichment:</strong> An incident against a CI supporting a "Critical"
+            Business Application can automatically receive a higher priority than one against a
+            "Low" business criticality service
+          </li>
+          <li>
+            <strong>Stakeholder notifications:</strong> Business Application owners are automatically
+            notified when incidents affect their application
+          </li>
+          <li>
+            <strong>SLA selection:</strong> The correct SLA applies based on the affected Application
+            Service's Service Offering and Service Commitment
+          </li>
+        </ul>
+
+        <h3>The Business Criticality Field</h3>
+        <p>
+          The <span class="code-inline">business_criticality</span> field on Application Service
+          and Business Application records (scale: 1-Critical, 2-High, 3-Medium, 4-Low) is used
+          by ITSM workflows to make automated priority decisions. Keeping this field accurate
+          requires ongoing governance — it doesn't auto-populate from Discovery.
+        </p>
+      </div>
+
+      <!-- S6: Service Modeling Anti-Patterns -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Common CSDM Modeling Mistakes</h2>
+        <p>
+          Organizations that rush into CSDM without understanding the framework often
+          create models that look complete but don't provide real value. Here are the
+          most common mistakes:
+        </p>
+
+        <h3>Mistake 1: Modeling at the Wrong Level</h3>
+        <p>
+          Creating one Business Application called "All Production Systems" and linking every
+          CI to it. This defeats the purpose — impact analysis says "all production systems are
+          affected" for every incident, which is useless.
+        </p>
+        <p>
+          <strong>Fix:</strong> Each distinct application (Salesforce, SAP, Custom Billing App)
+          should have its own Business Application record.
+        </p>
+
+        <h3>Mistake 2: Skipping Application Services</h3>
+        <p>
+          Linking CIs directly to Business Applications without Application Services.
+          This creates a flat model that can't distinguish which CIs support which aspect
+          of a multi-tier application.
+        </p>
+        <p>
+          <strong>Fix:</strong> Always use the Application Service as the intermediate layer.
+          CIs → Application Service → Business Application. Never skip layers.
+        </p>
+
+        <h3>Mistake 3: Stale Ownership Fields</h3>
+        <p>
+          Populating Business Application owners once and never reviewing them. After
+          reorganizations, staff changes, or departmental mergers, the ownership fields
+          become wrong. Automated notifications and approvals go to the wrong people.
+        </p>
+        <p>
+          <strong>Fix:</strong> Include Business Application ownership review in quarterly
+          CMDB governance reviews (covered in Part 6).
+        </p>
+
+        <h3>Mistake 4: Manual Service Models Without Refresh</h3>
+        <p>
+          Creating manual Application Service models and never updating them as infrastructure
+          changes. After 6 months, the model shows 3 servers supporting the application
+          when the actual infrastructure has grown to 12.
+        </p>
+        <p>
+          <strong>Fix:</strong> Use Service Mapping wherever possible. For manual models,
+          schedule a regular review (quarterly minimum) to verify CI membership.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Incomplete CSDM Is Worse Than No CSDM</strong>
+            An incomplete CSDM model (some applications linked, most not) creates a false sense
+            of security. When an incident fires, the impact shows "no Business Applications affected"
+            — because the impacted application's links were never configured. Operations teams
+            lose trust in the system and stop using it. Either commit to maintaining the model
+            or don't deploy it — a half-built CSDM model is actively misleading.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: Relationship Types in CSDM -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Key Relationship Types in CSDM</h2>
+        <p>
+          CSDM uses specific relationship types from the <span class="code-inline">cmdb_rel_type</span>
+          table to connect CIs across domains. Understanding these relationship types matters
+          because they control how impact propagates through the model.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>From (Child)</th>
+              <th>Relationship Type</th>
+              <th>To (Parent/Target)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Business Application</td>
+              <td>Uses::Used by</td>
+              <td>Application Service</td>
+            </tr>
+            <tr>
+              <td>Application Service</td>
+              <td>Depends on::Used by</td>
+              <td>Infrastructure CI (server, database, network device)</td>
+            </tr>
+            <tr>
+              <td>Application Service</td>
+              <td>Depends on::Used by</td>
+              <td>Technical Service</td>
+            </tr>
+            <tr>
+              <td>Technical Service</td>
+              <td>Depends on::Used by</td>
+              <td>Infrastructure CI</td>
+            </tr>
+            <tr>
+              <td>Business Application</td>
+              <td>Supports::Supported by</td>
+              <td>Business Capability</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Tip — Direction Matters for Impact Propagation</strong>
+            Impact propagates upward in the hierarchy. When a CI fails, the impact flows:
+            CI → Application Service (depends on CI) → Business Application (uses Application Service).
+            Relationship direction affects which way impact flows — if relationships are
+            created in the wrong direction, impact analysis won't work correctly.
+            Always verify: the CI is the "used by" side, the Application Service is the "depends on" side.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: CSDM and CMDB Health Scoring -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>CSDM Completeness in CMDB Health Scoring</h2>
+        <p>
+          ServiceNow's CMDB Health framework (covered in depth in Part 6) includes CSDM
+          completeness as a scoring dimension. CIs and Business Applications are evaluated
+          for:
+        </p>
+        <ul>
+          <li><strong>Required fields populated:</strong> Are Business Application owner, support_group, business_criticality set?</li>
+          <li><strong>Relationship completeness:</strong> Does each Application Service have at least one CI linked? Does each Business Application have at least one Application Service linked?</li>
+          <li><strong>Ownership populated:</strong> Is the "owned by" field set for each CI class that CSDM requires it for?</li>
+          <li><strong>Classification accuracy:</strong> Are CIs in the correct CMDB classes per CSDM guidance?</li>
+        </ul>
+        <p>
+          These CMDB Health scores for CSDM completeness help organizations identify gaps
+          in their service model and prioritize which applications need relationship data filled in.
+        </p>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>CSDM Service Modeling — Key Facts</h2>
+        <ul>
+          <li><strong>Application Services populated by Service Mapping (preferred)</strong> or manual modeling (fallback).</li>
+          <li><strong>Service Mapping keeps Application Services current automatically.</strong> Manual models drift as infrastructure changes.</li>
+          <li><strong>Link: Business Application → Application Service → CI.</strong> Never skip layers. Never link CIs directly to Business Applications.</li>
+          <li><strong>One Business Application can have multiple Application Services.</strong> Each tier (web, app, data) can be a separate service.</li>
+          <li><strong>Ownership fields enable automation:</strong> incident routing, change approval, stakeholder notifications, SLA selection.</li>
+          <li><strong>Business criticality field</strong> on Application Service and Business Application drives automated incident priority decisions.</li>
+          <li><strong>Change Impact Analysis</strong> requires full CSDM chain: CI → Application Service → Business Application. Without links, no automated impact.</li>
+          <li><strong>Impact propagates upward:</strong> CI failure → Application Service impact → Business Application impact.</li>
+          <li><strong>CMDB Health scores CSDM completeness:</strong> missing owners, empty links, wrong classes all count against CMDB health.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Change Impact Analysis</div>
+            <div class="term-def">Automatic determination of which Business Applications are affected by a change to an infrastructure CI. Requires complete CSDM CI → Application Service → Business Application chain.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Business Criticality</div>
+            <div class="term-def">Field on Application Service and Business Application (1=Critical to 4=Low). Used by ITSM workflows to set automatic incident priority and determine change approval requirements.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Impact Propagation</div>
+            <div class="term-def">The automatic upstream flow of impact from a failing CI to all higher-level CSDM objects (Application Services, Business Applications, Business Capabilities) that depend on it.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Service Model (CSDM)</div>
+            <div class="term-def">The complete map of relationships from Business Applications down through Application Services to infrastructure CIs. Built via Service Mapping and/or manual configuration.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Managed by vs Owned by</div>
+            <div class="term-def">Managed by = operational responsibility (IT ops team). Owned by = business/financial accountability (cost center or department). Both needed for complete CSDM accountability chain.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CSDM Completeness Score</div>
+            <div class="term-def">CMDB Health dimension measuring how fully CSDM relationships, ownership fields, and CI classifications are populated. Low score indicates missing service model data.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. A company wants to use ServiceNow to automatically determine which Business Applications are affected when a specific Linux server CI goes down. The CMDB has accurate CI data. What additional configuration is required?</div>
+          <div class="cq-options">
+            <div>A) Configure SNMP monitoring on the Linux server</div>
+            <div>B) Create CSDM relationships: link the Linux server to an Application Service, and link that Application Service to the relevant Business Applications</div>
+            <div>C) Add the Linux server to a Static CI Group named "Impact Analysis Group"</div>
+            <div>D) Set the Linux server's priority field to "Critical"</div>
+          </div>
+          <div class="cq-hint">💡 What's the chain that connects a CI to business applications in CSDM?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Automatic business impact determination requires the CSDM relationship chain: CI → Application Service → Business Application. The Linux server must be linked as a member of an Application Service (ideally populated by Service Mapping), and that Application Service must be linked to the affected Business Applications. Without this chain, ServiceNow has no way to traverse from an infrastructure CI to the business applications it supports.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. An administrator has used Service Mapping to populate an Application Service for the company's e-commerce platform. Six months later, the platform added 3 new application servers. What happens to the Application Service model without manual intervention?</div>
+          <div class="cq-options">
+            <div>A) The Application Service model remains unchanged — manual update required</div>
+            <div>B) Service Mapping automatically discovers and adds the new servers to the Application Service on its next run</div>
+            <div>C) IRE automatically adds new servers to the Application Service when Discovery creates their CIs</div>
+            <div>D) The new servers appear as "Unassigned CIs" requiring a separate assignment process</div>
+          </div>
+          <div class="cq-hint">💡 What does Service Mapping do automatically that manual modeling can't?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Service Mapping reruns periodically (based on schedule) and automatically detects changes to the application's infrastructure. When new servers are added to the application tier, Service Mapping discovers them through its dependency traversal process and updates the Application Service membership. This is the primary advantage of Service Mapping over manual modeling — the service map stays current without administrative intervention.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. A Change Request is submitted to patch a database server. ServiceNow shows no Business Applications affected in the Impact Assessment section. The CMDB has the database server CI accurately populated. What is the most likely reason no Business Applications are shown?</div>
+          <div class="cq-options">
+            <div>A) Database servers are not included in Change Impact Analysis by design</div>
+            <div>B) The database server CI is not linked to any Application Service, or the Application Service is not linked to any Business Application</div>
+            <div>C) The Change Request type is incorrect — use "Emergency Change" to trigger impact analysis</div>
+            <div>D) Business Application impact is only shown for network device CIs, not servers</div>
+          </div>
+          <div class="cq-hint">💡 What does Change Impact Analysis traverse to find Business Applications?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Change Impact Analysis follows the CSDM relationship chain: CI → Application Service → Business Application. If the database server is not a member of any Application Service, or if the Application Service has no Business Application linked, the traversal finds no Business Applications to report as affected. The CI data accuracy (which is fine) is irrelevant — it's the CSDM relationships that are missing.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. A company has CSDM implemented. When an incident fires against a server, it should automatically receive a higher priority because the server supports a Critical business application. This is NOT happening. All incidents against this server get Medium priority. What field is most likely missing or incorrect?</div>
+          <div class="cq-options">
+            <div>A) The server's ip_address field is null</div>
+            <div>B) The Business Application's business_criticality field is not set (or set to a lower value than expected)</div>
+            <div>C) The incident's category field is blank</div>
+            <div>D) The Application Service's support_group field is blank</div>
+          </div>
+          <div class="cq-hint">💡 Which field drives automatic incident priority enrichment in CSDM?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Automatic incident priority enrichment based on business application criticality depends on the business_criticality field being correctly set on the Business Application (or Application Service). If it's blank or set to "Low"/"Medium," the ITSM workflow uses those values for priority calculation. The support_group (D) affects routing, not priority. The server's ip_address (A) has no bearing on priority calculation.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. An organization's CMDB Health report shows a low "CSDM Completeness" score specifically for the "Application Service to Business Application" dimension. What does this mean and what should the administrator do?</div>
+          <div class="cq-options">
+            <div>A) There are too many CIs in each Application Service — reduce the number of CIs per service</div>
+            <div>B) Most Application Services in the CMDB are not linked to any Business Application record — the administrator should create Business Application records and link them to the existing Application Services</div>
+            <div>C) The Application Services are missing support_group assignments — the administrator should assign support groups</div>
+            <div>D) Application Services have duplicate records — run a deduplication scan</div>
+          </div>
+          <div class="cq-hint">💡 "Application Service to Business Application" dimension measures the relationship links between Domain 2 and Domain 1.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — A low score on the "Application Service to Business Application" dimension specifically means that Application Service records exist (Domain 2) but are not linked upward to Business Application records (Domain 1). This is a CSDM relationship gap — the service model stops at the technical service layer and doesn't connect to the business layer. The fix is to create Business Application records for each application the organization runs and link them to the corresponding Application Services using the "Supported by Services" relationship.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="06-csdm-framework.html" class="btn btn-secondary">← CSDM Framework</a>
+          <a href="08-csdm-ci-alignment.html" class="btn btn-secondary">CSDM CI Alignment →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p5_t7_07';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

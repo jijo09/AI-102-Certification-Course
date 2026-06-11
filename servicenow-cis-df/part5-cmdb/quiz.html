@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 5 – CMDB Quiz · CIS-DF</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #22d3ee; color: #67e8f9; background: rgba(8,145,178,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .q-dot.answered { border-color: var(--slate-500); color: var(--text-muted); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 5 · All 8 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 5 Full Quiz — CMDB &amp; CSDM</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions on CI classes, relationships, Discovery, IRE deduplication, and CMDB governance. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 15</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0891b2"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 5 — CMDB &amp; CSDM</span>
+          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#0891b2;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🏛️ Topic 1 — CMDB Architecture &amp; CI Classes</div>
+              <div class="quiz-scenario">Scenario: An IT team asks what distinguishes a CMDB Configuration Item (CI) from a regular ServiceNow record.</div>
+              <p class="quiz-question">What is a Configuration Item (CI) in the ServiceNow CMDB?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Any record stored anywhere in ServiceNow</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A physical or logical component (server, application, service, etc.) tracked in the CMDB for management and change control</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only physical hardware assets tracked by Asset Management</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A record in sys_cmdb that defines a ServiceNow table schema</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>CI</strong> is any component — physical or logical — that is managed and tracked in the CMDB: servers, applications, services, databases, network devices, virtual machines, and more. CIs are NOT limited to hardware (C) — software, services, and logical constructs are equally valid CIs. Not every ServiceNow record is a CI (A). The CMDB exists to track infrastructure dependencies and support change management, incident impact analysis, and asset lifecycle.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🏛️ Topic 1 — CMDB Architecture &amp; CI Classes</div>
+              <div class="quiz-scenario">Scenario: A developer needs to store a Windows Server as a CI. They see multiple class options in the CMDB table hierarchy.</div>
+              <p class="quiz-question">What is the base class for all Configuration Items in ServiceNow?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">sys_object</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">cmdb_ci — the base Configuration Item class that all CI types extend</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">task</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">cmdb — all CIs extend cmdb directly without an intermediate class</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The CMDB class hierarchy is: <strong>cmdb</strong> (base CMDB table) → <strong>cmdb_ci</strong> (base CI class, extends cmdb, adds CI-specific fields like Name, Asset Tag, Serial Number, Status) → specific CI types like cmdb_ci_server, cmdb_ci_computer, cmdb_ci_appl. All CIs extend cmdb_ci directly or through intermediate classes. For a Windows Server, use <code>cmdb_ci_win_server</code> (most specific) or <code>cmdb_ci_server</code>. <code>cmdb</code> itself is the base but CIs live in <code>cmdb_ci</code> and its children.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🏛️ Topic 1 — CMDB Architecture &amp; CI Classes</div>
+              <div class="quiz-scenario">Scenario: An admin sees both a "cmdb" table and a "cmdb_ci" table in the schema. They are confused about the difference.</div>
+              <p class="quiz-question">[TRAP] What is the correct distinction between cmdb and cmdb_ci?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">They are identical; cmdb is just a legacy alias for cmdb_ci</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">cmdb is the base CMDB table; cmdb_ci extends cmdb and is the base class for all actual Configuration Items</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">cmdb stores hardware CIs; cmdb_ci stores software CIs</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">cmdb_ci is deprecated; only cmdb should be used in modern instances</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> <code>cmdb</code> is the root of the CMDB hierarchy — it is the grandparent table. <code>cmdb_ci</code> extends cmdb and serves as the base class for all actual CI records, adding essential CI fields (Name, Class, Asset Tag, etc.). All specific CI classes (cmdb_ci_server, cmdb_ci_appl, etc.) extend <code>cmdb_ci</code>, not cmdb directly. They are not aliases (A), not split by hardware/software (C), and cmdb_ci is very much still in use (D).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🏛️ Topic 1 — CMDB Architecture &amp; CI Classes</div>
+              <div class="quiz-scenario">Scenario: A CMDB admin is creating CI records for network routers and wants to use the most appropriate, specific class.</div>
+              <p class="quiz-question">Why is it better to use specific CI classes (e.g., cmdb_ci_ip_router) rather than the base cmdb_ci class for all CIs?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Specific classes have no extra fields — they are identical to cmdb_ci but have a different name</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Specific classes provide additional relevant fields (e.g., firmware version, port count for routers), enable class-specific reports, and allow precise IRE identification</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Using the base class is recommended for performance — fewer table joins required</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Specific classes enforce mandatory fields that the base class cannot</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Specific CI classes provide: (1) <strong>domain-specific fields</strong> — router classes have port counts, routing protocols; server classes have CPU/RAM fields; (2) <strong>class-specific Discovery patterns</strong> — Discovery uses CI class to know what attributes to collect; (3) <strong>precise IRE identification rules</strong> — IRE uses class-specific identifiers; (4) <strong>targeted reporting and CMDB Health</strong>. Using cmdb_ci for everything loses these benefits and reduces data quality.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔗 Topic 2 — CI Relationships &amp; Dependency</div>
+              <div class="quiz-scenario">Scenario: An Application CI is related to a Database Server CI with the relationship type "Runs on". Which CI is upstream (parent)?</div>
+              <p class="quiz-question">In a "Runs on" CMDB relationship between Application and Database Server, which is the parent CI?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Application — it depends on the server so it is the parent in the dependency hierarchy</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Database Server — it hosts the application; in "Runs on", the host is the parent (upstream)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">There is no parent/child — both CIs are equal in this relationship type</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Whichever CI was created first is the parent</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> In CMDB relationship direction, the <strong>hosting/infrastructure CI is upstream (parent)</strong>. For "Application Runs on Database Server": the Database Server is the upstream/parent; the Application is the downstream/child. This matters for Service Maps and impact analysis — if the Database Server fails, the Application (child) is impacted. The direction is: infrastructure → application, not application → infrastructure.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔗 Topic 2 — CI Relationships &amp; Dependency</div>
+              <div class="quiz-scenario">Scenario: A trainer is teaching CMDB relationship categories. They reference the "3 C's" framework.</div>
+              <p class="quiz-question">What are the 3 C's in CMDB relationship management?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Connect, Configure, Certify</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Contain, Connect, Control — the three main categories of CI relationships</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Create, Classify, Confirm</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">CI, Class, Compliance</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The CMDB relationship 3 C's: <strong>Contain</strong> — a parent CI physically/logically contains child CIs (e.g., a rack contains servers); <strong>Connect</strong> — CIs are networked or communicate with each other (e.g., server connects to switch); <strong>Control</strong> — a management CI controls another (e.g., a cluster controls its nodes). Understanding these categories helps classify relationship types and understand CMDB service dependency maps.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔗 Topic 2 — CI Relationships &amp; Dependency</div>
+              <div class="quiz-scenario">Scenario: A Business Service CI has all its infrastructure CIs linked via relationships. The primary database server for this service has an Incident raised against it.</div>
+              <p class="quiz-question">[TRAP] Where can you IMMEDIATELY see the downstream impact on the Business Service when the database server fails?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">In the database server's Incident record — impact is tracked there</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">In the Service Map / CMDB Service Graph showing the full dependency chain from infrastructure to Business Service</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">In the Business Service's Task SLA record</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">In the Audit History of the Business Service CI</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The <strong>Service Map</strong> (accessible from a Business Service CI) visualises the full CMDB relationship chain — from Business Service down through all infrastructure CIs. When a CI has an active Incident or Change, the Service Map highlights impacted components in the dependency tree, making it immediately clear what services are at risk. This is the primary value of maintaining CMDB relationships. Task SLAs (C) and Audit History (D) do not show relationship-based impact.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔗 Topic 2 — CI Relationships &amp; Dependency</div>
+              <div class="quiz-scenario">Scenario: A developer sees CI relationships stored in the cmdb_rel_ci table with a specific "Type" field referencing a relationship type record.</div>
+              <p class="quiz-question">What does a "Typed" CI relationship provide compared to an untyped relationship?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Nothing — all relationships in ServiceNow must have a type; untyped relationships are not possible</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A relationship type (e.g., "Hosted on", "Runs on", "Connects to") gives semantic meaning to the relationship, enabling precise impact analysis and Service Maps</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Typed relationships are only created by Discovery; manual relationships are always untyped</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Typed relationships are enforced by ACLs; untyped relationships bypass security</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Relationship types (stored in cmdb_rel_type) give semantic meaning — "Application X Runs On Server Y" conveys the nature of the dependency. This semantic meaning enables: (1) directional Service Map visualisation; (2) impact analysis that understands hosting vs connectivity vs containment; (3) clear documentation for change management. Without a meaningful type, a relationship just says "A is somehow related to B" — much less useful for impact assessment.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(20,184,166,0.15);color:#5eead4">🔍 Topic 3 — Discovery &amp; IRE</div>
+              <div class="quiz-scenario">Scenario: Discovery runs against the network and finds a server that already exists in the CMDB but with an outdated IP address.</div>
+              <p class="quiz-question">What is the primary purpose of the Identification & Reconciliation Engine (IRE)?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It discovers devices on the network by scanning IP ranges</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">It identifies if incoming CI data matches an existing CMDB record, then reconciles conflicting attribute values from multiple data sources</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It certifies CI data accuracy through human review workflows</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">It manages CI-to-CI relationships between discovered devices</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The <strong>IRE</strong> (Identification & Reconciliation Engine) solves two problems: (1) <strong>Identification</strong> — when new CI data arrives (from Discovery, SCCM, or any source), IRE uses identification rules to determine if a matching CI already exists in the CMDB (preventing duplicates); (2) <strong>Reconciliation</strong> — when multiple sources provide conflicting values for the same CI attribute, IRE applies precedence rules to determine which source wins. Discovery (A) scans networks; IRE processes Discovery results.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(20,184,166,0.15);color:#5eead4">🔍 Topic 3 — Discovery &amp; IRE</div>
+              <div class="quiz-scenario">Scenario: Discovery finds a Linux server with Serial Number "SRV-001". The CMDB already has a CI with Serial Number "SRV-001" but different IP and OS version. IRE is called.</div>
+              <p class="quiz-question">[TRAP] What does IRE do in this scenario?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Creates a new duplicate CI record for the newly discovered data</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Deletes the old CI and creates a fresh one with Discovery data</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Matches the incoming data to the existing CI via the serial number identification rule, then reconciles attributes (e.g., updates IP and OS version) per source precedence rules</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Flags both records for manual admin review without making any changes</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> IRE uses the Serial Number as an <strong>identification rule</strong> to match the incoming Discovery data to the existing CI. Once matched (no duplicate created), IRE applies <strong>reconciliation rules</strong> to resolve the attribute conflicts — each attribute can have a source priority list (e.g., Discovery > SCCM > Manual). The existing CI is <em>updated</em> with the reconciled values. Creating duplicates (A) is exactly what IRE is designed to prevent. Deleting (B) and flagging for manual review (D) are not default IRE behavior.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(20,184,166,0.15);color:#5eead4">🔍 Topic 3 — Discovery &amp; IRE</div>
+              <div class="quiz-scenario">Scenario: An admin configures an IRE Identification Rule for the "cmdb_ci_server" class using Serial Number and IP Address as identifier fields.</div>
+              <p class="quiz-question">What does an IRE Identification Rule define?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A Business Rule that fires when a CI is created by Discovery</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The specific CI attributes (e.g., serial number, IP address) used as unique identifiers to match incoming CI data to existing CMDB records</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A rule controlling which fields Discovery is allowed to update on a CI</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">An ACL that controls which users can create CI records</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> An <strong>Identification Rule</strong> tells IRE: "to identify a cmdb_ci_server, check if a record already exists with matching Serial Number AND/OR IP Address." The identifier fields are the "keys" used for lookup. If a match is found: update existing CI. If no match: create new CI. Without well-defined identification rules, every Discovery run would create duplicate CIs. Identification Rules are the foundation of CMDB data quality via IRE.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(234,179,8,0.15);color:#fde68a">📊 Topic 4 — CMDB Health &amp; Governance</div>
+              <div class="quiz-scenario">Scenario: A CMDB Health report shows "Completeness = 38%". A manager asks what this score means.</div>
+              <p class="quiz-question">What does a CMDB Health Completeness score of 38% indicate?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Only 38% of CIs have been discovered by Discovery</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Only 38% of CIs have all required/expected attributes populated with non-empty values</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">38% of CI relationships are correctly defined</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">38% of CIs have been certified in the last quarter</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> CMDB Health measures three dimensions: (1) <strong>Completeness</strong> — percentage of CIs with all required attributes populated; (2) <strong>Compliance</strong> — CIs that meet defined rules/standards; (3) <strong>Correctness</strong> (sometimes called Accuracy) — data validated against source of truth. A 38% completeness score means most CIs are missing required fields — a data quality problem requiring attention. Discovery coverage (A) and certification (D) are separate concerns.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(234,179,8,0.15);color:#fde68a">📊 Topic 4 — CMDB Health &amp; Governance</div>
+              <div class="quiz-scenario">Scenario: A CI class has a "Staleness Rule" configured — CIs not updated within 90 days are considered stale.</div>
+              <p class="quiz-question">[TRAP] What happens AUTOMATICALLY when a CI exceeds the 90-day staleness threshold?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The CI is automatically deleted from the CMDB</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The CI is flagged as "stale" in the CMDB Health dashboard — the underlying CI record is not automatically changed or deleted</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">An Incident is automatically created for the stale CI</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Discovery is immediately triggered to refresh the CI data</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A Staleness Rule flags CIs for the CMDB Health dashboard — it is purely a <strong>reporting/visibility indicator</strong>. The stale CI record continues to exist unchanged. ServiceNow does NOT automatically delete (A), create incidents (C), or trigger Discovery (D) as a result of staleness alone. These remediation actions would require additional custom automations (Scheduled Jobs, Event Rules) built on top of the staleness data. The staleness flag is an alert, not an action.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(234,179,8,0.15);color:#fde68a">📊 Topic 4 — CMDB Health &amp; Governance</div>
+              <div class="quiz-scenario">Scenario: An organisation uses Discovery, SCCM, and manual entry as three data sources for CMDB CIs. These sources sometimes disagree on attribute values.</div>
+              <p class="quiz-question">What is the recommended approach for resolving conflicting CI attribute values from multiple sources?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Last write wins — most recent update always overrides all previous values</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Configure IRE Reconciliation Rules to define which data source takes priority per CI attribute</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Lock CIs to prevent automated sources from updating them after initial creation</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Create separate CI records per data source and let users choose which version to trust</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> <strong>IRE Reconciliation Rules</strong> define source precedence per attribute: e.g., "for IP Address, Discovery wins; for Owner, Manual entry wins; for OS Version, SCCM wins." This gives fine-grained control over which source is authoritative per field. Last-write-wins (A) is chaotic and unpredictable. Locking CIs (C) prevents legitimate automated updates. Separate records per source (D) defeats the purpose of the CMDB — you'd have no single truth.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(234,179,8,0.15);color:#fde68a">📊 Topic 4 — CMDB Health &amp; Governance</div>
+              <div class="quiz-scenario">Scenario: A CMDB admin wants to measure whether all Server CIs have their "Owner" and "Location" fields populated.</div>
+              <p class="quiz-question">Which CMDB Health dimension measures whether required fields are populated?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Compliance</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Completeness</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Correctness / Accuracy</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Coverage</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The three core CMDB Health dimensions: <strong>Completeness</strong> — are all required/expected attributes populated? (this question); <strong>Compliance</strong> — do CIs adhere to defined governance rules and standards?; <strong>Correctness/Accuracy</strong> — is the data in the CMDB accurate and verified against a source of truth? "Owner and Location populated" is a completeness check — it measures whether data exists, not whether it's accurate or policy-compliant.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 15;
+  const dots = document.getElementById('q-dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => { const state = window._quizState?.['main-quiz']; if (!state) return; state.current = i; QuizEngine._render('main-quiz'); updateDots(i, state); });
+    dots.appendChild(d);
+  }
+  function updateDots(current, state) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current','correct','incorrect','answered');
+      if (i === current) d.classList.add('current');
+      else if (state.answered[i] !== null) { const q = state.questions[i]; const correct = q.querySelector('[data-correct]')?.dataset.correct; d.classList.add(state.answered[i] === correct ? 'correct' : 'incorrect'); }
+    });
+    const answered = state.answered.filter(a => a !== null).length;
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = `${state.score} / ${TOTAL}`;
+    document.getElementById('qs-answered').textContent = answered;
+    document.getElementById('qs-prog').style.width = `${((current+1)/TOTAL)*100}%`;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    QuizEngine.init('main-quiz');
+    QuizEngine.wireOptions('main-quiz');
+    window._quizState = QuizEngine._state ?? {};
+    const quiz = document.getElementById('main-quiz');
+    const patch = () => setTimeout(() => { const s = QuizEngine._state?.['main-quiz']; if(s) updateDots(s.current, s); }, 50);
+    quiz.querySelectorAll('[data-option]').forEach(btn => btn.addEventListener('click', patch));
+    quiz.querySelector('[data-q-prev]')?.addEventListener('click', patch);
+    quiz.querySelector('[data-q-next]')?.addEventListener('click', patch);
+  });
+</script>
+</body>
+</html>

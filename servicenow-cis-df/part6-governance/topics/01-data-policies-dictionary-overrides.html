@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Policies &amp; Dictionary Overrides | CIS-DF Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span>
+        <span class="current">Data Policies &amp; Dictionary Overrides</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 6 · Topic 1</div>
+        <h1 class="topic-title">Data Policies &amp; Dictionary Overrides</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Data Policies enforce field rules at the server level — making fields mandatory or read-only
+          everywhere, including APIs and imports. Understand the critical difference from UI Policies,
+          and when Dictionary Overrides let you customize rules per child table.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~20 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~10% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Quality</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>The Data Quality Problem</h2>
+        <p>
+          Data quality degrades when there are no rules enforcing what values are required, which fields
+          should be restricted, and what format data should follow. Without enforcement, users skip
+          important fields, enter inconsistent values, or import bad data through APIs that bypass
+          form-level validations.
+        </p>
+        <p>
+          ServiceNow has several layers of data quality control. Understanding which layer enforces
+          rules at what level is crucial — the exam frequently tests the enforcement scope of each mechanism.
+        </p>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Data Policies — Server-Side Enforcement</h2>
+        <p>
+          A <span class="hl-teal">Data Policy</span> is a server-side rule that makes a field mandatory
+          or read-only. The critical word is <strong>server-side</strong> — it runs on the server
+          and applies regardless of how data is submitted. Whether a user saves a form, an API call
+          sends a PATCH request, an import set transform writes a record, or a script runs a
+          GlideRecord insert — the Data Policy enforces its rules every time.
+        </p>
+        <p>
+          Data Policies are configured at <span class="code-inline">System Policy → Data Policies</span>.
+          Each policy specifies:
+        </p>
+        <ul>
+          <li><strong>Table</strong> — which table the policy applies to (including all child tables)</li>
+          <li><strong>Conditions</strong> — an encoded query; the policy only activates when these conditions are true</li>
+          <li><strong>Field Rules</strong> — per-field rules: Mandatory, Read-only, or both</li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Data Policies Apply Everywhere</strong>
+            Data Policies are enforced server-side: the database layer, not the form layer. This means
+            they apply to UI saves, API calls, Transform Map imports, and even scripted GlideRecord
+            inserts. A missing mandatory field causes a save failure with a validation error regardless
+            of how the data was submitted.
+          </div>
+        </div>
+
+        <h3>Conditional Data Policies</h3>
+        <p>
+          Data Policies can be conditional — they only apply when a record meets certain criteria.
+          For example: "make Category mandatory only when Impact = 1 (High)." The condition is an
+          encoded query on the current record. When the condition is true, the field rules apply.
+          When false, the fields are optional.
+        </p>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>UI Policies — Client-Side Only</h2>
+        <p>
+          A <span class="hl-teal">UI Policy</span> also makes fields mandatory or read-only, but it
+          runs only in the browser — client-side. It only affects users who are using the standard
+          ServiceNow form interface. UI Policies are bypassed by API calls, Import Sets, and
+          background scripts entirely.
+        </p>
+        <p>
+          UI Policies are configured at <span class="code-inline">System UI → UI Policies</span>.
+          They support the same conditional logic as Data Policies — "make field X mandatory when
+          field Y = value Z" — but this logic runs in JavaScript in the user's browser.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — UI Policy vs. Data Policy Enforcement Scope</strong>
+            This is one of the highest-frequency exam questions. UI Policies only affect form users.
+            Data Policies enforce at the database layer and apply everywhere.
+            <br><br>
+            Scenario: "An API integration is inserting records without filling in the Category field,
+            but Category is set as mandatory in a UI Policy. Why is the API succeeding?"
+            Answer: UI Policies don't affect APIs. To block the API as well, convert to a Data Policy.
+          </div>
+        </div>
+
+        <h3>Side-by-Side Comparison</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Aspect</th><th>UI Policy</th><th>Data Policy</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Enforcement level</td><td>Client-side (browser only)</td><td>Server-side (database layer)</td></tr>
+            <tr><td>Applies to API calls</td><td>No</td><td>Yes</td></tr>
+            <tr><td>Applies to imports</td><td>No</td><td>Yes</td></tr>
+            <tr><td>Applies to scripts</td><td>No</td><td>Yes</td></tr>
+            <tr><td>Real-time response</td><td>Immediate — field grays out as you type</td><td>At save time — error returned on save</td></tr>
+            <tr><td>Can hide/show fields</td><td>Yes — UI Policies can show/hide fields</td><td>No — only mandatory/read-only</td></tr>
+            <tr><td>Configuration location</td><td>System UI → UI Policies</td><td>System Policy → Data Policies</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Dictionary Overrides — Per-Table Field Behavior</h2>
+        <p>
+          We introduced Dictionary Overrides in Part 1 Topic 2. In the context of data quality,
+          they are a powerful tool for making fields mandatory on a <em>specific child table</em>
+          without affecting the parent or other siblings.
+        </p>
+        <p>
+          For example: the <code>task</code> table has a <code>category</code> field. By default, it's
+          optional on all task subtypes. You want to make it mandatory on <code>incident</code> only.
+          Options:
+        </p>
+        <ul>
+          <li><strong>Dictionary Override on incident</strong> — sets mandatory=true on the field for the incident table only. All other task subtypes are unaffected.</li>
+          <li><strong>Data Policy with condition sys_class_name=incident</strong> — achieves the same effect but is more discoverable as a named policy.</li>
+          <li><strong>Editing the parent field directly</strong> — WRONG. This makes the field mandatory on ALL task subtypes, not just incidents.</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Dictionary Override vs. Data Policy for Mandatory Fields</strong>
+            Both achieve mandatory on a child table. Dictionary Overrides are set directly in the
+            dictionary and are good for permanent structural changes. Data Policies are named,
+            discoverable records that can be conditionally active and are easier to audit.
+            For CIS-DF exam purposes: if the question says "enforce mandatory on the child table
+            without affecting the parent," both are valid approaches — the distinction is in how
+            they are managed and their enforcement scope.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Business Rules for Validation</h2>
+        <p>
+          For validations more complex than mandatory/read-only — like "if field A = X, then field B
+          must be in set {1, 2, 3}" — you use a <span class="hl-teal">Business Rule</span> with
+          condition type <strong>before</strong> (fires before insert/update, can abort the save).
+        </p>
+        <p>
+          In the Business Rule script, use <span class="code-inline">current.setAbortAction(true)</span>
+          to abort the save, and <span class="code-inline">gs.addErrorMessage('message')</span>
+          to display the error message to the user.
+        </p>
+        <p style="font-family:var(--font-mono);font-size:0.82rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 16px;color:#22d3ee">
+          // Before Insert/Update — validate urgency matches impact<br>
+          if (current.impact == 1 &amp;&amp; current.urgency == 3) {<br>
+          &nbsp;&nbsp;current.setAbortAction(true);<br>
+          &nbsp;&nbsp;gs.addErrorMessage('High impact incidents cannot have low urgency.');<br>
+          }
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Business Rule Timing</strong>
+            Only Business Rules with timing <strong>Before</strong> (before insert/update) can abort a
+            save. Rules with timing <strong>After</strong> fire after the record is already committed —
+            you cannot abort at that point. For data validation, always use "Before" timing.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Data Policies &amp; Dictionary Overrides</h2>
+        <ul>
+          <li><strong>Data Policies</strong> = server-side, apply everywhere (UI, API, imports, scripts)</li>
+          <li><strong>UI Policies</strong> = client-side only, bypassed by API calls and imports</li>
+          <li>If an API is bypassing mandatory field enforcement, the solution is a Data Policy, not a UI Policy</li>
+          <li>Dictionary Overrides allow per-child-table field behavior changes without modifying the parent</li>
+          <li>Modifying the parent field affects ALL child tables — use Override or conditional Data Policy for child-only changes</li>
+          <li>Business Rule with <strong>Before</strong> timing + <code>setAbortAction(true)</code> = custom field validation that blocks saves</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <span style="color:var(--text-muted);font-size:0.82rem;align-self:center">Next:</span>
+          <a href="02-field-validation-choice-lists.html" class="btn btn-secondary">Field Validation &amp; Choice Lists →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p3_t1_01';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

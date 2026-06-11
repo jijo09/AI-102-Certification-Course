@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reconciliation Rules | CIS-DF Part 4</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 4: IRE</a>
+        <span class="sep">›</span>
+        <span class="current">Reconciliation Rules</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 4 · Topic 3</div>
+        <h1 class="topic-title">Reconciliation Rules — Which Source Wins When They Disagree</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          You now understand how IRE identifies existing CIs (Phase 1). Once identified,
+          Phase 2 begins: Reconciliation. Multiple sources — Discovery, SGC, manual entry,
+          custom integrations — may all have a value for the same CI field. Reconciliation
+          Rules define which source is authoritative for each field. This topic explains
+          how to configure and troubleshoot these rules.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>9 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~19% exam weight (INGEST domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Reconciliation Rules · Source Priority · Staleness · Owned Fields</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: The Reconciliation Problem -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>The Source Conflict Problem</h2>
+        <p>
+          Imagine three different tools all know about the same server and send updates to IRE:
+        </p>
+        <ul>
+          <li><strong>Discovery</strong> finds the server has cpu_count=8 (it scanned the live OS)</li>
+          <li><strong>AWS SGC</strong> says cpu_count=4 (the instance type says 4 vCPUs)</li>
+          <li><strong>Old CMDB spreadsheet import</strong> says cpu_count=2 (from a 3-year-old inventory)</li>
+        </ul>
+        <p>
+          Without a rule, the last one to run wins. If the spreadsheet import runs Monday morning,
+          your production CMDB says cpu_count=2 even though the actual server has 8 CPUs.
+          That's wrong data poisoning your CMDB.
+        </p>
+        <p>
+          Reconciliation Rules solve this by explicitly designating which source is authoritative
+          for each field. Once a source is authoritative, only that source can update that field.
+          Other sources' values are ignored — even if they run after the authoritative source.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">⚖️</span>
+          <div class="callout-body">
+            <strong>Analogy — Reconciliation Like Editorial Authority</strong>
+            A news organization has multiple contributors: beat reporters, wire services, and
+            freelancers. They all submit content about the same story. But there are rules:
+            the staff reporter's version of local facts is authoritative. The wire service
+            is authoritative for international context. The editor-in-chief can override everyone.
+            A freelancer can't override the staff reporter's facts just by submitting later.
+            IRE Reconciliation Rules are the editorial authority structure for your CMDB fields.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: What a Reconciliation Rule Is -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Anatomy of a Reconciliation Rule</h2>
+        <p>
+          A <span class="hl-teal">Reconciliation Rule</span> is a configuration record in
+          ServiceNow that defines: <em>for CI class X and field Y, which data source has
+          authority to write values?</em>
+        </p>
+        <p>
+          Navigate to <strong>Configuration → CMDB Identification and Reconciliation →
+          Reconciliation Rules</strong> to view and modify them.
+        </p>
+
+        <h3>Key Components</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>What It Does</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CI Class</td>
+              <td>Which CI type this rule applies to</td>
+              <td>cmdb_ci_server (applies to all servers)</td>
+            </tr>
+            <tr>
+              <td>Applies to child classes</td>
+              <td>Whether the rule cascades to subclasses</td>
+              <td>If checked, also applies to cmdb_ci_linux_server</td>
+            </tr>
+            <tr>
+              <td>Attribute</td>
+              <td>Which field on the CI the rule controls</td>
+              <td>cpu_count</td>
+            </tr>
+            <tr>
+              <td>Source Priority</td>
+              <td>Ordered list of sources by trust level for this field</td>
+              <td>Manual &gt; ServiceNow &gt; AWS SGC &gt; Legacy Import</td>
+            </tr>
+            <tr>
+              <td>Staleness Period</td>
+              <td>How long since a source's last update before its value is considered stale</td>
+              <td>60 days — after that, a lower-priority source can override</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>The CMDB Data Source Priority Table</h3>
+        <p>
+          Reconciliation is controlled by the <span class="hl-teal">CMDB Data Source Priority</span>
+          configuration. Think of it as a master ranking of sources. This table is separate
+          from Reconciliation Rules — it sets the global source ranking, while Reconciliation
+          Rules override it per-field when needed.
+        </p>
+        <p>
+          Default global ranking (customizable):
+        </p>
+        <ol>
+          <li><strong>Manual Entry</strong> — highest trust; a human deliberately set this</li>
+          <li><strong>ServiceNow (Discovery)</strong> — live active scan directly from device</li>
+          <li><strong>Service Graph Connectors</strong> — API-sourced from cloud/monitoring providers</li>
+          <li><strong>Orchestration</strong> — automated workflows</li>
+          <li><strong>Other integrations</strong> — import sets, third-party tools</li>
+        </ol>
+      </div>
+
+      <!-- S3: How Reconciliation Decisions Are Made -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>How IRE Makes Reconciliation Decisions — Step by Step</h2>
+        <p>
+          When IRE has identified an existing CI and is ready to update it with incoming data,
+          it evaluates each field in the incoming payload:
+        </p>
+
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Incoming field: cpu_count=8, source=ServiceNow (Discovery)</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Step 1: Does a Reconciliation Rule exist for this class + cpu_count field?</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-arrow">↓ Yes → use rule's source priority</div>
+            <div class="flow-arrow" style="margin-left:var(--space-8)">→ No → use global CMDB Data Source Priority</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">Step 2: What is the current value's source on the CI?</div>
+            <div class="flow-note">// current ci.cpu_count was set by: SGC, last_updated=30 days ago</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Step 3: Is Discovery ranked higher than SGC for cpu_count?</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-arrow">↓ Yes → Discovery is authoritative</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">Step 4: Is the current value stale (past staleness period)?</div>
+            <div class="flow-note">// if stale, even lower-priority sources can overwrite</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Discovery wins → cpu_count updated to 8</div>
+          </div>
+        </div>
+
+        <h3>The Role of Staleness</h3>
+        <p>
+          Reconciliation Rules include a <span class="hl-teal">Staleness Period</span> setting.
+          This defines how many days a source's value stays "fresh." After the staleness period
+          expires, even a lower-priority source can overwrite that field.
+        </p>
+        <p>
+          Why staleness matters: Discovery may be authoritative for cpu_count, but if Discovery
+          hasn't scanned a server in 90 days (maybe it went offline temporarily), the value
+          becomes stale. A more current SGC value should then be allowed to update it.
+          Without staleness, a single Discovery scan could lock in a field value forever even
+          if Discovery never runs again.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Staleness Is Per Field, Not Per CI</strong>
+            Each field tracks its own staleness independently. A CI could have cpu_count
+            marked as fresh (Discovery ran 10 days ago) but manufacturer marked as stale
+            (the source that set manufacturer hasn't run in 90 days). Fields don't all
+            go stale at the same time.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Field Ownership Modes -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Field Ownership Modes</h2>
+        <p>
+          Reconciliation Rules support different ownership modes that control how strictly
+          a source "owns" a field:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Mode</th>
+              <th>Behavior</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Fully Authoritative</td>
+              <td>Only this source can set this field. All other sources' values for this field are ignored, period.</td>
+              <td>Business fields (owned_by, cost_center) that only ServiceDesk sets and no tool should override</td>
+            </tr>
+            <tr>
+              <td>Priority-Based</td>
+              <td>Highest-priority source that provides a value wins. Lower-priority sources ignored if higher one has already set the field.</td>
+              <td>Technical fields (cpu_count, ip_address) where Discovery is best but SGC is acceptable fallback</td>
+            </tr>
+            <tr>
+              <td>First-in Wins</td>
+              <td>Whichever source first sets a value "claims" the field. Later sources cannot overwrite unless the first source's value goes stale.</td>
+              <td>Set-once fields like serial_number where manual entry wins if set, otherwise Discovery</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Protect Manual Fields from Automated Sources</strong>
+            One of the most common Reconciliation Rule configurations: marking business fields
+            (owned_by, department, support_group, cost_center) as "Manual Entry Fully Authoritative."
+            This means Discovery and SGC cannot overwrite these fields even though they may
+            appear in the device scan output. Otherwise, a bad Discovery run could blank out
+            the business ownership fields of hundreds of CIs.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Configuring Source Priority Per Field -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Practical Field Authority Configuration</h2>
+        <p>
+          Here's how typical organizations configure field authority in a multi-source CMDB.
+          This table is a real-world example of which source is authoritative for which fields:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>CI Field</th>
+              <th>Authoritative Source</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>serial_number</td>
+              <td>ServiceNow Discovery</td>
+              <td>Discovery reads it directly from the hardware</td>
+            </tr>
+            <tr>
+              <td>cpu_count</td>
+              <td>ServiceNow Discovery</td>
+              <td>Live OS scan is more accurate than API-reported vCPUs</td>
+            </tr>
+            <tr>
+              <td>ram</td>
+              <td>ServiceNow Discovery</td>
+              <td>Live OS scan; SGC reports allocated memory, not installed</td>
+            </tr>
+            <tr>
+              <td>ip_address</td>
+              <td>ServiceNow Discovery (via network adapter)</td>
+              <td>Real assigned IP at scan time</td>
+            </tr>
+            <tr>
+              <td>instance_type (AWS)</td>
+              <td>AWS SGC</td>
+              <td>Cloud-native attribute; Discovery doesn't know EC2 instance types</td>
+            </tr>
+            <tr>
+              <td>availability_zone</td>
+              <td>AWS SGC</td>
+              <td>Cloud topology attribute; only the cloud provider knows this</td>
+            </tr>
+            <tr>
+              <td>owned_by</td>
+              <td>Manual Entry</td>
+              <td>Business ownership decided by humans, not tools</td>
+            </tr>
+            <tr>
+              <td>cost_center</td>
+              <td>Manual Entry</td>
+              <td>Finance-assigned, must not be overwritten by automation</td>
+            </tr>
+            <tr>
+              <td>support_group</td>
+              <td>Manual Entry</td>
+              <td>Support assignment is a business decision</td>
+            </tr>
+            <tr>
+              <td>environment (prod/dev)</td>
+              <td>Manual Entry or Orchestration</td>
+              <td>Environment tag is set during provisioning and should be stable</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — "Who Knows Best?" Is the Right Question</strong>
+            For every field in your CMDB, ask: "Which source has the most accurate, up-to-date
+            knowledge of this specific piece of information?" That source should be authoritative.
+            Don't assign authority based on which tool is most trusted globally —
+            a specific source might know one field better than everything else.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: Reconciliation and Blank/Null Values -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Reconciliation of Blank and Null Values</h2>
+        <p>
+          An important and often-misunderstood behavior: what happens when an authoritative
+          source sends a null or blank value for a field?
+        </p>
+
+        <h3>Default Behavior: Null Does Not Overwrite Non-Null</h3>
+        <p>
+          By default, IRE does not allow a source to "blank out" a field that already has a value,
+          even if that source is authoritative. This is a protective default — it prevents
+          sources from accidentally deleting data they don't have.
+        </p>
+        <p>
+          Example: Discovery is authoritative for serial_number. On Tuesday, the hardware returns
+          an empty serial (maybe BIOS wasn't responding). By default, IRE keeps the existing
+          serial_number in the CMDB and doesn't blank it out, even though Discovery returned null.
+        </p>
+
+        <h3>Overriding the Default: Allow Null Writes</h3>
+        <p>
+          Reconciliation Rules can be configured to allow a source to write null values.
+          Use this carefully — only when you explicitly want a source to be able to clear a field.
+          Example use case: when an SGC detects that a cloud resource has been deleted,
+          it should be allowed to set certain fields to null to indicate the resource no longer exists.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Enabling Null Writes Can Cause Data Loss</strong>
+            If you enable "allow null" for an authoritative source and that source ever returns
+            empty data due to a transient error, it will blank out fields across many CIs.
+            Always scope "allow null" to specific fields and specific sources, never globally.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: Reconciliation and the Source Recency Tracking -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Source Recency Tracking — The discovery_source and last_discovered Fields</h2>
+        <p>
+          IRE tracks two important metadata fields on every CI that relate to reconciliation:
+        </p>
+        <ul>
+          <li>
+            <strong><span class="code-inline">discovery_source</span></strong> — The name of the
+            source (tool) that last successfully updated the CI record. Updated every time a source
+            successfully writes to a CI via IRE.
+          </li>
+          <li>
+            <strong><span class="code-inline">last_discovered</span></strong> — The timestamp
+            when the most recent update occurred. Used to calculate staleness for reconciliation.
+          </li>
+        </ul>
+
+        <h3>Per-Field Source Tracking</h3>
+        <p>
+          IRE also tracks source information at the field level (not just the CI level).
+          This is stored internally and used by Reconciliation Rules to determine which source
+          last set a specific field and when, for staleness calculations.
+        </p>
+        <p>
+          The field-level source tracking is not directly visible in standard CI forms,
+          but can be accessed through the <span class="code-inline">cmdb_ire_identification</span>
+          table and through the "Source" section that appears on CIs in CMDB Workspace.
+        </p>
+
+        <h3>CMDB Workspace Source View</h3>
+        <p>
+          In CMDB Workspace (covered in Part 7), you can open any CI and see a "Source" tab
+          that shows which source is currently authoritative for each field and when it was
+          last updated. This is the easiest way to understand why a field has a particular value.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — discovery_source vs. discovery_source_type</strong>
+            <code>discovery_source</code> = the name of the tool that last updated the CI
+            (e.g., "ServiceNow", "AWS SGC"). This is a string field on the CI.
+            Do not confuse with <code>discovery_source_type</code>, which classifies the type
+            of source (e.g., "Discovery", "API"). The exam may use both terms — know the difference.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: Troubleshooting Reconciliation Issues -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>Troubleshooting Reconciliation — Common Problems</h2>
+
+        <h3>Symptom: A tool keeps overwriting manually-set field values</h3>
+        <p>
+          Root cause: No Reconciliation Rule restricting that field, so global priority applies.
+          Manual Entry may be globally highest, but if no explicit rule covers this field,
+          the global default might let automation overwrite manual entries.
+        </p>
+        <p>
+          Fix: Create a Reconciliation Rule for the class + field, explicitly marking Manual Entry
+          as "Fully Authoritative" for that field.
+        </p>
+
+        <h3>Symptom: A field value hasn't updated even though the authoritative source ran</h3>
+        <p>
+          Root causes and checks:
+        </p>
+        <ul>
+          <li>Was the incoming payload missing that field? (IRE skips fields not in the payload)</li>
+          <li>Did IRE identification succeed? (If identification failed, reconciliation never ran)</li>
+          <li>Is there a Reconciliation Rule marking a different source as higher priority?</li>
+          <li>Is the current value set by a higher-priority source that is not yet stale?</li>
+        </ul>
+        <p>
+          Check the IRE Log for the specific CI update event to see reconciliation decisions.
+        </p>
+
+        <h3>Symptom: A CI shows outdated business fields (owned_by shows a person who left the company)</h3>
+        <p>
+          Root cause: Manual Entry is authoritative, but no one is correcting the data. This is
+          not an IRE problem — it's a governance and data lifecycle problem. Reconciliation Rules
+          correctly prevent automation from overwriting manual data, but manual data also needs
+          a process for review and correction.
+        </p>
+        <p>
+          Solution: CMDB Health Dashboards (covered in Part 6) and regular data quality reviews
+          identify stale manual data that needs human correction.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Reconciliation Doesn't Fix Governance Gaps</strong>
+            Reconciliation Rules ensure the right source's value wins when sources conflict.
+            They cannot fix situations where the "right source" has wrong or stale data.
+            Manual entry being authoritative for owned_by only helps if humans maintain
+            that data. Automation handles accuracy for technical fields; humans must maintain
+            accuracy for business fields. CMDB governance (Part 6) covers how to enforce this.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Reconciliation Rules — Key Facts</h2>
+        <ul>
+          <li><strong>Reconciliation Rule</strong> = configuration that assigns source authority per field per CI class.</li>
+          <li><strong>Authoritative source wins</strong> regardless of when it ran. Last-write-wins is eliminated.</li>
+          <li><strong>Global priority order</strong> (default): Manual &gt; Discovery &gt; SGC &gt; Orchestration &gt; Other. Customizable per field.</li>
+          <li><strong>Staleness Period</strong> = how long a source's value stays fresh. After expiry, lower-priority sources can overwrite.</li>
+          <li><strong>Staleness is per-field, not per CI.</strong> Each field tracks its own freshness independently.</li>
+          <li><strong>Null values don't overwrite by default.</strong> Must explicitly enable "allow null" if a source should be allowed to blank a field.</li>
+          <li><strong>Manual Entry</strong> should be fully authoritative for business fields (owned_by, cost_center, support_group).</li>
+          <li><strong>discovery_source</strong> field = which tool last successfully updated the CI. String field on CI record.</li>
+          <li><strong>CMDB Workspace Source tab</strong> shows which source is authoritative per field — best UI for investigating reconciliation decisions.</li>
+          <li><strong>IRE Log</strong> = diagnostic starting point for reconciliation issues alongside identification issues.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Reconciliation Rule</div>
+            <div class="term-def">IRE configuration that defines which data source is authoritative for a specific CI field. Overrides global CMDB Data Source Priority for that specific field.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CMDB Data Source Priority</div>
+            <div class="term-def">Global ranking table of data sources by trust level. Default order: Manual &gt; Discovery &gt; SGC &gt; Other. Applied when no field-specific Reconciliation Rule exists.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Staleness Period</div>
+            <div class="term-def">Number of days a source's field value stays "fresh." After this period, lower-priority sources are allowed to overwrite the value even if the higher-priority source is normally authoritative.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Fully Authoritative</td>
+            <div class="term-def">A reconciliation ownership mode where only one source can ever write to a field. All other sources' values are ignored, regardless of priority ranking.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">discovery_source</div>
+            <div class="term-def">Field on CI record recording which tool last successfully updated the CI via IRE. Examples: "ServiceNow", "AWS Service Graph Connector". Used for auditing and reconciliation calculations.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Allow Null Write</div>
+            <div class="term-def">Optional Reconciliation Rule setting that permits an authoritative source to blank out a field value. Off by default — must be explicitly enabled for specific use cases like resource deletion detection.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. An IT manager manually sets owned_by="Jane Smith" on a CI in the CMDB. That evening, Discovery runs and the CI payload includes owned_by="" (blank). The next morning, the manager finds owned_by is still "Jane Smith." Which IRE behavior explains this?</div>
+          <div class="cq-options">
+            <div>A) Discovery is blocked from updating business fields by default</div>
+            <div>B) Reconciliation Rules mark Manual Entry as authoritative for owned_by, AND the default behavior does not allow null values to overwrite non-null values</div>
+            <div>C) Discovery did not include owned_by in its payload at all</div>
+            <div>D) The manager's change was cached and not yet committed to the CMDB</div>
+          </div>
+          <div class="cq-hint">💡 Two IRE behaviors interact here — source authority AND null handling.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Two IRE behaviors protect the field. First, Reconciliation Rules typically mark Manual Entry as fully authoritative for owned_by, meaning Discovery's value would be ignored regardless. Second, even if Discovery were authoritative, the default "null does not overwrite non-null" behavior would prevent the blank value from clearing "Jane Smith." Both protections work together in this scenario.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. Discovery is configured as the authoritative source for the ip_address field on cmdb_ci_server. A Reconciliation Rule sets a Staleness Period of 30 days. Discovery ran 45 days ago (unusual outage). An SGC now sends a new ip_address value. What happens?</div>
+          <div class="cq-options">
+            <div>A) The SGC value is ignored because Discovery is always authoritative regardless of staleness</div>
+            <div>B) IRE creates a conflict alert and doesn't update the field</div>
+            <div>C) The SGC value overwrites the ip_address because Discovery's value has passed the 30-day staleness period</div>
+            <div>D) IRE rejects the SGC payload until Discovery runs again</div>
+          </div>
+          <div class="cq-hint">💡 What does the Staleness Period allow lower-priority sources to do?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — Staleness Period exists precisely for this situation. If the authoritative source (Discovery) hasn't updated a field within the staleness window (30 days), that field is considered stale. A lower-priority source (SGC) is then allowed to update it. After 45 days without a Discovery update, ip_address is stale, and the SGC value is accepted. This prevents old, potentially incorrect data from being permanently locked in by an authoritative source that stopped running.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. An administrator notices that the instance_type field on AWS VM CIs in the CMDB always shows data from Discovery (e.g., "t2.micro" derived from CPU count), not from the AWS SGC (which returns the actual EC2 instance type "t2.micro"). The AWS SGC is actually running successfully. What is likely wrong?</div>
+          <div class="cq-options">
+            <div>A) The AWS SGC is not configured to provide instance_type in its payload</div>
+            <div>B) A Reconciliation Rule marks ServiceNow Discovery as authoritative for instance_type, overriding the AWS SGC's value</div>
+            <div>C) The cmdb_ci_aws_ec2_instance class does not have an instance_type field</div>
+            <div>D) IRE processes Discovery first so its value always wins</div>
+          </div>
+          <div class="cq-hint">💡 Which Reconciliation Rule configuration would cause an SGC to lose to Discovery for a specific field?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — If a Reconciliation Rule marks Discovery as authoritative for instance_type, then even though the AWS SGC provides a more appropriate value (since instance_type is a cloud-native concept), Discovery's derived value wins. The fix is to modify the Reconciliation Rule for instance_type to make the AWS SGC authoritative (or higher priority than Discovery) for this field specifically. This illustrates why field-level source authority configuration matters.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. A company runs an Import Set from a 3-year-old CMDB spreadsheet. After the import, many CI fields that were correctly set by Discovery are now showing old values from the spreadsheet. What configuration would have prevented this?</div>
+          <div class="cq-options">
+            <div>A) Scheduling Discovery to run after every Import Set</div>
+            <div>B) Configuring Reconciliation Rules to give the Import Set source lower priority than Discovery for those technical fields</div>
+            <div>C) Disabling Import Sets from using IRE</div>
+            <div>D) Setting the Import Set's Transform Map to skip fields that already have values</div>
+          </div>
+          <div class="cq-hint">💡 Reconciliation Rules define which source wins. Who should win for technical fields like cpu_count and ip_address?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Reconciliation Rules are exactly designed for this scenario. If Discovery is ranked higher than the Import Set source for technical fields (cpu_count, ip_address, serial_number, etc.), then even when the Import Set runs, its values for those fields will be ignored in favor of Discovery's more current and accurate values. The Import Set would still be able to update fields it IS authoritative for (like contract numbers or custom attributes).</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. An administrator uses CMDB Workspace to investigate why a CI's os_version field shows an outdated value. Where in CMDB Workspace would they find which source last set that field and when?</div>
+          <div class="cq-options">
+            <div>A) The Reconciliation Rules configuration form</div>
+            <div>B) The CI's "Source" tab in CMDB Workspace, which shows per-field source and timestamp</div>
+            <div>C) The Discovery Status record for the last Discovery run</div>
+            <div>D) The cmdb_ire_event log filtered by field name</div>
+          </div>
+          <div class="cq-hint">💡 CMDB Workspace has a specific view for per-field source attribution.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — CMDB Workspace provides a Source tab on each CI record that shows field-level source attribution: which source last set each field, and when. This is the easiest and most direct way to investigate why a field has a specific value. It's more efficient than filtering the cmdb_ire_event log (D), though that log provides more detailed history of all update decisions.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="02-identification-rules.html" class="btn btn-secondary">← Identification Rules</a>
+          <a href="04-dedup-remediation.html" class="btn btn-secondary">Dedup &amp; Remediation →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p4i_t3_03';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

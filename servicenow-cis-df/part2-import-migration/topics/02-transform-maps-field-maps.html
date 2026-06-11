@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transform Maps &amp; Field Maps | CIS-DF Part 2</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .flow-steps{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;margin:var(--space-4) 0}
+    .flow-step{background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.25);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);font-family:var(--font-heading);font-size:0.82rem;font-weight:600;color:#22d3ee}
+    .flow-arrow{color:var(--text-muted);font-size:1rem}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Transform Maps &amp; Field Maps</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 2 · Topic 2</div>
+        <h1 class="topic-title">Transform Maps &amp; Field Maps</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Transform Maps are the logic engine of every import — they map staging columns to target fields,
+          run transformation scripts, handle coalesce (duplicate detection), and fire event scripts.
+          Master every script hook and you master the import pipeline.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~22 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~12% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Migration</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>What Is a Transform Map?</h2>
+        <p>
+          A <span class="hl-teal">Transform Map</span> defines how each row in a staging table becomes
+          a record in a target table. It is the bridge between "what arrived" and "what ServiceNow stores."
+          Without a Transform Map, staging data just sits in the staging table indefinitely — nothing
+          moves to the target table.
+        </p>
+        <p>
+          A Transform Map has three parts:
+        </p>
+        <ol>
+          <li><strong>Header</strong> — which staging table is the source and which table is the target</li>
+          <li><strong>Field Maps</strong> — column-by-column mapping from source to target</li>
+          <li><strong>Scripts</strong> — JavaScript hooks that run at specific points during the transform</li>
+        </ol>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — One Transform Map, Many Runs</strong>
+            A Transform Map is a reusable definition, not a one-time thing. Every time new data lands
+            in the staging table, the same Transform Map processes it. You configure the Transform Map
+            once, and it runs for every import load — scheduled or manual. This is why getting the
+            Transform Map right is so important: errors will repeat for every future load.
+          </div>
+        </div>
+
+        <h3>Creating a Transform Map</h3>
+        <p>
+          Navigate to <span class="code-inline">System Import Sets → Transform Maps → New</span>.
+          Fill in:
+        </p>
+        <ul>
+          <li><strong>Name</strong> — descriptive label for this transform</li>
+          <li><strong>Source table</strong> — the Import Set staging table</li>
+          <li><strong>Target table</strong> — where records should go (e.g., <code>incident</code>, <code>cmdb_ci_server</code>)</li>
+          <li><strong>Run business rules</strong> — whether target table's Business Rules fire during import (usually yes)</li>
+          <li><strong>Copy empty fields</strong> — whether a blank staging field overwrites an existing target value</li>
+        </ul>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Field Maps — Column to Field Mapping</h2>
+        <p>
+          Each <span class="hl-teal">Field Map</span> entry maps one column in the staging table to one
+          field in the target table. You create these in the Field Maps related list on the Transform Map
+          record. For each field map, you specify:
+        </p>
+        <ul>
+          <li><strong>Source field</strong> — the column name in the staging table</li>
+          <li><strong>Target field</strong> — the field on the target table to populate</li>
+          <li><strong>Coalesce</strong> — whether this field should be used to detect duplicates (discussed in Section 3)</li>
+          <li><strong>Transform script</strong> — optional JavaScript to transform the source value before writing it to the target</li>
+        </ul>
+
+        <h3>Field-Level Transform Scripts</h3>
+        <p>
+          Sometimes the source value is not in the right format for the target field. A field-level
+          transform script lets you manipulate the value inline. For example, the source CSV has
+          dates in "MM/DD/YYYY" format but ServiceNow expects "YYYY-MM-DD". Your transform script:
+        </p>
+        <p style="font-family:var(--font-mono);font-size:0.82rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 16px;color:#22d3ee">
+          // source_field is the incoming raw value<br>
+          var parts = source_field.split('/');<br>
+          answer = parts[2] + '-' + parts[0] + '-' + parts[1];
+        </p>
+        <p>
+          The variable <span class="code-inline">source_field</span> holds the incoming value.
+          You set <span class="code-inline">answer</span> to the transformed value that will be
+          written to the target field.
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Auto Map Matching</strong>
+            When you save a new Transform Map, ServiceNow offers "Auto Map Matching Fields." This scans
+            the staging table columns and tries to find target table fields with the same name and creates
+            Field Maps automatically. It's a time-saver for well-named source data, but always review
+            the auto-generated maps — column names in CSV files are often different from ServiceNow field names.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Coalesce — Duplicate Detection and Update Logic</h2>
+        <p>
+          <span class="hl-teal">Coalesce</span> is the mechanism that prevents duplicates during imports.
+          When the Transform Map processes a staging row, it first checks: does a record already exist
+          in the target table with these same "coalesce field" values? If yes, update that record.
+          If no, create a new one.
+        </p>
+        <p>
+          Without coalesce configured, every import run <em>always inserts new records</em> — even if
+          the same person, CI, or item was already imported in a previous run. With coalesce, you
+          define which field(s) uniquely identify a record (like an employee ID, asset tag, or serial number)
+          and ServiceNow uses those to decide insert vs. update.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Analogy — Checking the Guest List</strong>
+            Coalesce is like a bouncer at a venue who checks the guest list. When someone arrives, the
+            bouncer asks "Are you already on the list?" If yes, they update your status ("arrived").
+            If not, they add you as a new guest. Without the bouncer checking, every arrival creates
+            a new entry and the list fills up with duplicates.
+          </div>
+        </div>
+
+        <h3>Coalesce Field Selection Strategy</h3>
+        <p>
+          The coalesce field must be a value that is:
+        </p>
+        <ul>
+          <li><strong>Unique</strong> — no two records should have the same value for this field</li>
+          <li><strong>Stable</strong> — the value doesn't change over time (a serial number, not a person's name)</li>
+          <li><strong>Present in source data</strong> — the source system must reliably provide it</li>
+        </ul>
+        <p>
+          Common coalesce fields: employee number, asset tag, serial number, hostname, email address.
+          Bad coalesce fields: name (not unique), description (not stable or unique).
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Multiple Coalesce Fields</strong>
+            You can mark more than one field as "Coalesce" on a Transform Map. When multiple fields
+            are coalesced, ServiceNow looks for a record where <em>ALL</em> coalesced fields match —
+            it's an AND condition, not OR. This is useful when no single field is unique but a
+            combination is. Example: first name + last name + department together identify a person
+            even though none of the three alone is unique.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Transform Script Hooks — Full Lifecycle</h2>
+        <p>
+          Transform Maps have six script hooks that run at different points during the transform.
+          These are server-side JavaScript scripts that give you complete control over the import process.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Script Hook</th><th>When It Runs</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>onStart</td>
+              <td>Once before any row is processed</td>
+              <td>Initialize global variables, log start of import, validate data source availability</td>
+            </tr>
+            <tr>
+              <td>onBefore</td>
+              <td>Before each row is transformed</td>
+              <td>Validate the row, skip rows that don't meet criteria, set <code>ignore = true</code> to skip</td>
+            </tr>
+            <tr>
+              <td>onAfter</td>
+              <td>After each row is transformed (after insert/update)</td>
+              <td>Create related records, trigger workflows, log per-row results</td>
+            </tr>
+            <tr>
+              <td>onComplete</td>
+              <td>Once after ALL rows are processed</td>
+              <td>Send summary email, update import log record, clean up temp data</td>
+            </tr>
+            <tr>
+              <td>onForeignInsert</td>
+              <td>When a reference field value is not found in the target table</td>
+              <td>Create the missing reference record rather than failing</td>
+            </tr>
+            <tr>
+              <td>onReject</td>
+              <td>When a row is rejected due to an error</td>
+              <td>Log rejected rows, create error notification, store rejected data for review</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>The onBefore Script — Row Skipping</h3>
+        <p>
+          The <span class="code-inline">onBefore</span> script is the most commonly used hook. To skip
+          a row entirely, set <span class="code-inline">ignore = true</span> in the onBefore script.
+          To force a row to be inserted even if coalesce would update, set
+          <span class="code-inline">action = INSERT</span>.
+          To force an update, set <span class="code-inline">action = UPDATE</span>.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Script Hook Execution Order</strong>
+            The order is always: onStart (once) → [for each row: onBefore → field maps → onAfter] → onComplete (once).
+            onReject fires instead of onAfter when a row fails. onForeignInsert fires during field mapping
+            when a reference lookup fails. Exam questions often present scenarios and ask which hook fires.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Transform Map for CMDB Data</h2>
+        <p>
+          When importing CI data, the Transform Map has an additional concern: should it write directly
+          to the target CI table, or feed through the IRE? As covered in Topic 1, writing directly
+          bypasses IRE — usually a mistake for CMDB data.
+        </p>
+        <p>
+          For CMDB imports where you need IRE processing, the Transform Map's target is not a CI table
+          directly — it is the <strong>CMDB Identification and Reconciliation API</strong>. Service Graph
+          Connectors handle this automatically. For custom Import Sets targeting CMDB, you use the
+          onAfter script to call <span class="code-inline">SNC.CMDBTransformUtil</span> or the CMDB API
+          endpoint rather than relying on direct table mapping.
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Test with a Small Sample First</strong>
+            Before running a large import, always test your Transform Map with a sample of 10-20 rows
+            (create a small test Import Set). Verify the insert/update/ignored counts are what you expect,
+            check that coalesce is matching the right records, and review any error rows. A bug in a
+            Transform Map running against 50,000 rows creates a much larger cleanup problem than one
+            caught on 20 rows.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Transform Maps</h2>
+        <ul>
+          <li>Transform Maps run AFTER staging — they are the logic engine that moves data from staging to target</li>
+          <li><strong>Coalesce fields</strong> define duplicate detection — without them, every run inserts new records</li>
+          <li>Multiple coalesce fields use AND logic — all must match for an update</li>
+          <li>Good coalesce fields: unique, stable, always present. Bad: name, description, free-text fields</li>
+          <li>Script hook order: onStart → (per row: onBefore → fieldmaps → onAfter) → onComplete</li>
+          <li><code>ignore = true</code> in onBefore skips the current row without error</li>
+          <li>onForeignInsert fires when a reference lookup fails — use it to create missing reference records</li>
+          <li>For CMDB data, direct Transform Map inserts to CI tables bypass IRE — use Service Graph Connectors instead</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <span style="color:var(--text-muted);font-size:0.82rem;align-self:center">Next:</span>
+          <a href="03-data-sources-scheduled-imports.html" class="btn btn-secondary">Data Sources &amp; Scheduled Imports →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p2_t2_02';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

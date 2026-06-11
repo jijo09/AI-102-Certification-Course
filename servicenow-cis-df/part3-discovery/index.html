@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 3 — Discovery & Service Mapping | CIS-DF Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .part-hero { background: linear-gradient(135deg, rgba(8,145,178,0.1) 0%, #021a20 60%); border: 1px solid rgba(8,145,178,0.2); border-radius: var(--radius-2xl); padding: var(--space-10) var(--space-12); margin-bottom: var(--space-8); position: relative; overflow: hidden; }
+    .part-hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; background: radial-gradient(circle, rgba(8,145,178,0.15) 0%, transparent 70%); }
+    .part-hero-eyebrow { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #67e8f9; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.25); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); margin-bottom: var(--space-4); font-family: var(--font-heading); }
+    .part-hero-title { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.15; margin-bottom: var(--space-4); background: linear-gradient(135deg, #f0fbff 0%, #a5f3fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .part-hero-desc { font-size: 0.975rem; color: var(--text-secondary); max-width: 600px; line-height: 1.75; margin-bottom: var(--space-8); }
+    .part-hero-meta { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-value { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: #67e8f9; line-height: 1; }
+    .meta-label { font-size: 0.7rem; color: var(--text-muted); }
+    .why-card { background: rgba(8,145,178,0.06); border: 1px solid rgba(8,145,178,0.15); border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8); margin-bottom: var(--space-8); }
+    .why-title { font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: #67e8f9; margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2); }
+    .topic-list { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-10); }
+    .topic-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-6); display: flex; gap: var(--space-6); align-items: flex-start; text-decoration: none; transition: all var(--transition-normal); position: relative; overflow: hidden; }
+    .topic-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #0891b2; border-radius: var(--radius-xl) 0 0 var(--radius-xl); }
+    .topic-card:hover { border-color: rgba(8,145,178,0.4); transform: translateX(4px); box-shadow: 0 4px 16px rgba(8,145,178,0.1); }
+    .topic-card.completed::before { background: var(--green-500); }
+    .topic-num-badge { width: 44px; height: 44px; min-width: 44px; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.25); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: #67e8f9; margin-top: 2px; }
+    .topic-card-body { flex: 1; }
+    .topic-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-2); }
+    .topic-card-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+    .topic-card-desc { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-4); }
+    .topic-card-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .topic-tag { font-size: 0.68rem; font-family: var(--font-mono); background: var(--bg-secondary); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: var(--radius-sm); }
+    .topic-arrow { color: var(--text-muted); font-size: 1.2rem; margin-top: 2px; flex-shrink: 0; transition: transform var(--transition-fast); }
+    .topic-card:hover .topic-arrow { transform: translateX(4px); color: #67e8f9; }
+    .learn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-8); }
+    .learn-item { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-5); display: flex; gap: var(--space-3); align-items: flex-start; }
+    .learn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .learn-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+    .action-bar { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-8); }
+    .action-bar-left { display: flex; flex-direction: column; gap: var(--space-1); }
+    .action-bar-title { font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
+    .action-bar-sub { font-size: 0.8rem; color: var(--text-muted); }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+    @media (max-width: 700px) { .part-hero { padding: var(--space-6); } .topic-card { flex-direction: column; gap: var(--space-3); } .action-bar { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <span class="current">Part 3 — Discovery</span>
+      </div>
+    </header>
+    <div class="page-content stagger">
+
+      <div class="part-hero animate-fade-in">
+        <div class="part-hero-eyebrow">🔭 Part 3 of 8 &nbsp;·&nbsp; INGEST Domain (19% Exam Weight)</div>
+        <h1 class="part-hero-title">Discovery &<br>Service Mapping</h1>
+        <p class="part-hero-desc">
+          How does data get into the CMDB automatically? Discovery scans IP ranges and applications,
+          MID Servers bridge network boundaries, Discovery Patterns determine what to collect,
+          Service Mapping builds application dependency maps, and Agent/ACC extends coverage to
+          isolated devices. This part covers the INGEST domain's automated CI population tools.
+        </p>
+        <div class="part-hero-meta">
+          <div class="meta-item"><span class="meta-value">19%</span><span class="meta-label">Exam Weight (INGEST)</span></div>
+          <div class="meta-item"><span class="meta-value" data-part-done-count>0/5</span><span class="meta-label">Topics Finished</span></div>
+          <div class="meta-item"><span class="meta-value" data-part-done-pct>0%</span><span class="meta-label">Readiness</span></div>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-title">💡 Discovery Exam Focus Areas</div>
+        <p style="font-size:0.875rem; line-height:1.6; color:var(--text-secondary); margin:0;">
+          Key traps: MID Server is required for Discovery on private networks (not public cloud APIs), IP Range Discovery finds new CIs while CI Group Discovery refreshes known CIs, Discovery Patterns populate CI attributes using Probes and Sensors, and Service Mapping builds the CSDM Application Service model. Know when each tool is appropriate and what its limitations are.
+        </p>
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">Part 3 Study Modules</h2>
+      <div class="topic-list">
+
+        <a href="topics/01-discovery-architecture.html" class="topic-card" id="card-cisdf_p3d_t1_01">
+          <div class="topic-num-badge">01</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Discovery Architecture & How It Works</h3></div>
+            <p class="topic-card-desc">How Discovery populates the CMDB — IP range scanning, Probes (data collectors) and Sensors (data processors), the CI write pipeline, discovery_source field, and Discovery scheduling.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Discovery</span><span class="topic-tag">Probes & Sensors</span><span class="topic-tag">IP Range</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/02-mid-server.html" class="topic-card" id="card-cisdf_p3d_t2_02">
+          <div class="topic-num-badge">02</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">MID Server — The Discovery Bridge</h3></div>
+            <p class="topic-card-desc">MID Server architecture, when it is required vs. optional, MID Server clusters, capability matching, MID Server Selection policies, and how MID Servers handle credential management for private networks.</p>
+            <div class="topic-card-tags"><span class="topic-tag">MID Server</span><span class="topic-tag">Private Network</span><span class="topic-tag">Capability</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/03-patterns-probes-credentials.html" class="topic-card" id="card-cisdf_p3d_t3_03">
+          <div class="topic-num-badge">03</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Discovery Patterns, Probes & Credentials</h3></div>
+            <p class="topic-card-desc">Pattern Designer, Horizontal Discovery vs. Vertical Discovery, credential types (SSH, WMI, SNMP), credential alias, Discovery Patterns for Linux/Windows/Network, and how Patterns determine CI class assignment.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Pattern Designer</span><span class="topic-tag">Horizontal Discovery</span><span class="topic-tag">Credentials</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/04-service-mapping.html" class="topic-card" id="card-cisdf_p3d_t4_04">
+          <div class="topic-num-badge">04</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Service Mapping — Building Application Dependency Maps</h3></div>
+            <p class="topic-card-desc">Top-down vs. Tag-based Service Mapping, entry points, Application Service creation, how Service Mapping builds the CSDM Application Service model, Traffic-based Discovery, and service map completeness.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Service Mapping</span><span class="topic-tag">Application Service</span><span class="topic-tag">CSDM</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/05-agent-client-collector.html" class="topic-card" id="card-cisdf_p3d_t5_05">
+          <div class="topic-num-badge">05</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Agent Client Collector (ACC) — Agentless to Agent-Based</h3></div>
+            <p class="topic-card-desc">When agentless Discovery fails — isolated devices, no network reach, high-security environments. ACC architecture, agent deployment, CI Group-based Discovery for ongoing refresh, and choosing Discovery method by scenario.</p>
+            <div class="topic-card-tags"><span class="topic-tag">ACC</span><span class="topic-tag">Agent-Based</span><span class="topic-tag">CI Group Discovery</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">What You'll Master</h2>
+      <div class="learn-grid">
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Why MID Server is required for private networks and how it routes Discovery requests.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">IP Range Discovery (finds new CIs) vs. CI Group Discovery (refreshes known CIs) — when to use each.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">How Discovery Patterns use Probes and Sensors to classify CIs into the correct CI class.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Service Mapping's role in building the CSDM Application Service model for change impact analysis.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">When to use ACC (agent-based) vs. agentless Discovery based on network topology and security constraints.</span></div>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <div class="action-bar-title">Ready to continue to Part 4: IRE?</div>
+          <div class="action-bar-sub">Discovery populates the CMDB — IRE processes what Discovery sends. Study them together.</div>
+        </div>
+        <div style="display:flex; gap:var(--space-3)">
+          <a href="flashcards.html" class="btn btn-secondary">🧠 Flashcards</a>
+          <a href="quiz.html" class="btn btn-secondary">🎯 Quiz</a>
+          <a href="../part4-ire/index.html" class="btn btn-primary">Part 4: IRE →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  function updatePartPageStats() {
+    const topicIds = [
+      'cisdf_p3d_t1_01','cisdf_p3d_t2_02','cisdf_p3d_t3_03','cisdf_p3d_t4_04','cisdf_p3d_t5_05'
+    ];
+    const done = topicIds.filter(id => ProgressManager.isComplete(id)).length;
+    const total = topicIds.length;
+    const pct = Math.round((done / total) * 100);
+    document.querySelectorAll('[data-part-done-count]').forEach(el => { el.textContent = `${done}/${total}`; });
+    document.querySelectorAll('[data-part-done-pct]').forEach(el => { el.textContent = `${pct}%`; });
+    topicIds.forEach(tid => {
+      const card = document.getElementById(`card-${tid}`);
+      if (card) card.classList.toggle('completed', ProgressManager.isComplete(tid));
+    });
+  }
+  document.addEventListener('DOMContentLoaded', updatePartPageStats);
+  document.addEventListener('progressUpdated', updatePartPageStats);
+</script>
+</body>
+</html>

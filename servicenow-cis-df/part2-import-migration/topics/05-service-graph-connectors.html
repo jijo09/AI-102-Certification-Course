@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Graph Connectors | CIS-DF Part 2</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-family:var(--font-mono);font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1)}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Service Graph Connectors</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 2 · Topic 5</div>
+        <h1 class="topic-title">Service Graph Connectors &amp; the MID Server</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          ServiceNow cannot always reach your infrastructure directly. Service Graph Connectors (SGC)
+          are pre-built integrations that pull discovery data from third-party sources — cloud providers,
+          CMDBs, monitoring tools — and route it through ServiceNow's Identity and Reconciliation Engine (IRE)
+          to create accurate, deduplicated CI records. This topic introduces the MID Server,
+          the on-premise bridge that makes it all work.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>10 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~19% exam weight (INGEST domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>SGC · MID Server · IRE · CI Lifecycle</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: Why direct writes fail -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Why Direct Table Writes Break Your CMDB</h2>
+        <p>
+          In the previous topics you learned how Import Sets work: data lands in a staging table,
+          Transform Maps move it to the target CMDB table, and Coalesce fields decide whether to
+          create a new record or update an existing one. That pipeline is powerful for one-time
+          migrations and scheduled batch loads.
+        </p>
+        <p>
+          But imagine you have five different tools that all know about your servers — AWS Config,
+          VMware vCenter, a monitoring agent, a manual spreadsheet import, and your own homegrown
+          CMDB. All five start writing to the same <span class="code-inline">cmdb_ci_server</span> table.
+          What happens?
+        </p>
+        <ul>
+          <li><strong>Duplicates.</strong> Tool A writes a server with IP 10.0.0.5. Tool B also writes it,
+          but with a slightly different hostname. Now you have two CI records for the same physical machine.</li>
+          <li><strong>Overwriting good data with bad data.</strong> Your authoritative source set
+          <span class="code-inline">serial_number = SN-12345</span>. A less-reliable source overwrites it
+          with <span class="code-inline">serial_number = UNKNOWN</span>. The good data is gone.</li>
+          <li><strong>No audit trail.</strong> You cannot tell which source populated which field, making
+          it impossible to debug quality problems.</li>
+        </ul>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🏗️</span>
+          <div class="callout-body">
+            <strong>Analogy — Multiple Contractors, No Foreman</strong>
+            Imagine building a house where five contractors show up and each one starts framing
+            walls without coordinating. One builds the east wall. Another demolishes it because
+            their blueprint was different. A third comes back and builds it again in a different
+            spot. The result is chaos. What you need is a <em>foreman</em> who receives all inputs,
+            applies rules, and issues the one authoritative instruction. In ServiceNow, that foreman
+            is the <strong>Identity and Reconciliation Engine (IRE)</strong>. Service Graph Connectors
+            are the contractors — each brings specialized data — but IRE is the one who decides what
+            actually gets written to the CMDB.
+          </div>
+        </div>
+
+        <p>
+          Direct Table API writes (a REST POST directly to <span class="code-inline">cmdb_ci_server.do?sysparm_action=insert</span>)
+          bypass IRE entirely. This is the single most important exam trap in this domain:
+          <strong>direct writes skip IRE</strong>, which means no deduplication, no source precedence
+          rules, no reconciliation. Service Graph Connectors exist precisely to fix this — they route
+          all incoming data through IRE before anything touches the CMDB.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Critical Exam Trap — Direct Table API Bypasses IRE</strong>
+            A REST POST directly to <code>cmdb_ci_server</code> (Table API) bypasses IRE completely.
+            No deduplication, no reconciliation, no source precedence. This is always wrong for
+            multi-source CMDB environments. SGC data, by contrast, always flows through IRE.
+            This distinction appears in scenario questions: "A developer writes a script that inserts
+            CIs via Table API. What quality risk does this introduce?"
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: What is SGC -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>What Is a Service Graph Connector?</h2>
+        <p>
+          A <span class="hl-teal">Service Graph Connector (SGC)</span> is a pre-built integration
+          package available on the ServiceNow Store that connects a specific third-party data source
+          to your ServiceNow CMDB. Each SGC knows:
+        </p>
+        <ul>
+          <li><strong>How to authenticate</strong> to the source system (API key, OAuth, certificate)</li>
+          <li><strong>What data to pull</strong> and how often (scheduled polling vs. push/webhook)</li>
+          <li><strong>How to map</strong> the source's data model to ServiceNow CI classes</li>
+          <li><strong>How to route</strong> that data through IRE rather than writing directly to tables</li>
+        </ul>
+        <p>
+          Instead of a developer spending weeks building a custom integration for AWS, you install
+          the "Service Graph Connector for AWS" from the Store, configure credentials, and it starts
+          pulling EC2 instances, RDS databases, S3 buckets, and VPCs as properly classified CIs —
+          all deduplicated through IRE.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — SGC vs. Discovery</strong>
+            Both SGC and Discovery populate the CMDB, but they work differently. Discovery
+            actively scans your network using probes (we cover this in Part 3). SGC passively
+            polls an external API or receives pushed data. For cloud resources (AWS, Azure, GCP),
+            SGC is the primary method because cloud providers expose rich APIs. For on-premise
+            servers and network devices, Discovery is typically used. Many organizations use both.
+          </div>
+        </div>
+
+        <h3>Available Service Graph Connectors (Examples)</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">SGC for AWS</div>
+            <div class="term-def">Pulls EC2, RDS, EKS, Lambda, S3, VPC, and IAM resources. Requires MID Server for private VPCs or can connect directly for public endpoints.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">SGC for Microsoft Azure</div>
+            <div class="term-def">Pulls VMs, App Services, SQL Databases, AKS clusters, Storage Accounts. Uses Azure service principal authentication.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">SGC for VMware vCenter</div>
+            <div class="term-def">Pulls virtual machines, datastores, ESXi hosts, clusters. Requires MID Server — vCenter is always on-premise.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">SGC for ServiceNow Discovery</div>
+            <div class="term-def">Correlates Discovery results with data from other SGCs to enrich CI records with network-scanned attributes.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">SGC for GitHub</div>
+            <div class="term-def">Pulls repositories, organizations, users as CI records. Used for software asset tracking in the CMDB.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">SGC for Qualys</div>
+            <div class="term-def">Pulls vulnerability scan results and maps them to existing CIs, enriching security-related attributes.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: MID Server -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>The MID Server — ServiceNow's On-Premise Proxy</h2>
+        <p>
+          Many of your data sources sit inside a private network — on-premise servers,
+          private cloud VPCs, internal databases. ServiceNow runs in the cloud (on Anthropic's or
+          ServiceNow's own data centers). These two worlds cannot talk directly because your
+          firewall blocks inbound connections from the internet.
+        </p>
+        <p>
+          The <span class="hl-teal">Management, Instrumentation, and Discovery (MID) Server</span>
+          solves this problem. It is a Java application that you install on a server
+          <em>inside</em> your private network. The MID Server makes an outbound connection to your
+          ServiceNow instance — outbound connections are allowed by most firewalls — and maintains
+          a persistent, bidirectional channel. ServiceNow can then ask the MID Server to reach
+          internal resources on its behalf.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📮</span>
+          <div class="callout-body">
+            <strong>Analogy — A Trusted Mailroom Inside the Building</strong>
+            Think of your corporate network as a locked office building. ServiceNow (in the cloud)
+            cannot walk through the front door — the firewall won't let it in. But you hire a mailroom
+            employee (the MID Server) who lives inside the building and has a P.O. Box on the street.
+            ServiceNow sends letters to the P.O. Box. The mailroom employee picks them up,
+            executes the instructions inside the building, and sends the results back. The firewall
+            never needed to open an inbound port.
+          </div>
+        </div>
+
+        <h3>How the MID Server Communication Works</h3>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">ServiceNow Instance</div>
+            <div class="flow-arrow">──→</div>
+            <div class="flow-box">ECC Queue (outbound instructions)</div>
+            <div class="flow-note">// posted to MID Server's job queue</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">MID Server</div>
+            <div class="flow-arrow">──→</div>
+            <div class="flow-box">Polls ECC Queue</div>
+            <div class="flow-note">// outbound poll, firewall-friendly</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">MID Server</div>
+            <div class="flow-arrow">──→</div>
+            <div class="flow-box">Internal Resource (vCenter, DB, server)</div>
+            <div class="flow-note">// reaches private network directly</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">MID Server</div>
+            <div class="flow-arrow">──→</div>
+            <div class="flow-box">ECC Queue (inbound results)</div>
+            <div class="flow-note">// results pushed back to ServiceNow</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">ServiceNow</div>
+            <div class="flow-arrow">──→</div>
+            <div class="flow-box">IRE processes results → CMDB</div>
+            <div class="flow-note">// deduplication and reconciliation</div>
+          </div>
+        </div>
+
+        <h3>Key MID Server Facts for the Exam</h3>
+        <ul>
+          <li><strong>Operating System:</strong> Windows or Linux. Java 11+ required.</li>
+          <li><strong>Network requirement:</strong> Outbound HTTPS (port 443) to your ServiceNow instance. No inbound ports needed.</li>
+          <li><strong>Authentication:</strong> MID Server authenticates to ServiceNow using a dedicated service account with the <span class="code-inline">mid_server</span> role.</li>
+          <li><strong>ECC Queue:</strong> The External Communication Channel queue is the message bus between ServiceNow and MID Server. Input = commands to MID. Output = results from MID.</li>
+          <li><strong>High availability:</strong> Multiple MID Servers can exist. They are assigned to IP ranges or applications. Cluster mode provides redundancy.</li>
+          <li><strong>Not always required:</strong> For cloud APIs accessible from ServiceNow's network (public AWS endpoints), SGC can call the API directly without a MID Server. MID Server is required when the target is on a private network.</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — MID Server Optional for Cloud, Required for On-Premise</strong>
+            SGC for AWS can run without a MID Server if your ServiceNow instance has network
+            access to AWS APIs (typically true for cloud-to-cloud). SGC for VMware vCenter
+            always needs a MID Server because vCenter sits inside your corporate network.
+            Exam questions often ask: "In which scenario is a MID Server required for an SGC?"
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: SGC Data Flow End to End -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>SGC Data Flow — End to End</h2>
+        <p>
+          Understanding the exact path data takes from a third-party source to a CI record in
+          your CMDB is critical for the exam. Let's trace it step by step.
+        </p>
+
+        <h3>Step-by-Step: SGC Pulls AWS EC2 Instances</h3>
+        <ol>
+          <li>
+            <strong>Scheduled trigger fires.</strong> The SGC has a scheduled job configured to
+            poll every 4 hours. At 9:00 AM the job fires.
+          </li>
+          <li>
+            <strong>SGC calls AWS EC2 API.</strong> Using stored credentials (an IAM role or
+            access key), the SGC calls <code>DescribeInstances</code>. This returns raw JSON
+            with instance IDs, AMIs, tags, IPs, etc. If a MID Server is configured, this API
+            call is proxied through the MID Server.
+          </li>
+          <li>
+            <strong>Payload transformation.</strong> The SGC transforms the raw AWS JSON into
+            ServiceNow's internal <span class="hl-teal">Identification and Reconciliation API (IRE API)</span>
+            format. At this stage, data is NOT written to any CMDB table. It is packaged as
+            a structured payload.
+          </li>
+          <li>
+            <strong>IRE receives the payload.</strong> The payload is handed to IRE. IRE looks
+            at each CI in the payload and asks: "Does this CI already exist in the CMDB?" using
+            Identification Rules (covered deeply in Part 4). If a match is found, this is an
+            update. If not, this is a new CI.
+          </li>
+          <li>
+            <strong>Reconciliation decides field values.</strong> For update scenarios, IRE checks
+            Reconciliation Rules: which data source has authority for each field? If AWS says
+            <code>cpu_count=4</code> but a prior Discovery scan said <code>cpu_count=8</code>,
+            Reconciliation Rules determine which wins.
+          </li>
+          <li>
+            <strong>CMDB record created or updated.</strong> IRE writes the final, reconciled
+            values to the appropriate CMDB table (e.g., <span class="code-inline">cmdb_ci_vm_instance</span>
+            for an EC2 instance). A <span class="code-inline">last_discovered</span> timestamp is
+            updated. The <span class="code-inline">discovery_source</span> field is set to the SGC name.
+          </li>
+          <li>
+            <strong>IRE log updated.</strong> The result of each CI's processing is written to
+            the IRE log, not the Import Set log. This is a key distinction — SGC processing
+            is visible in <strong>IRE logs</strong>, not Transform Map logs.
+          </li>
+        </ol>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — SGC Does Not Use Import Sets</strong>
+            Import Sets (covered in Topics 1–4) use a staging table. SGC does NOT use Import Sets.
+            SGC bypasses the staging table entirely and sends data directly to the IRE API.
+            This means you will NOT see SGC data in the <span class="code-inline">sys_import_set_row</span> table
+            or in Transform Map logs. You look for SGC activity in: CMDB IRE Log, Data Source
+            logs, and the SGC connector's own scheduled job log.
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — SGC Errors Hide in IRE Logs, Not Transform Logs</strong>
+            If an SGC stops creating CIs correctly, most admins check Transform Map logs first —
+            those are empty because SGC doesn't use Import Sets. The real error will be in
+            the CMDB Identification &amp; Reconciliation log under
+            <strong>Configuration → CMDB → Identification/Reconciliation</strong>.
+            Also check the connector's own Scheduled Import log under
+            <strong>Data Sources → Scheduled Imports</strong>.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: SGC vs Direct API vs Import Sets -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>SGC vs. Direct Table API vs. Import Sets — Full Comparison</h2>
+        <p>
+          Knowing when to use each ingestion method — and what each method guarantees — is a
+          recurring exam theme. Study this table carefully.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Service Graph Connector</th>
+              <th>Import Set + Transform Map</th>
+              <th>Direct Table API (REST)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Goes through IRE?</td>
+              <td>✅ Yes — always</td>
+              <td>⚠️ Only if Transform Map calls IRE API (requires explicit configuration)</td>
+              <td>❌ No — bypasses IRE entirely</td>
+            </tr>
+            <tr>
+              <td>Deduplication</td>
+              <td>✅ Automatic via IRE</td>
+              <td>⚠️ Only via Coalesce field in Transform Map</td>
+              <td>❌ None — can create duplicates</td>
+            </tr>
+            <tr>
+              <td>Multi-source reconciliation</td>
+              <td>✅ Full source precedence via Reconciliation Rules</td>
+              <td>❌ Last-write-wins (no source weighting)</td>
+              <td>❌ None</td>
+            </tr>
+            <tr>
+              <td>Staging table used</td>
+              <td>❌ No staging table</td>
+              <td>✅ Yes — <code>sys_import_set</code></td>
+              <td>❌ No</td>
+            </tr>
+            <tr>
+              <td>Best for</td>
+              <td>Continuous sync from cloud/ITSM/monitoring tools</td>
+              <td>One-time migrations, periodic batch loads, CSV/Excel files</td>
+              <td>Quick scripted updates by developers who accept the risks</td>
+            </tr>
+            <tr>
+              <td>Error visibility</td>
+              <td>IRE logs + connector job logs</td>
+              <td>Import Set row status + Transform log</td>
+              <td>HTTP response codes only</td>
+            </tr>
+            <tr>
+              <td>Requires MID Server?</td>
+              <td>Only for on-premise targets</td>
+              <td>Only if data source is on-premise</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Custom CI class mapping</td>
+              <td>Preconfigured by ServiceNow per connector</td>
+              <td>Fully customizable in Transform Map</td>
+              <td>You specify the table in the URL</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S6: Types of SGCs -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Understanding SGC Categories</h2>
+        <p>
+          SGCs are organized into categories based on what type of data source they connect to.
+          Knowing the categories helps you answer "which connector should be used for X" questions.
+        </p>
+
+        <h3>Cloud Infrastructure Connectors</h3>
+        <p>
+          These connectors pull compute, storage, networking, and managed service resources from
+          cloud providers. They are the most common SGC category.
+        </p>
+        <ul>
+          <li><strong>AWS:</strong> EC2, RDS, EKS, Lambda, S3, VPC, CloudFormation stacks, IAM roles</li>
+          <li><strong>Azure:</strong> Virtual Machines, App Services, AKS, SQL Managed Instance, Blob Storage</li>
+          <li><strong>GCP:</strong> Compute Engine VMs, GKE clusters, Cloud SQL, Cloud Storage</li>
+        </ul>
+        <p>
+          Cloud connectors typically use the cloud provider's read-only IAM permissions. They do
+          NOT modify any resources in the cloud — they only read.
+        </p>
+
+        <h3>Virtualization &amp; On-Premise Connectors</h3>
+        <p>
+          These always require a MID Server because the data source is on-premise.
+        </p>
+        <ul>
+          <li><strong>VMware vCenter:</strong> VMs, hosts, datastores, clusters, resource pools</li>
+          <li><strong>Microsoft Hyper-V:</strong> VMs, virtual switches</li>
+          <li><strong>Nutanix:</strong> VMs, clusters, storage</li>
+        </ul>
+
+        <h3>Software Asset &amp; DevOps Connectors</h3>
+        <p>
+          Track software, repositories, and pipelines as CIs in the CMDB.
+        </p>
+        <ul>
+          <li><strong>GitHub / GitLab:</strong> Repositories, organizations, branches, pipelines</li>
+          <li><strong>Jira:</strong> Projects mapped to application CIs</li>
+          <li><strong>Dynatrace / Datadog:</strong> Monitored services and hosts as CIs</li>
+        </ul>
+
+        <h3>Security &amp; Vulnerability Connectors</h3>
+        <ul>
+          <li><strong>Qualys:</strong> Maps scan results to existing CIs, enriching vulnerability data</li>
+          <li><strong>Tenable.io:</strong> Asset inventory with CVE associations</li>
+          <li><strong>CrowdStrike:</strong> Endpoint agents mapped to CIs</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — SGC Enriches, Not Just Creates</strong>
+            SGCs do not always create new CI records. When a CI already exists (created by
+            Discovery or manually), an SGC can <em>enrich</em> it with additional attributes.
+            For example, Discovery finds a server and creates the CI. The Qualys SGC then
+            adds vulnerability scan data to that same CI record. IRE's Reconciliation Rules
+            govern which attributes each source is allowed to write.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: Configuring SGC -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Configuring a Service Graph Connector</h2>
+        <p>
+          All SGC configurations follow the same general workflow. Understanding this helps you
+          answer procedural questions on the exam.
+        </p>
+
+        <h3>Installation</h3>
+        <ol>
+          <li>Search the <strong>ServiceNow Store</strong> for the connector (e.g., "Service Graph Connector for AWS").</li>
+          <li>Install the application to your instance. This creates the connector's scheduled jobs, data source records, and IRE configuration.</li>
+          <li>The connector appears under <strong>Configuration → Connections &amp; Credentials</strong> or under its own application menu.</li>
+        </ol>
+
+        <h3>Authentication Setup</h3>
+        <p>
+          Each connector has a <span class="hl-teal">Connection &amp; Credential</span> record.
+          You configure:
+        </p>
+        <ul>
+          <li><strong>Connection alias</strong> — A named connection (e.g., "AWS Production Account").
+          Allows multiple accounts per connector.</li>
+          <li><strong>Credential record</strong> — API key, OAuth client ID/secret, certificate.
+          Stored encrypted using ServiceNow's credential vault.</li>
+          <li><strong>MID Server selection</strong> — If required, which MID Server to route through.</li>
+        </ul>
+
+        <h3>Data Scope Configuration</h3>
+        <p>
+          Most connectors let you scope what gets imported:
+        </p>
+        <ul>
+          <li><strong>Filters/tags:</strong> Only pull AWS resources tagged with <code>Environment=Production</code></li>
+          <li><strong>Regions/accounts:</strong> Pull from us-east-1 and eu-west-1 only</li>
+          <li><strong>CI classes:</strong> Only pull EC2 instances, skip Lambda functions</li>
+        </ul>
+
+        <h3>Scheduling</h3>
+        <p>
+          Each SGC creates one or more <span class="hl-teal">Scheduled Data Imports</span>.
+          You can configure:
+        </p>
+        <ul>
+          <li>Frequency (every 4 hours, daily, weekly)</li>
+          <li>Full sync vs. incremental sync (delta-based)</li>
+          <li>Run immediately for an initial baseline population</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Run Full Sync First, Then Incremental</strong>
+            When setting up a new SGC, always run a Full Sync first. This establishes the baseline —
+            all CIs from the source are pulled and IRE processes them. Subsequent runs use
+            Incremental Sync which only pulls changes (new, modified, deleted CIs). Incremental
+            sync is much faster but requires a complete baseline to be accurate.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: SGC and IRE Integration -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>How SGC Works with IRE (Preview)</h2>
+        <p>
+          You will study IRE in depth in Part 4. For now, you need to know enough to understand
+          what happens when SGC data arrives at IRE. This section introduces the concepts;
+          Part 4 covers the full detail.
+        </p>
+
+        <h3>Three Questions IRE Answers for Every CI</h3>
+        <ol>
+          <li>
+            <strong>"Does this CI already exist?"</strong> (Identification)<br>
+            IRE uses <em>Identification Rules</em> to match incoming CI data against existing CMDB records.
+            For a server, this might check: serial number, MAC address, or hostname. If a match is
+            found, this is an update. If not, this is a new CI.
+          </li>
+          <li>
+            <strong>"If it exists and I have multiple sources — what is the true value?"</strong> (Reconciliation)<br>
+            IRE uses <em>Reconciliation Rules</em> to determine source precedence per field.
+            "AWS is authoritative for instance_type. Discovery is authoritative for cpu_count.
+            Manual entry is authoritative for owned_by."
+          </li>
+          <li>
+            <strong>"Are there duplicate CIs for this same physical/logical entity?"</strong> (Deduplication)<br>
+            IRE detects duplicate CI records and can either merge them automatically or flag them
+            for manual review via Remediation Playbooks.
+          </li>
+        </ol>
+
+        <h3>The discovery_source Field</h3>
+        <p>
+          When IRE processes SGC data, it sets the <span class="code-inline">discovery_source</span>
+          field on the CI record to the name of the SGC. This is how you can later query
+          "which CIs came from AWS SGC?" You can filter <span class="code-inline">cmdb_ci</span>
+          where <span class="code-inline">discovery_source = ServiceNow AWS</span>.
+        </p>
+
+        <h3>What to Check When SGC Is Not Creating CIs</h3>
+        <ol>
+          <li>Check the <strong>Scheduled Import job log</strong> — did the job run? Did it pull data?</li>
+          <li>Check the <strong>CMDB IRE Log</strong> (<code>cmdb_ire_event</code>) — did IRE receive the data? Were there identification errors?</li>
+          <li>Check <strong>Identification Rules</strong> — is there a rule for the CI class being imported? (Part 4)</li>
+          <li>Check <strong>MID Server status</strong> — if on-premise, is the MID Server up and connected?</li>
+          <li>Check <strong>credentials</strong> — have API keys expired?</li>
+        </ol>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Scenario — "SGC ran but no CIs were created"</strong>
+            Common exam scenario: "The AWS SGC ran successfully (job log shows 500 records fetched),
+            but no new CIs appeared in the CMDB. What is the most likely cause?"
+            Answer: Missing or misconfigured <strong>IRE Identification Rules</strong> for the
+            <code>cmdb_ci_vm_instance</code> class. If IRE cannot identify whether incoming records
+            are new or existing (because no rule exists), it may drop or fail them rather than
+            creating new records.
+          </div>
+        </div>
+      </div>
+
+      <!-- S9: MID Server Roles and Management -->
+      <div class="section-block" id="s9">
+        <span class="section-label">Section 9</span>
+        <h2>MID Server Roles, Clusters, and Management</h2>
+        <p>
+          Because MID Server is introduced here and will appear repeatedly in Discovery (Part 3),
+          let's cover the management concepts the exam tests.
+        </p>
+
+        <h3>MID Server Applications</h3>
+        <p>
+          A single MID Server can handle multiple types of work. Each type is called an
+          <span class="hl-teal">Application</span>:
+        </p>
+        <ul>
+          <li><strong>Discovery</strong> — Runs probes and sensors to scan IP ranges (Part 3)</li>
+          <li><strong>Service Graph Connectors</strong> — Proxies API calls to on-premise sources</li>
+          <li><strong>Orchestration</strong> — Runs workflow activities on remote systems</li>
+          <li><strong>Event Management</strong> — Receives alerts from monitoring tools</li>
+          <li><strong>IntegrationHub</strong> — Executes spoke actions against on-premise systems</li>
+        </ul>
+
+        <h3>MID Server Clusters</h3>
+        <p>
+          For high availability and load distribution, you can group MID Servers into a
+          <span class="hl-teal">cluster</span>. Work items are distributed across cluster members.
+          If one MID Server fails, others pick up its work. Key exam points:
+        </p>
+        <ul>
+          <li>Cluster members must be in the same network segment to be useful for Discovery</li>
+          <li>Primary and secondary MID Server designation within a cluster</li>
+          <li>Cluster affinity — certain work items can be pinned to specific MID Servers</li>
+        </ul>
+
+        <h3>MID Server Validation</h3>
+        <p>
+          Before a MID Server can be used, it must be <span class="hl-teal">validated</span>.
+          Validation confirms the MID Server meets security and version requirements set by your
+          ServiceNow instance. Key facts:
+        </p>
+        <ul>
+          <li>MID Server auto-upgrade is configurable — ServiceNow can push updates automatically</li>
+          <li>If a MID Server is not validated, jobs assigned to it will not run</li>
+          <li>Validation status is visible at <strong>MID Server → Servers</strong></li>
+        </ul>
+
+        <h3>MID Server IP Ranges</h3>
+        <p>
+          For Discovery, each MID Server is assigned one or more <span class="hl-teal">IP ranges</span>.
+          When a Discovery schedule fires for a range, ServiceNow routes the work to the MID Server
+          that owns that range. This ensures that a MID Server in the US east data center handles
+          US east server scans, not a MID Server in Europe.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>MID Server Property</th>
+              <th>Where to Configure</th>
+              <th>Why It Matters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Service account credentials</td>
+              <td><code>config.xml</code> on the MID Server host</td>
+              <td>Authenticates MID Server to ServiceNow instance</td>
+            </tr>
+            <tr>
+              <td>IP Range assignment</td>
+              <td>MID Server record → IP Ranges related list</td>
+              <td>Routes Discovery work to correct MID Server</td>
+            </tr>
+            <tr>
+              <td>Application assignment</td>
+              <td>MID Server record → Applications related list</td>
+              <td>Controls what types of work this MID Server handles</td>
+            </tr>
+            <tr>
+              <td>Cluster membership</td>
+              <td>MID Server record → Cluster field</td>
+              <td>High availability and load distribution</td>
+            </tr>
+            <tr>
+              <td>Validation status</td>
+              <td>MID Server record → Validated field</td>
+              <td>Must be Validated before use; auto-checked on startup</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>SGC &amp; MID Server — Key Facts</h2>
+        <ul>
+          <li><strong>SGC always routes through IRE.</strong> Direct Table API writes bypass IRE — this is always wrong for multi-source environments.</li>
+          <li><strong>SGC does NOT use Import Sets.</strong> Look for SGC activity in IRE logs and connector job logs, not Transform Map logs.</li>
+          <li><strong>MID Server = outbound proxy</strong> inside your private network. Makes outbound connections to ServiceNow — no inbound firewall holes needed.</li>
+          <li><strong>MID Server required for on-premise targets</strong> (vCenter, Hyper-V, internal DBs). Optional for cloud APIs accessible from ServiceNow's network.</li>
+          <li><strong>ECC Queue</strong> = message bus between ServiceNow and MID Server. Input queue = instructions to MID. Output queue = results from MID.</li>
+          <li><strong>MID Server must be Validated</strong> before it can run jobs. Validation auto-runs on startup.</li>
+          <li><strong>discovery_source field</strong> = which SGC or Discovery schedule created/last updated the CI.</li>
+          <li><strong>Full sync first, then incremental.</strong> Full sync establishes baseline; incremental only pulls deltas.</li>
+          <li><strong>SGC troubleshooting order:</strong> Job log → IRE log → Identification Rules → MID Server status → Credentials.</li>
+          <li><strong>Multiple MID Servers can form a cluster</strong> for high availability and IP range-based routing.</li>
+        </ul>
+
+        <h3>Term Grid — SGC Key Vocabulary</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Service Graph Connector (SGC)</div>
+            <div class="term-def">Pre-built integration that pulls data from a third-party source into CMDB via IRE. Installed from ServiceNow Store.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">MID Server</div>
+            <div class="term-def">Java app installed on-premise. Bridges private network to ServiceNow via outbound HTTPS. Proxies Discovery and SGC jobs.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">ECC Queue</div>
+            <div class="term-def">External Communication Channel. Message queue between ServiceNow and MID Server. Input = to MID, Output = from MID.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">IRE (Identity &amp; Reconciliation Engine)</div>
+            <div class="term-def">ServiceNow's engine that identifies existing CIs, reconciles multi-source field conflicts, and detects duplicates. All SGC data passes through it.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">discovery_source</div>
+            <div class="term-def">Field on CI records recording which tool last populated it. Set by IRE when processing SGC or Discovery data.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Connection &amp; Credential Alias</div>
+            <div class="term-def">Named authentication record for an SGC. Allows multiple accounts (e.g., multiple AWS accounts) per connector type.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Full Sync</div>
+            <div class="term-def">SGC run that fetches ALL records from the source. Used for initial baseline population.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Incremental Sync</div>
+            <div class="term-def">SGC run that fetches only changed/new/deleted records since last run. Faster but requires a valid baseline.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. A developer writes a Python script that uses the ServiceNow Table API to insert 500 new server CI records directly into <code>cmdb_ci_server</code>. What is the primary CMDB quality risk of this approach?</div>
+          <div class="cq-options">
+            <div>A) The records will fail validation and not be saved</div>
+            <div>B) The records bypass IRE, so deduplication and reconciliation rules do not apply</div>
+            <div>C) The records are saved to a staging table and require manual approval</div>
+            <div>D) The records will be deleted after 24 hours</div>
+          </div>
+          <div class="cq-hint">💡 Think about what IRE provides that a direct API call does not.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Direct Table API writes bypass IRE entirely. This means no deduplication (duplicates can be created), no reconciliation (last-write-wins instead of source precedence), and no identification matching against existing records. The records are saved but without any quality controls.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. Your organization runs VMware vCenter on-premise. You want to use the Service Graph Connector for VMware to populate CI records. Which statement is true?</div>
+          <div class="cq-options">
+            <div>A) No MID Server is needed because SGC always connects directly to data sources</div>
+            <div>B) A MID Server is required because vCenter is on a private network inaccessible from ServiceNow's cloud</div>
+            <div>C) A MID Server is optional — the connector will try direct connection first and fall back to MID Server</div>
+            <div>D) MID Server is only needed for Discovery, not SGC</div>
+          </div>
+          <div class="cq-hint">💡 Can ServiceNow's cloud servers reach your internal vCenter API?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — vCenter runs on your private corporate network. ServiceNow (in the cloud) cannot reach it directly through your firewall. A MID Server installed inside your network makes outbound connections to ServiceNow and proxies the vCenter API calls. This is required, not optional.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. An SGC for AWS ran successfully — the job log shows 300 EC2 instances were fetched — but no CI records appeared in the CMDB. What is the MOST likely cause?</div>
+          <div class="cq-options">
+            <div>A) The Transform Map is misconfigured</div>
+            <div>B) The Import Set staging table is full</div>
+            <div>C) IRE Identification Rules for <code>cmdb_ci_vm_instance</code> are missing or misconfigured</div>
+            <div>D) The MID Server is offline</div>
+          </div>
+          <div class="cq-hint">💡 Data was fetched, so connectivity works. The failure is in processing. SGC does not use Transform Maps or Import Sets.</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — Since the job fetched data successfully, the MID Server and credentials work. SGC does not use Import Sets or Transform Maps. The data was handed to IRE, but without Identification Rules for the CI class, IRE cannot process it. Missing or inactive Identification Rules are the most common cause of "data fetched but no CIs created."</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. Where do you check for errors when an SGC job appears to run but produces incorrect or missing CI data?</div>
+          <div class="cq-options">
+            <div>A) Transform Map log and Import Set row status</div>
+            <div>B) CMDB IRE Log and the connector's Scheduled Import job log</div>
+            <div>C) Discovery schedule log and MID Server probe results</div>
+            <div>D) Business Rule execution log</div>
+          </div>
+          <div class="cq-hint">💡 SGC data flows through IRE, not Import Sets.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — SGC does not use Import Sets or Transform Maps, so options A and C are wrong. SGC errors appear in: (1) the CMDB Identification &amp; Reconciliation log (cmdb_ire_event) which shows whether IRE accepted or rejected each CI, and (2) the connector's Scheduled Import job log which shows whether data was successfully fetched from the source.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. You are deploying a new MID Server. After installation and configuration, the assigned Discovery schedule runs but no work is executed. What is the most likely reason?</div>
+          <div class="cq-options">
+            <div>A) The MID Server has not been validated yet</div>
+            <div>B) The MID Server service account has too many roles</div>
+            <div>C) The ECC Queue is disabled</div>
+            <div>D) The MID Server is running on Windows instead of Linux</div>
+          </div>
+          <div class="cq-hint">💡 What status must a MID Server have before ServiceNow will assign work to it?</div>
+          <div class="cq-answer"><strong>Answer: A</strong> — A MID Server must be Validated before ServiceNow will route work to it. Validation confirms the MID Server meets security and version requirements. After installation, the admin must validate it in the ServiceNow console (MID Server → Servers → Validate). Until validated, all assigned jobs will queue but not execute.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">6. Which MID Server concept allows work items to be distributed across multiple servers for high availability?</div>
+          <div class="cq-options">
+            <div>A) IP Range assignment</div>
+            <div>B) MID Server Cluster</div>
+            <div>C) ECC Queue partitioning</div>
+            <div>D) Application-based routing</div>
+          </div>
+          <div class="cq-hint">💡 Which feature groups multiple MID Servers together?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — MID Server Clusters group multiple MID Servers. Work is distributed across cluster members, and if one fails, others pick up the work. IP Range assignment routes work to the correct network segment. Application-based routing controls what type of work each MID Server handles, not redundancy.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">7. A company wants to track their AWS infrastructure in ServiceNow. They have both public-facing EC2 instances and EC2 instances in private VPCs. Which statement about MID Server requirements is accurate?</div>
+          <div class="cq-options">
+            <div>A) No MID Server is needed — AWS is always cloud-accessible</div>
+            <div>B) A MID Server is always required for all AWS SGC connections</div>
+            <div>C) A MID Server is needed for private VPC resources but may not be needed for public endpoints</div>
+            <div>D) Two MID Servers are required — one for public and one for private</div>
+          </div>
+          <div class="cq-hint">💡 The AWS API is cloud-accessible. Private VPCs are not.</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — The AWS EC2 API itself (used by the SGC to list instances) is publicly accessible, so ServiceNow can call it directly without a MID Server. However, if the SGC needs to reach resources inside a private VPC (e.g., performing additional checks via private IP), a MID Server deployed inside that VPC is needed. The exam often draws this distinction.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="04-coalesce-behaviors-scripts.html" class="btn btn-secondary">← Coalesce &amp; Transform Scripts</a>
+          <a href="06-non-discoverable-cis.html" class="btn btn-secondary">Non-Discoverable CIs →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p2_t5_05';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Field Validation &amp; Choice Lists | CIS-DF Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span>
+        <span class="current">Field Validation &amp; Choice Lists</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 6 · Topic 2</div>
+        <h1 class="topic-title">Field Validation &amp; Choice Lists</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Consistent, validated data starts with the right constraints on every field.
+          Learn field-level regex validation, how choice lists store and compare values,
+          dependent picklists, and when to use a lookup table instead of a choice list.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~16 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~8% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Quality</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Choice Lists — How They Work Under the Hood</h2>
+        <p>
+          A <span class="hl-teal">Choice field</span> presents a dropdown of options on a form.
+          These options are stored in the <span class="code-inline">sys_choice</span> table — one
+          record per choice option. Each choice has four key attributes:
+        </p>
+        <ul>
+          <li><strong>Table</strong> — which table this choice belongs to</li>
+          <li><strong>Element</strong> — which field name on that table</li>
+          <li><strong>Label</strong> — what users see in the dropdown ("High," "New," "Pending")</li>
+          <li><strong>Value</strong> — what gets stored in the database ("1," "2," "3")</li>
+        </ul>
+        <p>
+          The label and value are deliberately separated. This allows ServiceNow to store compact
+          values (integers, short codes) in the database while displaying human-readable labels
+          in the UI. It also allows the label to be translated for different languages without
+          changing the stored value.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Always Use Values in Conditions</strong>
+            Business Rules, Client Scripts, and GlideRecord queries must use the stored <em>value</em>
+            for choice fields. The Incident state field stores <code>1</code> for New, <code>2</code>
+            for In Progress, <code>6</code> for Resolved, <code>7</code> for Closed.
+            Writing <code>if (current.state == 'Resolved')</code> will NEVER be true because
+            "Resolved" is the label, not the value. Always use <code>current.state == 6</code>.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Dependent Choice Lists</h2>
+        <p>
+          A <span class="hl-teal">dependent choice list</span> filters the options of one field based
+          on the current value of another field. The classic example in ServiceNow is
+          Category → Sub-category. When you select "Software" as the Category, only Software-related
+          subcategories appear. When you select "Hardware," only Hardware subcategories appear.
+        </p>
+        <p>
+          This is configured in the choice records themselves: each Sub-category choice record has
+          a <strong>Dependent value</strong> field specifying which Category value it belongs to.
+          The field also needs to be configured in the dictionary with a <strong>Dependent field</strong>
+          pointing to the parent (Category) field.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Dependent Choices Are Still Choice Records</strong>
+            Dependent choice options are still rows in <code>sys_choice</code> — they just have
+            an additional "Dependent value" populated. You manage them the same way as regular choices:
+            navigate to <span class="code-inline">System Definition → Choice Lists</span>, filter
+            by the child field, and you'll see all choices with their dependent values.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>String Field Validation — Regex</h2>
+        <p>
+          For String fields where only certain formats are valid (phone numbers, IP addresses, postal
+          codes, product codes), you can add a <span class="hl-teal">regular expression validation</span>
+          directly in the field's dictionary entry. If a user enters a value that doesn't match the
+          regex, the save is blocked with a validation error.
+        </p>
+        <p>
+          To add regex validation: open the field's dictionary entry, scroll to the
+          <strong>Attributes</strong> field or the dedicated <strong>Validation</strong> section,
+          and enter the regex pattern. For example, to validate a US phone number:
+          <span class="code-inline">^\+?1?\s*\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$</span>
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Test Regex Before Deploying</strong>
+            Regex validation errors can block entire import pipelines if your source data doesn't
+            perfectly match the pattern. Before adding regex validation to a production field, check
+            existing data to ensure all current values pass the regex. Use a Script Include or Scheduled
+            Script to run a pre-check before activating the validation.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Managing Choice Lists</h2>
+        <p>
+          Choice lists are managed via two paths:
+        </p>
+        <ol>
+          <li><strong>Right-click the field on a form → Configure → Choice List</strong> — opens the choice editor for that specific field</li>
+          <li><strong>System Definition → Choice Lists</strong> — shows all choices for all tables, filterable by table/field</li>
+        </ol>
+        <p>
+          When you add a new choice, you specify: the table, the field name (element), the label, the value,
+          the sequence (display order), and optionally a dependent value. Active checkbox controls whether
+          the choice appears in the dropdown (inactive choices still exist but are hidden from the UI).
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Inactive Choices and Existing Data</strong>
+            Making a choice "inactive" hides it from the dropdown for new entries, but it does NOT
+            remove the value from records that already have it. Existing records with that inactive
+            choice value still display the label correctly. The choice must remain in <code>sys_choice</code>
+            even when inactive, or existing records will show a blank/unknown value for that field.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Choice List vs. Lookup Table</h2>
+        <p>
+          For small, stable sets of options (5-15 values that rarely change), Choice Lists are the
+          right tool. For larger, frequently-changing sets, or when each option needs additional
+          metadata, a Lookup Table (standalone reference table) is better.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Aspect</th><th>Choice List (sys_choice)</th><th>Lookup Table + Reference field</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Who can add options</td><td>Developer (requires dictionary access)</td><td>Admin (add a row to the table)</td></tr>
+            <tr><td>Per-option metadata</td><td>Label + value only</td><td>Any additional fields you define</td></tr>
+            <tr><td>Size limit</td><td>Practical limit ~50 (performance/UX)</td><td>Thousands of rows if needed</td></tr>
+            <tr><td>Translation</td><td>Built-in label translation per language</td><td>Must build translation mechanism yourself</td></tr>
+            <tr><td>Cross-table reuse</td><td>One definition per table+field</td><td>One table referenced by many fields</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Field Validation &amp; Choice Lists</h2>
+        <ul>
+          <li>Choice fields store the <strong>value</strong> (e.g., <code>1</code>), not the label (e.g., "New") — use values in conditions</li>
+          <li>Incident state values: 1=New, 2=In Progress, 3=On Hold, 6=Resolved, 7=Closed, 8=Cancelled</li>
+          <li>Dependent choice lists filter Sub-category options based on Category — configured via "Dependent value" on choice records</li>
+          <li>Regex validation on String fields blocks saves if value doesn't match — applies to forms AND APIs</li>
+          <li>Deactivating a choice hides it from dropdowns but existing records still display it correctly</li>
+          <li>Use Choice Lists for small stable sets; use Lookup Tables for large, changing, or metadata-rich option sets</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <span style="color:var(--text-muted);font-size:0.82rem;align-self:center">Next:</span>
+          <a href="03-reference-qualifiers-field-security.html" class="btn btn-secondary">Reference Qualifiers &amp; Field Security →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p3_t2_02';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

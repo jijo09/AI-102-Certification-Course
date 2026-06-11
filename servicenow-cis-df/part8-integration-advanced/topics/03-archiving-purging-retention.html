@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archiving, Purging &amp; Data Retention | CIS-DF Part 8</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .flow-steps{display:flex;flex-direction:column;gap:var(--space-2);margin:var(--space-5) 0}
+    .flow-step{display:flex;gap:var(--space-4);align-items:flex-start;padding:var(--space-4) var(--space-5);background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.14);border-radius:var(--radius-lg)}
+    .flow-step-num{width:28px;height:28px;border-radius:50%;background:rgba(8,145,178,0.2);border:1px solid rgba(8,145,178,0.35);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;color:#22d3ee;flex-shrink:0}
+    .flow-step-body{flex:1}
+    .flow-step-title{font-size:0.88rem;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+    .flow-step-desc{font-size:0.82rem;color:var(--text-muted);line-height:1.5}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 8</a>
+        <span class="sep">›</span>
+        <span class="current">Archiving, Purging &amp; Data Retention</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 8 · Topic 3</div>
+        <h1 class="topic-title">Archiving, Purging &amp; Data Retention</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Data grows indefinitely without governance. ServiceNow's Archive and Purge frameworks
+          let you move old records out of active tables and eventually delete them — keeping the
+          instance performing well while meeting compliance retention requirements.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>4 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~15 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~6% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Archiving · Data Retention · Governance</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Why Archive and Purge?</h2>
+        <p>
+          A ServiceNow instance that never deletes old data will eventually slow down. Queries
+          scan millions of old resolved incidents. Lists take longer to load. Reports time out.
+          Storage costs increase. Archiving and purging are the tools to manage this growth.
+        </p>
+        <p>
+          The two processes serve different goals:
+        </p>
+        <ul>
+          <li><strong>Archiving</strong> — move old records from active tables to archive tables. The records still exist and can be searched, but they don't impact active list performance.</li>
+          <li><strong>Purging</strong> — permanently delete records. Used to enforce compliance retention limits (e.g., "GDPR requires deleting PII after 7 years") or to reclaim storage.</li>
+        </ul>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Archive Rules</h2>
+        <p>
+          An <span class="hl-teal">Archive Rule</span> (stored in <code>sys_archive</code>) specifies:
+        </p>
+        <ul>
+          <li><strong>Table</strong> — which table to archive from (e.g., <code>incident</code>)</li>
+          <li><strong>Condition</strong> — filter for records to archive (e.g., state=Closed AND closed_at older than 2 years)</li>
+          <li><strong>Archive table</strong> — where records move (automatically named <code>ar_archive_incident</code> or similar)</li>
+          <li><strong>Schedule</strong> — when the archive job runs</li>
+        </ul>
+
+        <h3>How Archived Records Work</h3>
+        <p>
+          After archiving, the record no longer appears in standard list views of the source table.
+          To find archived records:
+        </p>
+        <ul>
+          <li>Navigate to the source table list view → click the <strong>Archive</strong> toggle in the column header (or use the "Show Archived" button)</li>
+          <li>Search the archive table directly: <code>ar_archive_incident</code></li>
+          <li>Archived records are read-only — you cannot reopen an archived incident</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Archived Records Are Still in the Database</strong>
+            Archiving does NOT delete records. They move to an archive table and are still accessible
+            (with the right permissions). Archiving improves performance by removing old records from
+            active tables, but does not fulfill deletion/purging requirements. For actual deletion,
+            you must configure a separate Purge Rule.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Purge Rules</h2>
+        <p>
+          A <span class="hl-teal">Purge Rule</span> permanently deletes records. It can target:
+        </p>
+        <ul>
+          <li>Records in the active table directly (dangerous — records are deleted without archiving first)</li>
+          <li>Records in archive tables (safer — archive first, then purge after a longer retention period)</li>
+        </ul>
+        <p>
+          The recommended pattern is: <strong>Archive → Purge from archive after retention period</strong>.
+          This gives a recovery window between the two operations.
+        </p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Record Meets Archive Condition</div>
+              <div class="flow-step-desc">Archive Rule triggers — record moves from incident to ar_archive_incident. No longer in active list views.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Retention Period in Archive</div>
+              <div class="flow-step-desc">Record sits in archive table for configured retention period (e.g., 5 years for compliance). Can be retrieved if needed.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Purge Rule Triggers</div>
+              <div class="flow-step-desc">After retention period expires, Purge Rule permanently deletes the record from the archive table. This action is irreversible.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-body">
+            <strong>Warning — Purge Is Permanent and Irreversible</strong>
+            Once purged, a record cannot be recovered from the database. Before configuring purge rules,
+            ensure the retention period aligns with legal, compliance, and audit requirements for your
+            organization. GDPR, HIPAA, SOX, and other frameworks have specific minimum and maximum
+            retention requirements.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Archive vs. CMDB Data Manager</h2>
+        <p>
+          There are two separate mechanisms for lifecycle management in ServiceNow, and the exam
+          tests knowing which one to use:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Feature</th><th>Archive/Purge Rules</th><th>CMDB Data Manager</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Target</td><td>Any ServiceNow table (incidents, changes, etc.)</td><td>CMDB CI tables only</td></tr>
+            <tr><td>Actions</td><td>Archive (move) or Purge (delete)</td><td>Retire, Archive, or Delete CIs</td></tr>
+            <tr><td>CI-specific logic?</td><td>No — generic record management</td><td>Yes — understands CI relationships and lifecycle stages</td></tr>
+            <tr><td>Use when</td><td>Managing ITSM records (incidents, changes) lifecycle</td><td>Managing CI record lifecycle in the CMDB</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Use CMDB Data Manager for CI Lifecycle, Archive Rules for ITSM Records</strong>
+            If the scenario involves retiring or archiving Configuration Items, CMDB Data Manager
+            is the correct tool — it understands CI-specific concepts like operational_status and
+            lifecycle_stage. For archiving old incidents, change records, or tasks, use Archive Rules.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Archiving, Purging &amp; Retention</h2>
+        <ul>
+          <li>Archiving = move records to archive table (still accessible); NOT deletion</li>
+          <li>Purging = permanent deletion; irreversible</li>
+          <li>Recommended pattern: Archive first → Purge from archive after retention period</li>
+          <li>Archived records are read-only; find them via archive table or "Show Archived" toggle</li>
+          <li>Archive Rules = any table; CMDB Data Manager = CI tables only</li>
+          <li>Purging from active table skips the archive safety window — avoid unless intentional</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="04-instance-data-health.html" class="btn btn-secondary">Instance &amp; Data Health →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p6_t3_03';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

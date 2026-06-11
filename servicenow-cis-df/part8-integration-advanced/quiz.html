@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 8 – Integration Quiz · CIS-DF</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #22d3ee; color: #67e8f9; background: rgba(8,145,178,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .q-dot.answered { border-color: var(--slate-500); color: var(--text-muted); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 8</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 8 · All 4 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 8 Full Quiz — Integration &amp; Advanced</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions on Table API, IntegrationHub, archiving vs purging, and instance data health. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 15</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0891b2"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 8 — Integration &amp; Advanced</span>
+          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#0891b2;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🌐 Topic 1 — REST API &amp; Table API</div>
+              <div class="quiz-scenario">Scenario: A developer calls the ServiceNow Table API to retrieve all open Incident records.</div>
+              <p class="quiz-question">Which HTTP method is used to READ records via the Table API?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">POST — create/send data</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">PUT — replace an existing record</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">GET — retrieve records without modifying data</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">PATCH — partially update a record</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> RESTful HTTP methods in Table API: <strong>GET</strong> = read/retrieve records (single or list); <strong>POST</strong> = create a new record; <strong>PUT</strong> = update/replace an entire record; <strong>PATCH</strong> = partial update (update specific fields only); <strong>DELETE</strong> = delete a record. For retrieving Incident records, GET is always used. These map directly to CRUD: Create=POST, Read=GET, Update=PUT/PATCH, Delete=DELETE.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🌐 Topic 1 — REST API &amp; Table API</div>
+              <div class="quiz-scenario">Scenario: A Table API GET request is made with the parameter <code>sysparm_display_value=all</code>.</div>
+              <p class="quiz-question">What does <code>sysparm_display_value=all</code> return in the API response?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Only the display value (human-readable label) for reference fields — e.g., "John Smith" instead of sys_id</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Both the raw value (sys_id) AND the display value for each field, as a JSON object with "value" and "display_value" keys</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">All records in the table regardless of filter conditions</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">All field values regardless of field-level ACL restrictions</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The <code>sysparm_display_value</code> parameter has three options: <code>false</code> (default) = raw values only (sys_ids, internal codes); <code>true</code> = display values only (human-readable labels); <code>all</code> = BOTH raw value and display value for each field as a JSON object: <code>{"value": "a1b2c3...", "display_value": "John Smith"}</code>. Use <code>all</code> when your integration needs both the sys_id (for programmatic use) and the label (for display). ACLs (D) are still enforced regardless of this parameter.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🌐 Topic 1 — REST API &amp; Table API</div>
+              <div class="quiz-scenario">Scenario: A developer uses Table API to create a new Incident record. The API returns HTTP status code 201.</div>
+              <p class="quiz-question">[TRAP] What does HTTP 201 mean in this context?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Request succeeded but no record was created (201 = Partial Success)</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The record was successfully CREATED (201 = Created)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The request was accepted but processing is still pending</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A validation error occurred and the record was not saved</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Standard HTTP status codes for REST APIs: <strong>200 OK</strong> = successful GET/PUT/PATCH; <strong>201 Created</strong> = successful POST (record created); <strong>204 No Content</strong> = successful DELETE; <strong>400 Bad Request</strong> = client error (bad params); <strong>401 Unauthorized</strong> = auth failed; <strong>403 Forbidden</strong> = ACL blocked; <strong>404 Not Found</strong> = record doesn't exist; <strong>500 Internal Server Error</strong> = server-side error. 201 specifically confirms the new record was created successfully.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🌐 Topic 1 — REST API &amp; Table API</div>
+              <div class="quiz-scenario">Scenario: A developer wants a Table API GET response to include only the "number", "short_description", and "state" fields — not all fields.</div>
+              <p class="quiz-question">Which Table API parameter limits which fields are returned?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text"><code>sysparm_query</code> — filters records by condition</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text"><code>sysparm_fields</code> — comma-separated list of fields to include in the response</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text"><code>sysparm_limit</code> — limits the number of records returned</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text"><code>sysparm_view</code> — returns fields based on a named form view</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Key Table API sysparm parameters: <strong>sysparm_fields</strong> = comma-separated field names to include (e.g., <code>number,short_description,state</code>); <strong>sysparm_query</strong> = GlideRecord-style filter (e.g., <code>state=1^priority=1</code>); <strong>sysparm_limit</strong> = max records to return (pagination); <strong>sysparm_offset</strong> = pagination offset; <strong>sysparm_display_value</strong> = raw vs display values; <strong>sysparm_view</strong> = use a named view's field set. Specifying sysparm_fields reduces payload size and improves performance.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔌 Topic 2 — IntegrationHub</div>
+              <div class="quiz-scenario">Scenario: A team wants to use IntegrationHub to connect ServiceNow with Jira, using pre-built actions for creating and updating Jira issues.</div>
+              <p class="quiz-question">What is an IntegrationHub "Spoke"?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A scheduled integration that polls an external system for changes</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A pre-built, platform-specific set of reusable Actions for integrating with a specific third-party platform (e.g., Jira Spoke, Slack Spoke)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The central IntegrationHub REST Message template</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A Mid Server proxy connection to an on-premise system</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> An IntegrationHub <strong>Spoke</strong> is a packaged set of pre-built <strong>Actions</strong> for a specific third-party platform. The Jira Spoke includes actions like "Create Issue," "Update Issue," "Add Comment." Each Spoke requires a separate license (except core HTTP). Spokes abstract away the raw API details — you use high-level actions instead of building raw REST calls. A Mid Server (D) handles on-premise network connectivity but is not a Spoke. A Spoke is a higher-level abstraction built on top of network connectivity.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔌 Topic 2 — IntegrationHub</div>
+              <div class="quiz-scenario">Scenario: A developer wants to use IntegrationHub to make a simple HTTP call to a custom REST API that has no dedicated Spoke.</div>
+              <p class="quiz-question">[TRAP] Does using the core HTTP step in IntegrationHub require a licensed Spoke?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — all IntegrationHub features require a Spoke license</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — the core HTTP step (generic REST call) is available as part of the base IntegrationHub license without a specific Spoke</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only if making more than 100 API calls per day</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Yes — at minimum the IntegrationHub Standard Spoke pack is required</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The IntegrationHub <strong>core HTTP step</strong> (generic outbound REST call) is included with the base IntegrationHub entitlement — no specific Spoke license is needed for it. Spoke licenses (Jira, Slack, ServiceNow-to-ServiceNow, etc.) are required to use those specific pre-built platform Spokes. If you need to call a custom REST API, use the core HTTP step — it's available without additional cost. This distinction is commonly tested to check if candidates understand the IHub licensing model.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔌 Topic 2 — IntegrationHub</div>
+              <div class="quiz-scenario">Scenario: A Flow Designer action needs to pull 50,000 employee records from an external API that paginates results in pages of 500 records.</div>
+              <p class="quiz-question">Which IntegrationHub element is designed for paginated bulk data retrieval from external APIs?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Outbound REST Message — sends all data in a single request</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Data Stream Action — pulls paginated data from external APIs iteratively</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Scripted REST API — receives paginated data from external systems</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Data Source with Import Set — handles bulk JDBC imports</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>Data Stream Action</strong> in IntegrationHub is specifically designed to handle paginated bulk data from external REST APIs — it iterates through pages automatically, handling pagination tokens or page offsets, until all data is retrieved. Regular Actions execute once per invocation (A would only get the first page). Scripted REST API (C) handles INBOUND calls to ServiceNow. Import Sets with JDBC (D) work for database-to-database pulls, not REST API pagination. Data Stream Actions bridge the gap between REST APIs and bulk data needs.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔌 Topic 2 — IntegrationHub</div>
+              <div class="quiz-scenario">Scenario: A developer needs to call an external REST API from ServiceNow repeatedly with different parameters. They want to store the base URL, headers, and authentication in a reusable record.</div>
+              <p class="quiz-question">What ServiceNow record type stores reusable outbound REST call configuration?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">sys_import_set — Import Set data source</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Outbound REST Message (sys_rest_message) — defines endpoint URL, headers, auth, and HTTP methods for calling an external service</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Scripted REST API — defines an inbound REST endpoint for external callers</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">sys_rest_message is an audit log of all REST calls</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> An <strong>Outbound REST Message</strong> (sys_rest_message) is the template for calling external REST APIs FROM ServiceNow. It stores the base URL, authentication method (Basic, OAuth, API Key), HTTP methods (GET/POST/etc.), and headers. Individual HTTP Methods within the REST Message define specific endpoints and request bodies. This is then called from scripts or workflows. A <strong>Scripted REST API</strong> (C) is the INBOUND counterpart — it defines REST endpoints that external systems call on ServiceNow. D is completely incorrect.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(239,68,68,0.15);color:#fca5a5">🗑️ Topic 3 — Archiving, Purging &amp; Retention</div>
+              <div class="quiz-scenario">Scenario: A compliance team asks about the difference between Archive and Purge operations in ServiceNow for old Incident records.</div>
+              <p class="quiz-question">What is the core difference between Archiving and Purging records?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Archive = soft delete (marks the record hidden but leaves it in the same table); Purge = hard delete from the table</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Archive = moves records OUT of the active table into an _archive table (data preserved, just moved); Purge = PERMANENTLY deletes records from the database</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Archive = copies records to another instance; Purge = removes them from the original instance</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">They are identical — both permanently remove records from active tables</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is one of the most important and tested distinctions in Part 6: <strong>Archive</strong> — moves records from the active table (e.g., incident) to the archive table (e.g., incident_archive). Data is <em>preserved</em> but no longer in the active table, so standard queries won't find it. <strong>Purge</strong> — <em>permanently destroys</em> the records from the database. This is irreversible. Archive preserves data for compliance/audit; purge is for permanent disposal. A (soft delete/flag) is NOT how ServiceNow archive works — records are physically moved.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(239,68,68,0.15);color:#fca5a5">🗑️ Topic 3 — Archiving, Purging &amp; Retention</div>
+              <div class="quiz-scenario">Scenario: An Incident was created 3 years ago and has been archived. A user queries the Incident table (incident) for this record.</div>
+              <p class="quiz-question">[TRAP] What does the user see when querying the active Incident table for an archived record?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The record appears normally — archived records stay in the active incident table</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No results — the archived record is in the incident_archive table and is NOT found by default queries on the active incident table</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The record appears with a red "ARCHIVED" flag in the title</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The user is automatically redirected to the incident_archive table</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> After archiving, the record is <strong>physically moved</strong> to the incident_archive table. Queries against the active incident table will find <em>nothing</em> — the record is gone from that table. To find archived records, you must explicitly query the <code>incident_archive</code> table. This is a common trap because users expect to still find records after "archiving" — but archiving in ServiceNow is a table move, not a status flag. There is no automatic redirect (D) or visual flag in the active table (C).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(239,68,68,0.15);color:#fca5a5">🗑️ Topic 3 — Archiving, Purging &amp; Retention</div>
+              <div class="quiz-scenario">Scenario: Archived Incident records need to be queried for a compliance audit. The admin knows they are no longer in the active incident table.</div>
+              <p class="quiz-question">Which table stores archived Incident records?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">incident_deleted</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">incident_archive</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">sys_archive_incident</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">archive_incident</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> ServiceNow follows a consistent naming convention for archive tables: the original table name followed by <strong>_archive</strong>. So <code>incident</code> → <code>incident_archive</code>, <code>sc_request</code> → <code>sc_request_archive</code>, etc. The archive table has the same column structure as the original (it is created automatically when archiving is first configured). Querying <code>incident_archive</code> directly via GlideRecord or via the list view allows compliance audits of archived data.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(239,68,68,0.15);color:#fca5a5">🗑️ Topic 3 — Archiving, Purging &amp; Retention</div>
+              <div class="quiz-scenario">Scenario: An admin needs to configure a rule that archives all Incidents older than 2 years with a "Closed" state.</div>
+              <p class="quiz-question">Where is an Archive Rule defined in ServiceNow?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">In a Business Rule on the Incident table with when = "after delete"</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">In a record in the sys_archive table (Archive Rule), defining the target table, conditions, and archive criteria</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">In a Scheduled Job that calls GlideRecord delete</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">In the Data Retention Policy (sys_data_policy)</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> <strong>Archive Rules</strong> are stored in the <code>sys_archive</code> table (accessible via System Archiving → Archive Rules). Each rule defines: which table to archive, the filter conditions (State = Closed AND Closed more than 2 years ago), the archive table to move records to, and optional fields to exclude from archiving. A scheduler runs the archive rule periodically. This is distinct from Data Retention Policy (D), which is a newer feature for broader data lifecycle management, and from manual scripts (C) which are not the standard mechanism.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(234,179,8,0.15);color:#fde68a">🏥 Topic 4 — Instance Data Health</div>
+              <div class="quiz-scenario">Scenario: A Production instance is cloned to a Development instance. Post-clone, a scheduled job that sends weekly email notifications runs.</div>
+              <p class="quiz-question">[TRAP] What is the most critical risk of this situation?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The clone operation itself fails if scheduled jobs run during cloning</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Real production users receive emails from the Development instance — email data from Production is cloned and jobs fire against it</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The scheduled job corrupts Development data, making it unstable</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The clone automatically disables all scheduled jobs to prevent this</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is a critical post-clone risk. When Production is cloned, the Development instance contains real production user data — including actual email addresses. If a scheduled job that sends emails runs in Dev, it uses those real email addresses and sends emails to real users from the Dev instance. This is embarrassing, potentially a compliance issue, and confusing for recipients. <strong>After every clone, always review and disable scheduled jobs</strong> in the Development instance — especially any that communicate with external systems (email, SMS, webhooks). ServiceNow does NOT automatically disable jobs post-clone (D).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(234,179,8,0.15);color:#fde68a">🏥 Topic 4 — Instance Data Health</div>
+              <div class="quiz-scenario">Scenario: A developer wants to ensure that sensitive API credentials stored in System Properties are NOT overwritten when Production is cloned to Development.</div>
+              <p class="quiz-question">What ServiceNow feature preserves Development-specific data during a clone from Production?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Clone Excluders — specify tables or records to exclude from being overwritten during cloning</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Clone Profiles — define which instance is the source for cloning</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Clone Protectors — encrypt sensitive fields before cloning</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Post-Clone Scripts — restore values after the clone completes</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>A is correct.</strong> <strong>Clone Excluders</strong> let you specify tables, records, or fields that should NOT be overwritten when a clone runs. Sensitive API credentials, Dev-specific configuration, or integration URLs stored in System Properties can be protected this way. The clone proceeds but skips the excluded data, keeping Dev-specific values intact. <strong>Clone Profiles</strong> (B) define the clone source/target and settings — they control the clone configuration. <strong>Post-Clone Scripts</strong> (D) run after the clone to restore specific values — also useful, but Excluders prevent the overwrite in the first place.</p>
+              </div>
+              <p data-correct="A" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(234,179,8,0.15);color:#fde68a">🏥 Topic 4 — Instance Data Health</div>
+              <div class="quiz-scenario">Scenario: A ServiceNow instance has a system property <code>glide.max_query_result_limit</code> set to 10,000.</div>
+              <p class="quiz-question">What does this property control?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The maximum number of characters in a single query condition string</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The maximum number of records returned by any single database query — protects system performance from runaway queries</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The maximum number of concurrent database connections allowed</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The maximum size (in KB) of an imported data file</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> <code>glide.max_query_result_limit</code> is a system-wide safety cap on query result sizes. If a GlideRecord query or Report would return more than 10,000 records, ServiceNow limits the result set to this maximum — preventing uncontrolled full-table scans from degrading instance performance. This is a database performance protection property. When reports or queries "stop at exactly 10,000 records," this property is usually why. Admins should be aware of this limit when designing reports and integrations that process large record sets.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 15;
+  const dots = document.getElementById('q-dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => { const state = window._quizState?.['main-quiz']; if (!state) return; state.current = i; QuizEngine._render('main-quiz'); updateDots(i, state); });
+    dots.appendChild(d);
+  }
+  function updateDots(current, state) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current','correct','incorrect','answered');
+      if (i === current) d.classList.add('current');
+      else if (state.answered[i] !== null) { const q = state.questions[i]; const correct = q.querySelector('[data-correct]')?.dataset.correct; d.classList.add(state.answered[i] === correct ? 'correct' : 'incorrect'); }
+    });
+    const answered = state.answered.filter(a => a !== null).length;
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = `${state.score} / ${TOTAL}`;
+    document.getElementById('qs-answered').textContent = answered;
+    document.getElementById('qs-prog').style.width = `${((current+1)/TOTAL)*100}%`;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    QuizEngine.init('main-quiz');
+    QuizEngine.wireOptions('main-quiz');
+    window._quizState = QuizEngine._state ?? {};
+    const quiz = document.getElementById('main-quiz');
+    const patch = () => setTimeout(() => { const s = QuizEngine._state?.['main-quiz']; if(s) updateDots(s.current, s); }, 50);
+    quiz.querySelectorAll('[data-option]').forEach(btn => btn.addEventListener('click', patch));
+    quiz.querySelector('[data-q-prev]')?.addEventListener('click', patch);
+    quiz.querySelector('[data-q-next]')?.addEventListener('click', patch);
+  });
+</script>
+</body>
+</html>

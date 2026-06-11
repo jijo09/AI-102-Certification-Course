@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report Types &amp; Report Builder | CIS-DF Part 7</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:var(--space-3);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.07);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card-name{font-size:0.82rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-1);font-family:var(--font-heading)}
+    .term-card-desc{font-size:0.82rem;color:var(--text-muted);line-height:1.5}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 7</a>
+        <span class="sep">›</span>
+        <span class="current">Report Types &amp; Report Builder</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 7 · Topic 1</div>
+        <h1 class="topic-title">Report Types &amp; Report Builder</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          ServiceNow's Report Builder lets you create visualizations directly from table data.
+          Knowing which report type to use for which scenario, and how grouping and aggregation work,
+          is consistently tested on the exam.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~18 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~7% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Reporting · Analytics</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Report Builder Overview</h2>
+        <p>
+          Every ServiceNow report is built in the <span class="hl-teal">Report Builder</span>
+          — a wizard-style interface where you choose a data source (table), apply filters, select
+          fields, choose a visualization type, and configure grouping/aggregation. Reports are stored
+          in the <span class="code-inline">sys_report</span> table.
+        </p>
+        <p>
+          Navigate to Report Builder: <strong>All → Reports → Create New</strong> (or from any list view:
+          the "Reports" icon). You can also create a report directly from a list by right-clicking
+          a column header and selecting "Show Visual Task Board."
+        </p>
+
+        <h3>Report Builder Sections</h3>
+        <ul>
+          <li><strong>Data</strong> — choose the table and apply a filter condition (encoded query). This is the report's scope.</li>
+          <li><strong>Type</strong> — select the visualization type (bar, pie, list, etc.)</li>
+          <li><strong>Configure</strong> — set grouping fields, aggregation function (COUNT, SUM, AVG), and axis labels</li>
+          <li><strong>Style</strong> — colors, legend position, chart title</li>
+          <li><strong>Sharing</strong> — who can view the report; add to dashboards</li>
+        </ul>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Report Types</h2>
+        <p>
+          Choosing the right report type for the data you're presenting is a tested skill.
+          Each type is optimized for different data shapes and audience needs.
+        </p>
+
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-card-name">List</div>
+            <div class="term-card-desc">Tabular display of records. Best when you need to show individual records with multiple field columns. Supports sorting and grouping.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Bar / Horizontal Bar</div>
+            <div class="term-card-desc">Count or sum of records by category. Best for comparing quantities across discrete categories (e.g., open incidents by team).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Pie / Donut</div>
+            <div class="term-card-desc">Part-to-whole relationship. Best when showing the proportion each category contributes to a total (e.g., incident priority breakdown).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Line</div>
+            <div class="term-card-desc">Trends over time. Best for showing how a metric changes across a date range. Requires a date/time field on the X axis.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Trend</div>
+            <div class="term-card-desc">Similar to Line but designed for Performance Analytics data. Shows metric values tracked over time with context bands.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Pivot Table</div>
+            <div class="term-card-desc">Cross-tabulation of two grouping dimensions. Best for comparing two categorical variables simultaneously (e.g., incidents by priority AND by team).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Heatmap</div>
+            <div class="term-card-desc">Grid with color intensity representing value. Best for showing density or patterns across two categorical axes.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-card-name">Scorecard</div>
+            <div class="term-card-desc">Single KPI metric with target comparison. Best for executive dashboards where one number tells the story.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Line Chart Requires a Date Field</strong>
+            Line charts show trends over time, so the X axis must be a Date or DateTime field.
+            If you group by a non-date field (like category), ServiceNow will suggest a Bar chart instead.
+            Similarly, Trend reports require Performance Analytics data (scorecard indicators) —
+            you can't use a standard Trend report on ad-hoc table data.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Grouping and Aggregation</h2>
+        <p>
+          Most report types aggregate data by grouping records and counting or summing them.
+          Understanding how grouping works prevents common mistakes:
+        </p>
+        <ul>
+          <li><strong>Group by</strong> — the field whose distinct values become categories (X axis or pie slices). Each unique value in this field gets its own bar/slice.</li>
+          <li><strong>Aggregation</strong> — what to calculate for each group: COUNT (number of records), SUM (total of a numeric field), AVG (average of a numeric field), MIN, MAX.</li>
+          <li><strong>Stack by</strong> — in bar charts, adds a secondary grouping field that splits each bar into colored segments.</li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Group By Reference Fields</strong>
+            When you group by a Reference field (like "Assignment Group"), the report uses
+            the <em>display value</em> of the reference (the group name), not the sys_id.
+            This means the report shows human-readable category names automatically.
+            However, if a referenced record is deleted, the group still appears with a blank
+            or "[unknown]" label until the report data is refreshed.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Report Visibility and Sharing</h2>
+        <p>
+          Reports have a visibility setting that controls who can see them:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Visibility</th><th>Who Can See</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Me</td><td>Only the report creator</td></tr>
+            <tr><td>Group</td><td>Specific user groups selected by the creator</td></tr>
+            <tr><td>Global</td><td>All users with access to the Reports module</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          Additionally, reports can be added to <strong>Dashboards</strong> as widgets.
+          A report must be set to at least "Group" or "Global" visibility to be added to
+          a shared dashboard — a report visible only to "Me" can't be shared on a group dashboard.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Report Visibility vs. ACL</strong>
+            Report visibility controls whether users can <em>find and view the report definition</em>.
+            But when a user runs a report, the underlying data is still filtered by that user's ACLs.
+            A user without access to certain CI records won't see those records in the report results,
+            even if the report itself is "Global" visibility. Report visibility ≠ data access.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Reports on CMDB Data</h2>
+        <p>
+          Reports are a primary tool for monitoring CMDB data quality and CI inventory. Common
+          CMDB reporting scenarios:
+        </p>
+        <ul>
+          <li><strong>CI inventory by class</strong> — List or Bar chart on <code>cmdb_ci</code> grouped by <code>sys_class_name</code></li>
+          <li><strong>Stale CI detection</strong> — List of CIs where <code>last_discovered</code> is older than 90 days</li>
+          <li><strong>CI ownership gaps</strong> — List of CIs where <code>managed_by</code> is empty</li>
+          <li><strong>Operational status distribution</strong> — Pie chart on <code>cmdb_ci</code> grouped by <code>operational_status</code></li>
+        </ul>
+        <p>
+          When reporting on CMDB data, be aware that querying <code>cmdb_ci</code> without a
+          class filter returns all CI types from all child tables. This can produce very large result
+          sets. Always add a <code>sys_class_name</code> filter or use a specific child table as the
+          report's data source.
+        </p>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Report Types &amp; Builder</h2>
+        <ul>
+          <li>Report Builder wizard sections: Data → Type → Configure → Style → Sharing</li>
+          <li>Line chart requires a Date/DateTime field on X axis</li>
+          <li>Trend report requires Performance Analytics indicator data (not ad-hoc table data)</li>
+          <li>Pivot Table = two grouping dimensions in a cross-tab grid</li>
+          <li>Report visibility (Me/Group/Global) controls who sees the report — not the data within it</li>
+          <li>Report data is still filtered by the viewing user's ACLs regardless of report visibility</li>
+          <li>Group by Reference field uses the display value (name), not the sys_id</li>
+          <li>Query <code>cmdb_ci</code> without class filter returns ALL CI types — always add class filter</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="02-database-views-reporting.html" class="btn btn-secondary">Database Views in Reporting →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p5_t1_01';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

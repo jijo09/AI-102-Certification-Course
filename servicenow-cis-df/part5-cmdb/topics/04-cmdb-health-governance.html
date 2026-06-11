@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMDB Health, Governance &amp; Lifecycle States | CIS-DF Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .flow-steps{display:flex;flex-direction:column;gap:var(--space-2);margin:var(--space-5) 0}
+    .flow-step{display:flex;gap:var(--space-4);align-items:flex-start;padding:var(--space-4) var(--space-5);background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.14);border-radius:var(--radius-lg)}
+    .flow-step-num{width:28px;height:28px;border-radius:50%;background:rgba(8,145,178,0.2);border:1px solid rgba(8,145,178,0.35);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;color:#22d3ee;flex-shrink:0}
+    .flow-step-body{flex:1}
+    .flow-step-title{font-size:0.88rem;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+    .flow-step-desc{font-size:0.82rem;color:var(--text-muted);line-height:1.5}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .workspace-nav{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-3);margin:var(--space-5) 0}
+    .workspace-tab{background:rgba(8,145,178,0.07);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .workspace-tab-name{font-size:0.88rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2);font-family:var(--font-heading)}
+    .workspace-tab-desc{font-size:0.82rem;color:var(--text-muted);line-height:1.5}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5</a>
+        <span class="sep">›</span>
+        <span class="current">CMDB Health, Governance &amp; Lifecycle States</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 5 · Topic 4</div>
+        <h1 class="topic-title">CMDB Health, Governance &amp; Lifecycle States</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          CMDB Health scoring measures CI data quality. CMDB Workspace is the central monitoring hub.
+          CMDB Data Manager automates lifecycle transitions (archive, retire, delete).
+          Lifecycle states track where a CI is in its operational life — all critical exam topics.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>6 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~28 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~14% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>CMDB Health · Governance · Lifecycle</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>CMDB Health Scoring</h2>
+        <p>
+          <span class="hl-teal">CMDB Health</span> is ServiceNow's built-in system for measuring
+          the quality of CI data. It calculates a health score for each CI based on configured rules,
+          then aggregates scores across CI classes and the entire CMDB to give administrators a
+          data quality dashboard.
+        </p>
+        <p>
+          Think of CMDB Health like a blood test — it doesn't tell you every detail about a patient,
+          but key metrics (completeness, correctness, compliance) tell you if something is wrong
+          and where to focus remediation effort.
+        </p>
+
+        <h3>Three Health Score Dimensions</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Dimension</th><th>What It Measures</th><th>Example Failure</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Completeness</td>
+              <td>Are required/important fields populated? Are mandatory relationships present?</td>
+              <td>A server CI has no "managed_by" value — completeness score drops</td>
+            </tr>
+            <tr>
+              <td>Correctness</td>
+              <td>Are field values valid according to configured rules? Do related CIs exist?</td>
+              <td>A CI has a "supported_by" group that doesn't exist in the system — correctness fails</td>
+            </tr>
+            <tr>
+              <td>Compliance</td>
+              <td>Does the CI meet governance rules? Is it certified? Is it in an expected state for its class?</td>
+              <td>A server CI has never been certified by its owner — compliance score is 0</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Health Score Calculation</h3>
+        <p>
+          For each CI class, an administrator configures <strong>Health Rules</strong> that specify:
+        </p>
+        <ul>
+          <li><strong>Inclusion filter</strong> — which CIs of this class are included in health scoring (e.g., only Active servers). CIs not matching the filter are excluded from the score calculation entirely.</li>
+          <li><strong>Field rules</strong> — for each important field, what weight does it carry in the score? Is it required, recommended, or optional?</li>
+          <li><strong>Relationship rules</strong> — does this CI class need to have at least one relationship of a certain type?</li>
+        </ul>
+        <p>
+          The final health score for a CI is a weighted average of how many rules it passes.
+          A CI with all required fields populated and all relationships present will score 100.
+          Missing a high-weight required field may drop the score below 50.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Inclusion Rules Determine Who Is Scored</strong>
+            CIs not matching the inclusion filter are <em>not scored</em> — they don't appear as
+            0% or failures. They simply aren't counted. This is intentional: you don't want
+            "On Order" servers dragging down the health score when they haven't been deployed yet.
+            Only CIs that should have complete data are included in the health calculation.
+          </div>
+        </div>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Completeness vs. Correctness Failures</strong>
+            <strong>Completeness failures</strong>: a field is empty or a relationship is missing.
+            Fix by populating the missing data.
+            <strong>Correctness failures</strong>: a field has a value but that value is wrong
+            (e.g., references a nonexistent group, or a date field is in the past by more than
+            expected). Fix by correcting the value or fixing the referenced record.
+            The CMDB Health dashboard shows these separately so you know whether you have a
+            "data gaps" problem or a "bad data" problem.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>CMDB Workspace Navigation</h2>
+        <p>
+          The <span class="hl-teal">CMDB Workspace</span> is the centralized dashboard for
+          monitoring CMDB health, exploring CI data, running queries, and viewing insights.
+          Navigate to it via: <strong>All → CMDB → CMDB Workspace</strong>
+          (or the CMDB Workspace application shortcut).
+        </p>
+
+        <div class="workspace-nav">
+          <div class="workspace-tab">
+            <div class="workspace-tab-name">🏠 Home Tab</div>
+            <div class="workspace-tab-desc">Overview dashboard. Shows overall CMDB health score, recent health trends, top CI classes by population, and quick access to recent activities. Starting point for any CMDB review.</div>
+          </div>
+          <div class="workspace-tab">
+            <div class="workspace-tab-name">❤ Health Tab</div>
+            <div class="workspace-tab-desc">Drill into health scores by CI class. Select a class to see completeness / correctness / compliance scores, which rules are failing, and which individual CIs are bringing the score down.</div>
+          </div>
+          <div class="workspace-tab">
+            <div class="workspace-tab-name">💡 Insights Tab</div>
+            <div class="workspace-tab-desc">AI-driven observations about the CMDB. Highlights anomalies, stale CIs, duplicate candidates, and data drift. Recommends remediation actions based on patterns in CI data.</div>
+          </div>
+          <div class="workspace-tab">
+            <div class="workspace-tab-name">🔍 Queries Tab</div>
+            <div class="workspace-tab-desc">Run and save CMDB queries. Find CIs matching specific criteria, export results, and save queries as named views for reuse. The primary ad-hoc CI lookup tool in Workspace.</div>
+          </div>
+        </div>
+
+        <p>
+          Within the Health tab, the click path to investigate a specific failure is:
+          <strong>Health Tab → Select CI Class → View Failing Rules → Click a Rule → See failing CIs → Open CI</strong>.
+          This path lets you go from "servers have 65% health" all the way to the specific server
+          records that are missing the "managed_by" field.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Workspace vs. CMDB Module</strong>
+            CMDB Workspace is a separate application/UI from the CMDB module in the navigation menu.
+            The CMDB module (Applications → CMDB) gives you table access to CI lists, relationships,
+            and configuration. CMDB Workspace is the analytics/health monitoring interface.
+            Exam questions that mention "monitoring CMDB data quality" mean CMDB Workspace, not the CMDB module.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Lifecycle vs. Operational State</h2>
+        <p>
+          This is one of the most-confused topic areas on the exam. ServiceNow CIs have
+          <em>three related but distinct</em> state fields:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Field</th><th>Technical Name</th><th>What It Tracks</th><th>Who Updates It</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Lifecycle Stage</td>
+              <td>lifecycle_stage</td>
+              <td>The broad phase of the CI's life (Design, Build, Test, Deploy, Operate, Retire)</td>
+              <td>Automated (CMDB Data Manager, Change workflows) or manual</td>
+            </tr>
+            <tr>
+              <td>Lifecycle Stage Status</td>
+              <td>lifecycle_stage_status</td>
+              <td>Where within the current stage the CI is (e.g., within "Operate" stage: Commissioned, Active, Maintenance)</td>
+              <td>Automated or manual, more granular than stage</td>
+            </tr>
+            <tr>
+              <td>Operational Status</td>
+              <td>operational_status</td>
+              <td>Current operational health: Operational, Non-Operational, Repair in Progress, DR Standby</td>
+              <td>Updated by incidents, changes, or Discovery</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Real-World Example</h3>
+        <p>
+          A server being onboarded might have:
+        </p>
+        <ul>
+          <li><strong>lifecycle_stage</strong> = "Build" (it's being set up)</li>
+          <li><strong>lifecycle_stage_status</strong> = "In Testing" (within Build stage)</li>
+          <li><strong>operational_status</strong> = "Non-Operational" (not yet in production)</li>
+        </ul>
+        <p>After deployment and going live:</p>
+        <ul>
+          <li><strong>lifecycle_stage</strong> = "Operate"</li>
+          <li><strong>lifecycle_stage_status</strong> = "Commissioned"</li>
+          <li><strong>operational_status</strong> = "Operational"</li>
+        </ul>
+        <p>During a major incident:</p>
+        <ul>
+          <li><strong>lifecycle_stage</strong> stays "Operate" (still in operation phase)</li>
+          <li><strong>lifecycle_stage_status</strong> might change to "Maintenance"</li>
+          <li><strong>operational_status</strong> = "Repair in Progress"</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Operational State ≠ Lifecycle Stage</strong>
+            A CI can be Operationally "Non-Operational" (down for maintenance) while still
+            being in the "Operate" Lifecycle Stage (it hasn't been retired or decommissioned —
+            it's just temporarily unavailable). These fields are <em>independent</em>. The exam
+            frequently tests scenarios where you must identify the correct field to update.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>CMDB Data Manager</h2>
+        <p>
+          <span class="hl-teal">CMDB Data Manager</span> is an automated governance tool that
+          applies lifecycle management policies to CI records at scale. Rather than manually
+          decommissioning thousands of old servers, CMDB Data Manager runs scheduled jobs that
+          evaluate policy conditions and take configured actions.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🧩</span>
+          <div class="callout-body">
+            <strong>Analogy — Estate Lawyer</strong>
+            CMDB Data Manager is like an automated estate lawyer. You define the rules in advance:
+            "If a CI has been in Retired state for more than 90 days, archive it. If archived for
+            365 days, delete it." The lawyer (Data Manager) checks these conditions on a schedule
+            and executes the transitions without human intervention, unless exceptions require review.
+          </div>
+        </div>
+
+        <h3>Three Policy Actions</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Action</th><th>What It Does</th><th>CI Is Still Accessible?</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Retire</td>
+              <td>Changes CI operational_status to "Retired" / lifecycle_stage to "Retire". The record remains fully visible and queryable in the CMDB.</td>
+              <td>Yes — full access</td>
+            </tr>
+            <tr>
+              <td>Archive</td>
+              <td>Moves the CI to a separate archive table (<code>cmdb_ci_archive</code> or similar). The CI is removed from default list views but can still be found via archive searches.</td>
+              <td>Limited — requires explicit archive search</td>
+            </tr>
+            <tr>
+              <td>Delete</td>
+              <td>Permanently removes the CI record and its relationships from the database. This action is irreversible.</td>
+              <td>No — permanently gone</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Policy Configuration</h3>
+        <p>
+          Each CMDB Data Manager policy specifies:
+        </p>
+        <ul>
+          <li><strong>Target CI class</strong> — which CI type the policy applies to</li>
+          <li><strong>Condition</strong> — filter that CIs must match for the policy to trigger (e.g., operational_status=Retired AND last_discovered older than 90 days)</li>
+          <li><strong>Action</strong> — Retire, Archive, or Delete</li>
+          <li><strong>Schedule</strong> — how often the policy evaluates (daily, weekly)</li>
+          <li><strong>Task creation</strong> — optionally create a task for human review before executing</li>
+        </ul>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Scheduled Run</div>
+              <div class="flow-step-desc">CMDB Data Manager policy runs on its configured schedule. Queries the target CI class with the specified filter condition.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Matching CIs Identified</div>
+              <div class="flow-step-desc">CIs matching the condition are collected into a candidate list. If review tasks are configured, tasks are created for each candidate.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Optional Human Review</div>
+              <div class="flow-step-desc">If configured, a reviewer confirms or rejects each candidate. Rejected candidates are excluded from the batch action.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Action Executed</div>
+              <div class="flow-step-desc">Retire, Archive, or Delete action is applied to confirmed candidates. Log entries record what was done and when.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">🚨</span>
+          <div class="callout-body">
+            <strong>Warning — Delete is Irreversible</strong>
+            CMDB Data Manager Delete policies permanently remove CI records. There is no
+            "trash" or "undo." Before creating a Delete policy, always configure a prior Archive
+            policy (archive first, then delete after a longer retention period). This gives a
+            recovery window if a CI is accidentally marked for deletion.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>CMDB Governance Best Practices</h2>
+        <p>
+          CMDB Governance refers to the policies, processes, and tools that ensure CI data remains
+          accurate, complete, and compliant over time. It's not just technical — it includes
+          organizational ownership and process discipline.
+        </p>
+
+        <h3>Key Governance Elements</h3>
+        <ul>
+          <li><strong>CI ownership</strong> — every CI should have a designated owner (managed_by group or owned_by person) responsible for its accuracy</li>
+          <li><strong>Data Certification</strong> — periodic human review of CI data by owners (covered in Part 3)</li>
+          <li><strong>CMDB Health rules</strong> — automated scoring to surface quality issues proactively</li>
+          <li><strong>Reconciliation Rules</strong> — define authoritative sources for each field to prevent data corruption</li>
+          <li><strong>Change Management integration</strong> — all changes to infrastructure should flow through Change Management and update CIs automatically</li>
+          <li><strong>CMDB Data Manager policies</strong> — automated lifecycle transitions to prevent stale data accumulation</li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Governance is Preventive, Not Reactive</strong>
+            Good CMDB governance prevents data quality problems from occurring rather than fixing
+            them after they accumulate. Reconciliation Rules prevent overwrites. Health scoring
+            surfaces issues early. Data Certification catches stale data. Data Manager prevents
+            zombie CIs. Each layer adds a quality control point.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6 -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Stale CI Detection</h2>
+        <p>
+          A <span class="hl-teal">stale CI</span> is a CI record that hasn't been updated or
+          discovered in an unexpectedly long time. If a server CI hasn't been seen by Discovery in
+          60+ days, it may have been decommissioned without the CMDB being updated.
+        </p>
+        <p>
+          ServiceNow tracks the <span class="code-inline">last_discovered</span> field (updated
+          each time Discovery finds the CI) and the <span class="code-inline">sys_updated_on</span>
+          field (updated on any modification). CMDB Health rules and CMDB Data Manager policies
+          can use these fields as staleness indicators.
+        </p>
+        <ul>
+          <li>A common health rule: flag any server CI with <code>last_discovered</code> older than 90 days</li>
+          <li>A common Data Manager policy: retire any CI flagged as stale for 30+ days</li>
+          <li>CMDB Workspace Insights tab surfaces stale CI candidates automatically</li>
+        </ul>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — CMDB Health, Governance &amp; Lifecycle</h2>
+        <ul>
+          <li>Health score = weighted average of rules passed (completeness + correctness + compliance)</li>
+          <li><strong>Inclusion filter</strong> = which CIs are scored; CIs outside filter are NOT counted (not 0%)</li>
+          <li>Completeness = empty fields; Correctness = values exist but are invalid</li>
+          <li>CMDB Workspace tabs: <strong>Home</strong> (overview), <strong>Health</strong> (drill into scores), <strong>Insights</strong> (AI observations), <strong>Queries</strong> (ad-hoc CI lookup)</li>
+          <li><strong>lifecycle_stage</strong> = broad phase (Design/Build/Test/Operate/Retire)</li>
+          <li><strong>lifecycle_stage_status</strong> = within-phase status (Commissioned/Maintenance/Decommissioned)</li>
+          <li><strong>operational_status</strong> = real-time health (Operational/Non-Operational/Repair in Progress)</li>
+          <li>A CI can be Non-Operational while still in Operate lifecycle stage</li>
+          <li>CMDB Data Manager: Retire (status change only) → Archive (removed from default views) → Delete (permanent)</li>
+          <li>Delete is irreversible — always archive before configuring a delete policy</li>
+          <li>Data Manager can require human review task before executing each action</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../part7-reporting-analytics/topics/01-report-types-builder.html" class="btn btn-secondary">Reports &amp; Dashboards →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p4_t4_04';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

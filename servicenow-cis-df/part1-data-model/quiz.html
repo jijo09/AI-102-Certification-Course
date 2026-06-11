@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 1 – Data Model Quiz · CIS-DF</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #22d3ee; color: #67e8f9; background: rgba(8,145,178,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .q-dot.answered { border-color: var(--slate-500); color: var(--text-muted); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 1 · All 4 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 1 Full Quiz — ServiceNow Data Model</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions on table hierarchy, field types, relationships, and schema design. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 15</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0891b2"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 1 — ServiceNow Data Model</span>
+          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#0891b2;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🗂️ Topic 1 — Table Types &amp; Hierarchy</div>
+              <div class="quiz-scenario">Scenario: A developer creates a new table that extends the Task [task] table. A record is created in this child table.</div>
+              <p class="quiz-question">Where is the data physically stored in ServiceNow's database?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Only in the child table — ServiceNow copies parent fields down during table creation</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Only in the task table — all records go to the root table</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Split across both — the child table stores fields unique to it; the task table stores inherited fields</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">In sys_db_object only — actual data is stored in metadata, not table rows</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> ServiceNow uses object-oriented inheritance. When a table extends another, data is physically split: fields inherited from the parent table are stored in the parent's database table, while fields added in the child table are stored in the child table. A JOIN is performed transparently when querying. <code>sys_db_object</code> (D) is the metadata catalog, not where records live.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🗂️ Topic 1 — Table Types &amp; Hierarchy</div>
+              <div class="quiz-scenario">Scenario: An admin is debugging a record lookup and needs to identify a record uniquely across all tables in the system.</div>
+              <p class="quiz-question">What is a sys_id in ServiceNow?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">An auto-incremented integer primary key unique within a single table</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A 32-character hexadecimal GUID that uniquely identifies every record globally across ALL tables</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A human-readable record number like INC0001234</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A combination of table name and record number</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Every ServiceNow record has a <code>sys_id</code> — a 32-character hex GUID that is globally unique across the entire instance, all tables included. It is how records are referenced by Reference fields, REST API calls, and imports. The human-readable number (C) is the <code>number</code> field (e.g., INC0001234), which is table-scoped and not globally unique.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🗂️ Topic 1 — Table Types &amp; Hierarchy</div>
+              <div class="quiz-scenario">Scenario: A company wants to add a "VIP Level" field that applies only to VIP incidents, not to regular incidents. A colleague suggests using a Dictionary Override.</div>
+              <p class="quiz-question">[TRAP] What is the correct approach?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Add "VIP Level" directly to the incident table for all incidents, then hide it with a UI Policy for non-VIP</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Create a VIP Incident table that extends incident and add the field to the child table only</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Use a Dictionary Override to add a new field to a subset of incident records</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Use a Data Policy to conditionally apply the field only when VIP flag = true</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The proper OO approach is to create a child table that extends incident — the "VIP Level" field exists only in that child. A Dictionary Override (C) changes attributes (mandatory, default, read-only) of an <em>existing</em> field on a child table; it cannot add entirely new fields. Adding the field to the base incident table (A) bloats the schema for all incidents. Data Policy (D) enforces values but cannot add fields.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(8,145,178,0.15);color:#67e8f9">🗂️ Topic 1 — Table Types &amp; Hierarchy</div>
+              <div class="quiz-scenario">Scenario: A developer needs to find all field definitions (column metadata) for the Incident table via a GlideRecord query.</div>
+              <p class="quiz-question">Which table stores all field/column metadata for ServiceNow tables?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">sys_db_object</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">sys_dictionary</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">sys_metadata</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">sys_table_schema</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> <code>sys_dictionary</code> is the central dictionary — it holds one row per field per table, storing field type, max length, mandatory flag, default value, etc. <code>sys_db_object</code> (A) is the table registry (one row per table, not per field). <code>sys_metadata</code> is the parent of all configuration records. <code>sys_table_schema</code> is not a standard ServiceNow table.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔤 Topic 2 — Field Types &amp; Dictionary</div>
+              <div class="quiz-scenario">Scenario: An admin needs a field on the Incident form that lets users select a single related User record from the sys_user table.</div>
+              <p class="quiz-question">Which field type is the correct choice?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">List Collector — for selecting multiple records</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Reference — stores the sys_id of a single related record from a specified table</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Document ID — stores any record reference regardless of table</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Choice — provides a dropdown of predefined values</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>Reference</strong> field stores the sys_id of exactly one record from a specified related table and renders a lookup field on the form. <strong>List Collector</strong> (A) is for multi-select references (glide_list). <strong>Document ID</strong> (C) is a special field that can reference any table (the table is stored separately in a "Table Name" field) — used for polymorphic references. <strong>Choice</strong> (D) uses a static dropdown list, not a table lookup.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔤 Topic 2 — Field Types &amp; Dictionary</div>
+              <div class="quiz-scenario">Scenario: A developer sets "Max Length = 100" on a String field in sys_dictionary.</div>
+              <p class="quiz-question">What does this setting control?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Limits the number of records returned when querying the table</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Controls the maximum number of characters that can be stored in that string field</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Limits how many choices can appear in a dependent choice list</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Sets the visual display width of the field on forms</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> <strong>Max Length</strong> on a string (or similar text) field in the dictionary controls the maximum number of characters that ServiceNow will store for that field. Values exceeding this limit are truncated or rejected. It is enforced at the database column level. It does not control display width (D), query limits (A), or choice counts (C).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔤 Topic 2 — Field Types &amp; Dictionary</div>
+              <div class="quiz-scenario">Scenario: The VIP Incident table (child of Incident) needs the "Priority" field to be mandatory only for VIP Incidents, while it remains optional on regular Incidents.</div>
+              <p class="quiz-question">[TRAP] What is the correct mechanism?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Set Priority = Mandatory in sys_dictionary on the base incident table</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Create a Dictionary Override on the VIP Incident child table, setting Mandatory = true for Priority only on that child</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Use a UI Policy with condition "table = vip_incident" to mark Priority mandatory</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Create a Data Policy with condition on the VIP flag field</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>Dictionary Override</strong> (sys_dictionary_override) lets you override specific field attributes (mandatory, default value, read-only, choices) for an inherited field on a specific child table — without touching the parent table definition. Setting mandatory on the parent (A) would force it everywhere. UI Policy (C) is client-side only; Data Policy (D) enforces on save but lacks field-level child specificity without conditions. Dictionary Override is the right tool for child-specific attribute changes.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(6,182,212,0.15);color:#22d3ee">🔤 Topic 2 — Field Types &amp; Dictionary</div>
+              <div class="quiz-scenario">Scenario: A field's "Mandatory" attribute is set in sys_dictionary. A developer asks whether this differs from marking a field mandatory via a UI Policy.</div>
+              <p class="quiz-question">What is the key enforcement difference?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Both enforce on client and server — they are equivalent</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Dictionary mandatory is server-side (enforced on save, including via API/imports); UI Policy mandatory is client-side only (form browser validation, can be bypassed by API)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">UI Policy mandatory is server-side; Dictionary mandatory is client-side</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Dictionary mandatory applies only to admin users; UI Policy applies to all users</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is a frequently tested distinction. <strong>Dictionary mandatory</strong> is enforced server-side on every save — form, API, import, whatever. <strong>UI Policy mandatory</strong> is enforced only in the browser form — it has no effect when records are created via REST API, Import Sets, or scripts. Always use Dictionary (or Data Policy) for requirements that must hold regardless of access method.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(20,184,166,0.15);color:#5eead4">🔗 Topic 3 — Relationships &amp; Database Views</div>
+              <div class="quiz-scenario">Scenario: A company needs a report combining Incident data with Task SLA data. Since they are in different tables, an admin creates a sys_db_view.</div>
+              <p class="quiz-question">What does a Database View (sys_db_view) support?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Creating and updating records across both joined tables simultaneously</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Running read-only cross-table reports that combine data from multiple tables without writing data</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Triggering Business Rules when a condition matches in either joined table</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Two-way synchronisation between tables whenever a record changes</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Database Views (sys_db_view) are <strong>read-only virtual joins</strong>. They exist solely to enable reporting across tables that are not in a direct parent-child relationship. You cannot write data through a view, create records, run Business Rules on the view, or synchronise data. They are purely a reporting construct — a named SQL-like JOIN definition.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(20,184,166,0.15);color:#5eead4">🔗 Topic 3 — Relationships &amp; Database Views</div>
+              <div class="quiz-scenario">Scenario: A Configuration Item (CI) needs to be associated with multiple support groups, and each support group may support multiple CIs.</div>
+              <p class="quiz-question">Which relationship type handles this correctly in ServiceNow?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">One-to-Many via a Reference field on CI</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Many-to-Many (M2M) via an intermediary relationship table</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Hierarchical via a parent_id field</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Table extension — CI extends Support Group</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> When both sides can have multiple associations (CI belongs to many groups; group supports many CIs), a <strong>Many-to-Many</strong> relationship is required. In ServiceNow, this is implemented via an intermediary "relationship table" with two Reference fields pointing to each side. A Reference field (A) only stores one value — that's one-to-many. Extension (D) means inheritance, not association. Parent_id (C) is a self-referential hierarchy within one table.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(20,184,166,0.15);color:#5eead4">🔗 Topic 3 — Relationships &amp; Database Views</div>
+              <div class="quiz-scenario">Scenario: A Database View joins Incident (primary table, Left) with Task SLA (secondary table, Left Outer Join). Some Incidents have no associated SLA records.</div>
+              <p class="quiz-question">[TRAP] What happens to Incidents with no matching SLA record in a report built on this view?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Those Incidents are excluded from the report entirely — only records with matches appear</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Those Incidents appear in the report; SLA-specific fields show empty/null values for those rows</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The query fails because the join cannot be completed</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Those Incidents appear but show "NO SLA" as placeholder text</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>Left Outer Join</strong> includes ALL rows from the primary (left) table, regardless of whether a matching row exists in the secondary table. When there is no match, the secondary table's fields are null/empty in the result. If it were an <strong>Inner Join</strong>, then only records with matches in both tables would appear (answer A would apply). This join-type distinction is frequently tested in CIS-DF.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(34,197,94,0.15);color:#86efac">🏛️ Topic 4 — Schema Design Patterns</div>
+              <div class="quiz-scenario">Scenario: A company wants to store custom employee data alongside existing HR records. They want to avoid modifying out-of-box tables but still keep data in the same inheritance hierarchy.</div>
+              <p class="quiz-question">What is the recommended approach?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Modify sys_user directly — it is the standard HR table and is meant to be customised</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Create an extension table that extends the HR table, adding custom fields only to the child</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Create an entirely separate unrelated table and link it via a Reference field</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Add the fields to sys_user using a Scoped Application so they are upgrade-safe</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Extending an OOB table creates a child table that inherits all parent fields while adding only the custom fields needed. This preserves the inheritance hierarchy (allowing CMDB/task queries to work), avoids modifying the OOB table directly (A/D — both touch the parent), and is the recommended upgrade-safe approach. A separate unrelated table (C) breaks the hierarchy and requires manual joins for reports.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(34,197,94,0.15);color:#86efac">🏛️ Topic 4 — Schema Design Patterns</div>
+              <div class="quiz-scenario">Scenario: A developer needs a field that can store references to multiple records from the same table on a single record (e.g., multiple related CIs on an Incident).</div>
+              <p class="quiz-question">Which field type stores multiple reference values (comma-separated sys_ids) in a single field?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Reference (multi-value mode)</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Glide List (List field type)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Document ID</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Journal Input</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A <strong>Glide List</strong> (field type: List) stores multiple sys_ids from the same table as a comma-delimited string in a single database field. It renders as a multi-select list on the form. Reference fields (A) store exactly one sys_id. Document ID (C) stores one polymorphic reference. Journal Input (D) is for append-only text like Work Notes. Glide Lists are quick but less performant than M2M tables for large-scale associations.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(34,197,94,0.15);color:#86efac">🏛️ Topic 4 — Schema Design Patterns</div>
+              <div class="quiz-scenario">Scenario: An admin needs to ensure a custom "Cost Center" field is always filled in when ANY record is saved — including saves via the REST API, Import Sets, and scripting.</div>
+              <p class="quiz-question">[TRAP] Which mechanism GUARANTEES server-side enforcement on every save regardless of access method?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">UI Policy with mandatory = true on the field</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Client Script with onSubmit validation</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Business Rule (before insert/update) that checks the field and aborts if empty</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Data Policy — enforces on form submit but not API calls</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Only a <strong>Business Rule (before insert/update)</strong> runs server-side on every save path — form, API, import, script. UI Policy (A) and Client Script (B) are browser-only and bypassed by any non-form access. Data Policy (D) enforces server-side too but only when "Apply to Import Sets" is enabled and still has edge cases. A Business Rule with <code>current.setAbortAction(true)</code> is the absolute guarantee across all paths.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(34,197,94,0.15);color:#86efac">🏛️ Topic 4 — Schema Design Patterns</div>
+              <div class="quiz-scenario">Scenario: A developer creates a table that "extends" the Task table. They add 3 new fields to this child table.</div>
+              <p class="quiz-question">What does table extension mean in ServiceNow's data architecture?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It adds new optional fields to the parent table that child tables can choose to use</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">It creates a child table that inherits all columns and behaviors from the parent, plus stores its own additional fields</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It creates a physical copy/clone of the parent table with a new name</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">It moves all records from the parent table into the new child table</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Table extension in ServiceNow implements OO inheritance. The child table inherits ALL columns from the parent (they are not copied — still stored in the parent's database table) and adds its own unique columns. Business Rules, ACLs, and scripts on the parent may also apply. Existing records stay in the parent (D is wrong). No copy is made (C). No fields are added to the parent (A). The key insight: the child IS-A parent — an Incident IS-A Task.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 15;
+  const dots = document.getElementById('q-dots');
+
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => {
+      const state = window._quizState?.['main-quiz'];
+      if (!state) return;
+      state.current = i;
+      QuizEngine._render('main-quiz');
+      updateDots(i, state);
+    });
+    dots.appendChild(d);
+  }
+
+  function updateDots(current, state) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current','correct','incorrect','answered');
+      if (i === current) d.classList.add('current');
+      else if (state.answered[i] !== null) {
+        const q = state.questions[i];
+        const correct = q.querySelector('[data-correct]')?.dataset.correct;
+        d.classList.add(state.answered[i] === correct ? 'correct' : 'incorrect');
+      }
+    });
+    const answered = state.answered.filter(a => a !== null).length;
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = `${state.score} / ${TOTAL}`;
+    document.getElementById('qs-answered').textContent = answered;
+    document.getElementById('qs-prog').style.width = `${((current+1)/TOTAL)*100}%`;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    QuizEngine.init('main-quiz');
+    QuizEngine.wireOptions('main-quiz');
+    window._quizState = QuizEngine._state ?? {};
+    const quiz = document.getElementById('main-quiz');
+    const patch = () => setTimeout(() => { const s = QuizEngine._state?.['main-quiz']; if(s) updateDots(s.current, s); }, 50);
+    quiz.querySelectorAll('[data-option]').forEach(btn => btn.addEventListener('click', patch));
+    quiz.querySelector('[data-q-prev]')?.addEventListener('click', patch);
+    quiz.querySelector('[data-q-next]')?.addEventListener('click', patch);
+  });
+</script>
+</body>
+</html>

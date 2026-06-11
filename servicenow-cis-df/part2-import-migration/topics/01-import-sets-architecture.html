@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Import Sets Architecture | CIS-DF Part 2</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .flow-steps{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;margin:var(--space-4) 0}
+    .flow-step{background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.25);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);font-family:var(--font-heading);font-size:0.82rem;font-weight:600;color:#22d3ee}
+    .flow-arrow{color:var(--text-muted);font-size:1rem}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Import Sets Architecture</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 2 · Topic 1</div>
+        <h1 class="topic-title">Import Sets Architecture</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Import Sets are ServiceNow's structured data ingestion pipeline. Learn the staging-then-transform
+          architecture, why it exists, the Service Graph Connector as the CMDB-preferred path, and
+          the Import Set API for programmatic ingestion.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>6 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~25 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~14% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Migration</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Why Import Sets Exist</h2>
+        <p>
+          When external data arrives into ServiceNow — whether from a CSV file, a database, an API,
+          or a discovery scanner — you almost never want to write it directly into your live tables.
+          Why? Because external data is messy: column names don't match, values are formatted
+          differently, duplicate records exist, and some fields need transformation before they
+          make sense in ServiceNow.
+        </p>
+        <p>
+          <span class="hl-teal">Import Sets</span> solve this by creating a two-stage pipeline:
+          first, load raw data into a temporary staging table (the "Import Set table"), then run
+          a Transform Map to clean, map, and push the data into the target live table. If something
+          goes wrong, you fix the transformation logic and re-run — the raw data is still in the
+          staging table, untouched.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Analogy — Customs Inspection at the Border</strong>
+            Think of Import Sets like customs at an international airport. When cargo (data) arrives
+            from outside, it goes to a holding area (staging table) for inspection and processing.
+            Inspectors (Transform Maps) check every item, apply rules, and either pass it through
+            to the destination (target table) or flag it for review. Nothing goes directly to its
+            final destination without going through customs first.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>The Import Set Pipeline — Step by Step</h2>
+        <p>
+          Understanding the full pipeline is essential — the exam tests each step independently.
+        </p>
+
+        <div class="flow-steps">
+          <div class="flow-step">1. Data Source</div>
+          <span class="flow-arrow">›</span>
+          <div class="flow-step">2. Import Set Table (staging)</div>
+          <span class="flow-arrow">›</span>
+          <div class="flow-step">3. Transform Map</div>
+          <span class="flow-arrow">›</span>
+          <div class="flow-step">4. Target Table</div>
+        </div>
+
+        <h3>Step 1 — Data Source</h3>
+        <p>
+          A <span class="hl-teal">Data Source</span> record defines where data comes from and how to
+          retrieve it. Types include: File (CSV/Excel/XML uploaded or retrieved via SFTP), JDBC
+          (direct database query), REST (fetch JSON/XML from an API), LDAP, and more. The Data Source
+          is configured in <span class="code-inline">System Import Sets → Data Sources</span>.
+        </p>
+
+        <h3>Step 2 — Import Set Table (Staging)</h3>
+        <p>
+          When a Data Source is loaded, ServiceNow creates a temporary staging table — the
+          <span class="hl-teal">Import Set table</span>. This table has one column for each column
+          in the source data. All rows are stored here first, untransformed, in their raw form.
+          The table is named with the pattern <span class="code-inline">u_imp_[something]</span> or a name
+          you specify.
+        </p>
+        <p>
+          Each load run creates one <span class="code-inline">sys_import_set</span> header record
+          (the "Import Set") and multiple <span class="code-inline">sys_import_set_row</span> records —
+          one per row of source data. These are what you see in the Import Set list view.
+        </p>
+
+        <h3>Step 3 — Transform Map</h3>
+        <p>
+          A <span class="hl-teal">Transform Map</span> defines how columns in the staging table
+          map to fields in the target table, and what transformation logic to apply. It runs
+          after the staging table is populated. We cover Transform Maps in depth in Topic 2.
+        </p>
+
+        <h3>Step 4 — Target Table</h3>
+        <p>
+          The final destination. For non-CMDB data, records are inserted or updated in the target
+          table based on the Transform Map's coalesce and field map settings. For CMDB data,
+          records go through the <strong>IRE (Identification and Reconciliation Engine)</strong>
+          before landing in the cmdb_ci hierarchy.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Staging Table Cleanup</strong>
+            Import Set staging tables grow unboundedly unless you clean them up. After successful
+            transforms, the staging rows still exist. Large staging tables slow down the import
+            process over time. Always configure a <strong>Data Retention Policy</strong> or
+            scheduled job to clean old Import Set rows. The exam may ask about performance issues
+            caused by uncleaned staging tables.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Service Graph Connectors — The CMDB-Preferred Import Path</h2>
+        <p>
+          For CMDB data specifically, ServiceNow recommends using <span class="hl-teal">Service Graph Connectors</span>
+          rather than building custom Import Set pipelines. A Service Graph Connector is a certified,
+          pre-built integration that loads CI data from a specific source system (AWS, Azure, Qualys,
+          SCCM, etc.) into the CMDB via the IRE.
+        </p>
+        <p>
+          Why are they preferred? Three reasons:
+        </p>
+        <ol>
+          <li><strong>IRE integration</strong> — Service Graph Connectors feed data through the IRE automatically, ensuring proper duplicate detection, class identification, and reconciliation. A raw Import Set transform that inserts directly to <code>cmdb_ci</code> bypasses IRE entirely.</li>
+          <li><strong>Payload format</strong> — Connectors use the CMDB API's structured payload format, which carries CI class information, identification attributes, and relationship data together — not just flat field values.</li>
+          <li><strong>Source attribution</strong> — The IRE needs to know which "data source" provided which CI data so it can apply Reconciliation Rules (which source wins when two sources disagree). Service Graph Connectors tag their data with a source identifier automatically.</li>
+        </ol>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Why Not Use Raw Import Sets for CMDB?</strong>
+            If you build a custom Import Set → Transform Map that writes directly to <code>cmdb_ci_server</code>,
+            you bypass the IRE. That means no duplicate detection — you could create two CI records for the
+            same physical server that came from different sources. No reconciliation — if Discovery and your
+            CMDB import both have the same server with different OS versions, you don't know which wins.
+            No relationship management — CI relationships are not automatically maintained.
+            Service Graph Connectors solve all of this by routing through the IRE.
+          </div>
+        </div>
+
+        <h3>Service Graph Connector Architecture</h3>
+        <p>
+          Under the hood, a Service Graph Connector:
+        </p>
+        <ol>
+          <li>Fetches data from the source system (via REST, file, JDBC, etc.)</li>
+          <li>Loads it into an Import Set staging table</li>
+          <li>Runs a Transform Map that produces a structured <strong>CMDB payload</strong></li>
+          <li>Submits the payload to the <strong>CMDB Identification and Reconciliation API</strong></li>
+          <li>The IRE processes the payload — identifies, reconciles, and writes to the appropriate CI table</li>
+        </ol>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Service Graph Connector vs. Import Set Direct</strong>
+            The exam will present a scenario: "A team imports server data from an Excel file using an
+            Import Set and Transform Map directly to cmdb_ci_server. Why are duplicates appearing?"
+            The answer is that they bypassed the IRE. The fix is to use a Service Graph Connector or
+            route through the CMDB Identification API instead of direct table writes.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Import Set API — Programmatic Import</h2>
+        <p>
+          The <span class="hl-teal">Import Set API</span> (<span class="code-inline">/api/now/import/{staging_table}</span>)
+          allows external systems to POST data directly into a ServiceNow staging table via REST,
+          which then triggers the associated Transform Map automatically.
+        </p>
+        <p>
+          This is how external systems can push data into ServiceNow without needing to upload a file:
+          the external system makes an HTTP POST request with the data as a JSON payload, ServiceNow
+          receives it into the staging table, and the transform runs automatically.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Method</th><th>How Data Arrives</th><th>Transform Trigger</th><th>Best For</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>File upload (manual)</td><td>User uploads CSV/Excel</td><td>Manual or scheduled</td><td>One-time or manual loads</td></tr>
+            <tr><td>Scheduled Data Source</td><td>SN pulls from file share or URL</td><td>Scheduled job</td><td>Recurring batch loads</td></tr>
+            <tr><td>Import Set API (POST)</td><td>External system pushes JSON</td><td>Automatic on receive</td><td>Real-time event-driven loads</td></tr>
+            <tr><td>Service Graph Connector</td><td>Connector fetches from source</td><td>Scheduled or triggered</td><td>CMDB CI data</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Import Set States</h2>
+        <p>
+          Each row in an Import Set staging table has a <span class="hl-teal">state</span> field that
+          tracks what happened during the transform. These states appear in the import set run results
+          and are critical for diagnosing import problems.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>State</th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Inserted</td><td>A new record was created in the target table</td></tr>
+            <tr><td>Updated</td><td>An existing record was found and updated (via coalesce)</td></tr>
+            <tr><td>Ignored</td><td>Row matched an existing record but no fields changed — no update needed</td></tr>
+            <tr><td>Error</td><td>The transform failed for this row — check error message for details</td></tr>
+            <tr><td>Skipped</td><td>Row was deliberately skipped by a transform script (onBefore returned IGNORE)</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Diagnosing Import Errors</strong>
+            After a scheduled import, navigate to <span class="code-inline">System Import Sets → Import Sets</span>
+            and open the most recent import set. Click the import set record to see the transform result
+            counts (inserted/updated/ignored/error). Click into Error rows to see the specific error
+            message. This is the fastest way to understand why data isn't landing correctly.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6 -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>MID Server Role in Imports</h2>
+        <p>
+          When ServiceNow needs to pull data from a source that is inside your corporate network (a database,
+          a file share, an LDAP directory) and not publicly accessible from the internet, it uses a
+          <span class="hl-teal">MID Server</span> (Management Instrumentation and Discovery server).
+        </p>
+        <p>
+          The MID Server is a Java agent installed inside your network. It acts as a proxy: the ServiceNow
+          instance tells the MID Server "go fetch data from this JDBC database using these credentials"
+          and the MID Server does so from inside the network, then returns the data to the instance.
+        </p>
+        <ul>
+          <li>MID Servers are used for: JDBC data sources, LDAP imports, file share access, Discovery</li>
+          <li>They authenticate to internal systems using credentials stored in ServiceNow's Credential records</li>
+          <li>MID Servers are configured in <span class="code-inline">MID Server → Servers</span></li>
+          <li>Data Sources that require a MID Server specify which MID Server (or cluster) to use</li>
+        </ul>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Import Sets</h2>
+        <ul>
+          <li>Import Sets use a <strong>two-stage pipeline</strong>: staging table first, then Transform Map to target table</li>
+          <li>Import Set staging tables grow unboundedly — always configure cleanup/retention</li>
+          <li><strong>Service Graph Connectors</strong> are the preferred method for CMDB CI data — they route through IRE</li>
+          <li>Direct Transform Map writes to cmdb_ci tables <strong>bypass the IRE</strong> — causes duplicates and reconciliation failures</li>
+          <li>Import Set API (<code>POST /api/now/import/{table}</code>) triggers transform automatically on receive</li>
+          <li>Import row states: Inserted / Updated / Ignored / Error / Skipped — Ignored means no change needed</li>
+          <li>MID Server required for JDBC, LDAP, or file shares inside the corporate network</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <span style="color:var(--text-muted);font-size:0.82rem;align-self:center">Next:</span>
+          <a href="02-transform-maps-field-maps.html" class="btn btn-secondary">Transform Maps &amp; Field Maps →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p2_t1_01';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

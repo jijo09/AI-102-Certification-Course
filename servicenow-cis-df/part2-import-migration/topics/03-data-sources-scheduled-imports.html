@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Sources &amp; Scheduled Imports | CIS-DF Part 2</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Data Sources &amp; Scheduled Imports</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 2 · Topic 3</div>
+        <h1 class="topic-title">Data Sources &amp; Scheduled Imports</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Data Sources define where data comes from and how ServiceNow retrieves it.
+          Scheduled Import Sets automate the retrieval and transform cycle on a timer.
+          Learn every source type, the MID Server role, and how to diagnose scheduled import failures.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~18 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~8% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Migration</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Data Source Types</h2>
+        <p>
+          A <span class="hl-teal">Data Source</span> record (<span class="code-inline">sys_data_source</span>)
+          defines the connection to an external system and how to retrieve data from it.
+          Navigate to <span class="code-inline">System Import Sets → Data Sources</span> to view and create them.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Type</th><th>What It Does</th><th>MID Server Required?</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>File</td>
+              <td>Reads a CSV, Excel, XML, or JSON file. Can be uploaded manually, retrieved from a URL (HTTP/HTTPS), or pulled from an SFTP/FTP server.</td>
+              <td>Only if file is on internal network (SFTP/file share)</td>
+            </tr>
+            <tr>
+              <td>JDBC</td>
+              <td>Queries an external relational database directly using SQL. Requires a JDBC driver for the target DB type.</td>
+              <td>Yes — DB is usually inside the network</td>
+            </tr>
+            <tr>
+              <td>REST</td>
+              <td>Fetches JSON or XML from a REST API endpoint. Uses HTTP GET or POST with optional authentication.</td>
+              <td>Only if API is on internal network</td>
+            </tr>
+            <tr>
+              <td>LDAP</td>
+              <td>Reads directory data from an LDAP/Active Directory server. Used for user imports.</td>
+              <td>Yes — AD is always internal</td>
+            </tr>
+            <tr>
+              <td>Custom (Script)</td>
+              <td>Runs a JavaScript script to populate the staging table. Full flexibility for unusual sources.</td>
+              <td>Depends on script implementation</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — JDBC Always Needs MID Server</strong>
+            JDBC Data Sources almost always require a MID Server because enterprise databases are inside
+            the corporate network and not accessible from the internet (where the ServiceNow instance runs).
+            If a JDBC import is failing and the question asks why, check whether the MID Server is running
+            and whether it has the correct JDBC driver installed.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Scheduled Import Jobs</h2>
+        <p>
+          A <span class="hl-teal">Scheduled Import Set</span> combines a Data Source with a schedule —
+          it automatically pulls data from the source, loads it into the staging table, and runs the
+          Transform Map on a recurring basis. This is how production imports run: nightly user syncs
+          from Active Directory, hourly CI updates from discovery tools, daily asset feeds from an ITAM system.
+        </p>
+        <p>
+          To create one, navigate to <span class="code-inline">System Import Sets → Scheduled Import Sets → New</span>.
+          Key configuration fields:
+        </p>
+        <ul>
+          <li><strong>Name</strong> — descriptive label</li>
+          <li><strong>Data source</strong> — which Data Source record to use</li>
+          <li><strong>Run as</strong> — which user account to run as (determines ACLs applied)</li>
+          <li><strong>Run</strong> — frequency: Daily, Weekly, Periodically, On Demand</li>
+          <li><strong>Time</strong> — when to run (for Daily schedule)</li>
+          <li><strong>Execute now</strong> button — runs the import immediately (useful for testing)</li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Scheduled Import vs. Scheduled Job</strong>
+            A Scheduled Import Set is a specialized wrapper — it handles the load + transform pipeline.
+            A regular Scheduled Job (<code>sys_trigger</code>) is a generic timer that runs arbitrary
+            JavaScript. They are different record types. Import Sets have their own specific record type
+            and run history tracking. Don't confuse them on the exam.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Import Set Run History and Diagnostics</h2>
+        <p>
+          Every time a Scheduled Import Set runs, ServiceNow creates a run history record. To view it:
+          navigate to <span class="code-inline">System Import Sets → Import Sets</span>. Each record
+          represents one run and shows:
+        </p>
+        <ul>
+          <li><strong>Number</strong> — import set identifier</li>
+          <li><strong>State</strong> — Loaded, Running, Completed, or Error</li>
+          <li><strong>Created</strong> — when the import set was created (i.e., when data was pulled)</li>
+          <li><strong>Transform results</strong> — count of Inserted / Updated / Ignored / Error rows</li>
+        </ul>
+        <p>
+          Clicking into an import set record shows the individual import set rows — one per row of source data —
+          each with its own state and error message if applicable.
+        </p>
+
+        <h3>Common Failure Scenarios</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Import set stuck in "Loading" state</td>
+              <td>MID Server down or unreachable</td>
+              <td>Check MID Server status; restart if needed</td>
+            </tr>
+            <tr>
+              <td>All rows show Error state</td>
+              <td>Transform Map misconfiguration or target field mandatory but empty</td>
+              <td>Check error message on first error row; fix Transform Map</td>
+            </tr>
+            <tr>
+              <td>Duplicates appearing in target table</td>
+              <td>Coalesce not configured or coalesce field values not matching</td>
+              <td>Add/fix coalesce field on Field Map; verify unique identifier in source data</td>
+            </tr>
+            <tr>
+              <td>Import runs but target table unchanged</td>
+              <td>All rows state is "Ignored" (no changes) or Transform Map not associated</td>
+              <td>Verify Transform Map is linked to the Data Source/Import Set</td>
+            </tr>
+            <tr>
+              <td>Data missing after import</td>
+              <td>onBefore script setting <code>ignore = true</code> for too many rows</td>
+              <td>Review onBefore script logic; add logging to diagnose skipped rows</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Data Source Authentication</h2>
+        <p>
+          Data Sources that connect to secure systems need credentials. ServiceNow stores credentials
+          securely in <span class="code-inline">Discovery Credentials</span> records (or Connection Records
+          for IntegrationHub). The Data Source references the credential record by name — the actual
+          username and password are stored encrypted, not exposed in the Data Source configuration.
+        </p>
+        <ul>
+          <li><strong>Basic auth</strong> — username + password for HTTP/REST endpoints or file share access</li>
+          <li><strong>OAuth 2.0</strong> — token-based auth for modern REST APIs; tokens auto-refresh</li>
+          <li><strong>JDBC auth</strong> — database username + password; MID Server uses these credentials</li>
+          <li><strong>SSH key</strong> — for SFTP sources; key stored in credential record</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">🚫</span>
+          <div class="callout-body">
+            <strong>Warning — Never Hard-Code Credentials</strong>
+            Do not store usernames or passwords in Data Source configuration fields or Transform Map scripts.
+            If credentials change, you would need to find and update every script. Always use credential
+            records and reference them by name. Also, never log credentials in Transform Map scripts —
+            import logs are visible to many users.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Incremental vs. Full Imports</h2>
+        <p>
+          When running scheduled imports, you must decide whether to load all records from the source
+          every time (full load) or only records that have changed since the last import (incremental/delta load).
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Strategy</th><th>How It Works</th><th>Pros</th><th>Cons</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Full Load</td>
+              <td>Pull all records every run</td>
+              <td>Simple; ensures complete sync</td>
+              <td>Slow on large datasets; creates large staging tables</td>
+            </tr>
+            <tr>
+              <td>Incremental (Delta)</td>
+              <td>Pull only records changed since last run (using a "last modified" timestamp filter)</td>
+              <td>Fast; lightweight staging table</td>
+              <td>Source must support timestamp filtering; deleted records not captured</td>
+            </tr>
+            <tr>
+              <td>Event-driven (Import Set API)</td>
+              <td>Source pushes changes when they happen</td>
+              <td>Real-time; minimal latency</td>
+              <td>Source must support webhooks or push; more complex to implement</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Incremental Imports Miss Deletes</strong>
+            Incremental imports using a "last modified" filter will never capture deleted records in the
+            source system. If a user is deactivated in HR and you only import changes, that deactivation
+            may never reach ServiceNow. Full loads (where coalesce handles updates) catch this only if
+            you also add logic to deactivate records no longer in the source. The exam tests this gap.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Data Sources &amp; Scheduled Imports</h2>
+        <ul>
+          <li>JDBC Data Sources almost always require a <strong>MID Server</strong> (databases are inside the network)</li>
+          <li>Scheduled Import Set = Data Source + Transform Map + schedule — a single automated pipeline</li>
+          <li>Import set states: Loaded → Running → Completed. Row states: Inserted / Updated / Ignored / Error / Skipped</li>
+          <li>Credentials should always be stored in Discovery Credential records — never hard-coded in scripts</li>
+          <li>Incremental imports miss deleted records — use full loads with deactivation logic to handle removes</li>
+          <li>"Execute now" button on Scheduled Import Set triggers an immediate run without waiting for schedule</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <span style="color:var(--text-muted);font-size:0.82rem;align-self:center">Next:</span>
+          <a href="04-coalesce-behaviors-scripts.html" class="btn btn-secondary">Coalesce Behaviors &amp; Scripts →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p2_t3_03';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

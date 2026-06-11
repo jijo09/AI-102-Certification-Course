@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 4 – IRE Quiz · CIS-DF</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #a78bfa; color: #a78bfa; background: rgba(124,58,237,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .q-dot.answered { border-color: var(--slate-500); color: var(--text-muted); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 4</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(124,58,237,0.15);color:#a78bfa;border:1px solid rgba(124,58,237,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 4 · All 4 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 4 Full Quiz — IRE: Identity &amp; Reconciliation Engine</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions covering IRE architecture, identification rules, reconciliation rules, and deduplication &amp; remediation. Multiple exam traps included — read each question carefully.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#a78bfa">0 / 15</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#7c3aed"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 4 — IRE: Identity &amp; Reconciliation Engine</span>
+          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#7c3aed;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(124,58,237,0.15);color:#a78bfa">🏗️ Topic 1 — IRE Architecture</div>
+              <div class="quiz-scenario">Scenario: A developer builds a custom integration that uses ServiceNow's Table API to directly write CI records to the cmdb_ci_server table. After running the integration, CI records appear in the CMDB. Months later, the CMDB admin notices hundreds of duplicate server CIs with inconsistent field values.</div>
+              <p class="quiz-question">[TRAP] What is the root cause?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The IRE Identification Rules were incorrectly configured for the server CI class</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Table API bypasses IRE entirely — no deduplication or reconciliation ran, causing raw unprocessed inserts</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Reconciliation Rules were set to "First-in Wins" which overwrote correct data</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Table API triggers IRE but only for existing CIs — new CI inserts skip IRE</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct and this is the most important IRE TRAP on the exam.</strong> Table API writes directly to the CMDB tables, completely bypassing IRE. No identification (dedup check), no reconciliation (field authority), and no deduplication runs. Every integration that uses Table API creates raw inserts — when the same CI is sent twice, two records get created. The fix: ALL integrations must use the IRE API (<code>IdentificationEngineScriptableAPI</code> in scripts, or the REST IRE endpoint) so that identification, reconciliation, and deduplication run for every CI write.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(124,58,237,0.15);color:#a78bfa">🏗️ Topic 1 — IRE Architecture</div>
+              <div class="quiz-scenario">Scenario: An integration sends CI data to ServiceNow via the IRE API. After the ingestion runs, no new CI records appear in the CMDB, but you can see entries in the cmdb_ire_event table with status "Failed".</div>
+              <p class="quiz-question">What is the cmdb_ire_event table and how should this be used for troubleshooting?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">cmdb_ire_event is a read-only audit archive — view failed events to understand which Identification Rule rejected the CIs</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">cmdb_ire_event is the IRE event log — inspect failed records to see which phase failed (Identification/Reconciliation/Dedup) and the specific error message, then fix the underlying rule or payload</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">cmdb_ire_event stores pending CI writes — resubmit failed records directly from this table to retry IRE</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">cmdb_ire_event only logs Reconciliation failures — Identification failures appear in syslog</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The <code>cmdb_ire_event</code> table is the primary diagnostic tool for all IRE ingestion issues. Every CI write through IRE generates an event record. When the status is "Failed", open the record to see: which phase failed (Phase 1: Identification, Phase 2: Reconciliation, Phase 3: Deduplication), the CI payload that was sent, and the specific error reason. From there you diagnose whether the problem is a missing Identification Rule, a bad payload, or a configuration issue. You do NOT resubmit directly from the table (C) — fix the root cause and re-run the integration.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(124,58,237,0.15);color:#a78bfa">🏗️ Topic 1 — IRE Architecture</div>
+              <div class="quiz-scenario">Scenario: An architect asks what the correct sequence of operations is when a new CI payload arrives through the IRE API.</div>
+              <p class="quiz-question">Which sequence correctly describes IRE's three-phase pipeline?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Reconciliation → Identification → Deduplication</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Identification → Deduplication → Reconciliation</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Identification → Reconciliation → Deduplication</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Deduplication → Identification → Reconciliation</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> IRE runs in exactly this order: <strong>Phase 1 — Identification</strong> (does this CI already exist? Match the payload against Identification Rules to find or create the CI). <strong>Phase 2 — Reconciliation</strong> (which source owns each field? Apply Reconciliation Rules to determine which values to keep). <strong>Phase 3 — Deduplication</strong> (are there now duplicate CIs? Detect and flag duplicates via the cmdb_dedup table). Remember this sequence — questions often mix up the order as a trap.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(109,40,217,0.15);color:#c4b5fd">🔍 Topic 2 — Identification Rules</div>
+              <div class="quiz-scenario">Scenario: An Identification Rule for cmdb_ci_server has one Identifier Entry with two fields: serial_number AND model_id. An incoming payload has serial_number = "SN12345" but model_id is NULL (not provided).</div>
+              <p class="quiz-question">[TRAP] What does IRE do with this Identifier Entry?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">IRE partially matches on serial_number alone and finds the existing CI</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IRE skips this Identifier Entry entirely — all fields in an Identifier Entry must be non-NULL to be evaluated; tries the next Identifier Entry</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">IRE treats NULL as a wildcard and matches any CI where serial_number = "SN12345"</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE creates a new CI record since the match is incomplete</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct — critical exam TRAP.</strong> Within a single Identifier Entry, ALL fields use AND logic — every field must be non-NULL and match for the entry to be evaluated. If ANY field in the entry is NULL in the incoming payload, IRE <strong>skips the entire Identifier Entry</strong> and moves to the next one. It does NOT do partial matching (A). It does NOT treat NULL as wildcard (C). This is why Identification Rules typically have multiple Identifier Entries: Entry 1: serial_number + manufacturer; Entry 2: ip_address + mac_address — fallback entries for when primary fields aren't provided.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(109,40,217,0.15);color:#c4b5fd">🔍 Topic 2 — Identification Rules</div>
+              <div class="quiz-scenario">Scenario: An Identification Rule has two Identifier Entries. Entry 1 matches on serial_number + manufacturer. Entry 2 matches on ip_address + mac_address. An incoming payload has serial_number and manufacturer but they DON'T match any existing CI. ip_address + mac_address DO match an existing CI.</div>
+              <p class="quiz-question">Which Identifier Entry does IRE use to identify this CI?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Entry 1 — it runs first; since Entry 1 found no match, the CI is always created new</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Entry 2 — IRE evaluates entries in order; when Entry 1 finds no match, it moves to Entry 2, which matches the existing CI via ip_address + mac_address</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Both entries run simultaneously — if any entry conflicts, a new CI is created</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Neither entry — if Entry 1 fails, IRE falls back to name-based matching</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Multiple Identifier Entries use OR logic — IRE evaluates them in priority order and stops at the first one that produces a match. Entry 1 has non-NULL values (serial_number + manufacturer both provided) so it IS evaluated, but finds no match. IRE moves to Entry 2. Entry 2 (ip_address + mac_address) produces a match — IRE identifies this as an existing CI and updates it. This is why multiple entries are configured as cascading fallbacks for different data sources that provide different identifiers.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(109,40,217,0.15);color:#c4b5fd">🔍 Topic 2 — Identification Rules</div>
+              <div class="quiz-scenario">Scenario: A storage array CI (cmdb_ci_storage_device) contains network adapters. The Identification Rule for the adapter CI class uses a Lookup Rule instead of direct field matching.</div>
+              <p class="quiz-question">What is the purpose of a Lookup Rule in IRE Identification?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A Lookup Rule searches external databases for CI attribute data to supplement the incoming payload</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A Lookup Rule identifies a dependent CI by first finding its parent CI — the adapter is identified by finding the storage array it belongs to</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A Lookup Rule enables fuzzy matching when exact field values are not available</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A Lookup Rule creates a CMDB relationship between two CIs during identification</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A Lookup Rule is used for <strong>dependent CIs</strong> — CIs that can only be uniquely identified in the context of their parent. A network adapter on a storage array cannot be identified by its MAC address alone (same address might appear on different arrays), but it CAN be identified as "adapter slot 2 on storage array SN-XXXX". The Lookup Rule first identifies the parent CI (the array), then identifies the child CI (the adapter) relative to the parent. This is essential for component CIs like CPU slots, network adapters, and disk drives.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(109,40,217,0.15);color:#c4b5fd">🔍 Topic 2 — Identification Rules</div>
+              <div class="quiz-scenario">Scenario: An admin wants to test whether a new Identification Rule will correctly match an incoming CI payload before enabling it in production.</div>
+              <p class="quiz-question">Which built-in ServiceNow utility allows you to simulate IRE identification against a CI payload without writing real CIs?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Test Identification — lets you paste a CI payload and see which Identification Rule matches and which CI would be updated</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">CMDB Health Dashboard — provides identification accuracy metrics</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">IRE Simulation Mode — a flag on the IRE API that runs identification without committing changes</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Test in a sub-production instance and compare CIs before/after</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>A is correct.</strong> ServiceNow provides the <strong>Test Identification</strong> utility (navigate to CMDB → Administration → Test Identification). You paste a CI payload (JSON) and select a CI class — it runs the identification logic dry-run and shows you: which Identifier Entry matched, which existing CI was found (if any), and what the result would be (insert vs. update). This is the correct tool for validating Identification Rules before production use. CMDB Health (B) shows health metrics, not rule testing. There is no built-in "IRE Simulation Mode" API flag (C).</p>
+              </div>
+              <p data-correct="A" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(91,33,182,0.15);color:#ddd6fe">⚖️ Topic 3 — Reconciliation Rules</div>
+              <div class="quiz-scenario">Scenario: Three data sources write to the same field (os_version) on cmdb_ci_server. Source A: manual ITSM updates. Source B: ServiceNow Discovery. Source C: a third-party CMDB integration. All three provide the os_version field. The Reconciliation Rule uses the default source priority order.</div>
+              <p class="quiz-question">Which source's value will be stored in os_version?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Source C (third-party integration) — because it was the last to write</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Source A (manual ITSM update) — because Manual has the highest default priority (Manual &gt; Discovery &gt; Integration)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Source B (ServiceNow Discovery) — because Discovery data is considered most accurate</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The field is left blank until an admin resolves the conflict</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The default CMDB Data Source Priority order is: <strong>Manual (1st) &gt; ServiceNow Discovery (2nd) &gt; Service Graph Connectors (3rd) &gt; Other integrations (4th)</strong>. In priority-based reconciliation, the highest-priority source wins. Manual edits made by a human in the CMDB form are considered most authoritative because they represent deliberate human overrides. This default can be changed per field via custom Reconciliation Rules. No conflict resolution queue exists — the priority rule resolves it automatically (D is wrong).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(91,33,182,0.15);color:#ddd6fe">⚖️ Topic 3 — Reconciliation Rules</div>
+              <div class="quiz-scenario">Scenario: A company's Discovery runs daily. A Reconciliation Rule for the os_version field has a Staleness Period of 48 hours. Discovery ran yesterday and set os_version = "Windows Server 2019". Today, no Discovery ran (scheduled maintenance window). Tomorrow, a third-party tool tries to update os_version = "Windows Server 2022".</div>
+              <p class="quiz-question">What does IRE do with the third-party tool's os_version value?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">IRE rejects it because Discovery has higher source priority and set the value yesterday</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IRE accepts the third-party value because Discovery's 48-hour Staleness Period has expired — Discovery no longer owns the field</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">IRE queues the update and waits for the next Discovery run before resolving the conflict</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE accepts both values and stores them as a multi-value field</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The Staleness Period defines how long a source "owns" a field after writing it. If Discovery's Staleness Period on os_version is 48 hours and it has been more than 48 hours since Discovery last wrote the field, Discovery's ownership expires. The lower-priority third-party tool can now write its value. Staleness Period is evaluated <strong>per field, per CI</strong> — not per CI as a whole (important exam trap). This mechanism prevents stale data from a dead source from blocking updates indefinitely.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(91,33,182,0.15);color:#ddd6fe">⚖️ Topic 3 — Reconciliation Rules</div>
+              <div class="quiz-scenario">Scenario: A Reconciliation Rule is set to "Fully Authoritative" for the serial_number field and Discovery is configured as the authority. A human admin manually edits serial_number on a CI record to correct a typo. The next time Discovery runs, what happens to serial_number?</div>
+              <p class="quiz-question">[TRAP] What is the outcome?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The manual edit is preserved — Manual priority always beats Fully Authoritative</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Discovery's Fully Authoritative setting overwrites the manual edit — Discovery's value replaces the human correction</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">IRE flags the conflict and holds serial_number pending admin approval</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Discovery skips the field because a manual edit occurred after the last Discovery run</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct — important TRAP.</strong> "Fully Authoritative" means that source owns the field absolutely — it overwrites all other sources including manual edits. If Discovery is set as Fully Authoritative for serial_number, then every time Discovery runs, Discovery's value wins, regardless of what a human typed. The default priority order (Manual &gt; Discovery) is overridden by the Fully Authoritative mode. This is by design — useful for fields like serial_number where Discovery is the ground truth. If you need to protect manual edits, don't use Fully Authoritative for that field, or exclude it from the rule.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(91,33,182,0.15);color:#ddd6fe">⚖️ Topic 3 — Reconciliation Rules</div>
+              <div class="quiz-scenario">Scenario: Discovery provides a CI update payload that includes os_version = NULL. The existing CMDB record has os_version = "Windows Server 2019" from a previous Discovery run. The Reconciliation Rule uses priority-based mode and Discovery has the highest priority.</div>
+              <p class="quiz-question">[TRAP] What happens to os_version?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">os_version is set to NULL — Discovery provided NULL and has highest priority</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">os_version retains "Windows Server 2019" — IRE ignores NULL values from any source during reconciliation</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">IRE creates an exception record requiring admin review before updating</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The lower-priority source's value replaces "Windows Server 2019" since Discovery sent NULL</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct — NULL handling TRAP.</strong> IRE's reconciliation logic ignores NULL values from sources. If a source sends NULL for a field, IRE treats it as "source is not providing data for this field" and does NOT overwrite the existing value with NULL. The existing "Windows Server 2019" value is preserved. This prevents accidental data wipe-outs when integrations send incomplete payloads. The Staleness Period is NOT reset by a NULL update — the previous write's timestamp remains active. This is a frequently-tested exam scenario.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(76,29,149,0.15);color:#ede9fe">🧹 Topic 4 — Deduplication &amp; Remediation</div>
+              <div class="quiz-scenario">Scenario: An admin runs a CMDB deduplication report and finds 300 duplicate server CI pairs. The admin wants to immediately run a Merge remediation playbook on all 300 pairs to clean up the CMDB.</div>
+              <p class="quiz-question">[TRAP] What should the admin do FIRST before running the remediation playbook?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Back up the CMDB before merging to enable rollback if needed</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Fix the root cause of duplication (typically a bad Identification Rule or integration using Table API) — otherwise new duplicates will be created immediately after remediation</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Get business owner approval for each CI pair before merging</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Sort duplicate pairs by creation date and merge oldest pairs first</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct — the most important deduplication rule.</strong> If you merge duplicates without fixing the root cause, the same integration or Discovery run that created duplicates will create new ones again immediately. The remediation is permanent but pointless without root cause resolution. Common root causes: (1) integration using Table API instead of IRE API, (2) Identification Rule missing or misconfigured for the CI class, (3) integration not providing key identifier fields. Fix the root cause → verify no new duplicates are being created → then run the remediation playbook. Backup (A) is good practice but not the first step in the IRE workflow.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(76,29,149,0.15);color:#ede9fe">🧹 Topic 4 — Deduplication &amp; Remediation</div>
+              <div class="quiz-scenario">Scenario: IRE detects two duplicate CI records for the same server. Record A has been in the CMDB for 2 years, has 15 relationships, and is referenced by 3 active Change Records. Record B was created 2 days ago, has no relationships, and is not referenced by any other records.</div>
+              <p class="quiz-question">When a Merge remediation playbook runs, which CI becomes the Master CI?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Record B — it has the most recent data, so it's treated as the authoritative source</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Record A — IRE selects the Master CI based on most relationships and references; Record A has more ties to other records</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The admin manually selects the Master CI during the playbook — IRE doesn't decide automatically</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE creates a new merged CI record and retires both Record A and Record B</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> IRE uses a deterministic Master CI selection algorithm based on: (1) number of relationships to other CIs, (2) reference count from other tables (incidents, changes, etc.), (3) age (older CIs preferred). Record A wins on all three criteria — it has 15 relationships, is referenced by Change Records, and is 2 years old. The Master CI is kept; the duplicate (Record B) is merged into it. The Master CI's sys_id is preserved so existing references (like the Change Records) continue to work. IRE does NOT create a new third record (D).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(76,29,149,0.15);color:#ede9fe">🧹 Topic 4 — Deduplication &amp; Remediation</div>
+              <div class="quiz-scenario">Scenario: A CMDB admin reviews the cmdb_dedup table and sees 50 CI pairs flagged as duplicates by IRE's real-time deduplication. For 30 of the pairs, the admin is confident they should be merged. For 10 pairs, they are actually different CIs (false positives). For 10 pairs, they're unsure and need more investigation.</div>
+              <p class="quiz-question">Which remediation actions should be taken for each group?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Merge all 50 — false positives can be re-created manually after</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">30 pairs: run Merge playbook. 10 false positives: run Dismiss playbook (not duplicates). 10 uncertain: leave open and investigate further before acting.</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Run Flag playbook on all 50 to mark them for admin review</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Delete the duplicate records from cmdb_dedup — this resolves the duplication without merging</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> IRE provides four Remediation Playbooks: <strong>Merge</strong> (combine two duplicate CIs into one master), <strong>Keep Primary</strong> (flag one CI as the winner but don't merge), <strong>Flag</strong> (mark as needs review), and <strong>Dismiss</strong> (declare these are NOT duplicates — removes from dedup queue). For confirmed duplicates: Merge. For false positives (different CIs incorrectly flagged): Dismiss. For uncertain pairs: investigate first, then decide. Merging false positives (A) is irreversible and destructive. Deleting from cmdb_dedup (D) doesn't resolve the duplication — it just removes the detection record.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(76,29,149,0.15);color:#ede9fe">🧹 Topic 4 — Deduplication &amp; Remediation</div>
+              <div class="quiz-scenario">Scenario: An exam question states: "The Staleness Period in a Reconciliation Rule defines how long a CI can remain in the CMDB without being updated before it is automatically retired."</div>
+              <p class="quiz-question">[TRAP] Is this statement correct?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — Staleness Period triggers automatic CI retirement after a defined period of no updates</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — Staleness Period defines how long a specific SOURCE'S WRITE on a specific FIELD remains authoritative; it controls field ownership, not CI lifecycle or retirement</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Partially correct — Staleness Period retires the CI if the primary source stops updating, but secondary sources can prevent retirement</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Yes — Staleness Period is a CMDB Health metric that flags CIs as stale when they haven't been refreshed</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct — high-frequency exam TRAP.</strong> The statement in the scenario is FALSE. Staleness Period is a property of a <strong>Reconciliation Rule field entry</strong>, not a CI lifecycle setting. It defines: "After source X writes field Y, how long does source X's write remain authoritative before a lower-priority source can overwrite it?" Example: Discovery's serial_number write is authoritative for 72 hours. After 72 hours, even lower-priority sources can update serial_number. It has NOTHING to do with CI retirement. CI retirement is a separate CMDB process entirely (CMDB Discovery Schedules → CI status management, not Reconciliation Rules).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../part5-cmdb/index.html" class="btn btn-primary">Part 5: CMDB &amp; CSDM →</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 15;
+  const dots = document.getElementById('q-dots');
+
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => {
+      const state = window._quizState?.['main-quiz'];
+      if (!state) return;
+      state.current = i;
+      QuizEngine._render('main-quiz');
+      updateDots(i, state);
+    });
+    dots.appendChild(d);
+  }
+
+  function updateDots(current, state) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current','correct','incorrect','answered');
+      if (i === current) d.classList.add('current');
+      else if (state.answered[i] !== null) {
+        const q = state.questions[i];
+        const correct = q.querySelector('[data-correct]')?.dataset.correct;
+        d.classList.add(state.answered[i] === correct ? 'correct' : 'incorrect');
+      }
+    });
+    const answered = state.answered.filter(a => a !== null).length;
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = `${state.score} / ${TOTAL}`;
+    document.getElementById('qs-answered').textContent = answered;
+    document.getElementById('qs-prog').style.width = `${((current+1)/TOTAL)*100}%`;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    QuizEngine.init('main-quiz');
+    QuizEngine.wireOptions('main-quiz');
+    window._quizState = QuizEngine._state ?? {};
+    const quiz = document.getElementById('main-quiz');
+    const patch = () => setTimeout(() => { const s = QuizEngine._state?.['main-quiz']; if(s) updateDots(s.current, s); }, 50);
+    quiz.querySelectorAll('[data-option]').forEach(btn => btn.addEventListener('click', patch));
+    quiz.querySelector('[data-q-prev]')?.addEventListener('click', patch);
+    quiz.querySelector('[data-q-next]')?.addEventListener('click', patch);
+  });
+</script>
+</body>
+</html>

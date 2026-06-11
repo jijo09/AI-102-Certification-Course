@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relationships &amp; Database Views | CIS-DF Part 1</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-analogy{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .flow-steps{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;margin:var(--space-4) 0}
+    .flow-step{background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.25);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);font-family:var(--font-heading);font-size:0.82rem;font-weight:600;color:#22d3ee}
+    .flow-arrow{color:var(--text-muted);font-size:1rem}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Relationships &amp; Database Views</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 1 · Topic 3</div>
+        <h1 class="topic-title">Relationships &amp; Database Views</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Tables don't exist in isolation — they connect. Learn how Reference (one-to-many),
+          M2M (many-to-many), and Database Views model real-world relationships, and when
+          to use each pattern.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~18 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~8% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Model</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>One-to-Many: Reference Fields</h2>
+        <p>
+          The most common relationship type in ServiceNow is <span class="hl-teal">one-to-many</span>,
+          implemented via a <strong>Reference field</strong>. One record on the "one" side is referenced
+          by many records on the "many" side. The relationship is stored as a sys_id in the Reference field
+          on the "many" side's table.
+        </p>
+        <p>
+          Example: one <code>sys_user</code> (person) can be the <code>caller_id</code> on many Incidents.
+          The <code>caller_id</code> field on the <code>incident</code> table is a Reference field
+          pointing to <code>sys_user</code>. Each Incident stores one caller's sys_id. That user record
+          has no "list of incidents they reported" field — you get that by querying Incidents where
+          <code>caller_id = [user sys_id]</code>.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Analogy — Address on an Envelope</strong>
+            A Reference field is like writing someone's address on an envelope. The envelope (incident)
+            contains the address (sys_id pointing to the person). Many envelopes can have the same address,
+            but each envelope holds only one address. To find all envelopes going to the same address,
+            you search by that address.
+          </div>
+        </div>
+
+        <h3>Related Lists</h3>
+        <p>
+          When you open a record that other records reference, ServiceNow can show you those related
+          records in <strong>Related Lists</strong> at the bottom of the form. For example, when you
+          open a User record, the Related Lists section shows all Incidents where that user is the caller.
+          This is just a filtered query — not a separate stored relationship.
+        </p>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Many-to-Many: M2M Tables</h2>
+        <p>
+          Sometimes a record on Table A can relate to multiple records on Table B, AND a record on Table B
+          can relate to multiple records on Table A. This is a <span class="hl-teal">many-to-many (M2M)</span>
+          relationship. You cannot implement this with a single Reference field — you need a dedicated
+          <strong>junction table</strong> (also called an M2M table or relationship table).
+        </p>
+        <p>
+          The M2M table has exactly two Reference fields: one pointing to Table A and one pointing to Table B.
+          Each row in the M2M table represents one link between one record from A and one record from B.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — M2M Pattern Example</strong>
+            A User can belong to multiple Groups. A Group can have multiple Users. Neither a single
+            Reference field on <code>sys_user</code> nor one on <code>sys_user_group</code> can express this.
+            The solution is the M2M table <code>sys_user_grmember</code> — it has a <code>user</code>
+            Reference field and a <code>group</code> Reference field. Each row says "User X is a member
+            of Group Y." One user maps to many rows; one group maps to many rows.
+          </div>
+        </div>
+
+        <h3>Common M2M Tables in ServiceNow</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>M2M Table</th><th>Left Side</th><th>Right Side</th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>sys_user_grmember</td><td>sys_user (user)</td><td>sys_user_group (group)</td><td>User is member of Group</td></tr>
+            <tr><td>task_ci</td><td>task</td><td>cmdb_ci</td><td>Task affects this CI</td></tr>
+            <tr><td>cmdb_rel_ci</td><td>cmdb_ci (parent)</td><td>cmdb_ci (child)</td><td>CI has relationship with CI</td></tr>
+            <tr><td>sys_user_role</td><td>sys_user</td><td>sys_user_role (role)</td><td>User has role (via group membership)</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — cmdb_rel_ci Is Self-Referential M2M</strong>
+            The <code>cmdb_rel_ci</code> table is an M2M table where BOTH reference fields point to
+            <code>cmdb_ci</code> — it links a CI to another CI. It has a third field, <code>type</code>,
+            which defines the relationship type (e.g., "Runs on," "Depends on," "Hosted on"). This pattern
+            is how ServiceNow models CI dependency relationships.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Database Views — Joining Tables for Reporting</h2>
+        <p>
+          A <span class="hl-teal">Database View</span> is a virtual, read-only "table" that presents
+          a JOIN of two or more real tables as if they were one. You navigate to
+          <span class="code-inline">System Definition → Database Views</span> to create one.
+        </p>
+        <p>
+          To create a Database View, you specify:
+        </p>
+        <ol>
+          <li><strong>Primary table</strong> — the main table (e.g., <code>incident</code>)</li>
+          <li><strong>Join table(s)</strong> — the additional table(s) to join (e.g., <code>cmdb_ci</code>)</li>
+          <li><strong>Join condition</strong> — how to match rows (e.g., incident.cmdb_ci = cmdb_ci.sys_id)</li>
+          <li><strong>Fields</strong> — which fields from each table to expose in the view</li>
+        </ol>
+        <p>
+          Once created, the view appears as a "table" in the report builder. Users can build reports
+          that show Incident fields alongside the CI fields of the affected configuration item —
+          without needing to understand the JOIN logic themselves.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — DB View Performance</strong>
+            Database Views execute a JOIN query at report run time. On large tables, this can be
+            significantly slower than reporting on a single indexed table. The exam may ask about
+            performance trade-offs — Database Views are powerful but expensive. For very large datasets,
+            consider Performance Analytics or pre-aggregated data instead.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Dynamic Reference Qualifiers</h2>
+        <p>
+          A <span class="hl-teal">Reference Qualifier</span> filters which records can be selected in
+          a Reference field. Without a qualifier, a Reference field to <code>sys_user</code> lets you
+          pick any active user. With a qualifier, you could restrict it to "only users in the ITSM team"
+          or "only users with the itil role."
+        </p>
+        <p>
+          There are three types of Reference Qualifiers:
+        </p>
+        <ul>
+          <li><strong>Static</strong> — a fixed encoded query that never changes (e.g., active=true^department=IT)</li>
+          <li><strong>Dynamic</strong> — an encoded query that includes variables resolved at run time (e.g., uses current user's department)</li>
+          <li><strong>Scripted</strong> — a JavaScript function that returns a GlideRecord or encoded query — maximum flexibility</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Qualifiers Are Client-Side Only</strong>
+            Reference qualifiers only filter the <em>picker dialog</em> — they don't enforce a data
+            constraint. A user can still type a sys_id directly into an API call or import that bypasses
+            the qualifier. To truly enforce what values are valid, use a Business Rule or Data Policy
+            in addition to the qualifier.
+          </div>
+        </div>
+
+        <h3>Principal Class Filtering (CMDB-Specific)</h3>
+        <p>
+          <span class="hl-teal">Principal Class Filtering</span> is a special CMDB mechanism that
+          restricts which CI class can be selected in a Reference field pointing to <code>cmdb_ci</code>.
+          Without it, any Reference field to <code>cmdb_ci</code> lets you pick any CI of any class.
+          With Principal Class Filtering, you can restrict it to "only pick from cmdb_ci_server"
+          or "only pick from cmdb_ci_database."
+        </p>
+        <p>
+          This is configured on the dictionary entry for the Reference field. Navigate to the field's
+          dictionary entry, open the <strong>Reference Specification</strong> related list, and add
+          a <strong>Principal Class</strong> record specifying which CI class(es) are valid selections.
+          This is commonly used on tables like Change Requests where you want to enforce that
+          the "Configuration Item" field only accepts CIs of a specific type.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Principal Class Filtering Scope</strong>
+            Principal Class Filtering only restricts which class is selectable in the UI picker.
+            It does NOT prevent a sys_id from a different class being stored via script or API.
+            For strict enforcement, combine Principal Class Filtering with a server-side Business Rule.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Relationship Types Summary</h2>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Pattern</th><th>Implementation</th><th>Storage</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>One-to-Many</td>
+              <td>Reference field on "many" table</td>
+              <td>sys_id stored on "many" side</td>
+              <td>Incident → User (caller_id)</td>
+            </tr>
+            <tr>
+              <td>Many-to-Many</td>
+              <td>Junction/M2M table with two Reference fields</td>
+              <td>Each pair = one row in M2M table</td>
+              <td>User ↔ Group (sys_user_grmember)</td>
+            </tr>
+            <tr>
+              <td>Parent-Child (hierarchy)</td>
+              <td>Reference to same table (self-join)</td>
+              <td>parent field on task table</td>
+              <td>sc_req_item.request → sc_request</td>
+            </tr>
+            <tr>
+              <td>CI Relationships</td>
+              <td>Self-referential M2M (cmdb_rel_ci)</td>
+              <td>parent, child, type fields</td>
+              <td>Server "Runs on" Rack</td>
+            </tr>
+            <tr>
+              <td>Cross-table Reporting</td>
+              <td>Database View (virtual JOIN)</td>
+              <td>No extra storage — computed</td>
+              <td>Incident + CI fields in one report</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Relationships &amp; DB Views</h2>
+        <ul>
+          <li>Reference fields implement one-to-many — the field stores the sys_id of the referenced record</li>
+          <li>Many-to-many relationships require a <strong>junction/M2M table</strong> — never a Reference field alone</li>
+          <li><strong>cmdb_rel_ci</strong> is the M2M table for CI-to-CI relationships; it has a <code>type</code> field for the relationship kind</li>
+          <li>Database Views are <strong>read-only</strong> — created for reporting only, cannot insert/update data</li>
+          <li>Reference Qualifiers filter the picker UI only — they don't enforce constraints on API or script inserts</li>
+          <li><strong>Principal Class Filtering</strong> restricts which CI class can be picked in a Reference field on CMDB tables</li>
+          <li>Related Lists on forms are query-based — not a stored field, but a live filtered query result</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <span style="color:var(--text-muted);font-size:0.82rem;align-self:center">Next:</span>
+          <a href="04-schema-design-patterns.html" class="btn btn-secondary">Schema Design Patterns →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p1_t3_03';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

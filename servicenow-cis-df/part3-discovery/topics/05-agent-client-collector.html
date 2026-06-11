@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Client Collector | CIS-DF Part 3</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 3: Discovery</a>
+        <span class="sep">›</span>
+        <span class="current">Agent Client Collector</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 3 · Topic 5</div>
+        <h1 class="topic-title">Agent Client Collector (ACC) — Agent-Based Discovery for Modern Environments</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Traditional Discovery connects to devices from the outside — it needs network access,
+          credentials, and open ports. The Agent Client Collector (ACC) flips this model:
+          a lightweight agent installed on each server proactively reports its own data to
+          ServiceNow. No network scan needed, no credentials required, and it works even in
+          cloud environments with strict security groups.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>8 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~25 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~19% exam weight (INGEST domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>ACC · Agent-Based · Agentless · ITOM · Visibility</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: The Agentless Limitation -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>The Agentless Discovery Problem</h2>
+        <p>
+          Traditional ServiceNow Discovery (covered in the previous topics) is
+          <span class="hl-teal">agentless</span> — it reaches into devices from the outside
+          using SSH, WMI, or SNMP credentials. This is powerful, but has real-world limitations:
+        </p>
+        <ul>
+          <li>
+            <strong>Credential management at scale:</strong> In large environments (thousands of servers),
+            managing SSH keys or WMI passwords for every server is operationally complex.
+            When passwords rotate, Discovery breaks until credentials are updated.
+          </li>
+          <li>
+            <strong>Cloud security group constraints:</strong> Cloud providers encourage locking
+            down inbound SSH (port 22) to specific sources only. Allowing Discovery to SSH in
+            from the MID Server requires firewall rule exceptions that many security teams resist.
+          </li>
+          <li>
+            <strong>NAT and private IP environments:</strong> In some cloud configurations,
+            servers have private IPs only. The MID Server can't route to them.
+          </li>
+          <li>
+            <strong>Laptop and endpoint discovery:</strong> Laptops roam between networks,
+            use VPNs, and have dynamic IPs. Agentless Discovery can't reliably find them.
+          </li>
+          <li>
+            <strong>Real-time data requirements:</strong> Agentless Discovery is periodic (runs every
+            few hours). For real-time visibility of rapidly changing data (processes, connections),
+            periodic scans miss the current state.
+          </li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Agent-Based vs. Agentless Discovery</strong>
+            <strong>Agentless Discovery</strong> (standard Discovery): External scan. MID Server
+            connects to target. Needs network access + credentials. Periodic.
+            <strong>Agent-Based Discovery (ACC)</strong>: Lightweight agent installed on target.
+            Agent reports to ServiceNow. No external scan needed. Continuous.
+            Both result in CI records in the CMDB. They can be used together for maximum coverage.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: What is ACC -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>What Is the Agent Client Collector?</h2>
+        <p>
+          The <span class="hl-teal">Agent Client Collector (ACC)</span> is a lightweight
+          software agent installed on servers and endpoints. Once installed, it:
+        </p>
+        <ol>
+          <li>Continuously collects configuration data from the host it's running on</li>
+          <li>Makes outbound connections to ServiceNow (or a MID Server) to report this data</li>
+          <li>Receives instructions from ServiceNow for on-demand data collection</li>
+          <li>Sends collected data through IRE for CMDB update</li>
+        </ol>
+        <p>
+          The "Client" in the name refers to the fact that the agent acts as a client
+          — it initiates outbound connections, just like a browser connecting to a website.
+          This means no inbound firewall rules are needed on the target server.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📱</span>
+          <div class="callout-body">
+            <strong>Analogy — ACC as a Health App on Your Phone</strong>
+            Agentless Discovery is like a doctor examining you from the outside —
+            they can observe what's visible and measurable without your cooperation.
+            ACC is like a fitness app on your phone that constantly monitors your
+            heart rate, steps, and sleep — then sends the data to your doctor on demand.
+            The app (agent) runs on the device and reports outward.
+            The doctor (ServiceNow) receives rich, continuous data without needing
+            to "visit" the device.
+          </div>
+        </div>
+
+        <h3>ACC Editions</h3>
+        <p>
+          ServiceNow offers two ACC editions:
+        </p>
+        <ul>
+          <li>
+            <strong>ACC-D (Discovery):</strong> Focused on collecting CI configuration data for the CMDB.
+            Replaces credential-based Discovery for supported platforms.
+          </li>
+          <li>
+            <strong>ACC-M (Monitoring):</strong> Focused on real-time performance metrics collection
+            for ITOM Event Management and AIOps. Sends CPU, memory, disk, process metrics continuously.
+          </li>
+        </ul>
+        <p>
+          Both can run simultaneously on the same server. For the CIS-DF exam, ACC-D (Discovery)
+          is most relevant.
+        </p>
+      </div>
+
+      <!-- S3: ACC Architecture -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>ACC Architecture — How It Connects</h2>
+        <p>
+          The ACC agent communicates with ServiceNow in two possible ways, depending on
+          your network topology:
+        </p>
+
+        <h3>Direct Connection (Cloud-to-Cloud)</h3>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Server with ACC Agent</div>
+            <div class="flow-arrow">→ outbound HTTPS :443</div>
+            <div class="flow-box">ServiceNow Instance</div>
+            <div class="flow-note">// direct; works if cloud server has internet access</div>
+          </div>
+        </div>
+        <p>
+          This is the simplest topology. Works for cloud servers (AWS EC2, Azure VMs) that
+          have outbound internet access. No MID Server needed.
+        </p>
+
+        <h3>MID Server Relay (Isolated Networks)</h3>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Server with ACC Agent</div>
+            <div class="flow-arrow">→ outbound HTTPS</div>
+            <div class="flow-box">MID Server (internal relay)</div>
+            <div class="flow-arrow">→ outbound HTTPS :443</div>
+            <div class="flow-box">ServiceNow Instance</div>
+            <div class="flow-note">// for servers in private subnets without internet access</div>
+          </div>
+        </div>
+        <p>
+          When the server is on a private subnet without direct internet access, the ACC agent
+          connects to the MID Server (which is on the private network and can reach the internet).
+          The MID Server relays ACC data to ServiceNow.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Key — ACC Always Makes Outbound Connections</strong>
+            Both in direct and relay mode, the ACC agent makes outbound connections only.
+            No inbound ports need to be opened on the server running ACC.
+            This is a critical distinction from agentless Discovery (which needs inbound SSH/WMI access).
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: ACC vs Agentless Discovery -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>ACC vs. Agentless Discovery — Full Comparison</h2>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Agentless Discovery (MID Server)</th>
+              <th>Agent-Based Discovery (ACC)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>How it works</td>
+              <td>MID Server connects to target externally</td>
+              <td>Agent on target reports to ServiceNow</td>
+            </tr>
+            <tr>
+              <td>Credentials required on target</td>
+              <td>Yes — SSH, WMI, SNMP</td>
+              <td>No — agent is pre-installed with ServiceNow identity</td>
+            </tr>
+            <tr>
+              <td>Inbound ports on target</td>
+              <td>Yes — port 22 (SSH), 135 (WMI), 161 (SNMP)</td>
+              <td>No — agent makes outbound connections only</td>
+            </tr>
+            <tr>
+              <td>Data freshness</td>
+              <td>Periodic (scan interval — every few hours)</td>
+              <td>Continuous / near real-time</td>
+            </tr>
+            <tr>
+              <td>Works for roaming laptops?</td>
+              <td>No — needs fixed IP/network access</td>
+              <td>Yes — agent reports from wherever the laptop is</td>
+            </tr>
+            <tr>
+              <td>Works for strict security groups?</td>
+              <td>Limited — requires inbound SSH exceptions</td>
+              <td>Yes — only outbound HTTPS needed</td>
+            </tr>
+            <tr>
+              <td>Requires agent installation?</td>
+              <td>No — no software on target</td>
+              <td>Yes — agent must be deployed to each target</td>
+            </tr>
+            <tr>
+              <td>Scale of management</td>
+              <td>Credential management + network access rules</td>
+              <td>Agent deployment + auto-update management</td>
+            </tr>
+            <tr>
+              <td>What it discovers</td>
+              <td>Deep OS + hardware + software (depends on credentials)</td>
+              <td>OS + hardware + software + processes + connections (from inside)</td>
+            </tr>
+            <tr>
+              <td>CI goes through IRE?</td>
+              <td>Yes</td>
+              <td>Yes</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Neither Approach Is "Better" — Use Both</strong>
+            Agentless Discovery covers network devices (switches, routers) where you can't
+            install agents. ACC covers servers and endpoints where agent installation is
+            practical. Most large environments use both: ACC for servers/endpoints where
+            credentials are hard to manage, agentless Discovery for network infrastructure.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: ACC Data Collection -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>What ACC Collects — Data and CI Types</h2>
+        <p>
+          The ACC agent has a rich collection capability because it runs on the target from the inside.
+        </p>
+
+        <h3>Hardware and OS Data</h3>
+        <ul>
+          <li>CPU model, core count, speed</li>
+          <li>RAM total and available</li>
+          <li>Disk partitions, size, free space, mount points</li>
+          <li>OS name, version, kernel (Linux) / build number (Windows)</li>
+          <li>System serial number, BIOS version, manufacturer</li>
+          <li>Network interfaces with IPs, MACs, interface names</li>
+          <li>Domain membership (Windows)</li>
+        </ul>
+
+        <h3>Installed Software</h3>
+        <ul>
+          <li>All installed packages (rpm, dpkg, Windows MSI + registry-based)</li>
+          <li>Software versions</li>
+          <li>Java, Python, Node.js runtimes and versions</li>
+        </ul>
+
+        <h3>Running Processes and Services</h3>
+        <ul>
+          <li>All currently running processes with PIDs and users</li>
+          <li>Active network connections (local and remote port/IP)</li>
+          <li>Windows services (running/stopped/disabled)</li>
+          <li>Linux systemd units</li>
+        </ul>
+
+        <h3>Cloud-Specific Data</h3>
+        <p>
+          When running on cloud instances, ACC can read the cloud instance metadata API:
+        </p>
+        <ul>
+          <li>Cloud instance ID, region, availability zone</li>
+          <li>Instance type</li>
+          <li>Tags assigned to the instance in AWS/Azure/GCP</li>
+          <li>IAM role / managed identity</li>
+        </ul>
+        <p>
+          This cloud metadata enriches the CI record beyond what OS-level collection can provide.
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — ACC Enriches CIs Already Created by SGC</strong>
+            A common pattern: SGC for AWS creates an EC2 instance CI with cloud-level properties
+            (instance type, tags, AMI). ACC running on that same instance adds OS-level properties
+            (kernel version, installed software, running processes). IRE reconciles both datasets
+            onto the same CI record. The result is the most complete CI possible.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: Deploying ACC -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Deploying the ACC Agent</h2>
+        <p>
+          Unlike the MID Server (one per network segment), the ACC agent must be deployed
+          to every server or endpoint you want to discover. At scale, this requires
+          automation tools.
+        </p>
+
+        <h3>Deployment Methods</h3>
+        <ul>
+          <li>
+            <strong>Manual installation:</strong>
+            Download the ACC installer from ServiceNow (Windows MSI or Linux RPM/DEB),
+            run it on each server. Only practical for very small environments.
+          </li>
+          <li>
+            <strong>Chef/Puppet/Ansible:</strong>
+            Write infrastructure-as-code to deploy the ACC agent across your server fleet.
+            ServiceNow provides documentation for major configuration management tools.
+          </li>
+          <li>
+            <strong>Cloud-init / User Data:</strong>
+            For cloud instances, embed ACC installation in the instance's user data script.
+            Every new instance gets the agent automatically as it boots.
+          </li>
+          <li>
+            <strong>Microsoft SCCM / Intune:</strong>
+            For Windows endpoints (laptops, workstations), deploy via SCCM software push
+            or Intune MDM policy.
+          </li>
+          <li>
+            <strong>Docker / Kubernetes sidecar:</strong>
+            For containerized environments, ACC can run as a sidecar container or
+            as a DaemonSet in Kubernetes to monitor all nodes.
+          </li>
+        </ul>
+
+        <h3>ACC Agent Registration</h3>
+        <p>
+          When the ACC agent starts for the first time, it registers with ServiceNow:
+        </p>
+        <ol>
+          <li>Agent connects to the configured ServiceNow endpoint (instance URL or MID Server relay)</li>
+          <li>Agent sends a registration payload with a unique identifier</li>
+          <li>ServiceNow creates a pending agent record</li>
+          <li>Admin approves the agent in ServiceNow (or auto-approval can be enabled)</li>
+          <li>Agent begins sending discovery data</li>
+        </ol>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Auto-Approval Creates Security Risk</strong>
+            ACC agents with auto-approval enabled will start reporting data to your CMDB
+            immediately without admin review. In environments with strict controls,
+            require manual approval for all new agents. This prevents rogue or
+            misconfigured agents from polluting CMDB data.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: ACC in the Discovery Ecosystem -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>ACC in the Full Discovery Ecosystem</h2>
+        <p>
+          The complete ServiceNow discovery ecosystem uses multiple ingestion methods simultaneously.
+          Here's how they work together:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>CI Type</th>
+              <th>Primary Discovery Method</th>
+              <th>Secondary Enrichment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AWS EC2 instances</td>
+              <td>SGC for AWS (API-based)</td>
+              <td>ACC agent for OS-level data</td>
+            </tr>
+            <tr>
+              <td>On-premise Linux servers</td>
+              <td>ACC agent OR agentless SSH Discovery</td>
+              <td>Service Mapping for application connections</td>
+            </tr>
+            <tr>
+              <td>Windows workstations / laptops</td>
+              <td>ACC agent (works everywhere)</td>
+              <td>Agentless Discovery when on corporate network</td>
+            </tr>
+            <tr>
+              <td>Cisco switches / routers</td>
+              <td>Agentless Discovery (SNMP)</td>
+              <td>No ACC — agents can't run on network OS</td>
+            </tr>
+            <tr>
+              <td>VMware VMs</td>
+              <td>SGC for VMware (vCenter API)</td>
+              <td>ACC agent for guest OS data</td>
+            </tr>
+            <tr>
+              <td>Kubernetes clusters</td>
+              <td>ACC DaemonSet on nodes</td>
+              <td>Service Mapping for microservice connections</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — IRE Reconciles All Sources</strong>
+            When SGC, agentless Discovery, and ACC all report data about the same server,
+            IRE's Reconciliation Rules determine which source wins for each field.
+            For example: SGC for AWS is authoritative for instance_type;
+            agentless Discovery is authoritative for cpu_name;
+            ACC is authoritative for running_processes.
+            The CI record becomes a union of the best data from all sources.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Agent Client Collector — Key Facts</h2>
+        <ul>
+          <li><strong>ACC = lightweight agent</strong> installed on each server/endpoint. Reports outward to ServiceNow.</li>
+          <li><strong>No inbound ports needed.</strong> ACC makes outbound HTTPS only. Works through strict firewalls and security groups.</li>
+          <li><strong>No credentials needed on the target.</strong> Agent is pre-authenticated. Contrast with SSH/WMI in agentless Discovery.</li>
+          <li><strong>Works for roaming endpoints</strong> (laptops) — reports from wherever the device is connected.</li>
+          <li><strong>Near real-time data</strong> — continuous collection vs. periodic agentless scans.</li>
+          <li><strong>Direct mode:</strong> Agent → ServiceNow (cloud servers with internet access).</li>
+          <li><strong>Relay mode:</strong> Agent → MID Server → ServiceNow (private subnets).</li>
+          <li><strong>ACC-D</strong> = Discovery (CI data). <strong>ACC-M</strong> = Monitoring (performance metrics). Can run together.</li>
+          <li><strong>Deployed at scale</strong> via Chef, Puppet, Ansible, SCCM, cloud-init. Not practical manually at large scale.</li>
+          <li><strong>Works alongside SGC and agentless Discovery.</strong> IRE reconciles all sources.</li>
+          <li><strong>Agent must be approved/validated</strong> after registration (similar to MID Server validation).</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Agent Client Collector (ACC)</div>
+            <div class="term-def">Lightweight agent installed on servers/endpoints. Proactively reports configuration and performance data to ServiceNow via outbound HTTPS.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">ACC-D</div>
+            <div class="term-def">ACC Discovery edition. Collects CI configuration data (hardware, OS, software, processes). Populates CMDB via IRE.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">ACC-M</div>
+            <div class="term-def">ACC Monitoring edition. Collects real-time performance metrics (CPU, memory, disk, network). Feeds ITOM Event Management.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Agentless Discovery</div>
+            <div class="term-def">Standard Discovery where the MID Server connects to targets externally using SSH, WMI, or SNMP credentials. No agent installed on target.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">MID Server Relay</div>
+            <div class="term-def">ACC deployment topology for private networks. Agent connects to MID Server, which relays data to ServiceNow. Target server needs no internet access.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">ACC Registration</div>
+            <div class="term-def">First-time connection of ACC agent to ServiceNow. Creates a pending agent record. Admin must approve (or auto-approve enabled) before data flows.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. A security team refuses to open inbound SSH (port 22) from the MID Server to production servers, blocking agentless Discovery. Which alternative approach allows ServiceNow to collect CI data from those servers?</div>
+          <div class="cq-options">
+            <div>A) Configure Discovery to use port 443 instead of port 22</div>
+            <div>B) Deploy the Agent Client Collector (ACC) on each server — it uses outbound HTTPS only</div>
+            <div>C) Use Service Graph Connectors to scan the servers from outside</div>
+            <div>D) Manually populate CI records and update them on a schedule</div>
+          </div>
+          <div class="cq-hint">💡 What Discovery method requires no inbound ports on the target?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — ACC is specifically designed for this scenario. The agent installed on each server makes outbound HTTPS connections to ServiceNow — no inbound SSH, WMI, or any other port needs to be opened on the server. The security team's restriction is fully respected. This is one of the primary use cases for ACC over agentless Discovery.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. A company wants to discover CI data from company-issued laptops that roam between office networks, home networks, and VPN. Which Discovery approach is best suited?</div>
+          <div class="cq-options">
+            <div>A) Agentless Discovery with Discovery Schedules covering all possible IP ranges</div>
+            <div>B) Service Graph Connectors for endpoint management platforms</div>
+            <div>C) Agent Client Collector (ACC) deployed to all laptops</div>
+            <div>D) Manual Import Sets from the endpoint management platform</div>
+          </div>
+          <div class="cq-hint">💡 Laptops have dynamic IPs and move between networks. What works regardless of network location?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — ACC is ideal for roaming endpoints. Because the agent makes outbound connections from wherever the laptop is (home network, office, VPN), it consistently reports to ServiceNow regardless of the current IP or network. Agentless Discovery (A) requires knowing the IP and having network access, which fails for roaming devices.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. An AWS EC2 instance is in a private subnet with no direct internet access. You want to deploy ACC on this instance. What architecture enables ACC to reach ServiceNow?</div>
+          <div class="cq-options">
+            <div>A) This is not possible — ACC requires direct internet access</div>
+            <div>B) Configure ACC to use port 80 instead of 443 to bypass the security group</div>
+            <div>C) Configure ACC to connect to a MID Server on the same private network, which relays data to ServiceNow</div>
+            <div>D) Install the MID Server on the EC2 instance alongside ACC</div>
+          </div>
+          <div class="cq-hint">💡 ACC has two connection modes. Which one handles private networks?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — ACC supports a MID Server relay mode for private networks. The ACC agent connects to the MID Server (which is deployed in the same private network or in a network that can reach ServiceNow). The MID Server relays ACC data to ServiceNow. This is exactly the architecture for EC2 instances in private subnets.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. What is the primary difference between ACC-D and ACC-M?</div>
+          <div class="cq-options">
+            <div>A) ACC-D runs on Linux; ACC-M runs on Windows</div>
+            <div>B) ACC-D collects CI configuration data for the CMDB; ACC-M collects real-time performance metrics for monitoring</div>
+            <div>C) ACC-D requires a MID Server relay; ACC-M connects directly</div>
+            <div>D) ACC-D is the older version; ACC-M replaced it</div>
+          </div>
+          <div class="cq-hint">💡 D = Discovery. M = Monitoring.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — ACC-D (Discovery) collects configuration inventory data (hardware, OS, software, network interfaces) and populates the CMDB through IRE. ACC-M (Monitoring) collects real-time performance metrics (CPU usage, memory, disk I/O, network throughput) and feeds them to ITOM Event Management and AIOps. Both can run on the same server simultaneously.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. After deploying ACC agents to 500 new cloud servers, no new CI records appear in the CMDB despite the agents showing as connected. What is the most likely cause?</div>
+          <div class="cq-options">
+            <div>A) ACC requires SSH credentials to be configured before it can collect data</div>
+            <div>B) The agents are pending approval in ServiceNow and have not been validated yet</div>
+            <div>C) The MID Server is offline</div>
+            <div>D) ACC data goes into Import Sets, which need a Transform Map before processing</div>
+          </div>
+          <div class="cq-hint">💡 What gate exists between agent registration and data flow?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — When ACC agents register with ServiceNow for the first time, they enter a "pending approval" state. Data does not flow until the admin approves each agent (or auto-approval is enabled). This is analogous to MID Server validation. Check the ACC Agent records in ServiceNow and approve them. ACC does not use SSH credentials (A) or Import Sets (D).</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">6. Network switches and routers need to be discovered in ServiceNow. You already have ACC agents deployed on all servers. Can ACC be used for network device discovery?</div>
+          <div class="cq-options">
+            <div>A) Yes — ACC can be installed on any IP-addressable device including switches and routers</div>
+            <div>B) No — network devices run specialized firmware where ACC agents cannot be installed; use agentless Discovery with SNMP</div>
+            <div>C) Yes — ACC connects to network devices via SNMP automatically</div>
+            <div>D) No — network devices must use Service Graph Connectors, not Discovery</div>
+          </div>
+          <div class="cq-hint">💡 Can you install a software agent on a Cisco IOS switch?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Network devices like Cisco switches and routers run specialized firmware (IOS, Junos, etc.) that doesn't support installing third-party software agents. ACC requires an installable agent, which is not possible on network hardware. For network devices, agentless Discovery using SNMP is the correct approach — it queries the device externally without requiring any software installation.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="04-service-mapping.html" class="btn btn-secondary">← Service Mapping</a>
+          <a href="../../part4-ire/topics/01-ire-architecture.html" class="btn btn-secondary">Part 4: IRE Architecture →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p3d_t5_05';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

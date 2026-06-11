@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Certification &amp; Asset-CI Lifecycle | CIS-DF Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .flow-steps{display:flex;flex-direction:column;gap:var(--space-2);margin:var(--space-5) 0}
+    .flow-step{display:flex;gap:var(--space-4);align-items:flex-start;padding:var(--space-4) var(--space-5);background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.14);border-radius:var(--radius-lg)}
+    .flow-step-num{width:28px;height:28px;border-radius:50%;background:rgba(8,145,178,0.2);border:1px solid rgba(8,145,178,0.35);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;color:#22d3ee;flex-shrink:0}
+    .flow-step-body{flex:1}
+    .flow-step-title{font-size:0.88rem;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+    .flow-step-desc{font-size:0.82rem;color:var(--text-muted);line-height:1.5}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6</a>
+        <span class="sep">›</span>
+        <span class="current">Data Certification &amp; Asset-CI Lifecycle</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 6 · Topic 4</div>
+        <h1 class="topic-title">Data Certification &amp; Asset-CI Lifecycle</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Data Certification is a workflow that asks humans to confirm configuration data is still accurate.
+          Asset and CI records overlap but track different things — understanding when they sync and when they diverge is critical for the exam.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~20 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~9% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Quality · CMDB</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>What Is Data Certification?</h2>
+        <p>
+          Data in the CMDB goes stale. Servers get decommissioned but their CI records persist.
+          Ownership changes without updating the CMDB. Services get renamed. Without a process
+          to periodically validate data, the CMDB slowly becomes a historical snapshot rather
+          than a live source of truth.
+        </p>
+        <p>
+          <span class="hl-teal">Data Certification</span> is a scheduled workflow built into ServiceNow
+          that selects a set of records, sends them to designated <strong>certifiers</strong>
+          (usually business owners or IT managers), and asks them to confirm each record is accurate
+          or flag it for correction. Think of it as an audit cycle run directly within ServiceNow.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🧩</span>
+          <div class="callout-body">
+            <strong>Analogy — Annual Tax Review</strong>
+            Data Certification is like asking your accountant to review last year's expenses and
+            mark which ones are still active vs. closed. The accountant doesn't update the data
+            themselves — they mark "confirm" or "needs correction" and someone else acts on the flags.
+            The value is forcing human review on a schedule, not just trusting automated imports.
+          </div>
+        </div>
+
+        <h3>Key Tables</h3>
+        <ul>
+          <li><strong><code class="code-inline">cert_cert</code></strong> — Certification definition (rule: what to certify, who certifies, schedule)</li>
+          <li><strong><code class="code-inline">cert_certifier</code></strong> — Certifier record linking a user to a certification</li>
+          <li><strong><code class="code-inline">cert_result</code></strong> — Individual result record for each record in the certification batch</li>
+        </ul>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Data Certification Workflow</h2>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Define the Certification</div>
+              <div class="flow-step-desc">Admin creates a Certification record specifying: target table, filter (which records to include), certifier assignment method, and schedule frequency.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Certification Runs (Scheduled)</div>
+              <div class="flow-step-desc">On the scheduled date, the system queries the target table with the filter, creates a <code>cert_result</code> record for each matching CI, and assigns certifiers.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Certifier Reviews</div>
+              <div class="flow-step-desc">Certifier receives a task to review assigned records. For each: Mark <strong>Certified</strong> (data is correct) or <strong>Rejected</strong> (data needs updating) or leave open.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Remediation</div>
+              <div class="flow-step-desc">Rejected records can trigger change requests or tasks to correct the underlying CI data. The certification captures the rejection reason.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">CMDB Health Score Updated</div>
+              <div class="flow-step-desc">Certified records contribute positively to CMDB Health completeness scores. Uncertified or expired certifications reduce health scores.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Certification Does Not Update Data</strong>
+            Data Certification only marks records as <em>verified by a human</em>. It does not
+            update field values. If a certifier rejects a record, the CI data stays unchanged
+            until a separate task or change is raised to fix it. Certification is a <em>quality
+            tracking</em> process, not a data correction process.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Asset vs. CI — Two Records, One Physical Item</h2>
+        <p>
+          This is one of the most tested concepts in CIS-DF. When you buy a server, ServiceNow
+          creates <em>two</em> separate records:
+        </p>
+        <ul>
+          <li>An <strong>Asset record</strong> in the <span class="code-inline">alm_asset</span> table — tracks financial and lifecycle information</li>
+          <li>A <strong>CI record</strong> in <span class="code-inline">cmdb_ci_server</span> (or another CI class) — tracks technical configuration</li>
+        </ul>
+        <p>
+          These two records are linked. The Asset record has a <span class="code-inline">ci</span>
+          reference field pointing to the CI. The CI record has an <span class="code-inline">asset</span>
+          reference field pointing back to the Asset. They represent the same physical object but
+          from two different perspectives.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🧩</span>
+          <div class="callout-body">
+            <strong>Analogy — Car Title vs. Repair Manual</strong>
+            An Asset record is like the car title: who owns it, when purchased, purchase price,
+            warranty, insurance. A CI record is like the repair manual's entry: make, model,
+            VIN, engine specs, current mileage, what's been modified. Same car, two documents,
+            each serving a different audience — Finance vs. IT Operations.
+          </div>
+        </div>
+
+        <h3>What Each Record Tracks</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Attribute</th><th>Asset (alm_asset)</th><th>CI (cmdb_ci)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Primary audience</td><td>Finance, Procurement, HR</td><td>IT Operations, ITSM</td></tr>
+            <tr><td>Cost / depreciation</td><td>✓ Tracked</td><td>Not tracked</td></tr>
+            <tr><td>Assigned to (person)</td><td>✓ Tracked (who has it)</td><td>Sometimes (operational ownership)</td></tr>
+            <tr><td>Managed by (group)</td><td>Sometimes</td><td>✓ Primary field</td></tr>
+            <tr><td>Serial number</td><td>✓ Primary identifier</td><td>✓ Also stored</td></tr>
+            <tr><td>IP address / OS</td><td>Not tracked</td><td>✓ Tracked</td></tr>
+            <tr><td>Relationships (runs on / depends on)</td><td>Not tracked</td><td>✓ cmdb_rel_ci</td></tr>
+            <tr><td>Lifecycle state</td><td>On Order → In Stock → In Use → Retired</td><td>Installed → Configured → Active → Decommissioned</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Asset vs. CI Reconciliation</h2>
+        <p>
+          Because Asset and CI records are separate, they can get out of sync. An asset may be
+          marked "In Stock" while its CI says it's actively used. A CI may be discovered on the
+          network (Discovery creates/updates it) while no corresponding Asset record exists.
+        </p>
+
+        <h3>Sync Mechanisms</h3>
+        <p>
+          ServiceNow uses <span class="hl-teal">Asset-CI field synchronization rules</span>
+          to keep certain shared fields consistent between the two records. For example:
+        </p>
+        <ul>
+          <li><strong>Serial number</strong> — updated on one record auto-propagates to the other</li>
+          <li><strong>Assigned to</strong> — depending on configuration, asset assignment can sync to CI or vice versa</li>
+          <li>Name changes on the CI can update the Asset display name</li>
+        </ul>
+
+        <h3>Asset-CI Reconciliation Scenarios</h3>
+        <p>
+          Asset-CI Reconciliation specifically addresses scenarios where the two records diverge:
+        </p>
+        <ul>
+          <li><strong>Discovery finds CI with no Asset</strong> — IRE creates/updates the CI; a business rule may auto-create an Asset record and link it</li>
+          <li><strong>Procurement creates Asset with no CI</strong> — Asset record exists in On Order state; when deployed and discovered, IRE creates the CI and the link is established</li>
+          <li><strong>Lifecycle state mismatch</strong> — Asset is "Retired" but CI is still Active. Data Certification or a reconciliation job should flag this</li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Authoritative Source Per Field</strong>
+            IRE reconciliation rules designate which data source is authoritative for each field on
+            a CI. For technical fields (IP address, OS version), Discovery is typically authoritative.
+            For financial fields on the Asset side, the procurement system (imported via Import Sets)
+            is authoritative. The "right" value depends on the field — there is no single source
+            of truth for the entire record.
+          </div>
+        </div>
+
+        <h3>Lifecycle State Alignment</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Asset State</th><th>Typical CI State</th><th>Alignment Note</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>On Order</td><td>None (not yet in CMDB)</td><td>Asset exists; CI may not yet</td></tr>
+            <tr><td>In Stock (Receiving)</td><td>None / Draft</td><td>Physical item received, not deployed</td></tr>
+            <tr><td>In Use</td><td>Installed → Active</td><td>Should match; Discovery keeps CI current</td></tr>
+            <tr><td>In Maintenance</td><td>Maintenance</td><td>Should match; updated manually or via Change</td></tr>
+            <tr><td>Retired</td><td>Decommissioned</td><td>Both should be updated during offboarding</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Discovery Does NOT Update Asset Records</strong>
+            ServiceNow Discovery updates CI records through IRE. It does <em>not</em> update
+            Asset records. If a server is discovered and its OS version changes, the CI record
+            updates but the Asset record is unaffected. Asset records are updated by procurement
+            systems, service desk agents, or field technicians — not by Discovery.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Creating Asset-CI Links</h2>
+        <p>
+          When a new CI is created by Discovery or a Service Graph Connector, the system checks
+          whether a matching Asset record exists. The matching logic uses serial number, asset tag,
+          or other identity attributes. There are three outcomes:
+        </p>
+        <ul>
+          <li><strong>Match found</strong> — the CI and Asset are linked. Shared fields are synchronized per the sync rules.</li>
+          <li><strong>No match found, auto-create enabled</strong> — a new Asset record is created and linked to the CI automatically.</li>
+          <li><strong>No match found, auto-create disabled</strong> — CI is created with no Asset link. The Asset Management team must manually create and link the Asset record later. Common source of reconciliation gaps.</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Asset Tag vs. Serial Number for Matching</strong>
+            The <strong>asset tag</strong> (a label physically attached to hardware) is a reliable
+            matching key because it's manually applied and stable. The <strong>serial number</strong>
+            is set by the manufacturer but sometimes gets overwritten by virtualization platforms.
+            For servers in virtualized environments, use asset tag as the primary reconciliation key
+            when matching Assets to CIs.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Data Certification &amp; Asset-CI Lifecycle</h2>
+        <ul>
+          <li>Data Certification marks records as verified — it does NOT update field values</li>
+          <li>Rejected certifications trigger tasks/changes to fix data; they don't auto-update the CI</li>
+          <li>Asset record = Finance/lifecycle view; CI record = IT/technical view — same physical object</li>
+          <li>Asset and CI linked via: <code>alm_asset.ci</code> → CI and <code>cmdb_ci.asset</code> → Asset</li>
+          <li><strong>Discovery updates CI records only — never Asset records</strong></li>
+          <li>Asset states (On Order → In Use → Retired) don't auto-sync to CI operational states</li>
+          <li>Lifecycle state mismatch between Asset and CI is a data quality issue detected by CMDB Health</li>
+          <li>Asset-CI reconciliation matching uses serial number or asset tag as identity keys</li>
+          <li>IRE is authoritative for CI technical fields; procurement system authoritative for Asset financial fields</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../part5-cmdb/topics/01-cmdb-architecture-ci-classes.html" class="btn btn-secondary">CMDB Architecture &amp; CI Classes →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p3_t4_04';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

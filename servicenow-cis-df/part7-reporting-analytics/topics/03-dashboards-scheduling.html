@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboards &amp; Scheduled Reports | CIS-DF Part 7</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 7</a>
+        <span class="sep">›</span>
+        <span class="current">Dashboards &amp; Scheduled Reports</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 7 · Topic 3</div>
+        <h1 class="topic-title">Dashboards &amp; Scheduled Reports</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Dashboards organize multiple reports into a single view for specific audiences.
+          Scheduled Reports automatically email report results. Both use shared visibility settings
+          that interact with ACLs in ways the exam tests carefully.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>4 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~14 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~6% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Dashboards · Scheduling</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Dashboards</h2>
+        <p>
+          A <span class="hl-teal">Dashboard</span> is a collection of report widgets arranged on
+          a canvas. Each widget is a report (bar chart, pie chart, list, scorecard) displayed inline.
+          Dashboards are the primary way executives and team leads get a real-time overview without
+          running reports manually.
+        </p>
+        <p>
+          Navigate to: <strong>All → Dashboards</strong> or via the homepage widget selector.
+        </p>
+
+        <h3>Dashboard Visibility</h3>
+        <p>
+          Like reports, dashboards have visibility settings:
+        </p>
+        <ul>
+          <li><strong>Private</strong> — only the owner sees it</li>
+          <li><strong>Shared with groups</strong> — specific groups can view</li>
+          <li><strong>Public</strong> — all users with Reports access</li>
+        </ul>
+        <p>
+          A user viewing a shared dashboard sees each report widget rendered with <em>their own data access</em>.
+          If User A is restricted from seeing certain incident categories by ACL, those categories
+          don't appear in the shared widget when User A views the dashboard.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Shared Dashboard, Personal Data</strong>
+            Two users looking at the same shared dashboard may see different numbers in the same
+            widget. User A (full access) sees 150 incidents. User B (restricted to their group only)
+            sees 42 incidents. The report definition is the same — the ACLs determine what data
+            each user's query returns. Dashboards are NOT a way to bypass data access restrictions.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Scheduled Reports</h2>
+        <p>
+          A <span class="hl-teal">Scheduled Report</span> runs a report automatically on a schedule
+          and emails the results to a list of recipients. This is the primary way to deliver
+          regular status reports (weekly incident summary, daily CMDB health snapshot) without
+          requiring recipients to log in and run reports manually.
+        </p>
+
+        <h3>Configuration</h3>
+        <ul>
+          <li><strong>Report</strong> — the report to run (must exist already)</li>
+          <li><strong>Frequency</strong> — Daily, Weekly, Monthly, or custom Cron expression</li>
+          <li><strong>Run as</strong> — the user whose context the report runs in. This user's ACLs determine what data appears in the emailed output.</li>
+          <li><strong>Send to</strong> — email addresses or user groups to receive the report</li>
+          <li><strong>Format</strong> — PDF, Excel, CSV, or HTML email body</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — "Run As" Determines Emailed Data</strong>
+            The <strong>Run As</strong> user on a Scheduled Report is critical. The report runs
+            with that user's data access. If the Run As user is an admin, the email shows all data.
+            If the Run As user is a regular technician, only data accessible to that user appears.
+            All recipients receive the same email with the same data — the ACLs of the <em>recipients</em>
+            are irrelevant. Only the Run As user's access matters.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Homepage vs. Dashboard</h2>
+        <p>
+          ServiceNow has two overlapping concepts for personalized views that confuse exam candidates:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Feature</th><th>Homepage (Legacy)</th><th>Dashboard (Modern)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Technology</td><td>Older portals framework</td><td>Now Platform UI framework</td></tr>
+            <tr><td>Widgets</td><td>Gauges, lists, mini-reports</td><td>Full reports as widgets</td></tr>
+            <tr><td>Personalization</td><td>Per-user customization of shared homepages</td><td>Owner controls layout; sharing by group</td></tr>
+            <tr><td>Mobile support</td><td>Limited</td><td>Responsive layout</td></tr>
+            <tr><td>Recommended?</td><td>Legacy — prefer Dashboard</td><td>Yes — current standard</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Exam Uses "Dashboard" as Current Standard</strong>
+            Exam questions that say "create a shared view for the management team" mean Dashboards,
+            not Homepages. When in doubt, answer with the modern Dashboard approach. Homepages
+            are a legacy feature still in the platform but not the recommended path for new builds.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Report Distribution via Notifications</h2>
+        <p>
+          Beyond Scheduled Reports (email with report output), ServiceNow can also send
+          <strong>Notifications</strong> triggered by record conditions — for example, notify
+          the CMDB team when a CI's health score drops below 50%. This is configured via the
+          standard Notification mechanism (System Notification → Email → Notifications), not
+          via the Report Builder.
+        </p>
+        <p>
+          The distinction matters for the exam:
+        </p>
+        <ul>
+          <li><strong>Scheduled Report</strong> = report output emailed on a schedule</li>
+          <li><strong>Notification</strong> = email triggered by a record event or condition</li>
+        </ul>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Dashboards &amp; Scheduling</h2>
+        <ul>
+          <li>Different users see different data on the same shared dashboard — ACLs apply per viewer</li>
+          <li>Scheduled Report "Run As" user determines what data is emailed — recipient ACLs don't matter</li>
+          <li>All recipients of a Scheduled Report email receive identical data (Run As user's view)</li>
+          <li>Dashboard = current standard; Homepage = legacy</li>
+          <li>Scheduled Report ≠ Notification — report is on a schedule; notification is event/condition triggered</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="04-performance-analytics.html" class="btn btn-secondary">Performance Analytics →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p5_t3_03';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

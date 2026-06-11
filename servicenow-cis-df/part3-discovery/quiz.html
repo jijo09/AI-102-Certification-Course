@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 3 – Discovery Quiz · CIS-DF</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .quiz-page { max-width: 820px; margin: 0 auto; padding: var(--space-10) var(--space-6); }
+    .q-topic-label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-heading); padding: 2px 8px; border-radius: 10px; margin-bottom: var(--space-4); }
+    .quiz-strip { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .qs-label { font-size: 0.75rem; color: var(--text-muted); }
+    .qs-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; }
+    .q-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-6); }
+    .q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.7rem; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card); }
+    .q-dot.current { border-color: #0ea5e9; color: #38bdf8; background: rgba(3,105,161,0.1); }
+    .q-dot.correct { border-color: var(--green-500); color: #fff; background: var(--green-500); }
+    .q-dot.incorrect { border-color: var(--red-500); color: #fff; background: var(--red-500); }
+    .q-dot.answered { border-color: var(--slate-500); color: var(--text-muted); }
+    .result-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0; }
+    .rb-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .rb-topic { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-2); }
+    .rb-score { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 800; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Part 3</a>
+        <span class="sep">›</span>
+        <span class="current">Full Quiz</span>
+      </div>
+    </header>
+
+    <div class="quiz-page animate-fade-in">
+
+      <div style="margin-bottom:var(--space-6)">
+        <div class="badge" style="background:rgba(3,105,161,0.15);color:#38bdf8;border:1px solid rgba(3,105,161,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 3 · All 5 Topics</div>
+        <h1 style="margin-bottom:var(--space-3)">Part 3 Full Quiz — Discovery &amp; Service Mapping</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions covering Discovery architecture, MID Server, patterns &amp; probes, Service Mapping, and ACC. Select an answer to reveal the explanation.</p>
+      </div>
+
+      <div class="quiz-strip" id="quiz-strip">
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#38bdf8">0 / 15</div></div>
+        <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
+        <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0369a1"></div></div></div>
+      </div>
+
+      <div class="q-dots" id="q-dots"></div>
+
+      <div class="quiz-container" id="main-quiz">
+        <div class="quiz-header">
+          <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 3 — Discovery &amp; Service Mapping</span>
+          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+        </div>
+        <div style="height:3px;background:var(--navy-800)">
+          <div style="height:3px;background:#0369a1;transition:width 0.4s ease;width:0%" data-q-progress></div>
+        </div>
+
+        <div data-quiz-body id="quiz-body">
+
+          <!-- Q1 -->
+          <div data-question>
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(3,105,161,0.15);color:#38bdf8">🏗️ Topic 1 — Discovery Architecture</div>
+              <div class="quiz-scenario">Scenario: An admin wants to refresh configuration data on 200 servers already in the CMDB. The servers' IPs are known and they have an existing CI Group containing all 200 servers.</div>
+              <p class="quiz-question">Which type of Discovery should be used?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">IP Range Discovery — scan the subnet to find the servers and update their data</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">CI Group Discovery — target the existing CI Group to refresh the 200 known CIs</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Horizontal Discovery — run classification again since the servers may have changed type</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Service Mapping — map the dependencies across the 200 servers</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> CI Group Discovery is designed specifically for refreshing data on CIs already in the CMDB. It targets a defined group (static or dynamic) instead of scanning an IP range for new devices. IP Range Discovery (A) finds NEW unknown CIs — it's less efficient for known servers. Horizontal Discovery (C) is not a schedule type you trigger separately; it's a phase of the Discovery process. Service Mapping (D) discovers application dependencies, not CI attributes.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(3,105,161,0.15);color:#38bdf8">🏗️ Topic 1 — Discovery Architecture</div>
+              <div class="quiz-scenario">Scenario: A newly-discovered device appears in ServiceNow with a CI class of "IP Network Device" but is missing fields like OS version, memory, and CPU. The admin checks and confirms Horizontal Discovery ran successfully.</div>
+              <p class="quiz-question">What should the admin investigate next?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Re-run IP Range Discovery to repopulate the missing attributes</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Check whether Vertical Discovery ran — Vertical collects detailed attributes after classification</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Check the CMDB Health dashboard for completeness rules on the CI class</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Manually enter the attributes via the CMDB form</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Discovery runs in two phases: Horizontal (classifies the CI class) and then Vertical (collects detailed configuration attributes). If Horizontal succeeded but attributes are missing, Vertical either didn't run or failed. Check the Vertical patterns and credential coverage for this CI class. CMDB Health (C) shows the problem but doesn't diagnose the cause. Manual entry (D) is a workaround, not a fix.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q3 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(3,105,161,0.15);color:#38bdf8">🏗️ Topic 1 — Discovery Architecture</div>
+              <div class="quiz-scenario">Scenario: Discovery runs against a new subnet. The MID Server executes PING successfully against a device but the device doesn't match any Horizontal Pattern. The admin sees no CI record created.</div>
+              <p class="quiz-question">[TRAP] Why did no Vertical Discovery data get collected for this device?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Vertical Discovery requires separate credentials that weren't configured</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Vertical Discovery only runs AFTER Horizontal Discovery successfully classifies the CI — no classification means no Vertical</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The MID Server cluster was overloaded and dropped the Vertical Discovery task</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Vertical Discovery must be triggered manually after Horizontal completes</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct and this is a KEY TRAP.</strong> Horizontal Discovery must successfully classify a device (determine its CI class) before Vertical Discovery runs. If no Horizontal Pattern matches — perhaps because the device is a network appliance with no matching pattern — no CI is created and Vertical never executes. The fix is to create a Horizontal Pattern for the device type or add it manually. Vertical Discovery is automatic once Horizontal succeeds — it doesn't need manual triggering (D).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(2,132,199,0.15);color:#7dd3fc">🖥️ Topic 2 — MID Server</div>
+              <div class="quiz-scenario">Scenario: A company uses ServiceNow Discovery to scan their on-premises data center (private network) and also syncs EC2 instance data from AWS using a Service Graph Connector.</div>
+              <p class="quiz-question">Which of these requires a MID Server?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Both on-premises Discovery and the AWS Service Graph Connector require a MID Server</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Only the on-premises Discovery requires a MID Server — the AWS SGC calls public APIs directly</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only the AWS Service Graph Connector requires a MID Server</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Neither requires a MID Server — ServiceNow cloud can reach all targets directly</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A MID Server is required for on-premises Discovery because the ServiceNow cloud instance cannot directly access devices on a private network behind a firewall. The AWS Service Graph Connector calls AWS public APIs (EC2, RDS, etc.) which are internet-accessible — no MID Server needed. The MID Server acts as an on-premises proxy; public cloud APIs are already internet-facing.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(2,132,199,0.15);color:#7dd3fc">🖥️ Topic 2 — MID Server</div>
+              <div class="quiz-scenario">Scenario: A company has two MID Servers in a cluster: MID-1 has SSH and WMI capabilities declared; MID-2 has only SNMP capability. A Discovery job targets a Linux server requiring SSH.</div>
+              <p class="quiz-question">Which MID Server will ServiceNow assign this Discovery job to?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Whichever MID Server has the lowest current load</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">MID-1 — because it has SSH capability, which the Linux target requires</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">MID-2 — because SNMP is more universal than SSH</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Both MID Servers simultaneously for redundancy</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> ServiceNow uses capability-based routing to select the appropriate MID Server. Each Discovery target has capability requirements (SSH for Linux, WMI for Windows, SNMP for network devices). ServiceNow matches the target's required capability to a MID Server that has declared that capability. MID-2 only has SNMP — it cannot handle SSH targets. MID Servers don't handle jobs simultaneously for the same target (D).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q6 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(2,132,199,0.15);color:#7dd3fc">🖥️ Topic 2 — MID Server</div>
+              <div class="quiz-scenario">Scenario: A company has one MID Server covering their entire private network. The MID Server host machine fails during a hardware outage.</div>
+              <p class="quiz-question">[TRAP] What is the impact on Discovery?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Discovery automatically switches to agentless mode and continues without the MID Server</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Discovery for the entire private network stops until the MID Server is restored — single point of failure</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">ServiceNow cloud takes over and scans the private network directly</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Discovery queues jobs and retries for up to 24 hours before failing</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A single MID Server is a single point of failure. If it goes down, all Discovery for the private network it covers stops. ServiceNow cloud cannot reach private network devices directly (C is false — that's why MID Server exists). There is no automatic agentless fallback (A). The best practice is to use MID Server clusters for production coverage — multiple MID Servers grouped together provide load balancing and failover.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q7 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(14,165,233,0.15);color:#bae6fd">🔑 Topic 3 — Patterns, Probes &amp; Credentials</div>
+              <div class="quiz-scenario">Scenario: A Discovery run completes. ServiceNow sent instructions to the MID Server to run an SSH command on a Linux host. The MID Server executed the command and returned raw output. ServiceNow then mapped that output to CI fields.</div>
+              <p class="quiz-question">Which Discovery component executed the SSH command, and which mapped the output to CI fields?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Sensor executed the SSH command; Probe mapped the output</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Probe executed the SSH command; Sensor mapped the output</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Pattern executed the SSH command and also mapped the output</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">MID Server handled both — ServiceNow just stored the final result</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> In classic Discovery (probe/sensor model): a <strong>Probe</strong> is the instruction from ServiceNow to the MID Server to collect data from a target (executing SSH commands, WMI queries, SNMP OID walks). A <strong>Sensor</strong> is the script on ServiceNow that parses the raw probe response and maps the data to CI fields. Probe = collect; Sensor = parse. In modern Pattern Designer, steps combine these concepts, but the directional distinction is the same.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q8 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(14,165,233,0.15);color:#bae6fd">🔑 Topic 3 — Patterns, Probes &amp; Credentials</div>
+              <div class="quiz-scenario">Scenario: A company rotates SSH passwords for all Linux servers every 90 days. Their Discovery uses 10 different Vertical Patterns targeting Linux hosts, each referencing credentials directly.</div>
+              <p class="quiz-question">What is the best practice to make credential rotation easier?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Update each of the 10 patterns individually with the new SSH password every 90 days</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Use a Credential Alias — patterns reference the alias; update the password in one place on the credential record</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Store credentials in a script include so they can be updated once</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Remove SSH credentials and switch to certificate-based authentication</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A Credential Alias is a named reference to a credential record stored in ServiceNow's encrypted credential store. Discovery Patterns and schedules reference the alias by name — not the credential directly. When the password changes, update the credential record once; all patterns using that alias automatically pick up the new credential. This is the ServiceNow-designed solution for credential lifecycle management. Storing credentials in Script Includes (C) is a security anti-pattern.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q9 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(14,165,233,0.15);color:#bae6fd">🔑 Topic 3 — Patterns, Probes &amp; Credentials</div>
+              <div class="quiz-scenario">Scenario: An admin creates a new Vertical Pattern to collect detailed CPU and memory data from network switches. During testing, no data is collected even though the MID Server can reach the switches.</div>
+              <p class="quiz-question">[TRAP] What is the most likely root cause?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The switches need a Horizontal Pattern to classify them first; without classification, Vertical Patterns never run</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Vertical Patterns cannot run against network devices — only Horizontal Patterns work on switches</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Pattern Designer doesn't support network device patterns — only classic Probe/Sensor can be used for switches</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Vertical Patterns must be manually triggered; they don't run on scheduled Discovery</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>A is correct.</strong> Vertical Patterns only execute after a CI has been classified by a Horizontal Pattern. If the switches don't have an existing Horizontal Pattern match, they never get classified as a CI, and Vertical Patterns never trigger. The fix: ensure a Horizontal Pattern exists for the switch type and runs first. Vertical Patterns support all CI types including network devices (B is wrong). Pattern Designer supports network devices (C is wrong). Vertical runs automatically after Horizontal on scheduled Discovery (D is wrong).</p>
+              </div>
+              <p data-correct="A" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q10 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(56,189,248,0.12);color:#e0f2fe">🗺️ Topic 4 — Service Mapping</div>
+              <div class="quiz-scenario">Scenario: After running Service Mapping for a web application, a new record appears in the CMDB representing the full application infrastructure with all discovered CIs and their relationships.</div>
+              <p class="quiz-question">What CI class does Service Mapping create to represent the running application topology?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">cmdb_ci_appl — a Business Application record for the web app</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">cmdb_ci_service_auto — an Application Service record containing all CIs and relationships</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">cmdb_rel_ci — a relationship record linking all discovered components</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">cmdb_ci_service — a generic service record created manually</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Service Mapping creates <code>cmdb_ci_service_auto</code> records — Application Service CIs in the CSDM Operated Landscape. These records contain all discovered CIs (servers, databases, load balancers) and their dependency relationships for one business service. This is different from a Business Application (<code>cmdb_ci_appl</code>, option A) which represents the logical application concept in the Designed Landscape. <code>cmdb_rel_ci</code> (C) stores individual CI-to-CI relationships, not the service as a whole.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q11 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(56,189,248,0.12);color:#e0f2fe">🗺️ Topic 4 — Service Mapping</div>
+              <div class="quiz-scenario">Scenario: A company uses a microservices architecture in Kubernetes where services scale dynamically. New pods spin up constantly. Traditional entry-point-based Service Mapping configuration is impractical at this scale.</div>
+              <p class="quiz-question">Which Service Mapping discovery strategy is best suited for this environment?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Top-down discovery — define entry points for each microservice</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Tag-based discovery — lightweight agents emit service tags that Service Mapping reads automatically</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">IP Range Discovery — scan the Kubernetes subnet to find all pods</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Manual entry — create Application Service records for each microservice manually</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Tag-based discovery uses lightweight agents on hosts that emit service identity tags. Service Mapping reads these tags to build service maps without requiring manual entry-point configuration per service. This scales naturally to dynamic environments like Kubernetes where pods are ephemeral. Top-down (A) requires manually defining entry points for each service — impractical at microservices scale. IP Range Discovery (C) finds CIs but doesn't map service dependencies. Manual entry (D) cannot keep up with dynamic infrastructure.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q12 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(56,189,248,0.12);color:#e0f2fe">🗺️ Topic 4 — Service Mapping</div>
+              <div class="quiz-scenario">Scenario: A CMDB admin says "Discovery already finds all our servers — why do we need Service Mapping?"</div>
+              <p class="quiz-question">[TRAP] What is the most accurate response?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Service Mapping and Discovery are redundant — choose one or the other</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Discovery finds individual CIs; Service Mapping discovers HOW those CIs connect to form a running business service — they are complementary</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Service Mapping replaces Discovery for cloud environments — Discovery only works on-premises</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Service Mapping only works when Discovery is disabled — they conflict on CI ownership</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Discovery and Service Mapping answer different questions and are complementary. Discovery: "What devices exist and what are their attributes?" Service Mapping: "How do these devices connect to form this specific business service?" Service Mapping outputs Application Service models (cmdb_ci_service_auto) that show application topology — impossible to get from Discovery alone. Both are ITOM Visibility tools that work together. They don't conflict (D) and neither replaces the other (A, C).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q13 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(125,211,252,0.12);color:#0369a1">📡 Topic 5 — Agent Client Collector</div>
+              <div class="quiz-scenario">Scenario: A financial services company has a PCI-DSS compliant zone where no inbound network connections are allowed to servers. They need to collect CI attributes from servers in this zone for the CMDB.</div>
+              <p class="quiz-question">Which approach should be used?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Deploy a MID Server inside the PCI zone — it will handle inbound Discovery requests</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Deploy the Agent Client Collector (ACC) on the servers — it pushes data out to ServiceNow via HTTPS, requiring no inbound connections</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Use Import Sets to manually load server data from spreadsheets monthly</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Use Service Mapping's traffic-based discovery to detect the servers from outside the PCI zone</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> ACC is designed precisely for this scenario. It is installed ON the target server and pushes CI attribute data TO ServiceNow via outbound HTTPS (port 443) — no inbound connection to the server is required. MID Server (A) still requires the MID Server to send probes TO each target — inbound connection required on each server. Import Sets (C) is manual and doesn't provide automated refresh. Service Mapping (D) maps application dependencies from outside, not CI attributes from locked-down servers.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q14 -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(125,211,252,0.12);color:#0369a1">📡 Topic 5 — Agent Client Collector</div>
+              <div class="quiz-scenario">Scenario: An admin wants to use ACC to discover all unknown devices on a network subnet and add them to the CMDB automatically.</div>
+              <p class="quiz-question">[TRAP] Can ACC be used for this purpose?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — ACC scans the subnet and installs itself on discovered devices automatically</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — ACC cannot discover unknown devices. It must be pre-installed on known targets. Use IP Range Discovery to find unknown devices first.</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Yes — ACC can scan subnets like a MID Server but without requiring network credentials</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Yes — ACC uses SNMP broadcast to find unknown devices on the local subnet</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct and this is an important TRAP.</strong> ACC is an agent-based tool — it must be installed on each target device in advance. It cannot scan networks, probe unknown IPs, or self-install. To discover unknown devices, use IP Range Discovery (with a MID Server). The recommended workflow: use IP Range Discovery to find and classify new CIs, then deploy ACC on high-security hosts for secure ongoing CI refresh. ACC and MID Server-based Discovery are complementary.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q15 TRAP -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(125,211,252,0.12);color:#0369a1">📡 Topic 5 — Agent Client Collector</div>
+              <div class="quiz-scenario">Scenario: An architect describes two options: Option 1 — deploy a MID Server in the on-premises network and use agentless Discovery. Option 2 — install ACC agents on every server.</div>
+              <p class="quiz-question">Which architectural statement correctly distinguishes ACC from MID Server?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">MID Server is installed on target servers (agent-based); ACC runs in the ServiceNow cloud (agentless)</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">MID Server is an on-premises proxy that reaches OUT to targets (agentless on the target); ACC is installed ON each target and pushes data OUT to ServiceNow (agent-based)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Both MID Server and ACC require installation on each target device — the difference is the protocol used</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">MID Server and ACC are interchangeable — both provide the same capabilities for any Discovery scenario</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is the key architectural distinction: MID Server is deployed as a proxy host on the private network — it reaches OUT to targets using SSH/WMI/SNMP (no agent installed on targets). ACC is installed directly on each target host — the agent pushes CI data OUT to ServiceNow via HTTPS (no need for the network to reach the target). MID Server = outbound from ServiceNow through proxy. ACC = outbound from target device. They are NOT interchangeable (D) and they solve different access problems.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+        </div><!-- /quiz-body -->
+
+        <div class="quiz-footer" data-quiz-footer>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <div style="display:flex;gap:var(--space-3)">
+            <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+            <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+            <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+          </div>
+        </div>
+        <div data-quiz-result style="display:none"></div>
+      </div>
+
+      <div id="result-details" style="display:none">
+        <h2 style="margin-bottom:var(--space-5)">📊 Results by Topic</h2>
+        <div class="result-breakdown" id="rb-grid"></div>
+        <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-6)">
+          <a href="flashcards.html" class="btn btn-secondary">🃏 Review Flashcards</a>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-top:var(--space-8)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-4)">
+        <a href="flashcards.html" class="btn btn-ghost">← Flashcards</a>
+        <a href="../index.html" class="btn btn-primary">Back to Dashboard →</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  const TOTAL = 15;
+  const dots = document.getElementById('q-dots');
+
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i === 0 ? ' current' : '');
+    d.textContent = i + 1;
+    d.dataset.idx = i;
+    d.addEventListener('click', () => {
+      const state = window._quizState?.['main-quiz'];
+      if (!state) return;
+      state.current = i;
+      QuizEngine._render('main-quiz');
+      updateDots(i, state);
+    });
+    dots.appendChild(d);
+  }
+
+  function updateDots(current, state) {
+    dots.querySelectorAll('.q-dot').forEach((d, i) => {
+      d.classList.remove('current','correct','incorrect','answered');
+      if (i === current) d.classList.add('current');
+      else if (state.answered[i] !== null) {
+        const q = state.questions[i];
+        const correct = q.querySelector('[data-correct]')?.dataset.correct;
+        d.classList.add(state.answered[i] === correct ? 'correct' : 'incorrect');
+      }
+    });
+    const answered = state.answered.filter(a => a !== null).length;
+    document.getElementById('qs-current').textContent = current + 1;
+    document.getElementById('qs-score').textContent = `${state.score} / ${TOTAL}`;
+    document.getElementById('qs-answered').textContent = answered;
+    document.getElementById('qs-prog').style.width = `${((current+1)/TOTAL)*100}%`;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    QuizEngine.init('main-quiz');
+    QuizEngine.wireOptions('main-quiz');
+    window._quizState = QuizEngine._state ?? {};
+    const quiz = document.getElementById('main-quiz');
+    const patch = () => setTimeout(() => { const s = QuizEngine._state?.['main-quiz']; if(s) updateDots(s.current, s); }, 50);
+    quiz.querySelectorAll('[data-option]').forEach(btn => btn.addEventListener('click', patch));
+    quiz.querySelector('[data-q-prev]')?.addEventListener('click', patch);
+    quiz.querySelector('[data-q-next]')?.addEventListener('click', patch);
+  });
+</script>
+</body>
+</html>

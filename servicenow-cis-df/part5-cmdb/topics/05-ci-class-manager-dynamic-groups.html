@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CI Class Manager &amp; Dynamic Groups | CIS-DF Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5: CMDB &amp; CSDM</a>
+        <span class="sep">›</span>
+        <span class="current">CI Class Manager &amp; Dynamic Groups</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 5 · Topic 5</div>
+        <h1 class="topic-title">CI Class Manager &amp; Dynamic CI Groups — Managing the CMDB Schema and Smart Groupings</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          You've learned how IRE processes CIs into the correct CMDB classes. Now we look at
+          two key tools for managing the CMDB structure itself: CI Class Manager lets you
+          extend and customize the CI class hierarchy without breaking upgrades, and Dynamic
+          CI Groups let you define smart, condition-based collections of CIs used for targeting
+          Discovery, monitoring, and change management.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>8 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~30 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~15% exam weight (CONFIGURATION domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>CI Class Manager · Dynamic CI Groups · cmdb_ci_class · Extend Class</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: Why CI Class Management Matters -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Why the CI Class Hierarchy Matters</h2>
+        <p>
+          The CMDB is built on a class hierarchy — a tree of CI types that inherit attributes
+          from parent classes. You already know this from Part 1 (CMDB Architecture).
+          At the top is <span class="code-inline">cmdb_ci</span> (all CIs), below it are
+          categories like <span class="code-inline">cmdb_ci_hardware</span>,
+          <span class="code-inline">cmdb_ci_software</span>, and so on.
+        </p>
+        <p>
+          Managing this hierarchy correctly matters because:
+        </p>
+        <ul>
+          <li><strong>IRE Identification Rules are class-specific:</strong> If you put CIs in the wrong class, wrong rules apply</li>
+          <li><strong>Reconciliation Rules are class-specific:</strong> Field authority is configured per class</li>
+          <li><strong>Discovery patterns target specific classes:</strong> A pattern for Linux servers only runs against CIs in the Linux server class</li>
+          <li><strong>Reports and dashboards filter by class:</strong> A "server count" report counts only CIs in server classes</li>
+          <li><strong>CSDM mapping requires correct classes:</strong> The Common Service Data Model maps business services to specific CI classes</li>
+        </ul>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🌳</span>
+          <div class="callout-body">
+            <strong>Analogy — CI Classes as Biological Taxonomy</strong>
+            The CMDB class hierarchy is like biological taxonomy. Kingdom → Phylum → Class → Order →
+            Family → Genus → Species. A server is Kingdom=IT_Asset → Phylum=Hardware →
+            Class=Computer → Order=Server → Family=Linux_Server → Genus=RHEL_Server.
+            Each level inherits characteristics from the level above and adds its own specific
+            attributes. Putting a Windows server in the Linux server genus causes problems —
+            it inherits the wrong attributes and gets the wrong rules applied.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: CI Class Manager Tool -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>CI Class Manager — Viewing and Extending the Hierarchy</h2>
+        <p>
+          The <span class="hl-teal">CI Class Manager</span> is a ServiceNow application
+          that provides a visual tree-browser for the entire CMDB class hierarchy.
+          It replaces the older approach of manually editing database tables
+          (dictionary records) to add CI classes.
+        </p>
+
+        <h3>Accessing CI Class Manager</h3>
+        <p>
+          Navigate to <strong>Configuration → CI Class Manager</strong>. The main view shows:
+        </p>
+        <ul>
+          <li>A collapsible tree of all CI classes, from cmdb_ci root to leaf classes</li>
+          <li>The number of CIs in each class</li>
+          <li>Which classes have Identification Rules configured (green checkmark)</li>
+          <li>Which classes are "custom" (added by your organization) vs. "baseline" (shipped by ServiceNow)</li>
+        </ul>
+
+        <h3>Using CI Class Manager to Extend the Hierarchy</h3>
+        <p>
+          When you need a new CI class for a device type not in the baseline (e.g.,
+          a custom IoT sensor, or a specialized appliance), CI Class Manager is the correct
+          tool. It guides you through:
+        </p>
+        <ol>
+          <li><strong>Select the parent class:</strong> Which existing class best represents the new device type? Your new class will inherit its attributes.</li>
+          <li><strong>Name the new class:</strong> Must follow ServiceNow naming conventions (<span class="code-inline">cmdb_ci_</span> prefix)</li>
+          <li><strong>Add custom attributes:</strong> Fields specific to this device type that don't exist on the parent class</li>
+          <li><strong>Create Identification Rules:</strong> CI Class Manager prompts you to create rules after class creation</li>
+          <li><strong>Create Reconciliation Rules:</strong> Optionally configure source authority for the new class's fields</li>
+        </ol>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — CI Class Manager Is the Correct Way to Extend Classes</strong>
+            Do not directly modify the database schema (cmdb_ci_* tables) or add dictionary
+            entries manually to create new CI classes. CI Class Manager handles the internal
+            table extension, parent-child inheritance, and IRE rule scaffolding correctly.
+            Direct table modifications can break IRE, Service Mapping, and CMDB Health checks.
+            The exam may ask: "What tool should an admin use to add a new CI type to the CMDB?"
+            Answer: CI Class Manager.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: Extending vs. Modifying Baseline Classes -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Extending Baseline Classes — The Upgrade-Safe Approach</h2>
+        <p>
+          ServiceNow baseline classes (like <span class="code-inline">cmdb_ci_linux_server</span>)
+          are owned by ServiceNow. When you upgrade ServiceNow, these classes may be updated —
+          new fields added, existing fields renamed.
+        </p>
+        <p>
+          Two approaches for adding fields to capture organization-specific data:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Approach</th>
+              <th>Method</th>
+              <th>Upgrade Safety</th>
+              <th>When to Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Extend the Baseline Class</td>
+              <td>Create a new child class under the baseline parent. Add custom fields to the child class.</td>
+              <td>Safe — parent class upgrades don't affect your child class</td>
+              <td>When the device type is genuinely a subcategory of the parent (e.g., a specific server model)</td>
+            </tr>
+            <tr>
+              <td>Add Fields to a Baseline Class</td>
+              <td>Add custom dictionary fields directly to the baseline CI class table</td>
+              <td>Risky — ServiceNow upgrades can overwrite or conflict with custom fields</td>
+              <td>Only when absolutely necessary; custom fields must follow naming conventions (u_ prefix) to avoid conflicts</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The preferred approach for the CIS-DF exam is: extend the class hierarchy, don't
+          pollute baseline classes with custom fields. CI Class Manager supports both approaches
+          but guides you toward class extension.
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Customer Fields Must Use u_ Prefix</strong>
+            When you must add a custom field to a baseline CI class (instead of extending it),
+            the field name must start with <code>u_</code> (the "user" prefix). This tells
+            ServiceNow that this is a customer-added field and prevents naming conflicts with
+            ServiceNow-owned fields during upgrades. CI Class Manager enforces this automatically.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Dynamic CI Groups — Introduction -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Dynamic CI Groups — Smart, Condition-Based CI Collections</h2>
+        <p>
+          A <span class="hl-teal">Dynamic CI Group</span> (also called CI Group) is a
+          saved query that dynamically evaluates which CIs belong to the group at any given time.
+          Unlike a static list of CIs, a Dynamic CI Group membership is always current —
+          as CIs are added, modified, or removed from the CMDB, the group automatically
+          includes or excludes them based on the defined condition.
+        </p>
+
+        <h3>Why Dynamic Groups Matter</h3>
+        <p>
+          Without Dynamic CI Groups, targeting Discovery, monitoring, or change management
+          processes at a specific subset of CIs requires manually maintaining a list.
+          If servers are added or decommissioned, someone must update the list. Dynamic groups
+          solve this maintenance burden:
+        </p>
+        <ul>
+          <li><strong>Discovery scoping:</strong> "Run this Discovery Schedule against all Linux servers in the Production environment" — the group auto-updates as servers are added or decommissioned</li>
+          <li><strong>Change management:</strong> "This change affects all CIs in the Finance cost center" — group membership reflects current Finance-owned CIs</li>
+          <li><strong>Monitoring:</strong> "Alert me when any CI in the Critical Production group goes down"</li>
+          <li><strong>CMDB Health reporting:</strong> "Show data quality metrics for all cloud CIs"</li>
+        </ul>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🏷</span>
+          <div class="callout-body">
+            <strong>Analogy — Dynamic Groups as Smart Playlists</strong>
+            A Dynamic CI Group is like a smart playlist in a music app. You don't manually add
+            songs — you define a rule: "Genre = Jazz AND Year > 2010." The playlist automatically
+            includes any new jazz song added to your library that meets the criteria. When a song's
+            genre tag changes, it drops off the list. The list is always current without manual work.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Creating and Using Dynamic CI Groups -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Creating Dynamic CI Groups — Configuration Details</h2>
+        <p>
+          Navigate to <strong>Configuration → CI Groups → Dynamic CI Groups</strong> (or
+          <strong>All → CI Group</strong>).
+        </p>
+
+        <h3>Key Configuration Fields</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Name</td>
+              <td>Human-readable name for the group</td>
+              <td>"Production Linux Servers"</td>
+            </tr>
+            <tr>
+              <td>CI class</td>
+              <td>Which CMDB table the condition runs against</td>
+              <td>cmdb_ci_linux_server</td>
+            </tr>
+            <tr>
+              <td>Condition</td>
+              <td>The filter query that defines membership. Uses standard ServiceNow query builder.</td>
+              <td>environment=Production AND operational_status=1 (Operational)</td>
+            </tr>
+            <tr>
+              <td>Include child classes</td>
+              <td>Whether CIs from subclasses of the CI class are included</td>
+              <td>If checked and class=cmdb_ci_server, includes Windows, Linux, Unix servers</td>
+            </tr>
+            <tr>
+              <td>Active</td>
+              <td>Whether the group is currently evaluated</td>
+              <td>Inactive groups are not included in Discovery scoping or other uses</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Viewing Group Membership</h3>
+        <p>
+          After creating a Dynamic CI Group, click "View Members" to see all CIs currently
+          matching the condition. This preview helps verify your condition before using the
+          group in Discovery or monitoring.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Groups Evaluate in Real Time</strong>
+            Dynamic CI Group membership is not cached — it evaluates the condition query
+            every time the group is referenced. If you add a new server with environment=Production,
+            it immediately appears in the "Production Linux Servers" group the next time
+            the group is evaluated (e.g., when Discovery runs using it as a scope).
+            No manual refresh needed.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: Using Dynamic Groups with Discovery -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Dynamic CI Groups and Discovery Integration</h2>
+        <p>
+          One of the most powerful uses of Dynamic CI Groups is scoping Discovery schedules.
+          Instead of specifying IP ranges for Discovery (which are static and require updates
+          when IPs change), you can target a Dynamic CI Group — Discovery will run against
+          all CIs in the group.
+        </p>
+
+        <h3>CI-Based Discovery vs. IP-Based Discovery</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Approach</th>
+              <th>How It Works</th>
+              <th>Advantages</th>
+              <th>Limitations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>IP-Based Discovery</td>
+              <td>Discovery Schedule targets IP ranges (e.g., 10.0.0.0/24). Scans all IPs in range.</td>
+              <td>Finds new/unknown devices. Works without existing CMDB data.</td>
+              <td>Scans unknown IPs; must update ranges when network changes. Might discover unwanted devices.</td>
+            </tr>
+            <tr>
+              <td>CI Group-Based Discovery</td>
+              <td>Discovery Schedule targets a Dynamic CI Group. Uses CIs' stored IPs to connect directly.</td>
+              <td>Only rescans known, managed CIs. No wasted scans on empty IPs. Automatically adapts to CI changes.</td>
+              <td>Cannot discover brand-new CIs not yet in CMDB. Requires existing CMDB data.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Best practice: use IP-based Discovery for initial population and discovery of new devices.
+          Use CI Group-based Discovery for routine refresh of known CI data (faster, more targeted).
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — CI Group Discovery Requires Existing CMDB CIs</strong>
+            A Dynamic CI Group-based Discovery Schedule can only re-discover CIs that already exist
+            in the CMDB — it uses stored IP addresses. It cannot discover brand-new devices.
+            To populate the CMDB from scratch, you must use IP-range Discovery first.
+            The exam may ask "why does CI Group Discovery not find newly provisioned servers?"
+            — because those servers haven't been discovered yet and aren't in the group.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: Static CI Groups vs Dynamic CI Groups -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Static vs. Dynamic CI Groups — Choosing the Right Type</h2>
+        <p>
+          ServiceNow supports both static CI groups (manually maintained lists) and
+          dynamic CI groups (condition-based). Each has valid use cases:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Static CI Group</th>
+              <th>Dynamic CI Group</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Membership definition</td>
+              <td>Manual: administrator adds/removes specific CIs</td>
+              <td>Automatic: condition query evaluated at runtime</td>
+            </tr>
+            <tr>
+              <td>Stays current automatically</td>
+              <td>No — requires manual updates as CIs change</td>
+              <td>Yes — membership always reflects current CMDB state</td>
+            </tr>
+            <tr>
+              <td>Best for</td>
+              <td>One-time exceptions, project-specific lists, or highly curated groups</td>
+              <td>Ongoing operational groupings (production CIs, by environment, by cost center)</td>
+            </tr>
+            <tr>
+              <td>Risk</td>
+              <td>Stale membership if not maintained</td>
+              <td>Wrong CIs included if condition is poorly written</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          For the CIS-DF exam, Dynamic CI Groups are emphasized because they represent the
+          "right" approach for ongoing CMDB management — they automatically stay current with
+          the CMDB, reducing administrative burden and risk of human error.
+        </p>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>CI Class Manager &amp; Dynamic Groups — Key Facts</h2>
+        <ul>
+          <li><strong>CI Class Manager</strong> = tool for viewing, extending, and managing the CMDB class hierarchy. Correct tool for adding new CI types.</li>
+          <li><strong>Never modify baseline class tables directly.</strong> Use CI Class Manager to extend hierarchy safely.</li>
+          <li><strong>Extend classes</strong> (create child class) to add device-specific attributes — upgrade-safe.</li>
+          <li><strong>Custom fields on baseline classes</strong> must use <code>u_</code> prefix to avoid upgrade conflicts.</li>
+          <li><strong>Dynamic CI Group</strong> = condition-based CI collection. Membership auto-updates as CMDB changes. No manual maintenance.</li>
+          <li><strong>CI Group-based Discovery</strong> targets known CIs by their stored IP. Cannot discover new CIs not yet in CMDB.</li>
+          <li><strong>IP-range Discovery</strong> for initial population. CI Group Discovery for ongoing refresh of known CIs.</li>
+          <li><strong>Static CI Groups</strong> = manually maintained. Good for exceptions or one-time uses, not ongoing operations.</li>
+          <li><strong>"Include child classes" checkbox</strong> on Dynamic CI Group — when checked, the group includes CIs from all subclasses of the selected CI class.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">CI Class Manager</div>
+            <div class="term-def">ServiceNow application for viewing the full CMDB class hierarchy, creating custom CI classes, and managing Identification/Reconciliation Rules per class. Correct tool for extending CMDB schema.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Dynamic CI Group</div>
+            <div class="term-def">A CI collection defined by a condition query. Membership is evaluated at runtime — automatically includes/excludes CIs as the CMDB changes. Used for Discovery scoping, monitoring targeting, and change management.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Extend Class</div>
+            <div class="term-def">CI Class Manager operation that creates a new child CI class under a selected parent. Child inherits parent attributes and can add new custom fields. The upgrade-safe way to add CI types.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Static CI Group</div>
+            <div class="term-def">A manually maintained list of specific CIs. Does not auto-update. Requires administrator intervention when CIs are added or removed. Better for exceptions than ongoing operations.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">u_ Prefix</div>
+            <div class="term-def">Required prefix for custom fields added to baseline ServiceNow CI class tables. Prevents naming conflicts with ServiceNow-owned fields during platform upgrades.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CI Group-Based Discovery</div>
+            <div class="term-def">Discovery Schedule configured to target a Dynamic CI Group instead of IP ranges. Uses stored CI IP addresses for direct connection. Cannot discover CIs not already in the CMDB.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. An administrator needs to add a new CI class for a proprietary network appliance that doesn't fit any existing class. What is the correct tool and approach?</div>
+          <div class="cq-options">
+            <div>A) Directly add a new table to the ServiceNow database schema</div>
+            <div>B) Use CI Class Manager to extend the most appropriate parent class (e.g., cmdb_ci_netgear_device), adding custom fields for the appliance</div>
+            <div>C) Rename an existing unused CI class to match the new device type</div>
+            <div>D) Use Import Sets to create records in the closest matching existing class</div>
+          </div>
+          <div class="cq-hint">💡 Which tool handles CI class extensions safely without breaking upgrades?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — CI Class Manager is the correct tool for extending the CMDB class hierarchy. It guides the administrator to select a parent class, name the new class (with cmdb_ci_ prefix), add custom fields, and then creates the Identification Rule scaffold. Direct table additions (A) bypass CI Class Manager's upgrade-safety mechanisms. Renaming classes (C) would break any existing CIs in that class and its associated IRE rules.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. A team creates a Dynamic CI Group with condition: CI class=cmdb_ci_linux_server AND environment=Production AND operational_status=Operational. A new Linux server is provisioned in the Production environment and is discovered by Discovery. When will it appear in this group?</div>
+          <div class="cq-options">
+            <div>A) Never — group membership is static after creation</div>
+            <div>B) Only after an administrator manually refreshes the group</div>
+            <div>C) Automatically — when the group is next evaluated (e.g., when a Discovery Schedule using this group runs), because the new CI matches the condition</div>
+            <div>D) After 24 hours, when a scheduled synchronization runs</div>
+          </div>
+          <div class="cq-hint">💡 Dynamic CI Groups evaluate their condition at runtime. What does "runtime" mean here?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — Dynamic CI Group membership is evaluated at runtime each time the group is referenced. Once the new server is created in the CMDB (after Discovery and IRE process it with environment=Production and operational_status=Operational), it automatically satisfies the group condition. The next time a Discovery Schedule using this group runs, the new server is included in scope. No manual refresh or wait period is needed.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. A Discovery Schedule is configured to use a Dynamic CI Group "All Production Servers" instead of IP ranges. A new server is provisioned with IP 10.0.5.100. It is NOT yet in the CMDB. Will this Discovery Schedule discover the new server?</div>
+          <div class="cq-options">
+            <div>A) Yes — the Dynamic CI Group updates automatically to include new IP addresses in the Production network</div>
+            <div>B) No — CI Group-based Discovery only targets CIs already in the CMDB. The new server is not in the CMDB yet, so it's not in the group.</div>
+            <div>C) Yes — Discovery automatically expands its scope to adjacent IP addresses</div>
+            <div>D) Yes — as long as the IP is reachable from the MID Server</div>
+          </div>
+          <div class="cq-hint">💡 What does CI Group-based Discovery use to connect to CIs?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — CI Group-based Discovery uses the IP addresses stored in existing CMDB CI records. If a server is not yet in the CMDB, it has no CI record, so it cannot be in the group, and Discovery cannot target it. To discover new servers, you need either IP-range Discovery (which scans all IPs in a range) or use a separate Discovery Schedule with IP ranges to initially find new devices before CI Group-based Discovery can maintain them.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. An administrator wants to add a custom field called "data_classification" to the baseline cmdb_ci_server class to track if servers store sensitive data. What naming convention must the field name follow?</div>
+          <div class="cq-options">
+            <div>A) data_classification (no prefix needed)</div>
+            <div>B) sys_data_classification (sys_ prefix for system fields)</div>
+            <div>C) u_data_classification (u_ prefix for customer-added fields)</div>
+            <div>D) cmdb_data_classification (cmdb_ prefix to indicate it's a CMDB field)</div>
+          </div>
+          <div class="cq-hint">💡 What prefix prevents naming conflicts with ServiceNow-owned fields during upgrades?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — Custom fields added to baseline ServiceNow tables must use the u_ prefix (standing for "user" or "customer"). This prefix prevents naming conflicts if ServiceNow later ships a baseline field with the same name. sys_ is for ServiceNow system fields. The correct field name would be u_data_classification. CI Class Manager enforces this convention when you add fields through its interface.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. An operations team wants to ensure their weekly Deep Discovery scan targets only servers in the "Production" and "Staging" environments. They don't want to maintain a static IP list. What is the best approach?</div>
+          <div class="cq-options">
+            <div>A) Create separate IP ranges for Production and Staging networks, update them manually when servers move</div>
+            <div>B) Create a Dynamic CI Group with condition: environment IN (Production, Staging), then configure the Discovery Schedule to target this group</div>
+            <div>C) Run Discovery against the entire data center and filter results in reports afterwards</div>
+            <div>D) Create a static CI Group with all current Production and Staging servers, update it weekly</div>
+          </div>
+          <div class="cq-hint">💡 Dynamic CI Groups auto-update when CIs' attributes change. How does this solve the maintenance problem?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — A Dynamic CI Group with condition environment IN (Production, Staging) is the ideal solution. When servers are added to Production or Staging environments in the CMDB, they automatically join the group. When decommissioned (environment changed or operational_status changed to Retired), they automatically leave the group. No manual list maintenance required. This is exactly the use case Dynamic CI Groups are designed for: ongoing operational targeting without administrative overhead.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="04-cmdb-health-governance.html" class="btn btn-secondary">← CMDB Health &amp; Governance</a>
+          <a href="06-csdm-framework.html" class="btn btn-secondary">CSDM Framework →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p5_t5_05';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSDM CI Alignment | CIS-DF Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5: CMDB &amp; CSDM</a>
+        <span class="sep">›</span>
+        <span class="current">CSDM CI Alignment</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 5 · Topic 8</div>
+        <h1 class="topic-title">CSDM CI Alignment — Mapping Discovered CIs Into the CSDM Framework</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          The final piece of the CSDM puzzle: how do discovered CIs from different sources
+          (Discovery, SGC, Import Sets) get properly aligned to CSDM's prescribed classes
+          and roles? What happens when Discovery creates CIs in the wrong classes?
+          How do CSDM alignment rules validate your data model? This topic brings together
+          everything from Parts 2-5.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>8 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~30 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~11% exam weight (CSDM domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>CSDM Alignment · CI Class Mapping · Class Rules · CMDB 360</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: The Alignment Problem -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Why CI Alignment to CSDM Classes Matters</h2>
+        <p>
+          Discovery and SGCs create CIs in specific CMDB classes based on what the scan or
+          API finds. In a perfect world, every discovered server becomes a
+          <span class="code-inline">cmdb_ci_linux_server</span> or
+          <span class="code-inline">cmdb_ci_win_server</span>, every cloud VM becomes a
+          <span class="code-inline">cmdb_ci_vm_instance</span>, and so on.
+        </p>
+        <p>
+          In practice, alignment problems occur frequently:
+        </p>
+        <ul>
+          <li>A Discovery pattern creates a Linux server as <span class="code-inline">cmdb_ci_computer</span> (generic) instead of <span class="code-inline">cmdb_ci_linux_server</span></li>
+          <li>An Import Set creates application records in <span class="code-inline">cmdb_ci_appl</span> when CSDM expects them in <span class="code-inline">cmdb_ci_business_app</span></li>
+          <li>A legacy integration creates all services as <span class="code-inline">cmdb_ci_service</span> without the correct service_type field set</li>
+        </ul>
+        <p>
+          When CIs are in the wrong classes, CSDM model-building fails: Service Mapping can't
+          identify them as supported CIs, Identification Rules for the correct class don't apply,
+          and CMDB Health shows class mismatches.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🗂️</span>
+          <div class="callout-body">
+            <strong>Analogy — Wrong Class as Filing in the Wrong Drawer</strong>
+            Imagine a hospital filing records. A patient's X-ray report is filed in the
+            "Prescription Records" drawer instead of "Radiology." The record exists, it's accurate,
+            but no one looking for radiology records finds it. Similarly, a Linux server CI in
+            the generic "computer" class won't be found by queries targeting Linux servers,
+            won't match Linux-specific Identification Rules, and won't appear in
+            "Linux server capacity" reports.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: CSDM's Prescribed CI Classes -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>CSDM's Prescribed Classes — What Goes Where</h2>
+        <p>
+          CSDM specifies exactly which CI classes should be used for each type of IT entity.
+          Deviating from these prescriptions breaks the CSDM model. Key prescriptions:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>IT Entity Type</th>
+              <th>CSDM-Prescribed Class</th>
+              <th>Common Misuse</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Business Application (named app)</td>
+              <td>cmdb_ci_business_app</td>
+              <td>Using cmdb_ci_service or creating in cmdb_ci_appl</td>
+            </tr>
+            <tr>
+              <td>Application Service (technical map)</td>
+              <td>cmdb_ci_service (service_type=Application Service)</td>
+              <td>Using wrong service_type, or using cmdb_ci_service without type field</td>
+            </tr>
+            <tr>
+              <td>Business Service</td>
+              <td>cmdb_ci_service (service_type=Business Service)</td>
+              <td>Confusing with Application Service; omitting service_type field</td>
+            </tr>
+            <tr>
+              <td>Technical Service</td>
+              <td>cmdb_ci_service (service_type=Technical Service)</td>
+              <td>Creating as a generic cmdb_ci_service without type</td>
+            </tr>
+            <tr>
+              <td>Physical server</td>
+              <td>cmdb_ci_server → specific subclass (Linux, Windows, etc.)</td>
+              <td>Leaving in cmdb_ci_computer (too generic)</td>
+            </tr>
+            <tr>
+              <td>Cloud VM</td>
+              <td>cmdb_ci_vm_instance or cloud-specific class</td>
+              <td>Treating as a physical server; wrong CSDM domain placement</td>
+            </tr>
+            <tr>
+              <td>Software Installation</td>
+              <td>cmdb_ci_appl (instance) + cmdb_ci_software_product (product)</td>
+              <td>Conflating software instance with product; missing the product record</td>
+            </tr>
+            <tr>
+              <td>Business Capability</td>
+              <td>cmdb_ci_business_capability</td>
+              <td>Modeling as a Business Application; missing the capability layer entirely</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — service_type Field on cmdb_ci_service Is Critical</strong>
+            All three CSDM service types (Application Service, Business Service, Technical Service)
+            use the same underlying table (<code>cmdb_ci_service</code>). The
+            <code>service_type</code> field distinguishes them. If this field is blank or
+            wrong, CSDM workflows, impact analysis, and CMDB Health checks cannot correctly
+            classify the service. Always verify service_type when creating or reviewing service CI records.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: Fixing Misaligned CIs — Reclassification -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Reclassifying Misaligned CIs</h2>
+        <p>
+          When you discover CIs in the wrong classes, you need to move them to the correct
+          class. This is called <span class="hl-teal">reclassification</span>.
+        </p>
+        <p>
+          Reclassification is not a simple update — changing a CI's class has implications:
+        </p>
+        <ul>
+          <li>The CI must be "moved" from one CMDB table to another (the tables are physically different for different classes)</li>
+          <li>Fields that exist on the old class but not the new class may be lost</li>
+          <li>Fields that exist on the new class but not the old class start as null</li>
+          <li>Existing relationships (incidents, changes, cmdb_rel_ci) must be re-pointed</li>
+          <li>IRE Identification Rules for the new class will now apply on the next Discovery/SGC run</li>
+        </ul>
+
+        <h3>How to Reclassify a CI</h3>
+        <p>
+          ServiceNow provides a "Reclassify CI" action on CI records:
+        </p>
+        <ol>
+          <li>Open the misclassified CI record</li>
+          <li>Click the "Reclassify" button (available based on roles)</li>
+          <li>Select the new CI class</li>
+          <li>Review field mapping: which fields transfer, which are lost, which start empty</li>
+          <li>Confirm — the CI is moved to the new table and relationships are re-pointed</li>
+        </ol>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Fix the Source, Not Just the Symptom</strong>
+            Reclassifying a CI manually corrects it today. But if the underlying Discovery
+            pattern or SGC configuration still sends data with the wrong class, the CI will
+            be reclassified back to the wrong class on the next run (IRE will create a new CI
+            of the wrong class or update the existing one to wrong attributes).
+            Always fix the Discovery pattern or SGC class mapping BEFORE reclassifying CIs.
+            Otherwise you'll repeat the reclassification after every scan.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Discovery Pattern Class Assignment -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Controlling CI Class from Discovery Patterns</h2>
+        <p>
+          Discovery Patterns (covered in Part 3 Topic 3) control which CMDB class is assigned
+          to discovered CIs. Getting this right is critical for CSDM alignment.
+        </p>
+
+        <h3>How Patterns Assign Classes</h3>
+        <p>
+          In a Discovery Pattern, each CI that the pattern creates or updates has a
+          CI class defined in the pattern steps. The pattern might have logic like:
+        </p>
+        <ul>
+          <li>If OS type = "Linux" → create as <span class="code-inline">cmdb_ci_linux_server</span></li>
+          <li>If OS type = "Windows" → create as <span class="code-inline">cmdb_ci_win_server</span></li>
+          <li>If device type = "Cisco IOS" → create as <span class="code-inline">cmdb_ci_netgear_router</span> (example)</li>
+        </ul>
+        <p>
+          In Pattern Designer (the UI for creating patterns), each CI output step lets you
+          configure the target class. If this is wrong or too generic
+          (<span class="code-inline">cmdb_ci_computer</span> instead of the specific OS class),
+          every CI created by this pattern will be misaligned.
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Audit Pattern Class Assignments After CSDM Rollout</strong>
+            When CSDM is being implemented in an organization, one of the first technical audits
+            should be reviewing all Discovery patterns and SGC class mappings to verify they
+            create CIs in CSDM-prescribed classes. This audit prevents the need for mass
+            reclassification later.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: SGC Class Mapping for CSDM -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>SGC Class Mapping for CSDM Alignment</h2>
+        <p>
+          Service Graph Connectors map cloud/third-party API data to CMDB CI classes.
+          The mapping is configured in the SGC's "Data Mapping" section in ServiceNow.
+        </p>
+
+        <h3>Cloud-Specific Classes and CSDM</h3>
+        <p>
+          Cloud resources have specific CSDM-aligned classes:
+        </p>
+        <ul>
+          <li>AWS EC2 → <span class="code-inline">cmdb_ci_vm_instance</span> or <span class="code-inline">cmdb_ci_ec2_instance</span> (more specific, SGC-provided class)</li>
+          <li>AWS Lambda → <span class="code-inline">cmdb_ci_aws_lambda_function</span></li>
+          <li>Azure VM → <span class="code-inline">cmdb_ci_azure_virtual_machine</span></li>
+          <li>Kubernetes Pod → <span class="code-inline">cmdb_ci_kubernetes_pod</span></li>
+        </ul>
+        <p>
+          ServiceNow-published SGC plugins define these classes and their CSDM alignment automatically.
+          Custom SGCs require manual configuration of class mappings.
+        </p>
+
+        <h3>When SGC Data Needs Business Application Mapping</h3>
+        <p>
+          SGCs are excellent at creating Domain 4 infrastructure CIs. However, SGCs generally
+          don't create Business Applications (Domain 1) — that requires business context that
+          cloud APIs don't provide. The typical workflow is:
+        </p>
+        <ol>
+          <li>SGC creates cloud VM/function/database CIs (Domain 4)</li>
+          <li>Service Mapping discovers how they connect and creates Application Services (Domain 2)</li>
+          <li>Administrators manually create Business Applications and link to Application Services</li>
+          <li>Optionally: tagging strategies (Part 3 Topic 4 — tag-based service mapping) can automate some Domain 2-to-1 linking</li>
+        </ol>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — SGC Creates Infrastructure CIs, Not Business Applications</strong>
+            SGCs are domain 4 tools — they populate infrastructure CIs. They don't create
+            Business Applications or Application Services automatically (unless specifically
+            configured to do so with custom mapping). The CSDM upper layers (Domains 1-2)
+            typically require human input to define the business context.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: CSDM Alignment Validation -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Validating CSDM Alignment — Tools and Reports</h2>
+        <p>
+          ServiceNow provides tools to validate how well your CMDB aligns with CSDM prescriptions:
+        </p>
+
+        <h3>CSDM Alignment Report</h3>
+        <p>
+          Navigate to <strong>Configuration → CMDB → CSDM → CSDM Alignment Report</strong>.
+          This report shows:
+        </p>
+        <ul>
+          <li>Percentage of CIs in CSDM-prescribed classes vs. generic/incorrect classes</li>
+          <li>Business Applications without Application Services linked</li>
+          <li>Application Services without any CI members</li>
+          <li>CIs in Domain 4 not linked to any Application Service or Technical Service</li>
+          <li>"Orphan" CIs — existing in CMDB but not connected to any CSDM object</li>
+        </ul>
+
+        <h3>CMDB Health — CSDM Dimension</h3>
+        <p>
+          CMDB Health (Part 6) includes a CSDM dimension that scores how complete the CSDM
+          model is. Specific sub-scores include:
+        </p>
+        <ul>
+          <li><strong>Business Application completeness:</strong> % of Business Applications with required fields populated and Application Services linked</li>
+          <li><strong>Application Service completeness:</strong> % of Application Services with support_group, business_criticality, and CI members</li>
+          <li><strong>Orphan CI percentage:</strong> % of CIs not connected to any CSDM service layer object</li>
+        </ul>
+      </div>
+
+      <!-- S7: CI Lifecycle and CSDM -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>CI Lifecycle Management Within CSDM</h2>
+        <p>
+          CSDM must reflect the actual lifecycle of IT services and infrastructure.
+          As CIs are provisioned, modified, and decommissioned, the CSDM model must stay current.
+        </p>
+
+        <h3>Key Lifecycle Events and CSDM Impact</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Lifecycle Event</th>
+              <th>Required CSDM Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>New server provisioned</td>
+              <td>Discovery creates CI. Service Mapping adds it to Application Service. Business Application link already exists — no action needed for existing app.</td>
+            </tr>
+            <tr>
+              <td>New application deployed</td>
+              <td>Create Business Application record. Run Service Mapping to create Application Service. Link them. Assign owners and business_criticality.</td>
+            </tr>
+            <tr>
+              <td>Server decommissioned</td>
+              <td>CI operational_status set to Retired. Service Mapping removes it from Application Service on next run (if Service Mapping is active). Change must be reviewed for impact.</td>
+            </tr>
+            <tr>
+              <td>Application retired</td>
+              <td>Business Application and Application Service operational_status set to Retired. Remove from active service catalog. Retain for audit history.</td>
+            </tr>
+            <tr>
+              <td>Application migrated to cloud</td>
+              <td>New cloud CIs created by SGC. Service Mapping updated. Business Application linked to new Application Service. Old Application Service retired.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — CSDM Is Maintained, Not Set-and-Forgotten</strong>
+            CSDM is a living model. The full lifecycle of every application — from provisioning
+            to decommission — must be reflected in the CSDM structure. Service Mapping automates
+            the Domain 4 to Domain 2 updates. Humans must manage Domain 1 (Business Applications,
+            Business Capabilities) through the application lifecycle.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>CSDM CI Alignment — Key Facts</h2>
+        <ul>
+          <li><strong>CSDM prescribes specific CI classes</strong> for each type of IT entity. Wrong class = broken CSDM model.</li>
+          <li><strong>service_type field on cmdb_ci_service</strong> distinguishes Application Service vs. Business Service vs. Technical Service. Never leave blank.</li>
+          <li><strong>Reclassification</strong> = moving a CI to the correct class. Must fix the source (pattern/SGC) first, or reclassification repeats after next scan.</li>
+          <li><strong>Discovery patterns assign CI classes</strong> in pattern steps. Audit these for CSDM alignment when implementing CSDM.</li>
+          <li><strong>SGC creates Domain 4 CIs</strong> (infrastructure). Doesn't automatically create Business Applications (Domain 1) — that needs human input.</li>
+          <li><strong>Orphan CIs</strong> = CIs in CMDB with no CSDM service layer connections. High orphan count = low CSDM maturity.</li>
+          <li><strong>CSDM Alignment Report</strong> shows class mismatches, missing links, orphan CIs. Starting point for CSDM gap analysis.</li>
+          <li><strong>CMDB Health CSDM dimension</strong> scores Business Application completeness, Application Service completeness, orphan CI percentage.</li>
+          <li><strong>Application lifecycle must be reflected</strong> in CSDM — provisioning, changes, and decommissions all require CSDM updates.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">CSDM CI Alignment</div>
+            <div class="term-def">The process of ensuring discovered/ingested CIs are in CSDM-prescribed CI classes and connected to the correct CSDM service layer objects. Required for CSDM-driven impact analysis to work.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Reclassification</div>
+            <div class="term-def">Moving a CI from one CMDB class to another. Preserves relationships but may lose class-specific field data. Must be paired with fixing the discovery/ingestion source to prevent recurrence.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">service_type Field</div>
+            <div class="term-def">Field on cmdb_ci_service that distinguishes CSDM service types: "Application Service" (technical map), "Business Service" (business grouping), "Technical Service" (shared internal capability).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Orphan CI</div>
+            <div class="term-def">A CI in the CMDB not linked to any CSDM Application Service or Technical Service. It exists as raw infrastructure data with no business context. High orphan count indicates incomplete CSDM implementation.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CSDM Alignment Report</div>
+            <div class="term-def">ServiceNow report showing gaps in CSDM implementation: misclassified CIs, missing Business Application links, empty Application Services, and orphan CIs. Used for CSDM gap analysis.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CI Lifecycle (CSDM)</div>
+            <div class="term-def">The end-to-end management of CI data from provisioning through decommission within CSDM. Each lifecycle event (new app, migration, retirement) requires specific CSDM updates to keep the model current.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. Discovery has been running for 6 months. A CSDM Alignment Report shows that 2,000 server CIs are in the cmdb_ci_computer class instead of cmdb_ci_linux_server or cmdb_ci_win_server. The admin reclassifies all 2,000 CIs manually. The next morning, the same 2,000 CIs are back in cmdb_ci_computer. What went wrong?</div>
+          <div class="cq-options">
+            <div>A) Reclassification is temporary — it always reverts after 24 hours</div>
+            <div>B) The Discovery patterns that create these CIs are still configured to use cmdb_ci_computer. IRE processed the next Discovery run and re-created them in the wrong class.</div>
+            <div>C) The CMDB Health job automatically reverts class changes to maintain consistency</div>
+            <div>D) The IRE Identification Rules require cmdb_ci_computer class for these CIs</div>
+          </div>
+          <div class="cq-hint">💡 What creates these CIs? If the creator hasn't been fixed, what happens next time?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — The Discovery patterns are still configured to create CIs as cmdb_ci_computer. When Discovery ran the next morning, it sent payloads with class=cmdb_ci_computer to IRE. IRE used the Identification Rules for cmdb_ci_computer, found (or didn't find) the existing CIs, and either updated them (in cmdb_ci_computer) or created new ones in that class. The manual reclassification was undone by the automated process. Correct sequence: fix the Discovery pattern class configuration first, THEN reclassify the existing misaligned CIs.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. An administrator creates a new Application Service record for the company's ERP system. When creating the record in the cmdb_ci_service table, which field is MOST critical to set correctly for CSDM compliance?</div>
+          <div class="cq-options">
+            <div>A) The name field</div>
+            <div>B) The service_type field (must be set to "Application Service")</div>
+            <div>C) The operational_status field</div>
+            <div>D) The support_group field</div>
+          </div>
+          <div class="cq-hint">💡 cmdb_ci_service is used for multiple CSDM concepts. How does CSDM distinguish between them?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — All three CSDM service types (Application Service, Business Service, Technical Service) use the same cmdb_ci_service table. The service_type field is what distinguishes them. Without service_type="Application Service", the record exists but CSDM workflows, impact analysis, and CMDB Health checks cannot correctly classify it as an Application Service. CSDM reports may show it as uncategorized. While name (A), operational_status (C), and support_group (D) are all important, service_type is the critical CSDM-specific field.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. An AWS SGC is running successfully and creating EC2 instance CIs. The CSDM Alignment Report shows these CIs as "Orphan CIs." What does this mean and what needs to be done?</div>
+          <div class="cq-options">
+            <div>A) The EC2 CIs have duplicate records that need to be merged</div>
+            <div>B) The EC2 instance CIs exist in the CMDB but are not linked to any Application Service or Technical Service — Service Mapping needs to run or manual service membership needs to be configured</div>
+            <div>C) The EC2 CIs are in the wrong class and need to be reclassified</div>
+            <div>D) The SGC is not properly authenticated and the CIs are incomplete</div>
+          </div>
+          <div class="cq-hint">💡 "Orphan CI" means the CI exists but has no CSDM service layer connection. What provides that connection?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — An Orphan CI is correctly classified and properly stored in the CMDB (the SGC is working fine), but it has no connection upward to any CSDM service layer object (Application Service or Technical Service). The EC2 instances exist as raw infrastructure data with no business context. The fix is to run Service Mapping to discover how these EC2 instances support applications (creating Application Service membership), or manually link them to Technical Services if they are shared infrastructure.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. A company retires an on-premises application and migrates it to a cloud-native microservices architecture. From a CSDM perspective, what steps need to occur to keep the CSDM model accurate?</div>
+          <div class="cq-options">
+            <div>A) Delete the old Business Application and create a new one for the cloud version</div>
+            <div>B) Retire the old Application Service (domain 2), configure SGC for cloud CIs (domain 4), run Service Mapping to create a new Application Service for the cloud version, link the existing Business Application to the new Application Service, and retire the old on-premises CIs</div>
+            <div>C) Change the old Application Service's name to include "Cloud" and update the CI list manually</div>
+            <div>D) No CSDM changes needed — the Business Application record captures the business concept, which doesn't change</div>
+          </div>
+          <div class="cq-hint">💡 A migration changes the infrastructure (Domain 4) and the technical implementation (Domain 2), but the business purpose (Domain 1) typically stays the same.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — A cloud migration is a complex CSDM lifecycle event. The Business Application (Domain 1) represents the business function which doesn't change — keep it and re-link it. The old Application Service (Domain 2) should be retired (not deleted — preserve history). New cloud CIs are created by the cloud SGC (Domain 4). Service Mapping runs against the cloud entry points to create a new Application Service capturing the cloud architecture. Finally, the Business Application is re-linked from the old (retired) Application Service to the new one. This preserves business continuity in the CSDM model.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. The CMDB Health report shows a "Business Application Completeness" score of 38% (critical threshold is 70%). The main driver is that 60% of Business Application records have the business_criticality and IT owner fields blank. What is the best approach to improve this score?</div>
+          <div class="cq-options">
+            <div>A) Run Discovery against Business Applications to auto-populate missing fields</div>
+            <div>B) Create a governance initiative: assign Business Application owners responsibility to populate required fields, track completion in CMDB Health, use targeted reporting to show applications with missing fields</div>
+            <div>C) Set a default value of "Medium" for business_criticality on all Business Applications</div>
+            <div>D) Delete Business Applications with incomplete fields and recreate them properly</div>
+          </div>
+          <div class="cq-hint">💡 Who sets business_criticality and IT owner? Can automation do it?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Business Application fields like business_criticality and IT owner reflect business decisions that humans must make — Discovery cannot determine business criticality from a network scan. The correct approach is a governance initiative: identify Business Application owners, assign them responsibility for keeping their application's CSDM data current, use CMDB Health reporting to show gaps and progress, and potentially create tasks for owners with incomplete records. Option C (default "Medium") improves the score artificially without improving actual data quality — this defeats the purpose of CMDB Health.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="07-csdm-service-modeling.html" class="btn btn-secondary">← CSDM Service Modeling</a>
+          <a href="../../part6-governance/topics/05-governance-framework.html" class="btn btn-secondary">Part 6: Governance Framework →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p5_t8_08';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

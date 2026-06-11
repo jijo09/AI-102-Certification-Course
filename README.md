@@ -11,6 +11,7 @@
 |---|---|---|---|---|
 | Microsoft Azure AI Engineer Associate | AI-102 | 6 | 18 | Active ⚠️ retires Jun 30 2026 |
 | ServiceNow Certified System Administrator | CSA · Zurich | 6 | 22 | Active |
+| ServiceNow Certified Implementation Specialist – Data Foundations | CIS-DF | 8 | 43 | Active |
 
 ---
 
@@ -105,6 +106,23 @@ Unified study session without page-hopping:
 
 ---
 
+### ServiceNow CIS-DF: Certified Implementation Specialist – Data Foundations
+
+| Part | Domain | Exam Weight | Topics |
+|---|---|---|---|
+| 1 | ServiceNow Data Model | 15% | Table Types · Field Types · Relationships · Schema Design |
+| 2 | Import Sets, SGC & Ingestion | 10% | Import Sets · Transform Maps · Data Sources · Coalesce · SGC · Non-Discoverable CIs |
+| 3 | Discovery & Service Mapping | 7% | Discovery Architecture · MID Server · Patterns & Probes · Service Mapping · ACC |
+| 4 | IRE — Identity & Reconciliation Engine | 2% | IRE Architecture · Identification Rules · Reconciliation Rules · Deduplication |
+| 5 | CMDB, CSDM & Service Modeling | 11% | CMDB Architecture · CI Relationships · Discovery & IRE · CMDB Health · CI Class Manager · CSDM |
+| 6 | Governance & Data Quality | 35% ★ | Data Policies · Field Validation · Ref Qualifiers · Data Certification · CMDB Governance · Health KPIs |
+| 7 | Reporting, Analytics & CMDB Workspace | 20% | Report Types · Database Views · Dashboards · Performance Analytics · CMDB Workspace · Foundation Dashboards |
+| 8 | Integration & Advanced | — | REST API · IntegrationHub · Archiving & Retention · Instance Data Health |
+
+**Reference:** [ServiceNow CIS-DF Certification](https://www.servicenow.com/services/training-and-certification/certified-implementation-specialist-data-foundations.html)
+
+---
+
 ## Project Structure
 
 ```
@@ -137,19 +155,34 @@ Certification-Study-Hub/
 │   ├── part5-knowledge-mining/       # Same structure
 │   └── part6-computer-vision/        # Same structure
 │
-└── servicenow-csa/
-    ├── index.html                    # CSA dashboard
-    ├── config.js                     # CSA course config (sidebar tree, metadata, theme)
-    ├── revision.html                 # CSA revision center
-    ├── flashcards.html               # CSA global flashcard deck
+├── servicenow-csa/
+│   ├── index.html                    # CSA dashboard
+│   ├── config.js                     # CSA course config (sidebar tree, metadata, theme)
+│   ├── revision.html                 # CSA revision center
+│   ├── flashcards.html               # CSA global flashcard deck
+│   ├── scripts/
+│   │   └── study-data.js             # CSA flashcard and quiz data
+│   ├── part1-navigation/             # Same part structure as ai-102
+│   ├── part2-configuration/
+│   ├── part3-collaboration/
+│   ├── part4-database-security/
+│   ├── part5-migration-integration/
+│   └── part6-process-automation/
+│
+└── servicenow-cis-df/
+    ├── index.html                    # CIS-DF dashboard
+    ├── config.js                     # CIS-DF course config
+    ├── revision.html                 # CIS-DF revision center
     ├── scripts/
-    │   └── study-data.js             # CSA flashcard and quiz data
-    ├── part1-navigation/             # Same part structure as ai-102
-    ├── part2-configuration/
-    ├── part3-collaboration/
-    ├── part4-database-security/
-    ├── part5-migration-integration/
-    └── part6-process-automation/
+    │   └── study-data.js             # CIS-DF flashcard data (43 topics, 8 parts)
+    ├── part1-data-model/
+    ├── part2-import-migration/
+    ├── part3-discovery/
+    ├── part4-ire/
+    ├── part5-cmdb/
+    ├── part6-governance/
+    ├── part7-reporting-analytics/
+    └── part8-integration-advanced/   # Each part: index.html · quiz.html · flashcards.html · topics/
 ```
 
 ---
@@ -211,13 +244,11 @@ CSS custom properties in `styles/main.css` drive the entire visual system:
 
 ### Adding a new course
 
-To add a new cert (e.g., ServiceNow CIS-DF):
-
-1. **Create folder** `servicenow-cisdf/` — copy `servicenow-csa/` structure, swap content
+1. **Create folder** `<cert-code>/` — copy `servicenow-cis-df/` structure, swap content
 2. **`config.js`** — set course name, theme class, sidebar tree pointing at your parts/topics
 3. **`study-data.js`** — populate flashcard and quiz data
-4. **`styles/main.css`** — add `body.theme-cisdf { --accent-color: ...; }` (~5 lines)
-5. **`index.html`** — add a `<div class="selector-card card-cisdf">` entry to the portal
+4. **`styles/main.css`** — add `body.theme-<cert> { --accent-color: ...; }` (~5 lines)
+5. **`index.html`** — add a `<div class="selector-card card-<cert>">` entry to the portal
 
 Engine, sidebar, flashcards, quiz, and light mode all inherit automatically.
 

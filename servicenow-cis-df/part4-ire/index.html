@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 4 — IRE: Identity & Reconciliation Engine | CIS-DF Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .part-hero { background: linear-gradient(135deg, rgba(8,145,178,0.1) 0%, #021a20 60%); border: 1px solid rgba(8,145,178,0.2); border-radius: var(--radius-2xl); padding: var(--space-10) var(--space-12); margin-bottom: var(--space-8); position: relative; overflow: hidden; }
+    .part-hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; background: radial-gradient(circle, rgba(8,145,178,0.15) 0%, transparent 70%); }
+    .part-hero-eyebrow { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #67e8f9; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.25); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); margin-bottom: var(--space-4); font-family: var(--font-heading); }
+    .part-hero-title { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.15; margin-bottom: var(--space-4); background: linear-gradient(135deg, #f0fbff 0%, #a5f3fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .part-hero-desc { font-size: 0.975rem; color: var(--text-secondary); max-width: 600px; line-height: 1.75; margin-bottom: var(--space-8); }
+    .part-hero-meta { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-value { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: #67e8f9; line-height: 1; }
+    .meta-label { font-size: 0.7rem; color: var(--text-muted); }
+    .why-card { background: rgba(8,145,178,0.06); border: 1px solid rgba(8,145,178,0.15); border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8); margin-bottom: var(--space-8); }
+    .why-title { font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: #67e8f9; margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2); }
+    .topic-list { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-10); }
+    .topic-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-6); display: flex; gap: var(--space-6); align-items: flex-start; text-decoration: none; transition: all var(--transition-normal); position: relative; overflow: hidden; }
+    .topic-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #0891b2; border-radius: var(--radius-xl) 0 0 var(--radius-xl); }
+    .topic-card:hover { border-color: rgba(8,145,178,0.4); transform: translateX(4px); box-shadow: 0 4px 16px rgba(8,145,178,0.1); }
+    .topic-card.completed::before { background: var(--green-500); }
+    .topic-num-badge { width: 44px; height: 44px; min-width: 44px; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.25); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: #67e8f9; margin-top: 2px; }
+    .topic-card-body { flex: 1; }
+    .topic-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-2); }
+    .topic-card-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+    .topic-card-desc { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-4); }
+    .topic-card-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .topic-tag { font-size: 0.68rem; font-family: var(--font-mono); background: var(--bg-secondary); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: var(--radius-sm); }
+    .topic-arrow { color: var(--text-muted); font-size: 1.2rem; margin-top: 2px; flex-shrink: 0; transition: transform var(--transition-fast); }
+    .topic-card:hover .topic-arrow { transform: translateX(4px); color: #67e8f9; }
+    .learn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-8); }
+    .learn-item { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-5); display: flex; gap: var(--space-3); align-items: flex-start; }
+    .learn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .learn-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+    .action-bar { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-8); }
+    .action-bar-left { display: flex; flex-direction: column; gap: var(--space-1); }
+    .action-bar-title { font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
+    .action-bar-sub { font-size: 0.8rem; color: var(--text-muted); }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+    @media (max-width: 700px) { .part-hero { padding: var(--space-6); } .topic-card { flex-direction: column; gap: var(--space-3); } .action-bar { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <span class="current">Part 4 — IRE</span>
+      </div>
+    </header>
+    <div class="page-content stagger">
+
+      <div class="part-hero animate-fade-in">
+        <div class="part-hero-eyebrow">⚙️ Part 4 of 8 &nbsp;·&nbsp; INGEST Domain (19% Exam Weight)</div>
+        <h1 class="part-hero-title">IRE — Identity &<br>Reconciliation Engine</h1>
+        <p class="part-hero-desc">
+          Discovery sends data to the CMDB — IRE decides what to do with it. Every CI write
+          goes through IRE's three-phase pipeline: Identification (does this CI already exist?),
+          Reconciliation (who owns each field?), and Deduplication (are there duplicate CIs?).
+          IRE is the engine that maintains CMDB integrity in a multi-source environment.
+        </p>
+        <div class="part-hero-meta">
+          <div class="meta-item"><span class="meta-value">19%</span><span class="meta-label">Exam Weight (INGEST)</span></div>
+          <div class="meta-item"><span class="meta-value" data-part-done-count>0/4</span><span class="meta-label">Topics Finished</span></div>
+          <div class="meta-item"><span class="meta-value" data-part-done-pct>0%</span><span class="meta-label">Readiness</span></div>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-title">💡 IRE Exam Focus Areas</div>
+        <p style="font-size:0.875rem; line-height:1.6; color:var(--text-secondary); margin:0;">
+          Critical exam traps: IRE API vs. Table API (always use IRE API for integrations — Table API bypasses IRE), Identification Rule entry logic (AND logic, missing field = entry skipped), Reconciliation Rule staleness period (per field, not per CI), and Deduplication (fix root cause before running remediation playbooks — don't merge duplicates before fixing the Identification Rule). The IRE Log (cmdb_ire_event) is the primary diagnostic tool for all ingestion issues.
+        </p>
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">Part 4 Study Modules</h2>
+      <div class="topic-list">
+
+        <a href="topics/01-ire-architecture.html" class="topic-card" id="card-cisdf_p4i_t1_01">
+          <div class="topic-num-badge">01</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">IRE Architecture — The Three-Phase Pipeline</h3></div>
+            <p class="topic-card-desc">IRE's role as CMDB gatekeeper, three-phase pipeline (Identification → Reconciliation → Deduplication), IRE API vs. Table API (critical exam trap), source labels, and IRE Log (cmdb_ire_event) as primary diagnostic tool.</p>
+            <div class="topic-card-tags"><span class="topic-tag">IRE</span><span class="topic-tag">cmdb_ire_event</span><span class="topic-tag">IRE API</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/02-identification-rules.html" class="topic-card" id="card-cisdf_p4i_t2_02">
+          <div class="topic-num-badge">02</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Identification Rules — Does This CI Already Exist?</h3></div>
+            <p class="topic-card-desc">Identification Rule anatomy, Identifier Entries (AND logic — all fields must match), out-of-box identification rules by CI class (serial_number+manufacturer+model_id for servers), Lookup Rules for dependent CIs, Test Identification utility.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Identification Rule</span><span class="topic-tag">Identifier Entry</span><span class="topic-tag">Lookup Rule</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/03-reconciliation-rules.html" class="topic-card" id="card-cisdf_p4i_t3_03">
+          <div class="topic-num-badge">03</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Reconciliation Rules — Who Owns Each Field?</h3></div>
+            <p class="topic-card-desc">Reconciliation Rule anatomy, CMDB Data Source Priority (Manual > Discovery > SGC > Other), field ownership modes (Fully Authoritative, Priority-Based, First-in Wins), Staleness Period (per field — not per CI), discovery_source field, null value handling.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Reconciliation Rule</span><span class="topic-tag">Source Priority</span><span class="topic-tag">Staleness Period</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/04-dedup-remediation.html" class="topic-card" id="card-cisdf_p4i_t4_04">
+          <div class="topic-num-badge">04</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Deduplication & Remediation — Resolving Duplicate CIs</h3></div>
+            <p class="topic-card-desc">How duplicates form (4 common causes), IRE Phase 3 real-time dedup, cmdb_dedup table, Master CI determination criteria, Remediation Playbooks (Merge, Keep Primary, Flag, Dismiss), merge process flow, and the critical rule: fix root cause before running remediation.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Deduplication</span><span class="topic-tag">cmdb_dedup</span><span class="topic-tag">Remediation Playbook</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">What You'll Master</h2>
+      <div class="learn-grid">
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">IRE's three-phase pipeline and why every CI write goes through it — even from Table API? (No — that's the trap.)</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Identification Rule AND logic — all Identifier Entry fields must match or the entry is skipped.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Reconciliation Rule staleness period is per field, not per CI — critical distinction on the exam.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Deduplication: always fix the Identification Rule first, then run remediation — never merge without fixing root cause.</span></div>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <div class="action-bar-title">Ready to continue to Part 5: CMDB &amp; CSDM?</div>
+          <div class="action-bar-sub">IRE processes CI data; CMDB and CSDM define how it's organized and modeled.</div>
+        </div>
+        <div style="display:flex; gap:var(--space-3)">
+          <a href="flashcards.html" class="btn btn-secondary">🧠 Flashcards</a>
+          <a href="quiz.html" class="btn btn-secondary">🎯 Quiz</a>
+          <a href="../part5-cmdb/index.html" class="btn btn-primary">Part 5: CMDB &amp; CSDM →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  function updatePartPageStats() {
+    const topicIds = [
+      'cisdf_p4i_t1_01','cisdf_p4i_t2_02','cisdf_p4i_t3_03','cisdf_p4i_t4_04'
+    ];
+    const done = topicIds.filter(id => ProgressManager.isComplete(id)).length;
+    const total = topicIds.length;
+    const pct = Math.round((done / total) * 100);
+    document.querySelectorAll('[data-part-done-count]').forEach(el => { el.textContent = `${done}/${total}`; });
+    document.querySelectorAll('[data-part-done-pct]').forEach(el => { el.textContent = `${pct}%`; });
+    topicIds.forEach(tid => {
+      const card = document.getElementById(`card-${tid}`);
+      if (card) card.classList.toggle('completed', ProgressManager.isComplete(tid));
+    });
+  }
+  document.addEventListener('DOMContentLoaded', updatePartPageStats);
+  document.addEventListener('progressUpdated', updatePartPageStats);
+</script>
+</body>
+</html>

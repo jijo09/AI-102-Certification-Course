@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Table Types &amp; Hierarchy | CIS-DF Part 1</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-4);margin:var(--space-4) 0}
+    .term-card{background:var(--glass-1);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);transition:border-color var(--transition-fast)}
+    .term-card:hover{border-color:rgba(8,145,178,0.35);background:var(--glass-2)}
+    .term-name{font-family:var(--font-heading);font-size:0.82rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card p{font-size:0.82rem;color:var(--text-muted);line-height:1.55;margin:0}
+    .flow-steps{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;margin:var(--space-4) 0}
+    .flow-step{background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.25);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);font-family:var(--font-heading);font-size:0.82rem;font-weight:600;color:#22d3ee}
+    .flow-arrow{color:var(--text-muted);font-size:1rem}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .hl-emerald{color:var(--emerald-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Table Types &amp; Hierarchy</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 1 · Topic 1</div>
+        <h1 class="topic-title">Table Types &amp; Hierarchy</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Everything in ServiceNow is a row in a table. Master the object-oriented inheritance model, the Task framework,
+          and how extending versus creating standalone tables shapes your entire data architecture.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>6 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~20 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~12% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Model</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Everything is a Table</h2>
+        <p>
+          Before touching any ServiceNow concept, you need one foundational truth burned into your memory:
+          <span class="hl-teal">every piece of data in ServiceNow lives in a table</span>. Every incident, every
+          change request, every user, every configuration item, every script, every notification template —
+          all of them are rows in database tables. Even the list of tables itself is stored in a table.
+        </p>
+        <p>
+          This is not just a technical detail — it is why ServiceNow is so configurable. Because everything is
+          a table, you can add fields to almost anything, create relationships between anything, and report
+          on anything using the same consistent tools. Understanding this single idea unlocks the entire platform.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Analogy — A City of Spreadsheets</strong>
+            Imagine ServiceNow as a city of spreadsheets. Each spreadsheet (table) has named columns (fields) and
+            rows (records). When you open an Incident, you're reading row #47382 from the <em>incident</em> spreadsheet.
+            When you add a custom field, you're adding a new column. The "meta-spreadsheet" — a table called
+            <code>sys_db_object</code> — lists every other spreadsheet that exists.
+          </div>
+        </div>
+
+        <h3>The sys_db_object Table</h3>
+        <p>
+          The table <span class="code-inline">sys_db_object</span> is ServiceNow's "table of tables." It stores
+          one record for every table in the instance — the table name, label, whether it extends another table,
+          which scope it belongs to, and more. When you create a new custom table, a record is inserted into
+          <span class="code-inline">sys_db_object</span> automatically. Navigate here via
+          <span class="code-inline">System Definition → Tables</span> in the Application Navigator.
+        </p>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Object-Oriented Inheritance Model</h2>
+        <p>
+          ServiceNow tables use <span class="hl-teal">single-table inheritance</span>, borrowed from
+          object-oriented programming. Just as a class in Java can extend a parent class and inherit
+          its methods and properties, a ServiceNow table can extend a parent table and inherit all of
+          its fields, business rules, ACLs, and UI policies.
+        </p>
+        <p>
+          In concrete database terms: when Table B extends Table A, every row in Table B is <em>also</em>
+          stored in Table A. The row appears in both tables. Table B just adds extra columns on top
+          of the ones inherited from A. This is why querying the parent table returns records from all
+          child tables.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Single-Table Inheritance</strong>
+            When <code>incident</code> extends <code>task</code>, every incident record is physically stored
+            in the <code>task</code> table AND has additional columns in the <code>incident</code> table.
+            A GlideRecord query on <code>task</code> will include incidents, changes, and problems.
+            A query on <code>incident</code> shows only incidents. The <code>sys_class_name</code> field
+            on each row identifies the actual type.
+          </div>
+        </div>
+
+        <h3>sys_class_name — The Type Discriminator</h3>
+        <p>
+          Every record in a table hierarchy has a field called <span class="code-inline">sys_class_name</span>.
+          This stores the actual table name of the record. When an Incident lives in the <code>task</code>
+          table alongside Changes and Problems, ServiceNow uses <span class="code-inline">sys_class_name = 'incident'</span>
+          to distinguish it. Without this field, there would be no way to know which type each row represents.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Inheritance Direction</strong>
+            Inheritance only flows <em>downward</em>. Child tables inherit from parents — never the reverse.
+            Adding a field to the <code>incident</code> table does NOT add it to <code>task</code>.
+            Adding a field to <code>task</code> immediately adds it to ALL child tables (incident, change_request,
+            problem, etc.). Modifying base/parent tables requires extra caution because changes propagate everywhere.
+          </div>
+        </div>
+
+        <h3>What Gets Inherited</h3>
+        <p>
+          When a child table extends a parent, it inherits: <strong>fields</strong>, <strong>ACLs</strong>
+          (access control rules), <strong>business rules</strong>, <strong>client scripts</strong>,
+          <strong>UI policies</strong>, and <strong>dictionary entries</strong>. This centralizes
+          governance — one ACL on <code>task</code> protects all work item types. But a mistake on a
+          parent table ACL propagates everywhere, so always test carefully before modifying parent tables.
+        </p>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>The Task Table — ServiceNow's Core Framework</h2>
+        <p>
+          The <span class="hl-teal">task</span> table (<span class="code-inline">task</span>) is the most
+          important table in ServiceNow. It is the parent of essentially every "work item" in the platform.
+          Incidents, Changes, Problems, Service Requests, Work Orders, Cases — they all extend <code>task</code>.
+        </p>
+        <p>
+          Why does this matter? Because extending <code>task</code> is not just about inheriting fields —
+          it buys you the entire <strong>Task Framework</strong>. All of these capabilities come for free
+          when you extend task:
+        </p>
+        <ul>
+          <li><strong>SLA Engine</strong> — automatic SLA timers with breach notifications and escalation</li>
+          <li><strong>Approval Engine</strong> — approval workflows and approval records</li>
+          <li><strong>Activity Stream</strong> — threaded work notes and comments with full history</li>
+          <li><strong>Assignment Logic</strong> — assigned_to and assignment_group fields with routing rules</li>
+          <li><strong>State Machine</strong> — state field with configurable lifecycle transitions</li>
+          <li><strong>Watch List</strong> — users who receive notifications on the record</li>
+          <li><strong>Task Relations</strong> — parent/child task relationships</li>
+          <li><strong>Skills-based routing</strong> — dispatch logic based on agent capabilities</li>
+        </ul>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Analogy — Pre-Built Contract Template</strong>
+            Think of <code>task</code> as a standard contract template that already has sections for
+            timeline, approvals, progress tracking, and stakeholder notifications. When you create a new
+            "Work Order" type, you extend this template — you automatically get all those sections without
+            writing them yourself. Creating a standalone table instead is like starting from a blank page:
+            possible, but you lose all the pre-built structure.
+          </div>
+        </div>
+
+        <h3>Core Tables That Extend Task</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">incident</div>
+            <p>Unplanned service interruption. Adds caller_id, impact, urgency, priority auto-calculation.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">change_request</div>
+            <p>Controlled infrastructure modification. Adds change type, CAB approval, risk assessment fields.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">problem</div>
+            <p>Root cause investigation. Adds known_error flag, workaround, fix confirmed date.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">sc_request</div>
+            <p>Service catalog order container. Has child sc_req_item records for each ordered item.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">sc_req_item</div>
+            <p>Individual catalog item within a request. Links to the catalog item definition.</p>
+          </div>
+          <div class="term-card">
+            <div class="term-name">sc_task</div>
+            <p>Fulfillment task generated from catalog item. Assigned to the fulfillment team.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Standalone Table Has No SLAs</strong>
+            Creating a custom table that does NOT extend <code>task</code> loses ALL Task Framework features.
+            No SLAs, no approvals, no activity stream, no assignment routing. The exam presents scenarios
+            where a team "creates a standalone table for tracking deliverables" and asks why SLAs are not
+            firing — the answer is always that the table doesn't extend task.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Custom Tables — Extending vs. Standalone</h2>
+        <p>
+          When you need a new table in ServiceNow, you face one fundamental decision: extend an existing
+          table, or create a standalone table from scratch. The right choice depends entirely on what
+          the table is meant to hold.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Aspect</th><th>Extending Task</th><th>Standalone Table</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>SLAs</td><td>Inherited automatically</td><td>Must build from scratch</td></tr>
+            <tr><td>Approvals</td><td>Inherited automatically</td><td>Must build from scratch</td></tr>
+            <tr><td>Activity Stream</td><td>Inherited automatically</td><td>Not available</td></tr>
+            <tr><td>Assignment fields</td><td>assigned_to + assignment_group inherited</td><td>Must add manually</td></tr>
+            <tr><td>State transitions</td><td>State machine from task</td><td>Must build state logic yourself</td></tr>
+            <tr><td>Reports across types</td><td>Appears in cross-task-type reports</td><td>Needs its own reports</td></tr>
+            <tr><td>Best use case</td><td>Anything representing "work" people do</td><td>Lookup/reference data, config tables</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Custom Table Naming — The u_ Prefix</h3>
+        <p>
+          All custom tables created in the <strong>Global scope</strong> must have a name prefixed with
+          <span class="code-inline">u_</span>. This prevents naming collisions with ServiceNow baseline tables.
+          For example: <span class="code-inline">u_equipment_request</span> or <span class="code-inline">u_vendor_contract</span>.
+        </p>
+        <p>
+          Tables inside a <strong>Scoped Application</strong> use the application's namespace prefix instead.
+          A scoped app with vendor prefix <span class="code-inline">x_fac</span> creates tables like
+          <span class="code-inline">x_fac_facilities_request</span>. The namespace replaces <code>u_</code>
+          and ensures isolation between vendor applications installed on the same instance.
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — When Standalone Is Right</strong>
+            Standalone tables are ideal for pure reference and lookup data: country lists, product categories,
+            approved software versions, or configuration parameters. These aren't "work items" — they're data
+            that other records reference. They don't need SLAs or approvals. For anything involving people
+            doing work and tracking progress, always extend task.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>The cmdb_ci Table — Root of All Configuration Items</h2>
+        <p>
+          Just as <code>task</code> is the root of all work items, <span class="hl-teal">cmdb_ci</span>
+          is the root of all Configuration Items (CIs). Every server, application, network device, virtual
+          machine, or database that ServiceNow tracks as a CI is a record in a table that ultimately
+          extends <code>cmdb_ci</code>.
+        </p>
+        <p>
+          The hierarchy is intentionally deep because different CI types have very different fields. A server
+          needs CPU count, RAM, and OS version. A network device needs port counts and firmware version.
+          The inheritance chain allows each level to add only the fields relevant to that type.
+        </p>
+
+        <div class="flow-steps">
+          <div class="flow-step">cmdb_ci (root)</div>
+          <span class="flow-arrow">›</span>
+          <div class="flow-step">cmdb_ci_hardware</div>
+          <span class="flow-arrow">›</span>
+          <div class="flow-step">cmdb_ci_computer</div>
+          <span class="flow-arrow">›</span>
+          <div class="flow-step">cmdb_ci_server</div>
+          <span class="flow-arrow">›</span>
+          <div class="flow-step">cmdb_ci_linux_server</div>
+        </div>
+
+        <p>
+          At the root level, <code>cmdb_ci</code> provides universal CI fields that every CI has:
+          <strong>name</strong>, <strong>install status</strong>, <strong>owned by</strong>,
+          <strong>managed by</strong>, <strong>asset tag</strong>, <strong>serial number</strong>,
+          and so on. These appear on every CI regardless of type, because they are inherited.
+        </p>
+
+        <h3>Why Query Hierarchy Matters</h3>
+        <p>
+          Because of inheritance, querying <span class="code-inline">cmdb_ci</span> returns <em>all</em> CIs —
+          servers, applications, databases, network devices, everything. Querying
+          <span class="code-inline">cmdb_ci_server</span> returns only server-type CIs. This lets you
+          build both broad ("all CIs owned by this department") and specific ("all Linux servers") queries
+          using the same consistent table hierarchy.
+        </p>
+      </div>
+
+      <!-- S6 -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Database Views — Virtual Read-Only Tables</h2>
+        <p>
+          A <span class="hl-teal">Database View</span> in ServiceNow is not a real table. It is a
+          virtual, read-only "table" defined as a SQL JOIN between two or more real tables. Database Views
+          exist primarily for reporting — they let you build reports spanning multiple related tables as if
+          they were one flat table.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — What a DB View Actually Is</strong>
+            Imagine you want a report showing Incident records alongside details of the CI the incident
+            affected. Incident lives in <code>incident</code>; CI details are in <code>cmdb_ci</code>.
+            A Database View JOINs these two tables on the CI reference field, presenting combined columns
+            as a single virtual table you can report on. No data is duplicated — the view just executes
+            a JOIN query at report time.
+          </div>
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Aspect</th><th>Real Table</th><th>Database View</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Can insert records</td><td>Yes</td><td>No — read-only</td></tr>
+            <tr><td>Can update records</td><td>Yes</td><td>No — read-only</td></tr>
+            <tr><td>Physical storage</td><td>Yes — data stored on disk</td><td>No — computed on query</td></tr>
+            <tr><td>Use in reports</td><td>Yes</td><td>Yes — primary purpose</td></tr>
+            <tr><td>URL navigation</td><td>tablename.list works</td><td>viewname.list works</td></tr>
+            <tr><td>Performance</td><td>Fast with indexes</td><td>Can be slow (JOIN at query time)</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — DB Views Are Read-Only</strong>
+            Database Views cannot be used to insert or update data. If the exam asks how to write records
+            through a Database View, the answer is: you don't. You insert into the underlying real tables.
+            Database Views are query and reporting tools only — never write targets.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Table Types &amp; Hierarchy</h2>
+        <ul>
+          <li><strong>sys_db_object</strong> is the "table of tables" — stores every table definition</li>
+          <li>Child tables inherit from parents — adding a field to a child does NOT affect the parent</li>
+          <li>Adding a field to a parent table (e.g., <code>task</code>) immediately affects ALL child tables</li>
+          <li><strong>sys_class_name</strong> on every record identifies which actual table/class the record belongs to</li>
+          <li>Not extending <code>task</code> means no SLAs, no approvals, no activity stream — these come only from the Task Framework</li>
+          <li>Custom tables in Global scope require the <strong>u_ prefix</strong>; scoped app tables use the vendor namespace</li>
+          <li>Database Views are <strong>read-only</strong> — you cannot insert or update through them</li>
+          <li>Querying the parent table (e.g., <code>task</code>) returns records from ALL child tables combined</li>
+          <li><code>cmdb_ci</code> is the root of all CIs — every CI type extends it directly or through intermediate tables</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <span style="color:var(--text-muted);font-size:0.82rem;align-self:center">Next:</span>
+          <a href="02-field-types-dictionary.html" class="btn btn-secondary">Field Types &amp; Dictionary →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p1_t1_01';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

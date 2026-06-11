@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schema Design Patterns | CIS-DF Part 1</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .hl-amber{color:var(--amber-300);font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 1</a>
+        <span class="sep">›</span>
+        <span class="current">Schema Design Patterns</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 1 · Topic 4</div>
+        <h1 class="topic-title">Schema Design Patterns</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Good schema design prevents technical debt. Learn when to extend vs. create tables,
+          how scoped apps isolate data, when table-per-type is better than a single table,
+          and the patterns ServiceNow itself uses for configuration and lookup data.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~18 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~8% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Data Model</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Extend vs. New Table — The Decision Framework</h2>
+        <p>
+          Every new data requirement in ServiceNow starts with the same question: should I extend an
+          existing table, or create a new standalone one? Getting this wrong creates long-term pain —
+          missed framework features if you don't extend when you should, or an overly complex hierarchy
+          if you extend when you shouldn't.
+        </p>
+        <p>
+          Ask these questions in order:
+        </p>
+        <ol>
+          <li><strong>Does this represent work that people do?</strong> (tickets, tasks, approvals) → Extend <code>task</code></li>
+          <li><strong>Does this represent a physical or logical thing in IT?</strong> (server, app, service) → Extend <code>cmdb_ci</code></li>
+          <li><strong>Does this extend a more specific existing type?</strong> (a kind of incident, a kind of server) → Extend that type's table</li>
+          <li><strong>Is this purely reference/lookup data?</strong> (categories, locations, vendors) → Standalone table</li>
+          <li><strong>Is this configuration data for your app?</strong> (settings, rules, policies) → Standalone table</li>
+        </ol>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">🚫</span>
+          <div class="callout-body">
+            <strong>Anti-Pattern — Extending Just for Inheritance</strong>
+            Don't extend a table just to inherit a few fields you want. If you extend <code>incident</code>
+            to create a new "Facility Request" just because you want the state field, you now have
+            Facility Requests appearing in all Incident reports and SLA rules. Only extend a table when
+            your new record type is genuinely a specialization of the parent type.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Scoped Applications and Table Isolation</h2>
+        <p>
+          A <span class="hl-teal">Scoped Application</span> is a container for all the components
+          (tables, scripts, UI, workflows) that belong to a specific application. Every table, script,
+          and configuration item created within a scope belongs to that scope and is isolated from
+          other scopes by default.
+        </p>
+        <p>
+          Think of scopes as namespaces: they prevent name collisions and ensure that changes in one
+          application don't accidentally break another. A scoped app with vendor prefix
+          <span class="code-inline">x_acme</span> creates tables like
+          <span class="code-inline">x_acme_project</span> and
+          <span class="code-inline">x_acme_deliverable</span>. No other app can accidentally create
+          a table with those same names.
+        </p>
+
+        <h3>Global vs. Scoped</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Aspect</th><th>Global Scope</th><th>Scoped Application</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Table naming</td><td>Must start with u_</td><td>Uses app namespace prefix (x_vendor_)</td></tr>
+            <tr><td>Script access</td><td>Can access all tables/scripts</td><td>Restricted by cross-scope access policies</td></tr>
+            <tr><td>Upgrade safety</td><td>May conflict with upgrades</td><td>Isolated — upgrades don't touch scoped code</td></tr>
+            <tr><td>Store publication</td><td>Cannot publish to Store</td><td>Can be published to ServiceNow Store</td></tr>
+            <tr><td>Best for</td><td>Instance-specific customizations</td><td>Reusable apps, products, integrations</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Scoped Access Restrictions</strong>
+            Scripts in a Scoped Application cannot access Global scope tables or scripts by default.
+            Access must be explicitly granted via <strong>Application Cross-Scope Access</strong> policies.
+            If a scoped app's script tries to query a Global table it doesn't have access to,
+            it receives an empty result — not an error. This silent failure is a common debugging trap.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Configuration Tables Pattern</h2>
+        <p>
+          One of the most common patterns in ServiceNow development is the <span class="hl-teal">Configuration Table</span>
+          pattern. Instead of hard-coding rules or values in scripts, you store them in a configurable table.
+          This separates "what the app does" (code) from "how it is configured" (data), making the system
+          more maintainable and giving admins control without needing developer access.
+        </p>
+        <p>
+          For example, instead of writing a Business Rule that has a hard-coded list of assignment groups
+          for each category, you create a table <span class="code-inline">u_routing_rule</span> with
+          fields for Category and Assignment Group. The Business Rule then queries this table. Now admins
+          can add, remove, or change routing rules by editing table records — no script changes needed.
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — System Properties Are Also Configuration Tables</strong>
+            ServiceNow's own System Properties (<code>sys_properties</code>) follow this same pattern.
+            Rather than hard-coding values in scripts, the platform stores configuration values as records
+            in <code>sys_properties</code>. Your custom apps should follow the same convention —
+            use <code>gs.getProperty('your.property.name')</code> to retrieve configuration values.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Lookup / Reference Data Tables</h2>
+        <p>
+          <span class="hl-teal">Lookup tables</span> (sometimes called "reference data tables") are
+          standalone tables that exist purely to provide values that other tables reference. They typically
+          have just a Name field and a few descriptive fields. Examples: countries, languages, product lines,
+          priority levels, or service categories.
+        </p>
+        <p>
+          The advantage over Choice fields: lookup table values can be edited by administrators without
+          touching the data dictionary. Adding a new choice to a dropdown field requires a developer
+          with dictionary access. Adding a new row to a lookup table is a simple form save that any
+          admin can do.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Aspect</th><th>Choice Field</th><th>Lookup Table + Reference</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Adding new values</td><td>Requires dictionary edit (developer)</td><td>Add row to table (admin)</td></tr>
+            <tr><td>Additional metadata</td><td>Label/value only</td><td>Can add as many fields as needed</td></tr>
+            <tr><td>Referential integrity</td><td>None — choice deleted = orphaned data</td><td>Reference link — can detect/prevent orphans</td></tr>
+            <tr><td>Cross-table use</td><td>Defined per-field, per-table</td><td>Same lookup table referenced from many tables</td></tr>
+            <tr><td>Suitable for</td><td>Small, stable sets (5-15 values)</td><td>Larger, growing, or metadata-rich sets</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Schema Upgrade Safety</h2>
+        <p>
+          ServiceNow upgrades (new platform releases) update baseline records — Business Rules, ACLs,
+          Dictionary entries, and Scripts that ship with the platform. Understanding which customizations
+          are upgrade-safe is essential for maintaining a healthy instance.
+        </p>
+        <ul>
+          <li><strong>Custom fields (u_ prefix)</strong> — 100% upgrade safe. Upgrades never modify custom-prefixed fields.</li>
+          <li><strong>New custom tables</strong> — 100% upgrade safe. Upgrades never delete custom tables.</li>
+          <li><strong>New business rules / scripts</strong> — Safe if the name doesn't conflict with a baseline record being added.</li>
+          <li><strong>Modifications to baseline records</strong> — Flagged as "customer modified." The upgrade may skip re-applying the ServiceNow change, leaving you running old logic.</li>
+          <li><strong>Dictionary modifications on baseline fields</strong> — Risky. If ServiceNow changes the baseline definition, your change may be overwritten or cause conflicts.</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Baseline Modifications</strong>
+            Directly modifying a ServiceNow baseline Business Rule or ACL marks it as "customer modified."
+            During upgrades, ServiceNow will flag these and in many cases will NOT overwrite your changes —
+            meaning you miss security patches and bug fixes. Best practice: never modify baseline records.
+            Instead, create a new Business Rule that runs in addition, or use a higher-order override.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Common Exam Traps — Schema Design</h2>
+        <ul>
+          <li>Extend <code>task</code> when building "work items" — standalone tables lose SLAs, approvals, activity stream</li>
+          <li>Extend <code>cmdb_ci</code> (or its children) for any CI type you need to track</li>
+          <li>Scoped app tables use <code>x_vendor_</code> prefix; Global custom tables use <code>u_</code></li>
+          <li>Scoped scripts cannot access Global tables without explicit <strong>Cross-Scope Access</strong> grants</li>
+          <li>Configuration Tables (storing rules as records) are preferred over hard-coded values in scripts</li>
+          <li>Lookup/reference tables scale better than choice fields when values change frequently or carry metadata</li>
+          <li>Modifying <strong>baseline records</strong> risks missing upgrade patches — create new records alongside instead</li>
+          <li>Custom fields with <strong>u_ prefix</strong> are never touched by platform upgrades</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <span style="color:var(--text-muted);font-size:0.82rem;align-self:center">Part 2:</span>
+          <a href="../../part2-import-migration/topics/01-import-sets-architecture.html" class="btn btn-secondary">Import Sets Architecture →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p1_t4_04';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

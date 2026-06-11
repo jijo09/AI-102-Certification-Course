@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instance &amp; Data Health | CIS-DF Part 8</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 8</a>
+        <span class="sep">›</span>
+        <span class="current">Instance &amp; Data Health</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 8 · Topic 4</div>
+        <h1 class="topic-title">Instance &amp; Data Health</h1>
+        <p style="color:var(--text-secondary);max-width:640px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Instance health goes beyond CMDB data quality — it encompasses platform performance,
+          customization hygiene, upgrade readiness, and overall instance governance.
+          Understanding how to monitor and maintain a healthy ServiceNow instance is the capstone
+          of the CIS-DF curriculum.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>5 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~18 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~6% exam weight</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Instance Health · Governance</strong></span>
+        </div>
+      </div>
+
+      <!-- S1 -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Instance Health Scan</h2>
+        <p>
+          The <span class="hl-teal">Instance Health</span> application is ServiceNow's built-in
+          tool for analyzing your instance's configuration, customizations, and usage patterns
+          against best practices. It runs a set of automated scans and produces a health score
+          for different categories.
+        </p>
+        <p>
+          Navigate to: <strong>All → Instance Health</strong> (or <strong>Health → Instance Health</strong>).
+          It provides scores across:
+        </p>
+        <ul>
+          <li><strong>Security</strong> — are there overprivileged users, public APIs, weak ACLs?</li>
+          <li><strong>Performance</strong> — slow Business Rules, inefficient queries, large tables without archiving?</li>
+          <li><strong>Upgrade</strong> — customizations that will conflict with the next ServiceNow release?</li>
+          <li><strong>Ownership</strong> — applications and customizations without designated owners?</li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">📘</span>
+          <div class="callout-body">
+            <strong>Core Concept — Preventive Maintenance</strong>
+            Instance Health Scan is like a car inspection — you don't wait for a breakdown to check
+            fluid levels. Running regular Instance Health scans surfaces issues before they become
+            outages or security incidents. Organizations that run these scans quarterly have fewer
+            upgrade conflicts and better performance.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Upgrade Readiness and Customization Hygiene</h2>
+        <p>
+          ServiceNow releases major platform upgrades (e.g., Washington DC, Xanadu, Yokohama)
+          twice a year. Customizations that modify out-of-box (OOB) records — Business Rules,
+          UI Policies, Scripts on base tables — can conflict with these upgrades.
+        </p>
+        <p>
+          The <span class="hl-teal">Upgrade Monitor</span> identifies:
+        </p>
+        <ul>
+          <li><strong>Customized OOB records</strong> — any base ServiceNow record that has been modified. During upgrade, these may be overwritten or flagged as "Skipped."</li>
+          <li><strong>Deprecated APIs</strong> — scripts using functions that are being removed in the new release</li>
+          <li><strong>Missing validations</strong> — new security features that require opt-in configuration</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Customizing OOB = Upgrade Risk</strong>
+            Every customization to an out-of-box record creates upgrade risk. Best practice is
+            to <em>extend</em> rather than modify: create a new Business Rule instead of editing
+            the OOB one; use a Dictionary Override instead of modifying the parent field definition.
+            Customizations in customer-owned scope (u_ prefix, private scope) don't conflict with OOB upgrades.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Table Growth and Database Monitoring</h2>
+        <p>
+          Large tables degrade query performance and increase storage costs. ServiceNow provides
+          tools to monitor table growth and take action:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Tool</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>sys_db_object statistics</td><td>Row count and storage size for each table — useful for identifying tables that need archiving</td></tr>
+            <tr><td>Stats page (sys.stats.do)</td><td>Instance-level statistics including database size, node count, memory usage</td></tr>
+            <tr><td>Instance Health scan</td><td>Flags tables without archiving rules that have grown beyond recommended thresholds</td></tr>
+            <tr><td>Archive Rules</td><td>The action to take — configure archive rules on identified large tables (covered in P6T3)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S4 -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Data Governance Summary</h2>
+        <p>
+          The CIS-DF certification covers data governance across the full platform. As a capstone,
+          here is how all the governance mechanisms fit together:
+        </p>
+        <ul>
+          <li><strong>Import Controls</strong> — Data Policies, Dictionary Overrides, IRE Reconciliation Rules prevent bad data entering</li>
+          <li><strong>Quality Monitoring</strong> — CMDB Health scoring, Data Certification detect quality issues</li>
+          <li><strong>Lifecycle Management</strong> — CMDB Data Manager, Archive Rules, Purge Rules remove stale/old data</li>
+          <li><strong>Security</strong> — Field-level ACLs, Reference Qualifiers, Data Policies enforce access and integrity</li>
+          <li><strong>Integration Safety</strong> — Service Graph Connectors, CMDB Identification API ensure external data routes through IRE</li>
+          <li><strong>Instance Health</strong> — Platform-level scans ensure the infrastructure supporting all of the above is healthy</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Exam Scenario Matching</strong>
+            CIS-DF exam questions typically describe a scenario and ask which tool/feature to use.
+            Map scenarios: "data quality" → CMDB Health; "duplicate CIs" → IRE; "stale CIs" → CMDB Data Manager;
+            "old records slowing lists" → Archive Rules; "field values from wrong source" → Reconciliation Rules;
+            "upgrade conflicts" → Upgrade Monitor; "external system bypassing IRE" → SGC or CMDB Identification API.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>CIS-DF Exam Preparation Summary</h2>
+        <p>
+          You've now covered all 24 topic areas of the CIS-DF curriculum. The highest-weight
+          areas to focus on in final review:
+        </p>
+        <ol>
+          <li><strong>IRE</strong> — Identification Rules, Identification Entries, Reconciliation Rules, what bypasses IRE</li>
+          <li><strong>CMDB Health</strong> — scoring dimensions, inclusion rules, Workspace tabs</li>
+          <li><strong>Import Pipeline</strong> — Import Sets, Transform Maps, coalesce, Service Graph Connectors</li>
+          <li><strong>Data Policies vs. UI Policies</strong> — enforcement scope differences</li>
+          <li><strong>Asset vs. CI</strong> — what each tracks, Discovery only updates CIs, reconciliation scenarios</li>
+          <li><strong>Lifecycle states</strong> — lifecycle_stage vs. lifecycle_stage_status vs. operational_status</li>
+          <li><strong>CMDB Data Manager</strong> — Retire vs. Archive vs. Delete</li>
+          <li><strong>Dependency View / Unified Map</strong> — cmdb_rel_ci, upstream/downstream, impact analysis</li>
+        </ol>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Final Exam Traps — Instance &amp; Data Health</h2>
+        <ul>
+          <li>Instance Health scan ≠ CMDB Health scan — Instance Health is about platform configuration; CMDB Health is about CI data quality</li>
+          <li>Customizing OOB records = upgrade risk; extend or scope instead</li>
+          <li>u_ prefix fields and private-scope customizations don't conflict with OOB upgrades</li>
+          <li>Archive Rules → any table; CMDB Data Manager → CI tables only</li>
+          <li>Scenario "data doesn't update correctly from import" → likely missing Reconciliation Rule (last writer wins)</li>
+          <li>Scenario "duplicate CIs created by import" → import bypasses IRE; use SGC or CMDB Identification API</li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../index.html" class="btn btn-secondary">← Back to CIS-DF Hub</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p6_t4_04';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

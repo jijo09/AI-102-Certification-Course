@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMDB Governance Framework | CIS-DF Part 6</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 6: Governance</a>
+        <span class="sep">›</span>
+        <span class="current">Governance Framework</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 6 · Topic 5</div>
+        <h1 class="topic-title">CMDB Governance Framework — The Policies, Roles, and Processes That Keep Data Accurate</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Technical tools like IRE, Discovery, and Reconciliation Rules keep data accurate
+          as it enters the CMDB. But technology alone isn't enough — people make decisions
+          about data, workflows affect data, and organizational processes determine whether
+          good data standards are maintained over time. CMDB Governance is the human and
+          process layer that sustains CMDB quality in the long run.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>9 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~35% exam weight (GOVERN domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>CMDB Governance · Data Stewards · RACI · Policies · Data Standards</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: Why Governance Is the Largest Exam Domain -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Why Governance Accounts for 35% of the Exam</h2>
+        <p>
+          The CIS-DF exam weights Governance at 35% — higher than any other domain.
+          This might seem surprising for a technical certification. But consider what
+          the exam is testing: not just whether you can configure Discovery, but whether
+          you understand how to make a CMDB organization-wide initiative succeed over time.
+        </p>
+        <p>
+          Technical tools are necessary but not sufficient:
+        </p>
+        <ul>
+          <li>Discovery runs perfectly — but if support teams override CI data to "fix" perceived errors, the CMDB becomes inconsistent</li>
+          <li>IRE deduplicates flawlessly — but if 10 different teams each manage their own integration without coordination, duplicates keep appearing</li>
+          <li>Reconciliation Rules are correctly configured — but if new applications are deployed without notifying the CMDB team, their services never appear in the model</li>
+        </ul>
+        <p>
+          Governance answers: <em>Who decides what goes in the CMDB? Who is responsible for accuracy?
+          How are CMDB changes controlled? What happens when data is wrong?</em>
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🏛️</span>
+          <div class="callout-body">
+            <strong>Analogy — CMDB Governance as City Government</strong>
+            A city has infrastructure (roads, buildings, utilities) that's accurately mapped
+            in a city registry. Technology exists to update the map when new buildings are
+            constructed. But without governance — zoning laws, permits, inspection processes,
+            designated map-keepers — the registry becomes inaccurate as soon as informal
+            construction starts happening. CMDB governance is the equivalent of city governance:
+            the rules, roles, and processes that ensure the technical map stays accurate.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: CMDB Governance Roles -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>CMDB Governance Roles — Who Does What</h2>
+        <p>
+          Effective CMDB governance requires clear role definitions. Without designated roles,
+          responsibility diffuses and no one is accountable for data quality.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Responsibilities</th>
+              <th>Typical Background</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CMDB Owner / Sponsor</td>
+              <td>Executive champion. Sets CMDB strategy, secures funding, resolves cross-team disputes about CMDB scope and priorities.</td>
+              <td>CIO, VP of IT Operations</td>
+            </tr>
+            <tr>
+              <td>CMDB Manager</td>
+              <td>Day-to-day management of CMDB program. Owns CMDB Health metrics, coordinates with teams, approves major CMDB changes.</td>
+              <td>CMDB Administrator, Service Management Manager</td>
+            </tr>
+            <tr>
+              <td>Data Steward</td>
+              <td>Subject matter expert for a specific CI class or data domain. Validates data accuracy, approves Identification Rule changes for their class, investigates data quality issues.</td>
+              <td>Technical specialist (e.g., Database Admin for DB CIs, Network Engineer for network CIs)</td>
+            </tr>
+            <tr>
+              <td>CMDB Architect</td>
+              <td>Designs CMDB structure — class hierarchy, Identification Rules, CSDM alignment. Approves Discovery pattern design for CI class correctness.</td>
+              <td>Senior ServiceNow admin or architect</td>
+            </tr>
+            <tr>
+              <td>Integration Owner</td>
+              <td>Owns a specific data source (Discovery schedule, SGC, Import Set). Ensures their data is correctly formatted and IRE-compatible.</td>
+              <td>Varies by integration type</td>
+            </tr>
+            <tr>
+              <td>ITSM Consumer</td>
+              <td>Uses CMDB data for incident, change, and problem management. Provides feedback on data quality issues encountered in workflows.</td>
+              <td>Service Desk, Change Manager, Problem Manager</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Data Stewards Are the Foundation</strong>
+            Data Stewards are the most operationally important governance role. Each significant
+            CI class should have a designated Data Steward who knows what correct data looks like
+            for that class. When Discovery creates a Linux server CI with wrong values,
+            the Linux infrastructure Data Steward should own the investigation. Without stewards,
+            data quality issues go uninvestigated.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: CMDB Governance Processes -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Core CMDB Governance Processes</h2>
+        <p>
+          Governance roles without processes are just titles. The processes define how
+          roles interact and how decisions get made.
+        </p>
+
+        <h3>CMDB Change Control Process</h3>
+        <p>
+          Any change to CMDB configuration (Identification Rules, Reconciliation Rules,
+          Discovery patterns, CI class hierarchy) should go through a formal change control process:
+        </p>
+        <ol>
+          <li><strong>Request:</strong> Integration owner or Data Steward identifies a needed change</li>
+          <li><strong>Assessment:</strong> CMDB Architect evaluates impact on existing CIs, reports, and workflows</li>
+          <li><strong>Approval:</strong> CMDB Manager approves or escalates to CMDB Owner if cross-team impact</li>
+          <li><strong>Testing:</strong> Change tested in sub-production environment</li>
+          <li><strong>Implementation:</strong> Change deployed in production with rollback plan</li>
+          <li><strong>Verification:</strong> CMDB Health metrics checked post-implementation</li>
+        </ol>
+
+        <h3>CMDB Data Quality Review Process</h3>
+        <p>
+          Scheduled (typically quarterly) review of CMDB Health metrics with all stakeholders:
+        </p>
+        <ol>
+          <li>Review CMDB Health dashboard scores across all dimensions</li>
+          <li>Identify CI classes with declining quality scores</li>
+          <li>Assign remediation tasks to appropriate Data Stewards</li>
+          <li>Review progress against previous quarter's remediation tasks</li>
+          <li>Report to CMDB Owner with trend data and executive summary</li>
+        </ol>
+
+        <h3>New Integration Onboarding Process</h3>
+        <p>
+          When a new data source (new SGC, new Import Set, new monitoring tool) needs to
+          write to the CMDB, it should go through a formal onboarding process:
+        </p>
+        <ol>
+          <li>Identify which CI classes and fields the integration will write to</li>
+          <li>Verify or create Identification Rules for those CI classes</li>
+          <li>Configure Reconciliation Rules for field authority</li>
+          <li>Test in sub-production with sample data</li>
+          <li>Monitor IRE logs for the first 2 weeks after production launch</li>
+          <li>Assign an Integration Owner accountable for ongoing data quality</li>
+        </ol>
+      </div>
+
+      <!-- S4: CMDB Data Policies -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>CMDB Data Policies — The Written Rules</h2>
+        <p>
+          CMDB governance requires written policies that define standards for data quality.
+          These policies translate into ServiceNow configurations (Data Policies, Field Validation)
+          covered in earlier topics, but they must first exist as organizational commitments.
+        </p>
+
+        <h3>Key Policy Areas</h3>
+        <ul>
+          <li>
+            <strong>Mandatory fields policy:</strong> Which fields must be populated for a CI to be considered
+            "complete"? (e.g., all servers must have: host_name, ip_address, operational_status, support_group, owned_by)
+          </li>
+          <li>
+            <strong>Source authority policy:</strong> Which source is authoritative for which fields?
+            (Formalizes what Reconciliation Rules enforce technically)
+          </li>
+          <li>
+            <strong>CI lifecycle policy:</strong> How are CIs created, modified, and retired?
+            Who can create manual CI records? When does a CI get retired vs. deleted?
+          </li>
+          <li>
+            <strong>Duplicate prevention policy:</strong> All new integrations must go through the
+            IRE API (not direct Table API). All new CI classes must have Identification Rules before
+            the integration goes live.
+          </li>
+          <li>
+            <strong>Data retention policy:</strong> How long are retired CIs kept before deletion?
+            How long is change history preserved?
+          </li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Governance Is Prevent, Not Just Fix</strong>
+            A common exam theme: governance is most valuable when it prevents data quality
+            problems rather than just detecting and fixing them. A good governance framework
+            (new integration onboarding process, mandatory IRE API policy, Data Steward review)
+            means fewer duplicates, fewer misclassified CIs, and fewer reconciliation conflicts
+            arise in the first place. Reactive cleanup (running dedup jobs, reclassifying CIs)
+            is governance failure mode — proactive prevention is success.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: CMDB RACI Model -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>RACI Model for CMDB Governance</h2>
+        <p>
+          A RACI matrix (Responsible, Accountable, Consulted, Informed) for CMDB activities
+          ensures clarity about who does what:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Activity</th>
+              <th>Responsible</th>
+              <th>Accountable</th>
+              <th>Consulted</th>
+              <th>Informed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Modify Identification Rule</td>
+              <td>CMDB Architect</td>
+              <td>CMDB Manager</td>
+              <td>Data Steward</td>
+              <td>Integration Owners</td>
+            </tr>
+            <tr>
+              <td>Add new SGC</td>
+              <td>Integration Owner</td>
+              <td>CMDB Manager</td>
+              <td>CMDB Architect, Data Steward</td>
+              <td>CMDB Owner</td>
+            </tr>
+            <tr>
+              <td>Investigate data quality issue</td>
+              <td>Data Steward</td>
+              <td>CMDB Manager</td>
+              <td>Integration Owner</td>
+              <td>ITSM Consumers</td>
+            </tr>
+            <tr>
+              <td>Approve CMDB policy change</td>
+              <td>CMDB Manager</td>
+              <td>CMDB Owner</td>
+              <td>All stakeholders</td>
+              <td>IT Leadership</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — The RACI "A" (Accountable) Is the Decision Maker</strong>
+            In RACI, Accountable means the person who approves the outcome and answers to
+            leadership if something goes wrong. There should only be ONE accountable person
+            per activity. When there's no clear "A," decisions stall and accountability
+            is diffused. In CMDB governance, CMDB Manager is typically accountable for
+            operational decisions; CMDB Owner is accountable for strategic decisions.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: Stakeholder Engagement -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Stakeholder Engagement — Getting Buy-In</h2>
+        <p>
+          A CMDB governance framework is only effective if stakeholders throughout the
+          organization cooperate with it. Getting buy-in requires demonstrating value:
+        </p>
+
+        <h3>Common Stakeholder Concerns and CMDB Answers</h3>
+        <ul>
+          <li>
+            <strong>Operations team:</strong> "CMDB data is always wrong — we don't trust it."
+            <br>Answer: Show CMDB Health score improvement over time. Demonstrate that incident
+            routing is faster when CI data is accurate.
+          </li>
+          <li>
+            <strong>Application owners:</strong> "Why should I maintain CSDM data? It takes time."
+            <br>Answer: Show automated change impact notifications they would have received if
+            CSDM was complete — changes they currently find out about from users, not proactively.
+          </li>
+          <li>
+            <strong>Finance:</strong> "What's the ROI of CMDB governance investment?"
+            <br>Answer: Fewer duplicate tool licenses (accurate software tracking), faster incident resolution
+            (accurate CI data), fewer failed changes (complete impact analysis).
+          </li>
+          <li>
+            <strong>Security:</strong> "How does CMDB governance help compliance?"
+            <br>Answer: Accurate inventory for audit trails, complete software tracking for license compliance,
+            CSDM relationships for regulatory reporting (which systems store PII, etc.).
+          </li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — CMDB Governance as a Value Enabler</strong>
+            Frame CMDB governance not as "we need accurate data for its own sake" but as
+            "accurate CMDB data enables faster incident resolution, fewer failed changes,
+            better financial decisions, and compliance confidence." Each stakeholder has
+            outcomes they care about — connect CMDB quality to those outcomes specifically.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: Governance Maturity Model -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>CMDB Governance Maturity Levels</h2>
+        <p>
+          ServiceNow defines a maturity progression for CMDB governance that organizations
+          typically move through:
+        </p>
+
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Level 1: Reactive</div>
+            <div class="flow-note">// No formal governance. Data quality issues discovered during incidents. No dedicated roles.</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Level 2: Defined</div>
+            <div class="flow-note">// Governance roles defined. Basic policies documented. CMDB Health monitoring in place.</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Level 3: Managed</div>
+            <div class="flow-note">// Governance processes actively running. Regular data quality reviews. IRE and Discovery optimized.</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Level 4: Optimized</div>
+            <div class="flow-note">// Governance is proactive. New integrations onboarded with full IRE compliance. CSDM complete. CMDB Health target consistently met.</div>
+          </div>
+        </div>
+
+        <p>
+          Most organizations seeking CIS-DF certification are operating at Level 2-3 and
+          targeting Level 3-4. The exam tests whether you understand what Level 3-4
+          governance looks like in practice.
+        </p>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Governance Framework — Key Facts</h2>
+        <ul>
+          <li><strong>GOVERN domain = 35% of exam.</strong> Largest domain. Tests whether you understand people, process, and policy — not just technology.</li>
+          <li><strong>Key roles:</strong> CMDB Owner (executive), CMDB Manager (program), Data Steward (class expert), CMDB Architect (technical design), Integration Owner (source quality).</li>
+          <li><strong>Data Steward = most operationally critical role.</strong> Owns data quality for a specific CI class or domain.</li>
+          <li><strong>Core processes:</strong> CMDB Change Control, Data Quality Review (quarterly), New Integration Onboarding.</li>
+          <li><strong>New Integration Onboarding must include:</strong> Identification Rules, Reconciliation Rules, IRE API compliance, and designated Integration Owner.</li>
+          <li><strong>Governance goal = prevention, not just cure.</strong> Best governance prevents data quality problems before they occur.</li>
+          <li><strong>RACI model</strong> for CMDB activities ensures clear accountability. One Accountable per activity.</li>
+          <li><strong>Stakeholder buy-in</strong> requires connecting CMDB quality to outcomes stakeholders care about (faster incidents, better changes, compliance).</li>
+          <li><strong>Maturity levels:</strong> Reactive → Defined → Managed → Optimized. Exam typically tests Managed/Optimized behaviors.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">CMDB Governance</div>
+            <div class="term-def">The people, processes, and policies that ensure CMDB data remains accurate, complete, and useful over time. Complements technical tools (IRE, Discovery) which handle automated data quality.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Data Steward</div>
+            <div class="term-def">Person responsible for data quality in a specific CI class or data domain. Subject matter expert who validates rules, investigates quality issues, and approves CI class configuration changes.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CMDB Manager</div>
+            <div class="term-def">Day-to-day program manager for the CMDB initiative. Owns Health metrics, coordinates teams, approves configuration changes. Accountable for operational CMDB decisions.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">New Integration Onboarding</div>
+            <div class="term-def">Governance process ensuring new data sources (SGC, Import Set, custom API) are properly configured with Identification Rules, Reconciliation Rules, and IRE compliance before connecting to production CMDB.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">RACI Matrix</div>
+            <div class="term-def">Responsibility assignment framework: Responsible (does the work), Accountable (answers for outcomes), Consulted (provides input), Informed (kept aware). Used to clarify governance role boundaries.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Governance Maturity</div>
+            <div class="term-def">Progression from Reactive (no governance) through Defined (roles/policies) and Managed (active processes) to Optimized (proactive, continuously improving CMDB quality).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. A new development team wants to integrate their deployment tool with the ServiceNow CMDB to record when new application instances are deployed. They plan to use the REST Table API to directly write to cmdb_ci_appl. What governance concern should be raised and what is the correct guidance?</div>
+          <div class="cq-options">
+            <div>A) The development team needs read-only access only — no team should be allowed to write to CMDB</div>
+            <div>B) Using the Table API directly bypasses IRE (no deduplication or reconciliation). The correct approach is using the IRE API. The integration must go through the new integration onboarding process to configure Identification Rules and Reconciliation Rules first.</div>
+            <div>C) The Table API is acceptable as long as the development team promises not to create duplicates</div>
+            <div>D) The integration is fine as long as they use HTTPS</div>
+          </div>
+          <div class="cq-hint">💡 What does direct Table API bypass in IRE? What governance process handles new integrations?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Direct Table API writes bypass IRE entirely, meaning no identification (duplicates will be created as the tool runs multiple times for the same CI), no reconciliation (last-write-wins regardless of source authority), and no deduplication. The governance response: require the team to use the IRE API instead, and run their integration through the formal New Integration Onboarding Process — which includes creating Identification Rules for cmdb_ci_appl, setting Reconciliation Rules for which fields this tool is authoritative for, and designating an Integration Owner.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. A CMDB Manager notices that the network CI class (cmdb_ci_netgear_switch) has a consistently low CMDB Health score. When asked who is accountable for data quality in that class, no one in the organization can give a clear answer. What governance gap does this represent?</div>
+          <div class="cq-options">
+            <div>A) Insufficient Discovery schedules covering network devices</div>
+            <div>B) No Data Steward designated for the network CI class — the organization lacks defined accountability for data quality in that domain</div>
+            <div>C) The CMDB Manager should directly fix all data quality issues for all CI classes</td>
+            <div>D) Network devices cannot have Data Stewards — they require automated management only</div>
+          </div>
+          <div class="cq-hint">💡 Which governance role is responsible for data quality in a specific CI class?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — The absence of an accountable person for data quality in a specific CI class is a Data Steward gap. Every significant CI class should have a designated Data Steward (typically from the team that manages those devices — in this case, the Network Engineering team). Without a steward, no one investigates quality issues, validates Identification Rules for that class, or reviews discovery patterns that create network CIs. The CMDB Manager (C) owns the overall program but cannot be the domain expert for every CI class.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. Which description best characterizes a "Managed" (Level 3) CMDB governance organization?</div>
+          <div class="cq-options">
+            <div>A) Governance roles are defined on paper but processes are not actively followed</div>
+            <div>B) Data quality issues are discovered only when incidents reveal incorrect CI data</div>
+            <div>C) Governance processes are actively running: regular data quality reviews occur, new integrations follow onboarding processes, CMDB Health is monitored, and remediation tasks are assigned and tracked</div>
+            <div>D) All CMDB data is 100% accurate and no remediation is ever needed</div>
+          </div>
+          <div class="cq-hint">💡 Managed = active, not just defined or theoretical.</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — Level 2 (Defined) has roles and policies on paper. Level 3 (Managed) means those processes are actively operational: regular quality reviews happen (not just when there's a crisis), new integrations don't bypass IRE, Health metrics are tracked monthly/quarterly, and remediation tasks are created and completed. Level 4 (Optimized) goes further with proactive prevention and continuous improvement. Level 3 organizations are actively managing quality, not just reacting to it.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. Application teams complain that they constantly discover changes to servers that host their applications through user reports, not through ServiceNow change management. The CMDB has all CIs. What governance and CSDM improvement would address this?</div>
+          <div class="cq-options">
+            <div>A) Require all teams to check the CMDB before making changes</div>
+            <div>B) Complete the CSDM model: ensure server CIs are linked to Application Services, which are linked to Business Applications with the application team as owners. Then ServiceNow Change Management will automatically notify application owners when changes affect their application's CIs.</div>
+            <div>C) Create a manual notification process where the infrastructure team emails application teams about changes</div>
+            <div>D) Give application teams edit access to Change Request records</div>
+          </div>
+          <div class="cq-hint">💡 What CSDM feature automatically notifies application owners about changes to their supporting infrastructure?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Completing the CSDM model (server CI → Application Service → Business Application with application team owner) enables ServiceNow Change Management to automatically identify impacted Business Applications when a Change Request is created for a server. The application owners receive automated notifications and can participate in change approval. This is a governance problem (missing CSDM relationships) as much as a technical one — both the CSDM configuration and the governance process for maintaining Business Application ownership need attention.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. An organization's CMDB Health has been declining for 6 months. The CMDB Manager presents data to the executive team showing the decline and proposes investing in quarterly Data Steward reviews. The CIO asks "What's the business impact of poor CMDB quality?" What is the most compelling governance argument?</div>
+          <div class="cq-options">
+            <div>A) "Poor CMDB quality means we have more data in the system than necessary"</div>
+            <div>B) "Poor CMDB quality directly increases mean time to resolve incidents (wrong CI routing, missing impact data), increases failed changes (missing impact analysis), and creates compliance risks (inaccurate audit trails)"</div>
+            <div>C) "The CMDB is required by industry standards and must be maintained regardless of business value"</div>
+            <div>D) "ServiceNow licensing costs increase when CMDB data quality is poor"</div>
+          </div>
+          <div class="cq-hint">💡 Connect CMDB quality to outcomes the CIO cares about: incidents, changes, compliance, cost.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — The strongest governance argument connects CMDB quality directly to business outcomes: (1) Incident MTTR: Incorrect CI data means incidents are routed to wrong teams, taking longer to resolve. (2) Failed changes: Missing CSDM impact analysis means changes proceed without full awareness, causing unplanned outages. (3) Compliance: Inaccurate software inventory creates license and audit risks. These are outcomes a CIO cares about — not abstract data quality metrics. Quantify with actual incident data where possible: "In Q3, 47 incidents took >2 hours to resolve due to wrong CI assignment" is more compelling than "our Health score is 62%."</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="04-data-certification-lifecycle.html" class="btn btn-secondary">← Data Certification</a>
+          <a href="06-cmdb-health-kpis-data-manager.html" class="btn btn-secondary">CMDB Health KPIs →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p6_t5_05';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

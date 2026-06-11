@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discovery Architecture | CIS-DF Part 3</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .phase-box{border:1px solid rgba(8,145,178,0.25);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-4);background:rgba(8,145,178,0.04)}
+    .phase-title{font-family:var(--font-heading);font-size:0.85rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 3: Discovery</a>
+        <span class="sep">›</span>
+        <span class="current">Discovery Architecture</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 3 · Topic 1</div>
+        <h1 class="topic-title">Discovery Architecture — How ServiceNow Finds What's on Your Network</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          ServiceNow Discovery is the technology that actively scans your network to find
+          computers, servers, network devices, storage, and the software running on them —
+          then automatically creates or updates CI records in the CMDB. This topic covers
+          the two types of Discovery, the complete scan lifecycle, and the architectural
+          components that make it work.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>9 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~32 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~19% exam weight (INGEST domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Discovery · Horizontal · Vertical · Schedule · Phase</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: What is Discovery -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>What Is ServiceNow Discovery?</h2>
+        <p>
+          In Part 2 you learned that Service Graph Connectors pull data from external APIs —
+          they ask a cloud provider or monitoring tool "what do you know about your assets?"
+          Discovery is different: it goes out and asks the assets themselves. It scans IP addresses
+          directly, connects to each device or server, and reads its configuration.
+        </p>
+        <p>
+          Think of the difference this way:
+        </p>
+        <ul>
+          <li><strong>SGC:</strong> Asks the hotel's front desk for a guest list</li>
+          <li><strong>Discovery:</strong> Knocks on every door and asks who's there directly</li>
+        </ul>
+        <p>
+          Discovery can find things that APIs don't expose: the exact version of software running
+          on a server, the precise CPU model, all installed services, running processes, open ports,
+          configuration file contents. This depth of data is why Discovery remains essential even
+          when SGCs are in use.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Discovery Complements SGC, Doesn't Replace It</strong>
+            Many organizations use both. SGC for AWS tells you which EC2 instances exist and
+            their AWS-level properties (instance type, AMI, tags). Discovery then scans those
+            same EC2 instances via their IP addresses to find OS-level details (exact kernel
+            version, installed packages, running services). IRE reconciles both data streams
+            onto the same CI record.
+          </div>
+        </div>
+
+        <p>
+          ServiceNow Discovery has been part of the platform since the Eureka release (2013)
+          and has gone through major evolution. The modern Discovery platform (Washington DC
+          and later) uses a <span class="hl-teal">pattern-based</span> approach that is more
+          robust than the older probe/sensor approach. Both exist today; the exam covers both.
+        </p>
+      </div>
+
+      <!-- S2: Two Types of Discovery -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Horizontal vs. Vertical Discovery — The Two Phases</h2>
+        <p>
+          Every Discovery run executes in two phases, which ServiceNow calls
+          <span class="hl-teal">Horizontal Discovery</span> and
+          <span class="hl-teal">Vertical Discovery</span>. Understanding the difference is
+          critical — it's one of the most commonly tested Discovery concepts.
+        </p>
+
+        <h3>Horizontal Discovery — Finding What Exists</h3>
+        <p>
+          Horizontal Discovery sweeps across a range of IP addresses to answer one question:
+          <em>"What is at this IP address, and is it alive?"</em>
+        </p>
+        <p>
+          It's called "horizontal" because it scans broadly across many IPs — a wide sweep
+          across your network. Horizontal Discovery uses two mechanisms:
+        </p>
+        <ul>
+          <li>
+            <strong>Port scanning:</strong> Sends TCP connection attempts to common ports (22 for SSH,
+            135/445 for Windows, 161 for SNMP, 443 for HTTPS). An open port means something is listening.
+          </li>
+          <li>
+            <strong>ICMP ping:</strong> Sends a ping to check if the IP is reachable. Note: many
+            firewalls block ICMP, so Discovery doesn't rely on ping alone.
+          </li>
+        </ul>
+        <p>
+          The output of Horizontal Discovery is a list of <strong>discovered devices</strong>
+          with their IPs and open ports. At this stage, Discovery doesn't know much about them
+          — just that they exist and are reachable.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🔍</span>
+          <div class="callout-body">
+            <strong>Analogy — Horizontal vs. Vertical Discovery</strong>
+            Imagine you're a census worker in an apartment building. Horizontal Discovery is
+            walking down the hallway and knocking on every door to see which apartments are
+            occupied (you note: "apartment 4B has someone home, 4C does not").
+            Vertical Discovery is then going inside each occupied apartment and doing a full
+            inventory: names, ages, employment, all the details. Two phases —
+            breadth first, then depth.
+          </div>
+        </div>
+
+        <h3>Vertical Discovery — Classifying and Detailing What Was Found</h3>
+        <p>
+          Vertical Discovery goes deep into each device found by Horizontal. It answers:
+          <em>"What exactly is this device? What is it running? What are all its properties?"</em>
+        </p>
+        <p>
+          It's called "vertical" because it digs down into each individual device. Vertical
+          Discovery uses the open ports found by Horizontal to choose the right protocol to
+          connect with:
+        </p>
+        <ul>
+          <li>Port 22 open → try SSH → if successful, run shell commands to get OS, CPU, memory, disk, installed software</li>
+          <li>Port 135/445 open → try WMI (Windows Management Instrumentation) → get Windows-specific inventory</li>
+          <li>Port 161 open → try SNMP → get network device details (MIBs for switches, routers)</li>
+          <li>Port 443/80 open → try HTTPS/HTTP → identify web servers, application servers</li>
+        </ul>
+        <p>
+          The output of Vertical Discovery is a rich CI record with populated fields:
+          OS name and version, CPU count and model, memory, storage, running services,
+          installed software, network interfaces, and more.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Horizontal Discovery</th>
+              <th>Vertical Discovery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Question answered</td>
+              <td>"What IP addresses are alive?"</td>
+              <td>"What exactly is at each IP?"</td>
+            </tr>
+            <tr>
+              <td>Breadth vs. depth</td>
+              <td>Wide sweep — many IPs, shallow info</td>
+              <td>Narrow focus — one device, deep info</td>
+            </tr>
+            <tr>
+              <td>Protocols used</td>
+              <td>ICMP ping, TCP port scan</td>
+              <td>SSH, WMI, SNMP, HTTPS, JDBC, and more</td>
+            </tr>
+            <tr>
+              <td>Output</td>
+              <td>List of live IPs with open ports</td>
+              <td>Full CI attributes, relationships, installed software</td>
+            </tr>
+            <tr>
+              <td>Credentials needed</td>
+              <td>None (ping and port scan are unauthenticated)</td>
+              <td>Yes — SSH credentials, WMI credentials, SNMP community strings</td>
+            </tr>
+            <tr>
+              <td>Runs before or after</td>
+              <td>First (Phase 1)</td>
+              <td>Second (Phase 2)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Horizontal Finds the IP, Vertical Gets the Details</strong>
+            If horizontal Discovery finds a device but vertical Discovery fails, you get a CI
+            with an IP address but no details (no OS, no software). This is called a
+            <strong>partial discovery</strong>. Common causes: firewall blocks the deep-scan port,
+            credentials are wrong, or the device type isn't supported. The exam tests "why would
+            Discovery find a CI but not populate its details?"
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: Discovery Schedule -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Discovery Schedules — Controlling When and Where Discovery Runs</h2>
+        <p>
+          Discovery doesn't run randomly — it's controlled by
+          <span class="hl-teal">Discovery Schedules</span>. A schedule defines:
+        </p>
+        <ul>
+          <li><strong>What to scan:</strong> IP ranges, specific IP addresses, or networks</li>
+          <li><strong>When to scan:</strong> Cron-based schedule (daily at 2 AM, every 4 hours, weekly)</li>
+          <li><strong>Which MID Server to use:</strong> Based on IP range assignment</li>
+          <li><strong>Behaviors:</strong> Whether to run full scan or targeted behaviors</li>
+        </ul>
+
+        <h3>Schedule Types</h3>
+        <ul>
+          <li>
+            <strong>IP Range Schedule:</strong> Scans all IPs in a specified CIDR range
+            (e.g., 10.0.0.0/24). Most common type. Can specify multiple ranges.
+          </li>
+          <li>
+            <strong>Single Device Schedule:</strong> Scans a specific IP or hostname.
+            Used for targeted rescans after configuration changes.
+          </li>
+          <li>
+            <strong>CMDB CI Schedule:</strong> Re-scans CIs that already exist in the CMDB.
+            Useful for verifying that known CIs haven't changed.
+          </li>
+        </ul>
+
+        <h3>Discovery Schedule Configuration Fields</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Name</td>
+              <td>Human-readable label for the schedule</td>
+              <td>"Datacenter East — Nightly Full Scan"</td>
+            </tr>
+            <tr>
+              <td>Discover</td>
+              <td>What to scan (IP ranges, specific IPs)</td>
+              <td>10.10.0.0/16</td>
+            </tr>
+            <tr>
+              <td>Run</td>
+              <td>Frequency (Daily, Weekly, Periodically)</td>
+              <td>Daily at 02:00</td>
+            </tr>
+            <tr>
+              <td>MID Server</td>
+              <td>Which MID Server(s) handle this range</td>
+              <td>MID-US-East-01</td>
+            </tr>
+            <tr>
+              <td>Behaviors</td>
+              <td>Which discovery behaviors to apply (controls depth)</td>
+              <td>All Devices</td>
+            </tr>
+            <tr>
+              <td>Status</td>
+              <td>Active/Inactive</td>
+              <td>Active</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Schedule During Off-Peak Hours</strong>
+            Discovery generates significant network traffic during horizontal scanning
+            (sending packets to every IP in the range). Schedule Discovery for off-peak hours
+            (nights, weekends) to avoid impacting business traffic. For sensitive environments,
+            limit the scan rate in the Discovery behavior settings.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Full Discovery Lifecycle -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>The Complete Discovery Run Lifecycle</h2>
+        <p>
+          When a Discovery Schedule fires, it goes through a precise sequence of phases.
+          Understanding this lifecycle helps you diagnose what went wrong when Discovery
+          produces incomplete results.
+        </p>
+
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">1. Schedule Fires</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">2. Discovery Status Record Created</div>
+            <div class="flow-note">// tracks entire run</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">3. IP Ranges Split into Chunks</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">4. Chunks Sent to MID Server via ECC Queue</div>
+            <div class="flow-note">// parallelization</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">5. Horizontal: MID Pings + Port Scans</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">6. Live IPs Identified</div>
+            <div class="flow-note">// Phase 1 complete</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">7. Vertical: Credentials Matched</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">8. Probes/Patterns Execute on Device</div>
+            <div class="flow-note">// Phase 2 begins</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">9. Raw Data Returned to ServiceNow</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">10. Sensors Parse Raw Data → CI Payload</div>
+            <div class="flow-note">// transforms raw → structured</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">11. CI Payload → IRE</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">12. IRE: Identify + Reconcile + Dedup</div>
+            <div class="flow-note">// same IRE as SGC</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-box">13. CMDB Record Created/Updated</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">14. Discovery Status: Complete</div>
+            <div class="flow-note">// run finished</div>
+          </div>
+        </div>
+
+        <h3>Discovery Status — Monitoring a Run</h3>
+        <p>
+          Every Discovery run creates a <span class="hl-teal">Discovery Status</span> record
+          visible at <strong>Discovery → Discovery Status</strong>. This record shows:
+        </p>
+        <ul>
+          <li>Number of IPs scanned</li>
+          <li>Number of CIs created / updated / skipped</li>
+          <li>Number of errors per phase</li>
+          <li>Which MID Servers participated</li>
+          <li>Timeline: when each phase started and completed</li>
+        </ul>
+        <p>
+          The Discovery Status is your primary diagnostic tool. When Discovery doesn't
+          create a CI you expected, check the Discovery Status record for that IP.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Discovery Troubleshooting Steps</strong>
+            When a device isn't discovered:
+            1. Check Discovery Status → is the IP in scope?
+            2. Is the IP reachable? (Did horizontal succeed?)
+            3. Did vertical probe execute? (Is the probe log present?)
+            4. Do credentials exist for this device type?
+            5. Is there an Identification Rule for the CI class?
+            The exam presents these as elimination questions.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Discovery Behaviors -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Discovery Behaviors — Controlling What Gets Scanned</h2>
+        <p>
+          A <span class="hl-teal">Discovery Behavior</span> is a named configuration that
+          controls which probes and patterns run during Discovery. Think of it as a
+          "scan profile" that you attach to a schedule.
+        </p>
+        <p>
+          Default behaviors shipped by ServiceNow include:
+        </p>
+        <ul>
+          <li><strong>All Active Servers:</strong> Discovers servers via SSH and WMI; collects full OS inventory</li>
+          <li><strong>Network Devices:</strong> Focuses on SNMP-based discovery of switches and routers</li>
+          <li><strong>Cloud Compute:</strong> Optimized for cloud instances; uses cloud APIs plus agent</li>
+          <li><strong>Agentless:</strong> Credential-based scan without installing anything on the target</li>
+        </ul>
+
+        <h3>What a Behavior Controls</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Behavior Setting</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Probes / Patterns included</td>
+              <td>Which data collection modules run on matching devices</td>
+            </tr>
+            <tr>
+              <td>Port scan list</td>
+              <td>Which ports to check during horizontal discovery</td>
+            </tr>
+            <tr>
+              <td>CI classes to create</td>
+              <td>Which CMDB tables this behavior populates</td>
+            </tr>
+            <tr>
+              <td>Relationship discovery</td>
+              <td>Whether to follow relationships (e.g., find software running on found servers)</td>
+            </tr>
+            <tr>
+              <td>Excluded IP ranges</td>
+              <td>IPs to skip even if they're in the schedule's range</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Behaviors Control Scope, Credentials Enable Access</strong>
+            Behaviors tell Discovery <em>what to try</em>. Credentials tell Discovery
+            <em>how to authenticate</em> when it tries. A behavior can include the SSH probe,
+            but if no SSH credentials are stored for that target's IP range, the probe will
+            fail authentication and return nothing useful. Both must be configured correctly.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: Discovery Inclusions and Exclusions -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Discovery Inclusions, Exclusions, and CI Identification</h2>
+
+        <h3>Including and Excluding Specific IPs or Ranges</h3>
+        <p>
+          Within a Discovery Schedule, you can add:
+        </p>
+        <ul>
+          <li>
+            <strong>Include ranges:</strong> Specific CIDR blocks or IP ranges to scan
+            (e.g., 10.0.1.0/24 and 10.0.2.0/24)
+          </li>
+          <li>
+            <strong>Exclude ranges:</strong> Specific IPs or ranges to always skip, even if they
+            fall within an included range (e.g., 10.0.1.50 is a fragile legacy system — never scan it)
+          </li>
+          <li>
+            <strong>IP classification rules:</strong> Mark certain IP ranges as "printers only"
+            or "network devices only" to limit which probes run
+          </li>
+        </ul>
+
+        <h3>How Discovery Identifies CI Types</h3>
+        <p>
+          During Vertical Discovery, after connecting to a device, Discovery must decide:
+          "Is this a Windows server? A Linux server? A Cisco router?" This classification
+          is done through <span class="hl-teal">CI Type Identification</span>, which checks:
+        </p>
+        <ol>
+          <li>What ports are open?</li>
+          <li>What protocol responded (SSH replied with Linux banner vs. WMI replied with Windows data)?</li>
+          <li>What did the initial fingerprint probe return?</li>
+        </ol>
+        <p>
+          Based on this, Discovery selects the appropriate probes (or patterns) to run in depth.
+        </p>
+
+        <h3>The Classification Hierarchy</h3>
+        <p>
+          CI type classification follows the CMDB class hierarchy (fully covered in Part 5):
+        </p>
+        <ul>
+          <li>Linux server with Apache → <span class="code-inline">cmdb_ci_linux_server</span> + <span class="code-inline">cmdb_ci_appl_apache</span></li>
+          <li>Windows server → <span class="code-inline">cmdb_ci_win_server</span></li>
+          <li>Cisco switch → <span class="code-inline">cmdb_ci_network_adapter</span> → parent class chain to switch-specific table</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Wrong CI Class Means Wrong Fields</strong>
+            If Discovery classifies a Linux server as a generic
+            <span class="code-inline">cmdb_ci_computer</span> instead of
+            <span class="code-inline">cmdb_ci_linux_server</span>, Linux-specific fields
+            (kernel version, distribution) won't be available. This usually happens when
+            the SSH credentials fail and Discovery can't get enough data to make the correct
+            classification. Always verify CI class assignment after a Discovery run.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: Discovery vs SGC — Full Comparison -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Discovery vs. Service Graph Connectors — When to Use Which</h2>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>ServiceNow Discovery</th>
+              <th>Service Graph Connector</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>How it works</td>
+              <td>Actively scans IPs, connects to devices directly</td>
+              <td>Polls an external API (cloud, ITSM, monitoring tool)</td>
+            </tr>
+            <tr>
+              <td>Best for</td>
+              <td>On-premise servers, network devices, any IP-addressable device</td>
+              <td>Cloud resources (AWS, Azure, GCP), SaaS tools, monitoring platforms</td>
+            </tr>
+            <tr>
+              <td>Data depth</td>
+              <td>Very deep — OS-level data, processes, files, registry, software</td>
+              <td>API-defined — whatever the provider exposes</td>
+            </tr>
+            <tr>
+              <td>Credentials needed</td>
+              <td>SSH, WMI, SNMP, JDBC per device type</td>
+              <td>API key / OAuth for the source system</td>
+            </tr>
+            <tr>
+              <td>Requires MID Server?</td>
+              <td>Yes — always for on-premise</td>
+              <td>Only for on-premise sources</td>
+            </tr>
+            <tr>
+              <td>Goes through IRE?</td>
+              <td>Yes — Discovery data is processed by IRE</td>
+              <td>Yes — always</td>
+            </tr>
+            <tr>
+              <td>Finds relationships?</td>
+              <td>Yes — can trace running processes, connections, dependencies</td>
+              <td>Limited — depends on what the API exposes</td>
+            </tr>
+            <tr>
+              <td>Impact on target</td>
+              <td>Generates network traffic; can stress fragile devices</td>
+              <td>API call only; no direct connection to the device</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Use Both Together for Complete Coverage</strong>
+            Best practice is to use SGC for cloud resources (AWS EC2 inventory via SGC) and
+            Discovery for deep OS-level data (then scan those same EC2 instances via SSH to
+            get kernel version, installed packages). IRE reconciles both data streams onto
+            the same CI record — the AWS-created CI gets enriched with Discovery data.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: Discovery Troubleshooting -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>Discovery Troubleshooting — Common Failure Patterns</h2>
+
+        <h3>Scenario 1: IP Is in Scope but No CI Created</h3>
+        <p>
+          Discovery Status shows the IP was scanned but no CI was created.
+        </p>
+        <ul>
+          <li>Check if horizontal succeeded: is the device pingable / are ports open?</li>
+          <li>If ports are open: check if credentials are configured for that IP range</li>
+          <li>If credentials exist: check if an Identification Rule exists for the expected CI class</li>
+          <li>Check MID Server logs for connection errors</li>
+        </ul>
+
+        <h3>Scenario 2: CI Created but Missing Fields</h3>
+        <p>
+          A CI exists for the server but CPU, memory, and software are blank.
+        </p>
+        <ul>
+          <li>Horizontal succeeded but vertical probe may have partially failed</li>
+          <li>Most likely: wrong credentials (SSH key format issue, expired password)</li>
+          <li>Or: firewall allowed port 22 connection but blocked specific commands</li>
+          <li>Check the probe log in the Discovery Status for the specific error message</li>
+        </ul>
+
+        <h3>Scenario 3: Duplicate CIs Created</h3>
+        <p>
+          Discovery creates a second CI for the same physical device.
+        </p>
+        <ul>
+          <li>IRE Identification Rules may be missing or misconfigured for that CI class</li>
+          <li>The device may have multiple IPs, and Discovery found it on two different IPs
+          without correlating them</li>
+          <li>A device was renamed — old CI still exists; Discovery created a new one with the new name</li>
+          <li>Resolution: use IRE Deduplication features (Part 4)</li>
+        </ul>
+
+        <h3>Scenario 4: Discovery Runs Slowly</h3>
+        <ul>
+          <li>Too many IPs in one schedule chunk — split into multiple smaller schedules</li>
+          <li>Too few MID Servers — add more to distribute load</li>
+          <li>Network is slow — Discovery is I/O bound when connecting to many devices</li>
+          <li>Vertical Discovery timing out — some devices respond slowly to probes; increase timeout values</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Discovery Partial vs. Full Failure</strong>
+            Know the difference: if <em>no</em> CIs are created for a range, suspect the
+            MID Server (is it up? is it validated? does it own this IP range?). If
+            <em>some</em> CIs are created but missing detail, suspect credentials (wrong
+            username/password for vertical probes). If duplicates appear, suspect
+            Identification Rules.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Discovery Architecture — Key Facts</h2>
+        <ul>
+          <li><strong>Horizontal Discovery:</strong> Phase 1. Scans IP ranges for live devices (ping + port scan). Unauthenticated. Wide sweep.</li>
+          <li><strong>Vertical Discovery:</strong> Phase 2. Deep dives into each live device using SSH, WMI, SNMP. Needs credentials. Generates full CI attributes.</li>
+          <li><strong>Partial discovery:</strong> Horizontal succeeded (IP is found) but vertical failed (no detailed attributes). Usually a credentials or firewall issue.</li>
+          <li><strong>Discovery Schedule:</strong> Defines what to scan (IP ranges), when, and which MID Server. Attached Behavior controls depth.</li>
+          <li><strong>Discovery Behavior:</strong> Named profile controlling which probes/patterns run and which CI classes to create.</li>
+          <li><strong>Discovery Status:</strong> Per-run record showing IPs scanned, CIs created, errors. Primary diagnostic tool.</li>
+          <li><strong>Discovery always goes through IRE.</strong> Same as SGC. Deduplication and reconciliation apply.</li>
+          <li><strong>MID Server always required</strong> for on-premise Discovery. It executes the probes from inside the network.</li>
+          <li><strong>Duplicate CIs → check Identification Rules.</strong> Missing details → check credentials. No CIs at all → check MID Server.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Horizontal Discovery</div>
+            <div class="term-def">Phase 1 of Discovery. Scans IP ranges with ping and port scans to find live devices. No credentials needed. Breadth-first.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Vertical Discovery</div>
+            <div class="term-def">Phase 2 of Discovery. Deep-scans each live device using SSH/WMI/SNMP with stored credentials. Produces full CI attributes.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Discovery Schedule</div>
+            <div class="term-def">Configuration defining which IP ranges to scan, when to run, which MID Server to use, and which Discovery Behavior to apply.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Discovery Behavior</div>
+            <div class="term-def">Named scan profile controlling which probes and patterns run, which ports to check, and which CI classes to create.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Discovery Status</div>
+            <div class="term-def">Per-run record showing timeline, IPs scanned, CIs created/updated, and all errors. Primary diagnostic tool for failed Discovery.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Partial Discovery</div>
+            <div class="term-def">A CI is created with IP address but no detailed attributes because horizontal succeeded but vertical failed (credentials/firewall issue).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. Discovery runs against a 10.0.0.0/24 IP range. Several CIs are created with IP addresses but without any OS details (CPU, memory, installed software are all blank). What is the most likely cause?</div>
+          <div class="cq-options">
+            <div>A) The Discovery Schedule is set to run only horizontal discovery</div>
+            <div>B) Credentials for SSH or WMI are missing or incorrect for those devices</div>
+            <div>C) IRE Identification Rules are not configured</div>
+            <div>D) The MID Server is offline</div>
+          </div>
+          <div class="cq-hint">💡 CIs were created (horizontal worked), but details are missing (vertical failed). What does vertical need that horizontal doesn't?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — CIs were created, so horizontal discovery succeeded (devices are reachable). Missing OS details means vertical discovery's deep probes failed. Vertical discovery requires credentials (SSH for Linux, WMI for Windows). Missing or wrong credentials is the most common cause of partially populated CIs. If MID Server were offline (D), no CIs would be created at all.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. What is the primary difference between Horizontal and Vertical Discovery?</div>
+          <div class="cq-options">
+            <div>A) Horizontal scans on-premise devices; vertical scans cloud devices</div>
+            <div>B) Horizontal finds which IPs are alive; vertical classifies and details each found device</div>
+            <div>C) Horizontal requires credentials; vertical does not</div>
+            <div>D) Horizontal uses patterns; vertical uses probes</div>
+          </div>
+          <div class="cq-hint">💡 Think breadth vs. depth.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Horizontal Discovery is Phase 1: it sweeps IP ranges with ping and port scans to find live devices (no credentials). Vertical Discovery is Phase 2: it connects to each live device using SSH/WMI/SNMP with credentials to collect detailed CI attributes. The terms describe breadth vs. depth, not location or technique type.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. A Discovery run completes but no CIs are created for an entire IP range. The MID Server log shows connection refused errors to the ServiceNow instance. What is the most likely cause?</div>
+          <div class="cq-options">
+            <div>A) The IP range has no live devices</div>
+            <div>B) The Discovery Behavior is misconfigured</div>
+            <div>C) The MID Server cannot communicate with the ServiceNow instance (ECC Queue unreachable)</div>
+            <div>D) Identification Rules are missing</div>
+          </div>
+          <div class="cq-hint">💡 "Connection refused to ServiceNow instance" is a specific MID Server communication failure.</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — The MID Server communicates with ServiceNow via the ECC Queue over outbound HTTPS (port 443). If the MID Server gets "connection refused" when trying to reach ServiceNow, no work can be sent or results received. This could be caused by a network outage, proxy misconfiguration, or the ServiceNow instance being unavailable. Nothing will be discovered until this channel is restored.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. Where would you look first to determine whether a specific IP address was scanned during the last Discovery run and whether any errors occurred?</div>
+          <div class="cq-options">
+            <div>A) CMDB Identification and Reconciliation log</div>
+            <div>B) MID Server error log on the MID Server host</div>
+            <div>C) Discovery Status record in ServiceNow</div>
+            <div>D) Import Set row status in sys_import_set</div>
+          </div>
+          <div class="cq-hint">💡 What record does ServiceNow create for every Discovery run?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — The Discovery Status record is created for every Discovery run and shows exactly which IPs were scanned, which CIs were created or updated, and what errors occurred per IP. It's the primary diagnostic tool. The CMDB IRE log (A) shows IRE processing errors after data was collected. Import Set (D) is not used by Discovery at all.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. A Discovery Schedule is configured with the "All Active Servers" behavior. An administrator wants to exclude a fragile legacy server at 10.0.1.45 from being scanned. What is the correct approach?</div>
+          <div class="cq-options">
+            <div>A) Remove 10.0.1.45 from the CMDB before running Discovery</div>
+            <div>B) Add 10.0.1.45 to the Exclusion list in the Discovery Schedule</div>
+            <div>C) Create a separate Discovery Schedule that only runs on 10.0.1.45 with an inactive status</div>
+            <div>D) Discovery cannot exclude individual IPs from within a range</div>
+          </div>
+          <div class="cq-hint">💡 Discovery Schedules support both inclusion and exclusion lists.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Discovery Schedules have an explicit Exclusion list where you can add specific IP addresses or ranges that should never be scanned, even if they fall within the schedule's IP range. This is the correct, built-in mechanism. Removing a CI from the CMDB (A) doesn't prevent Discovery from scanning the IP — it would just create a new CI.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">6. Discovery creates duplicate CIs for the same physical server — one with hostname "server01.corp.com" and one with hostname "server01". Both have the same IP address. What is the root cause?</div>
+          <div class="cq-options">
+            <div>A) The MID Server ran the Discovery job twice simultaneously</div>
+            <div>B) IRE Identification Rules for the server CI class are missing or not matching on hostname correctly</div>
+            <div>C) The Discovery Behavior is configured to always create new CIs</div>
+            <div>D) The server has two network interfaces with different IPs</div>
+          </div>
+          <div class="cq-hint">💡 Duplicates despite same IP indicate IRE couldn't match the existing CI to the incoming data.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Duplicate CIs are an IRE Identification failure. IRE should match the incoming CI to the existing one using Identification Rules (e.g., match on IP address or serial number). If the rule matches on hostname and the hostname format changed (FQDN vs. short name), IRE sees two different CIs. The fix is to configure Identification Rules to use a more stable identifier, or add hostname normalization.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="../../part2-import-migration/topics/06-non-discoverable-cis.html" class="btn btn-secondary">← Non-Discoverable CIs</a>
+          <a href="02-mid-server.html" class="btn btn-secondary">MID Server Deep Dive →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p3d_t1_01';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

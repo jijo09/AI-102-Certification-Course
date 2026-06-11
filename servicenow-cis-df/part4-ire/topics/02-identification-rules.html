@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identification Rules | CIS-DF Part 4</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 4: IRE</a>
+        <span class="sep">›</span>
+        <span class="current">Identification Rules</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 4 · Topic 2</div>
+        <h1 class="topic-title">Identification Rules — How IRE Knows If a CI Already Exists</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          The previous topic introduced IRE's three phases. Now we go deep on Phase 1: Identification.
+          Every time data arrives at IRE, the very first question is "have we seen this CI before?"
+          Identification Rules are how IRE answers that question — and getting these rules right
+          is one of the most impactful configuration decisions in your CMDB.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>9 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~19% exam weight (INGEST domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Identification Rules · Identifiers · Lookup Rules · ci_class</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: The Identification Problem -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Why Identification Is the Hardest Part</h2>
+        <p>
+          Before IRE can decide whether to create a new CI or update an existing one, it must answer
+          a deceptively simple question: <em>"Is the thing described in this incoming payload the
+          same thing as a CI that already exists in the CMDB?"</em>
+        </p>
+        <p>
+          This sounds easy. In practice, it's one of the hardest problems in CMDB management:
+        </p>
+        <ul>
+          <li>
+            <strong>Different sources use different identifiers.</strong> AWS uses <em>instance IDs</em>
+            (i-0123abc). Discovery finds the same machine and knows its <em>hostname</em>
+            (web-prod-01) and <em>serial number</em> (SN-12345). These look completely different —
+            but they refer to the same physical server.
+          </li>
+          <li>
+            <strong>Not all identifiers are stable.</strong> IP addresses change when a server moves
+            to a different subnet. Hostnames change when a machine is renamed. If you identify
+            servers by IP or hostname alone, Discovery will create duplicate CIs after any rename
+            or IP change.
+          </li>
+          <li>
+            <strong>Some identifiers are not unique.</strong> MAC addresses look unique but
+            can be cloned. Hostnames should be unique but aren't always enforced.
+            Serial numbers are often the most reliable — but not all devices have them.
+          </li>
+        </ul>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🔍</span>
+          <div class="callout-body">
+            <strong>Analogy — Identity Like a Government ID Check</strong>
+            Imagine checking into a hotel under different circumstances. Sometimes you show your
+            passport (serial number — always unique). Sometimes you show a driver's license
+            (hostname — usually unique, but you could have a same-name twin). Sometimes you just
+            say your name (IP — definitely not unique). The front desk needs to know which form
+            of ID is trustworthy enough to match you to your reservation. Identification Rules
+            tell IRE which fields are trustworthy enough to identify a CI.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: What an Identification Rule Is -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Anatomy of an Identification Rule</h2>
+        <p>
+          An <span class="hl-teal">Identification Rule</span> is a configuration record in
+          ServiceNow that defines: <em>for CI class X, use field(s) Y to determine uniqueness.</em>
+        </p>
+        <p>
+          Key components of an Identification Rule:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>What It Does</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CI Class</td>
+              <td>Which CMDB table this rule applies to</td>
+              <td>cmdb_ci_linux_server</td>
+            </tr>
+            <tr>
+              <td>Identifier Entries</td>
+              <td>The ordered list of attribute combinations to try</td>
+              <td>Try serial+make+model first, then IP+OS</td>
+            </tr>
+            <tr>
+              <td>Identifier Priority</td>
+              <td>Order of identifiers — higher priority tried first</td>
+              <td>Serial number (priority 1) before hostname (priority 2)</td>
+            </tr>
+            <tr>
+              <td>Lookup Rules</td>
+              <td>Related CI lookups — find this CI by finding a related CI first</td>
+              <td>Find the network adapter, then the server it belongs to</td>
+            </tr>
+            <tr>
+              <td>Apply to</td>
+              <td>Whether rule applies to child classes too</td>
+              <td>If checked, cmdb_ci_server rule also applies to all server subclasses</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Where to Find Identification Rules</h3>
+        <p>
+          Navigate to <strong>Configuration → CMDB Identification and Reconciliation →
+          Identification Rules</strong>. ServiceNow ships with pre-configured rules for
+          all major CI classes. You can modify existing rules or create new ones for
+          custom CI classes.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Identification Rules Are Per Class, Not Global</strong>
+            A rule for <code>cmdb_ci_linux_server</code> only applies when IRE receives
+            a payload tagged as that class. Rules do not apply across classes —
+            a Linux server identification rule cannot find a Windows server, even if both
+            have the same serial number. IRE always uses the CI class from the payload
+            to select which rules to evaluate.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: Identifiers and Identifier Entries -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Identifiers and Identifier Entries — The Matching Logic</h2>
+        <p>
+          Within an Identification Rule, the actual matching is done by
+          <span class="hl-teal">Identifier Entries</span>. Each Identifier Entry specifies
+          a set of CMDB fields that, when all matched, uniquely identify a CI.
+        </p>
+
+        <h3>How Multiple Identifier Entries Work</h3>
+        <p>
+          A single Identification Rule can have multiple Identifier Entries with different priorities.
+          IRE evaluates them in priority order — it tries the highest-priority entry first.
+          If that entry matches a CI, identification is complete. If not, it tries the next entry.
+          If no entries match, the CI is treated as new.
+        </p>
+
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Incoming payload: Linux server, serial=SN-XYZ, ip=10.0.1.5, hostname=web-01</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">IRE: select rule for cmdb_ci_linux_server</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Try Identifier Entry 1 (priority 1): match on serial_number + manufacturer</div>
+            <div class="flow-note">// serial=SN-XYZ → finds existing CI → MATCH! Stop here.</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓ (only if Entry 1 fails)</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Try Identifier Entry 2 (priority 2): match on ip_address + host_name</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓ (only if Entry 2 fails)</div></div>
+          <div class="flow-step">
+            <div class="flow-box">No match → CREATE new CI</div>
+          </div>
+        </div>
+
+        <h3>Multi-Field Identifiers (AND Logic)</h3>
+        <p>
+          When an Identifier Entry specifies multiple fields, <em>all</em> fields must match
+          for that entry to succeed. This is AND logic. For example:
+        </p>
+        <ul>
+          <li>Entry with fields: <span class="code-inline">serial_number</span> AND <span class="code-inline">manufacturer</span> AND <span class="code-inline">model_id</span></li>
+          <li>For this entry to match: all three fields in the payload must match corresponding values in an existing CI</li>
+          <li>Why require both serial AND manufacturer? Serial numbers from different manufacturers can occasionally collide. The combination is much more reliable.</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Missing Fields = Entry Skipped</strong>
+            If an Identifier Entry requires fields A, B, and C, but the incoming payload
+            only provides A and B (field C is missing or null), IRE skips that Identifier Entry
+            entirely and tries the next one. It does not do a partial match. This is why
+            Discovery patterns must be configured to collect all fields that Identification
+            Rules expect — missing fields mean lower-quality identification and potentially
+            more duplicate CIs.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Out-of-Box Identification Rules -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Out-of-Box Identification Rules — What ServiceNow Ships With</h2>
+        <p>
+          ServiceNow ships with identification rules for all major CMDB CI classes.
+          Understanding the defaults helps you know what Discovery must collect.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>CI Class</th>
+              <th>Primary Identifier (Entry 1)</th>
+              <th>Fallback Identifier (Entry 2)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>cmdb_ci_server / cmdb_ci_computer</td>
+              <td>serial_number + manufacturer + model_id</td>
+              <td>ip_address + host_name (less reliable)</td>
+            </tr>
+            <tr>
+              <td>cmdb_ci_linux_server</td>
+              <td>serial_number + manufacturer + model_id</td>
+              <td>ip_address + host_name</td>
+            </tr>
+            <tr>
+              <td>cmdb_ci_win_server</td>
+              <td>serial_number + manufacturer</td>
+              <td>ip_address + host_name</td>
+            </tr>
+            <tr>
+              <td>cmdb_ci_network_adapter</td>
+              <td>mac_address</td>
+              <td>(no fallback — MAC must be present)</td>
+            </tr>
+            <tr>
+              <td>cmdb_ci_ip_address</td>
+              <td>ip_address + nic_address (MAC)</td>
+              <td>ip_address alone (less reliable)</td>
+            </tr>
+            <tr>
+              <td>cmdb_ci_database_instance</td>
+              <td>name + type + host (server CI relationship)</td>
+              <td>(lookup rule — find server first)</td>
+            </tr>
+            <tr>
+              <td>cmdb_ci_appl (software)</td>
+              <td>name + version + type + host</td>
+              <td>name + host (no version check)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Why Serial Number Is the Gold Standard</h3>
+        <p>
+          For physical and virtual servers, serial number (combined with manufacturer) is the
+          most reliable identifier because:
+        </p>
+        <ul>
+          <li>It doesn't change when a server is renamed, re-IP'd, or moved to a different subnet</li>
+          <li>It's assigned by the hardware manufacturer and globally unique (in practice)</li>
+          <li>Both Discovery and most SGCs can reliably collect it</li>
+        </ul>
+        <p>
+          IP address as a sole identifier is problematic:
+          a DHCP environment reassigns IPs constantly, and after a server is decommissioned,
+          another server may inherit its IP — causing two different servers to map to the same CI.
+        </p>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Check What Your Discovery Patterns Actually Collect</strong>
+            The out-of-box Identification Rule for servers requires serial_number + manufacturer + model_id.
+            If your Discovery patterns don't collect the serial_number (maybe SNMP doesn't expose it),
+            IRE will fall through to the IP+hostname fallback. Audit your patterns and rules together —
+            they must be aligned.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Lookup Rules -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Lookup Rules — Finding CIs Through Relationships</h2>
+        <p>
+          Some CI classes are naturally identified through their relationship to another CI.
+          For example, a database instance doesn't have a serial number. Instead, it's unique
+          based on <em>which server it runs on</em> and <em>what its name is</em>.
+        </p>
+        <p>
+          <span class="hl-teal">Lookup Rules</span> handle this. A Lookup Rule tells IRE:
+          "To identify a CI of class X, first look up the related CI of class Y using these
+          fields, and then find CI X that is related to the CI Y you found."
+        </p>
+
+        <h3>Database Instance Lookup Rule — Step by Step</h3>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Incoming payload: DB instance, name=PROD_DB, type=Oracle, host=web-server-01</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Lookup Rule: find the server CI where host_name = "web-server-01"</div>
+            <div class="flow-note">// finds sys_id of the host server CI</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Now find: DB instance where name=PROD_DB AND type=Oracle AND runs_on=[server sys_id]</div>
+            <div class="flow-note">// exact match → found existing CI → UPDATE</div>
+          </div>
+        </div>
+
+        <h3>When Lookup Rules Fail</h3>
+        <p>
+          If the Lookup Rule cannot find the referenced CI (e.g., the host server doesn't
+          exist in the CMDB yet), the identification fails and the payload is typically
+          queued for retry. This is why Discovery processes infrastructure CIs
+          (servers, network devices) before application CIs (databases, software) —
+          the dependent CIs must exist first.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Lookup Rule Dependency Order</strong>
+            When a question asks why application CIs (databases, software) are not appearing
+            in the CMDB after Discovery, a common answer is that the host server CIs were
+            not created first. Lookup Rules require the referenced CI to already exist.
+            Discovery processes CIs in dependency order to minimize this problem.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: Independent vs Dependent Identifiers -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Independent vs. Dependent Identifiers</h2>
+        <p>
+          ServiceNow classifies CI identifiers into two types based on whether they
+          can stand alone or require a relationship.
+        </p>
+
+        <h3>Independent Identifiers</h3>
+        <p>
+          The CI is identified using only its own attributes — no relationship to another CI
+          is needed. Servers (using serial numbers) are the classic example. These are
+          the simplest and most reliable identifiers.
+        </p>
+        <ul>
+          <li><strong>Example:</strong> Server identified by serial_number + manufacturer</li>
+          <li><strong>Reliability:</strong> High — no dependency on other CIs existing first</li>
+          <li><strong>Best used for:</strong> Infrastructure CIs (servers, switches, routers)</li>
+        </ul>
+
+        <h3>Dependent Identifiers</h3>
+        <p>
+          The CI is identified using a combination of its own attributes <em>and</em> its
+          relationship to another CI. These use Lookup Rules internally.
+        </p>
+        <ul>
+          <li><strong>Example:</strong> Database instance identified by name + type + host CI</li>
+          <li><strong>Reliability:</strong> Lower — depends on the referenced CI being correctly identified first</li>
+          <li><strong>Best used for:</strong> Application and service CIs that don't have their own hardware identifiers</li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — CI Discovery Order Matters</strong>
+            Because dependent identifiers rely on the host CI existing first, the order
+            of Discovery and IRE processing matters. ServiceNow Discovery is designed to
+            process network infrastructure first (IP addresses, network adapters), then servers,
+            then running services and software. This ensures that by the time a database
+            instance payload arrives at IRE, its host server CI already exists.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: Troubleshooting Identification Issues -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Troubleshooting Identification — Common Failures</h2>
+        <p>
+          Most CMDB quality problems (duplicate CIs, CIs not appearing, wrong CI types)
+          trace back to Identification Rule issues. Here's how to diagnose them.
+        </p>
+
+        <h3>Symptom: Duplicate CIs After Discovery Runs</h3>
+        <p>
+          Root cause: IRE is not matching the incoming CI to the existing CI. Instead of
+          updating the existing one, it's creating a new one each time Discovery runs.
+        </p>
+        <p>Diagnostic steps:</p>
+        <ol>
+          <li>Check the IRE Log (<span class="code-inline">cmdb_ire_event</span>): look for action="insert" when you expect action="update"</li>
+          <li>Check what Identifier Entry IRE used to try to match (the "Matched on" field)</li>
+          <li>Compare: what fields did the Discovery pattern send? What fields does the Identifier Entry require?</li>
+          <li>Common finding: Discovery sends hostname but Identifier Entry requires serial_number. Serial is missing → IRE treats it as a new CI.</li>
+        </ol>
+
+        <h3>Symptom: No identification rule found for class X</h3>
+        <p>
+          Root cause: IRE received a CI payload for class X but has no Identification Rule
+          for that class. This happens when:
+        </p>
+        <ul>
+          <li>Discovery Pattern creates CIs of a custom class that doesn't have a rule yet</li>
+          <li>An SGC targets a class that was recently added to the CMDB hierarchy</li>
+        </ul>
+        <p>
+          Fix: Create an Identification Rule for class X with appropriate Identifier Entries.
+        </p>
+
+        <h3>Symptom: Multiple CIs match — dedup event created</h3>
+        <p>
+          Root cause: IRE found more than one existing CI that matches the incoming payload's
+          identifiers. This means duplicates already exist in the CMDB.
+        </p>
+        <p>
+          IRE creates a deduplication event (covered in Topic 4). The incoming update
+          is typically held until the duplicate is resolved.
+        </p>
+
+        <h3>Symptom: Wrong CI class in CMDB</h3>
+        <p>
+          Root cause: The Discovery Pattern or SGC sends the wrong CI class in the payload.
+          IRE uses the class from the payload — it doesn't infer the correct class.
+        </p>
+        <p>
+          Example: Pattern sends <span class="code-inline">cmdb_ci_computer</span> for a
+          Linux server. IRE creates a generic computer CI instead of a Linux server CI.
+          Linux-specific fields are not populated.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Modifying Identification Rules Affects Existing CIs</strong>
+            Changing an Identification Rule mid-production can cause previously-matched CIs
+            to no longer match — creating new duplicate CIs for the same physical devices.
+            Test Identification Rule changes in a sub-production environment first. Use the
+            "Test Identification" utility in ServiceNow to simulate how a payload would be
+            processed without actually writing to the CMDB.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: Custom Identification Rules for SGCs -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>Custom Identification Rules for SGC-Specific CI Classes</h2>
+        <p>
+          Service Graph Connectors often introduce new CI classes not present in standard
+          Discovery. For example, an AWS SGC might create:
+        </p>
+        <ul>
+          <li><span class="code-inline">cmdb_ci_aws_lambda_function</span> — AWS Lambda functions</li>
+          <li><span class="code-inline">cmdb_ci_aws_s3_bucket</span> — S3 buckets</li>
+          <li><span class="code-inline">cmdb_ci_kubernetes_pod</span> — Kubernetes pods</li>
+        </ul>
+        <p>
+          Out-of-box, ServiceNow ships Identification Rules for classes defined in its baseline
+          content. When you activate an SGC plugin, the plugin also deploys Identification Rules
+          for its new CI classes. However, if you build a custom SGC or custom CI class,
+          you must create the Identification Rules manually.
+        </p>
+
+        <h3>Choosing Identifier Fields for SGC-Specific Classes</h3>
+        <p>
+          Cloud resources typically have cloud-native identifiers that are globally unique:
+        </p>
+        <ul>
+          <li><strong>AWS resources:</strong> ARN (Amazon Resource Name) — globally unique, stable, changes only if resource is deleted/recreated</li>
+          <li><strong>Azure resources:</strong> Resource ID — full path including subscription, resource group, and name</li>
+          <li><strong>GCP resources:</strong> Project + resource name combination</li>
+          <li><strong>Kubernetes:</strong> namespace + name (pods are ephemeral — consider using Deployment instead)</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — SGC Activating Plugins Also Deploys IRE Rules</strong>
+            When you install a ServiceNow Service Graph Connector (via Plugin Manager or Store),
+            the plugin deployment automatically creates the Identification Rules and Reconciliation
+            Rules for all new CI classes the SGC introduces. You do NOT need to create these manually
+            for ServiceNow-published SGCs. This is different from custom SGCs where you must
+            create the rules yourself.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Identification Rules — Key Facts</h2>
+        <ul>
+          <li><strong>Identification Rule</strong> = configuration record that tells IRE how to find existing CIs of a given class.</li>
+          <li><strong>Per CI class.</strong> Rules for cmdb_ci_linux_server don't apply to cmdb_ci_win_server.</li>
+          <li><strong>Identifier Entries</strong> are evaluated in priority order. All fields in an entry must match (AND logic). If any field is missing from payload, that entry is skipped.</li>
+          <li><strong>Serial + manufacturer + model = gold standard</strong> for physical/virtual servers. Stable across renames and IP changes.</li>
+          <li><strong>IP address as sole identifier = risky.</strong> DHCP environments reassign IPs. Never use alone.</li>
+          <li><strong>Lookup Rules</strong> = identify a CI by first finding a related CI. Used for application-layer CIs (databases, software).</li>
+          <li><strong>Missing Identification Rule = no CI created.</strong> IRE drops payloads with no matching rule for the class.</li>
+          <li><strong>SGC plugin deployment creates Identification Rules automatically</strong> for SGC-specific classes. Custom classes need manual rules.</li>
+          <li><strong>IRE Log (cmdb_ire_event)</strong> shows what matched (or didn't) and why. First diagnostic step.</li>
+          <li><strong>Test Identification utility</strong> lets you simulate IRE processing without writing to CMDB. Use before changing rules in production.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Identification Rule</div>
+            <div class="term-def">IRE configuration record that defines how to uniquely identify CIs of a specific class. Contains Identifier Entries and optional Lookup Rules.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Identifier Entry</div>
+            <div class="term-def">A set of fields within an Identification Rule that must ALL match for identification to succeed. Multiple entries in a rule are tried in priority order.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Lookup Rule</div>
+            <div class="term-def">Part of an Identification Rule. Tells IRE to first find a related CI, then use that CI's sys_id as part of identifying the incoming CI. Used for dependent CIs like databases.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Independent Identifier</div>
+            <div class="term-def">CI identified using only its own attributes. No relationship required. Servers with serial numbers are the classic example.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Dependent Identifier</div>
+            <div class="term-def">CI identified using its own attributes plus a relationship to another CI. Requires the related CI to already exist in CMDB.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Test Identification Utility</div>
+            <div class="term-def">ServiceNow tool that simulates IRE identification against a sample payload without writing to the CMDB. Used to validate rule changes before production.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. Discovery runs nightly and consistently creates duplicate Linux server CIs. The IRE log shows action="insert" for CIs that already exist. The Identification Rule for cmdb_ci_linux_server has Entry 1: serial_number + manufacturer + model_id. What is the most likely root cause?</div>
+          <div class="cq-options">
+            <div>A) The Identification Rule is configured for the wrong CI class</div>
+            <div>B) The Discovery patterns are not collecting serial_number, causing IRE to skip Entry 1 and find no match</div>
+            <div>C) The IRE log is showing false positives and the CIs are not actually duplicates</div>
+            <div>D) The Discovery schedule is running too frequently</div>
+          </div>
+          <div class="cq-hint">💡 When an Identifier Entry has missing fields, what does IRE do?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — If the Discovery pattern doesn't collect serial_number (or it's not available from the device), the payload arrives at IRE without that field. Since Entry 1 requires all three fields (serial + manufacturer + model), IRE skips Entry 1. If there's no fallback entry that matches either, IRE treats the CI as new and creates a duplicate. Fix: ensure the Discovery pattern collects serial_number, or add a fallback Identifier Entry that uses fields the pattern does collect.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. An administrator wants to add a new custom CI class (cmdb_ci_custom_appliance) to the CMDB and plans to populate it using a custom SGC. What must the administrator configure in IRE before the SGC can successfully create CIs of this class?</div>
+          <div class="cq-options">
+            <div>A) Nothing — IRE automatically creates identification rules for all new CI classes</div>
+            <div>B) An Identification Rule with at least one Identifier Entry for cmdb_ci_custom_appliance</div>
+            <div>C) A Transform Map for the new CI class</div>
+            <div>D) A new Discovery Schedule targeting the custom appliance</div>
+          </div>
+          <div class="cq-hint">💡 What happens when IRE receives a payload for a class with no Identification Rule?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — IRE requires an Identification Rule for every CI class it processes. Without one, the payload fails with "No identification rule found for class cmdb_ci_custom_appliance." ServiceNow-published SGC plugins create rules automatically, but custom classes need manually created rules. Transform Maps (C) are for Import Sets, not SGC/IRE.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. A Lookup Rule is configured for cmdb_ci_database_instance to find its host server first. Discovery reports a database instance on server "db-host-01", but that server CI doesn't yet exist in the CMDB. What happens to the database instance payload?</div>
+          <div class="cq-options">
+            <div>A) IRE creates the database instance CI without a host relationship</div>
+            <div>B) IRE creates both the server CI and the database instance CI simultaneously</div>
+            <div>C) The Lookup Rule fails — the database instance payload cannot be identified, and the CI is not created (or queued for retry)</div>
+            <div>D) IRE creates the database instance and flags it for manual relationship assignment</div>
+          </div>
+          <div class="cq-hint">💡 Lookup Rules require the referenced CI to already exist. What if it doesn't?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — A Lookup Rule requires the referenced CI (the host server) to exist in CMDB before the dependent CI (database instance) can be identified. If the host doesn't exist, the Lookup Rule cannot find it, identification fails, and the database instance CI cannot be processed. Discovery processes CIs in dependency order (infrastructure before applications) to minimize this — but if a server CI is missing, its dependent application CIs will also be missing.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. An administrator is configuring a new Identification Rule for Linux servers and must choose between two Identifier Entry options: (A) ip_address + host_name or (B) serial_number + manufacturer + model_id. Which is more reliable and why?</div>
+          <div class="cq-options">
+            <div>A) Option A — IP address is always unique on a network</div>
+            <div>B) Option B — Serial number is stable across renames and IP changes; IP and hostname change frequently</div>
+            <div>C) Both are equally reliable</div>
+            <div>D) Option A — hostnames are enforced to be unique by DNS</div>
+          </div>
+          <div class="cq-hint">💡 Which identifier is stable across server lifecycle events like renames and IP changes?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Serial number (combined with manufacturer + model) is the gold standard for server identification. Serial numbers are assigned by the hardware manufacturer and don't change throughout the server's life. IP addresses change in DHCP environments or when servers move subnets. Hostnames change during renames. After any such change, an IP/hostname-based rule would fail to match the existing CI and create a duplicate.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. An administrator installs the ServiceNow AWS Service Graph Connector plugin from the ServiceNow Store. Do they need to manually create Identification Rules for the new AWS-specific CI classes (like cmdb_ci_aws_ec2_instance)?</div>
+          <div class="cq-options">
+            <div>A) Yes — all Identification Rules must be created manually regardless of how the SGC is installed</div>
+            <div>B) No — when a ServiceNow-published SGC plugin is installed, it automatically deploys Identification Rules and Reconciliation Rules for all new CI classes it introduces</div>
+            <div>C) Yes — Identification Rules are customer-specific and cannot be shipped with a plugin</div>
+            <div>D) No — Identification Rules are not needed for cloud CIs because they use API-generated IDs</div>
+          </div>
+          <div class="cq-hint">💡 What does a ServiceNow-published SGC plugin include beyond just connector code?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — ServiceNow-published Service Graph Connector plugins are comprehensive packages. Installing the plugin deploys the connector configuration, CI class extensions, Identification Rules, Reconciliation Rules, and often default Reconciliation Priority. You only need to create Identification Rules manually when building custom integrations or custom CI classes not covered by any existing SGC plugin.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="01-ire-architecture.html" class="btn btn-secondary">← IRE Architecture</a>
+          <a href="03-reconciliation-rules.html" class="btn btn-secondary">Reconciliation Rules →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p4i_t2_02';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

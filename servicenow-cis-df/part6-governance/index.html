@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 6 — Governance & Data Quality | CIS-DF Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .part-hero { background: linear-gradient(135deg, rgba(8,145,178,0.1) 0%, #021a20 60%); border: 1px solid rgba(8,145,178,0.2); border-radius: var(--radius-2xl); padding: var(--space-10) var(--space-12); margin-bottom: var(--space-8); position: relative; overflow: hidden; }
+    .part-hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; background: radial-gradient(circle, rgba(8,145,178,0.15) 0%, transparent 70%); }
+    .part-hero-eyebrow { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #67e8f9; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.25); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); margin-bottom: var(--space-4); font-family: var(--font-heading); }
+    .part-hero-title { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.15; margin-bottom: var(--space-4); background: linear-gradient(135deg, #f0fbff 0%, #a5f3fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .part-hero-desc { font-size: 0.975rem; color: var(--text-secondary); max-width: 600px; line-height: 1.75; margin-bottom: var(--space-8); }
+    .part-hero-meta { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-value { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: #67e8f9; line-height: 1; }
+    .meta-label { font-size: 0.7rem; color: var(--text-muted); }
+    .why-card { background: rgba(8,145,178,0.06); border: 1px solid rgba(8,145,178,0.15); border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8); margin-bottom: var(--space-8); }
+    .why-title { font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: #67e8f9; margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2); }
+    .topic-list { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-10); }
+    .topic-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-6); display: flex; gap: var(--space-6); align-items: flex-start; text-decoration: none; transition: all var(--transition-normal); position: relative; overflow: hidden; }
+    .topic-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #0891b2; border-radius: var(--radius-xl) 0 0 var(--radius-xl); }
+    .topic-card:hover { border-color: rgba(8,145,178,0.4); transform: translateX(4px); box-shadow: 0 4px 16px rgba(8,145,178,0.1); }
+    .topic-card.completed::before { background: var(--green-500); }
+    .topic-num-badge { width: 44px; height: 44px; min-width: 44px; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.25); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: #67e8f9; margin-top: 2px; }
+    .topic-card-body { flex: 1; }
+    .topic-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-2); }
+    .topic-card-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+    .topic-card-desc { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-4); }
+    .topic-card-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .topic-tag { font-size: 0.68rem; font-family: var(--font-mono); background: var(--bg-secondary); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: var(--radius-sm); }
+    .topic-arrow { color: var(--text-muted); font-size: 1.2rem; margin-top: 2px; flex-shrink: 0; transition: transform var(--transition-fast); }
+    .topic-card:hover .topic-arrow { transform: translateX(4px); color: #67e8f9; }
+    .learn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-8); }
+    .learn-item { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-5); display: flex; gap: var(--space-3); align-items: flex-start; }
+    .learn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .learn-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+    .action-bar { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-8); }
+    .action-bar-left { display: flex; flex-direction: column; gap: var(--space-1); }
+    .action-bar-title { font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
+    .action-bar-sub { font-size: 0.8rem; color: var(--text-muted); }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <span class="current">Part 6 — Governance</span>
+      </div>
+    </header>
+    <div class="page-content stagger">
+
+      <div class="part-hero animate-fade-in">
+        <div class="part-hero-eyebrow">✅ Part 6 of 8 &nbsp;·&nbsp; 35% Exam Weight ★ HIGHEST</div>
+        <h1 class="part-hero-title">Data Quality<br>& Governance</h1>
+        <p class="part-hero-desc">
+          Server-side data integrity enforcement. Master Data Policies (server-side vs UI Policy), Dictionary Overrides, field validation rules, choice list management, Reference Qualifiers (static vs dynamic), field-level ACLs, and Data Certification workflows.
+        </p>
+        <div class="part-hero-meta">
+          <div class="meta-item"><span class="meta-value">35%</span><span class="meta-label">Exam Weight ★</span></div>
+          <div class="meta-item"><span class="meta-value" data-part-done-count>0/4</span><span class="meta-label">Topics Finished</span></div>
+          <div class="meta-item"><span class="meta-value" data-part-done-pct>0%</span><span class="meta-label">Readiness</span></div>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-title">💡 The #1 Trap in Part 6</div>
+        <p style="font-size:0.875rem; line-height:1.6; color:var(--text-secondary); margin:0;">
+          Exam constantly confuses Data Policy vs UI Policy. UI Policy = client-side JavaScript = only affects the form = bypassable via REST API. Data Policy = server-side = enforces on form AND REST API AND import sets = truly server-enforced. Know this cold. Also: Dictionary Override only works on INHERITED fields, never on fields defined directly on that same table.
+        </p>
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">Part 6 Study Modules</h2>
+      <div class="topic-list">
+
+        <a href="topics/01-data-policies-dictionary-overrides.html" class="topic-card" id="card-cisdf_p3_t1_01">
+          <div class="topic-num-badge">01</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Data Policies & Dict Overrides</h3></div>
+            <p class="topic-card-desc">sys_data_policy2 vs UI Policy enforcement scope, Data Policy conditions, make-mandatory server-side, Dictionary Overrides (sys_dictionary_override) for child-table-specific field attributes.</p>
+            <div class="topic-card-tags"><span class="topic-tag">sys_data_policy2</span><span class="topic-tag">Dict Override</span><span class="topic-tag">Server-Side</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/02-field-validation-choice-lists.html" class="topic-card" id="card-cisdf_p3_t2_02">
+          <div class="topic-num-badge">02</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Field Validation & Choice Lists</h3></div>
+            <p class="topic-card-desc">sys_choice table structure (value vs label), dependent choice fields, regex validation (sys_validator), choice inheritance in child tables, and Choice Action behavior in transforms.</p>
+            <div class="topic-card-tags"><span class="topic-tag">sys_choice</span><span class="topic-tag">Value vs Label</span><span class="topic-tag">Dependent Field</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/03-reference-qualifiers-field-security.html" class="topic-card" id="card-cisdf_p3_t3_03">
+          <div class="topic-num-badge">03</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Ref Qualifiers & Field Security</h3></div>
+            <p class="topic-card-desc">Static vs dynamic reference qualifiers, field-level ACLs (read/write), read failure = blank field, write failure = read-only field, encrypted fields (sys_encrypted_text), table+field ACL interaction.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Ref Qualifier</span><span class="topic-tag">Field ACL</span><span class="topic-tag">Encrypted Field</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/04-data-certification-lifecycle.html" class="topic-card" id="card-cisdf_p3_t4_04">
+          <div class="topic-num-badge">04</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Data Certification & Lifecycle</h3></div>
+            <p class="topic-card-desc">Certification Definition, Certification Tasks, Data Quality Score (completeness/compliance/correctness), record staleness flags, sys_data_validation_rule, and certification as quality workflow not access control.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Cert Definition</span><span class="topic-tag">Data Quality Score</span><span class="topic-tag">Staleness</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/05-governance-framework.html" class="topic-card" id="card-cisdf_p6_t5_05">
+          <div class="topic-num-badge">05</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">CMDB Governance Framework — Roles, Processes & Accountability</h3></div>
+            <p class="topic-card-desc">Why GOVERN is 35% of the exam, CMDB governance roles (Owner, Manager, Data Steward, Architect, Integration Owner, ITSM Consumer), core governance processes (Change Control, Data Quality Review, New Integration Onboarding), RACI model, data policies, and governance maturity levels (Reactive → Optimized).</p>
+            <div class="topic-card-tags"><span class="topic-tag">GOVERN Domain</span><span class="topic-tag">Data Steward</span><span class="topic-tag">RACI</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/06-cmdb-health-kpis-data-manager.html" class="topic-card" id="card-cisdf_p6_t6_06">
+          <div class="topic-num-badge">06</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">CMDB Health KPIs & CMDB Data Manager</h3></div>
+            <p class="topic-card-desc">Five CMDB Health dimensions (Completeness, Compliance, Correctness, Staleness, Duplicate), Health Rules configuration, traffic-light scoring, CMDB Data Manager for bulk lifecycle management (aging policies, archiving, deletion), CI operational_status values (Absent vs. Retired distinction), and Health as executive KPI reporting.</p>
+            <div class="topic-card-tags"><span class="topic-tag">CMDB Health</span><span class="topic-tag">Data Manager</span><span class="topic-tag">Absent vs Retired</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">What You'll Master</h2>
+      <div class="learn-grid">
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Exactly what Data Policy enforces that UI Policy cannot — and why it matters for REST APIs.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Dictionary Override scope: which tables are affected and which cannot be overridden.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">What happens visually when a field-level read ACL fails vs a write ACL fails.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Data Certification as a quality workflow — not a security control or access restriction.</span></div>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <div class="action-bar-title">Ready to Test Your Part 6 Knowledge?</div>
+          <div class="action-bar-sub">Data Policy vs UI Policy is one of the most-tested distinctions in the exam.</div>
+        </div>
+        <div style="display:flex; gap:var(--space-3)">
+          <a href="flashcards.html" class="btn btn-secondary">🧠 Flashcards</a>
+          <a href="quiz.html" class="btn btn-primary">🎯 Take Part Quiz</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  function updatePartPageStats() {
+    const meta = ProgressManager.getPartProgress(6);
+    document.querySelectorAll('[data-part-done-count]').forEach(el => { el.textContent = `${meta.done} / ${meta.total}`; });
+    document.querySelectorAll('[data-part-done-pct]').forEach(el => { el.textContent = `${meta.pct}%`; });
+    const topics = ['cisdf_p3_t1_01','cisdf_p3_t2_02','cisdf_p3_t3_03','cisdf_p3_t4_04','cisdf_p6_t5_05','cisdf_p6_t6_06'];
+    topics.forEach(tid => { const card = document.getElementById(`card-${tid}`); if (card) card.classList.toggle('completed', ProgressManager.isComplete(tid)); });
+  }
+  document.addEventListener('DOMContentLoaded', updatePartPageStats);
+  document.addEventListener('progressUpdated', updatePartPageStats);
+</script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Part 2 — Import Sets & Migration | CIS-DF Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <style>
+    .part-hero { background: linear-gradient(135deg, rgba(8,145,178,0.1) 0%, #021a20 60%); border: 1px solid rgba(8,145,178,0.2); border-radius: var(--radius-2xl); padding: var(--space-10) var(--space-12); margin-bottom: var(--space-8); position: relative; overflow: hidden; }
+    .part-hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; background: radial-gradient(circle, rgba(8,145,178,0.15) 0%, transparent 70%); }
+    .part-hero-eyebrow { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #67e8f9; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.25); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); margin-bottom: var(--space-4); font-family: var(--font-heading); }
+    .part-hero-title { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.15; margin-bottom: var(--space-4); background: linear-gradient(135deg, #f0fbff 0%, #a5f3fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .part-hero-desc { font-size: 0.975rem; color: var(--text-secondary); max-width: 600px; line-height: 1.75; margin-bottom: var(--space-8); }
+    .part-hero-meta { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-value { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: #67e8f9; line-height: 1; }
+    .meta-label { font-size: 0.7rem; color: var(--text-muted); }
+    .why-card { background: rgba(8,145,178,0.06); border: 1px solid rgba(8,145,178,0.15); border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8); margin-bottom: var(--space-8); }
+    .why-title { font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: #67e8f9; margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2); }
+    .topic-list { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-10); }
+    .topic-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-6); display: flex; gap: var(--space-6); align-items: flex-start; text-decoration: none; transition: all var(--transition-normal); position: relative; overflow: hidden; }
+    .topic-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #0891b2; border-radius: var(--radius-xl) 0 0 var(--radius-xl); }
+    .topic-card:hover { border-color: rgba(8,145,178,0.4); transform: translateX(4px); box-shadow: 0 4px 16px rgba(8,145,178,0.1); }
+    .topic-card.completed::before { background: var(--green-500); }
+    .topic-num-badge { width: 44px; height: 44px; min-width: 44px; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.25); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: #67e8f9; margin-top: 2px; }
+    .topic-card-body { flex: 1; }
+    .topic-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-2); }
+    .topic-card-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+    .topic-card-desc { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-4); }
+    .topic-card-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .topic-tag { font-size: 0.68rem; font-family: var(--font-mono); background: var(--bg-secondary); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: var(--radius-sm); }
+    .topic-arrow { color: var(--text-muted); font-size: 1.2rem; margin-top: 2px; flex-shrink: 0; transition: transform var(--transition-fast); }
+    .topic-card:hover .topic-arrow { transform: translateX(4px); color: #67e8f9; }
+    .learn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-8); }
+    .learn-item { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-5); display: flex; gap: var(--space-3); align-items: flex-start; }
+    .learn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .learn-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+    .action-bar { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-6) var(--space-8); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-8); }
+    .action-bar-left { display: flex; flex-direction: column; gap: var(--space-1); }
+    .action-bar-title { font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
+    .action-bar-sub { font-size: 0.8rem; color: var(--text-muted); }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+    #sidebar-overlay.show { display: block; }
+    @media (max-width: 700px) { .part-hero { padding: var(--space-6); } .topic-card { flex-direction: column; gap: var(--space-3); } .action-bar { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <span class="current">Part 2 — Import Sets</span>
+      </div>
+    </header>
+    <div class="page-content stagger">
+
+      <div class="part-hero animate-fade-in">
+        <div class="part-hero-eyebrow">📥 Part 2 of 8 &nbsp;·&nbsp; 10% Exam Weight</div>
+        <h1 class="part-hero-title">Import Sets<br>& Migration</h1>
+        <p class="part-hero-desc">
+          Master the full import set lifecycle — staging tables, transform maps, field maps, data sources (File/JDBC/LDAP/REST), scheduled imports, and transform scripting (coalesce, onBefore, onAfter).
+        </p>
+        <div class="part-hero-meta">
+          <div class="meta-item"><span class="meta-value">10%</span><span class="meta-label">Exam Weight</span></div>
+          <div class="meta-item"><span class="meta-value" data-part-done-count>0/4</span><span class="meta-label">Topics Finished</span></div>
+          <div class="meta-item"><span class="meta-value" data-part-done-pct>0%</span><span class="meta-label">Readiness</span></div>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-title">💡 Why Import Sets Dominate the Exam</div>
+        <p style="font-size:0.875rem; line-height:1.6; color:var(--text-secondary); margin:0;">
+          Import Sets is 10% of the exam. Expect scenario questions on coalesce behavior, transform script variables (source, target, answer, ignore, error), data source types, and when MID Server is required. The biggest trap: thinking the staging table IS the destination.
+        </p>
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">Part 2 Study Modules</h2>
+      <div class="topic-list">
+
+        <a href="topics/01-import-sets-architecture.html" class="topic-card" id="card-cisdf_p2_t1_01">
+          <div class="topic-num-badge">01</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Import Sets Architecture</h3></div>
+            <p class="topic-card-desc">Staging table lifecycle (pending → transformed/error/ignored), sys_import_set run record, import set rows, table rotation, and the three-phase Load → Transform → Cleanup flow.</p>
+            <div class="topic-card-tags"><span class="topic-tag">sys_import_set</span><span class="topic-tag">Staging Table</span><span class="topic-tag">Row States</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/02-transform-maps-field-maps.html" class="topic-card" id="card-cisdf_p2_t2_02">
+          <div class="topic-num-badge">02</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Transform Maps & Field Maps</h3></div>
+            <p class="topic-card-desc">sys_transform_map and sys_transform_entry — auto-mapping, run scripts, Choice Action settings (ignore/reject/replace_empty/replace_always), run_business_rules flag, and multiple transforms ordering.</p>
+            <div class="topic-card-tags"><span class="topic-tag">sys_transform_map</span><span class="topic-tag">Field Map</span><span class="topic-tag">Choice Action</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/03-data-sources-scheduled-imports.html" class="topic-card" id="card-cisdf_p2_t3_03">
+          <div class="topic-num-badge">03</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Data Sources & Scheduled Imports</h3></div>
+            <p class="topic-card-desc">sys_data_source types (File/URL/JDBC/LDAP/REST), attachment vs URL modes, MID Server requirements for private networks, scheduled imports, and REST method auth records.</p>
+            <div class="topic-card-tags"><span class="topic-tag">sys_data_source</span><span class="topic-tag">MID Server</span><span class="topic-tag">JDBC</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/04-coalesce-behaviors-scripts.html" class="topic-card" id="card-cisdf_p2_t4_04">
+          <div class="topic-num-badge">04</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Coalesce, Behaviors & Scripts</h3></div>
+            <p class="topic-card-desc">Coalesce upsert logic, multiple coalesce fields (AND), import_behavior (insert/update/insert_or_update/skip/error), onBefore/onAfter/onStart/onComplete transform scripts, and error vs ignore semantics.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Coalesce</span><span class="topic-tag">insert_or_update</span><span class="topic-tag">onAfter Script</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/05-service-graph-connectors.html" class="topic-card" id="card-cisdf_p2_t5_05">
+          <div class="topic-num-badge">05</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Service Graph Connectors — Cloud & Third-Party Ingestion</h3></div>
+            <p class="topic-card-desc">SGC architecture for cloud providers (AWS, Azure, GCP) and third-party tools, ServiceNow Store connectors, IRE integration (SGC data goes through IRE unlike Table API), SGC data source priority vs. Discovery, and cloud CI class mapping (cmdb_ci_vm_instance, cmdb_ci_ec2_instance).</p>
+            <div class="topic-card-tags"><span class="topic-tag">SGC</span><span class="topic-tag">Cloud CI</span><span class="topic-tag">IRE Integration</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+        <a href="topics/06-non-discoverable-cis.html" class="topic-card" id="card-cisdf_p2_t6_06">
+          <div class="topic-num-badge">06</div>
+          <div class="topic-card-body">
+            <div class="topic-card-head"><h3 class="topic-card-title">Non-Discoverable CIs — Manual & Import-Based Ingestion</h3></div>
+            <p class="topic-card-desc">CIs that cannot be automatically discovered (contracts, licenses, business applications, physical assets), when to use Import Sets vs. Manual entry vs. CMDB REST API (via IRE) for non-discoverable CI ingestion, and governance controls for manually managed CI classes.</p>
+            <div class="topic-card-tags"><span class="topic-tag">Non-Discoverable</span><span class="topic-tag">Manual CI</span><span class="topic-tag">Import Sets</span></div>
+          </div>
+          <span class="topic-arrow">→</span>
+        </a>
+
+      </div>
+
+      <h2 style="margin-bottom:var(--space-5)">What You'll Master</h2>
+      <div class="learn-grid">
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Full import set lifecycle from raw data load to target table write.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">All five import behaviors and exactly when each is appropriate.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">Transform script variables: source, target, answer, ignore, error — what each does.</span></div>
+        <div class="learn-item"><span class="learn-icon">🟢</span><span class="learn-text">When MID Server is required and which data source types need it.</span></div>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <div class="action-bar-title">Ready to Test Your Part 2 Knowledge?</div>
+          <div class="action-bar-sub">Import Sets + SGC combined is a key INGEST domain — drill this thoroughly.</div>
+        </div>
+        <div style="display:flex; gap:var(--space-3)">
+          <a href="flashcards.html" class="btn btn-secondary">🧠 Flashcards</a>
+          <a href="quiz.html" class="btn btn-primary">🎯 Take Part Quiz</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script>
+  function updatePartPageStats() {
+    const meta = ProgressManager.getPartProgress(2);
+    document.querySelectorAll('[data-part-done-count]').forEach(el => { el.textContent = `${meta.done} / ${meta.total}`; });
+    document.querySelectorAll('[data-part-done-pct]').forEach(el => { el.textContent = `${meta.pct}%`; });
+    const topics = ['cisdf_p2_t1_01','cisdf_p2_t2_02','cisdf_p2_t3_03','cisdf_p2_t4_04','cisdf_p2_t5_05','cisdf_p2_t6_06'];
+    topics.forEach(tid => { const card = document.getElementById(`card-${tid}`); if (card) card.classList.toggle('completed', ProgressManager.isComplete(tid)); });
+  }
+  document.addEventListener('DOMContentLoaded', updatePartPageStats);
+  document.addEventListener('progressUpdated', updatePartPageStats);
+</script>
+</body>
+</html>

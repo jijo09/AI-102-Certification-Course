@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Mapping | CIS-DF Part 3</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 3: Discovery</a>
+        <span class="sep">›</span>
+        <span class="current">Service Mapping</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 3 · Topic 4</div>
+        <h1 class="topic-title">Service Mapping — Discovering How Applications Actually Run</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Discovery finds individual CIs — servers, databases, network devices. But a business
+          application like "Online Banking" runs across dozens of CIs connected in specific ways.
+          Service Mapping discovers those connections automatically, building a live application
+          service map that shows exactly which CIs deliver each business service and how they
+          depend on each other.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>9 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~30 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~19% exam weight (INGEST domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Service Map · Application Service · Top-Down · Bottom-Up · Traffic-Based</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: The Gap Discovery Leaves -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>What Discovery Misses — The Application Layer</h2>
+        <p>
+          You now have Discovery running. It finds every server, switch, and network device
+          on your network. Each one has a CI record in the CMDB with detailed OS, hardware,
+          and software attributes. This is excellent infrastructure visibility.
+        </p>
+        <p>
+          But consider your change manager's actual question: "If I take the database server
+          DB-PRD-01 down for maintenance tonight, which business applications will be affected?"
+        </p>
+        <p>
+          Discovery cannot answer this. It knows DB-PRD-01 exists and has Oracle 19c running.
+          But it doesn't know which application servers are connecting to it, which application
+          those connections belong to, or which business process depends on that application.
+        </p>
+        <p>
+          That's the gap Service Mapping fills. Instead of just finding what CIs exist,
+          Service Mapping discovers how they connect to each other to form a running
+          application service.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🗺️</span>
+          <div class="callout-body">
+            <strong>Analogy — Discovery vs. Service Mapping</strong>
+            Discovery is like a phone book — it lists every person (CI) in the city with their
+            address and phone number. Service Mapping is like a social network graph — it shows
+            who talks to whom, who depends on whom, and which conversation threads form a
+            coherent group. You need both: the phone book to find people, and the social graph
+            to understand relationships.
+          </div>
+        </div>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Application Service</strong>
+            In ServiceNow, an <span class="hl-teal">Application Service</span> is a CI that
+            represents a running application from end to end — including all the infrastructure
+            CIs that support it and the relationships between them. It's stored in the
+            <span class="code-inline">cmdb_ci_service</span> table.
+            Service Mapping automatically discovers and maintains Application Services.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: Service Mapping Approaches -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>The Three Service Mapping Approaches</h2>
+        <p>
+          ServiceNow offers three approaches to Service Mapping, each suited to different
+          starting points and environments.
+        </p>
+
+        <h3>1. Top-Down Discovery (Entry Point Approach)</h3>
+        <p>
+          You tell Service Mapping: "Start from this entry point (a URL, load balancer IP,
+          or specific server) and follow the connections outward to discover everything
+          this service touches."
+        </p>
+        <p>
+          How it works:
+        </p>
+        <ol>
+          <li>You define the entry point: "https://banking.yourcompany.com"</li>
+          <li>Service Mapping connects to the web server at that URL</li>
+          <li>It reads the web server's active connections and processes</li>
+          <li>It follows each connection to the next tier (app servers, databases)</li>
+          <li>It continues following connections until there are no more to follow</li>
+          <li>The result is a map of all CIs involved in delivering that service</li>
+        </ol>
+        <p>
+          This is the most powerful approach and builds the most accurate maps.
+          It requires credentials to connect to each tier.
+        </p>
+
+        <h3>2. Bottom-Up Discovery (CI-Centric Approach)</h3>
+        <p>
+          Instead of starting from a URL, you start from a specific CI and ask:
+          "What services use this CI?" Service Mapping looks at a known CI (e.g., a database
+          server) and traces which application servers connect to it.
+        </p>
+        <p>
+          When to use: You already know certain CIs are critical and want to understand
+          all services that depend on them. Useful for existing CIs discovered by Discovery
+          or imported via SGC.
+        </p>
+
+        <h3>3. Traffic-Based Discovery (Agentless Network Approach)</h3>
+        <p>
+          ServiceNow analyzes actual network traffic (using NetFlow data or SNMP traps from
+          network devices) to infer connections between CIs without needing credentials
+          to connect to each server.
+        </p>
+        <p>
+          Advantages:
+        </p>
+        <ul>
+          <li>Works for CIs where you can't install agents or have credentials</li>
+          <li>Discovers connections that credential-based mapping might miss</li>
+          <li>Can work for legacy or isolated systems</li>
+        </ul>
+        <p>
+          Limitations:
+        </p>
+        <ul>
+          <li>Less detailed than credential-based mapping</li>
+          <li>Requires network device data (NetFlow, SNMP)</li>
+          <li>Cannot follow application-level logic — only network connections</li>
+        </ul>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Approach</th>
+              <th>Starting Point</th>
+              <th>Credentials Required?</th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Top-Down</td>
+              <td>URL or entry point IP</td>
+              <td>Yes — for each tier</td>
+              <td>New service mapping; most accurate maps</td>
+            </tr>
+            <tr>
+              <td>Bottom-Up</td>
+              <td>Known CI record</td>
+              <td>Yes — for connected CIs</td>
+              <td>Understanding impact on a specific CI</td>
+            </tr>
+            <tr>
+              <td>Traffic-Based</td>
+              <td>Network flow data</td>
+              <td>No — uses network data</td>
+              <td>CIs without credentials; supplementary mapping</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S3: Service Mapping Components -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Service Mapping Architecture Components</h2>
+        <p>
+          Service Mapping uses the same MID Server infrastructure as Discovery but adds
+          additional components for tracking application-level connections.
+        </p>
+
+        <h3>Entry Points</h3>
+        <p>
+          An <span class="hl-teal">Entry Point</span> is the starting URL or IP that
+          Service Mapping begins from for top-down mapping. Entry points are configured
+          in the Application Service record. You can have multiple entry points for
+          applications with multiple front-ends (web, API, mobile).
+        </p>
+
+        <h3>Service Mapping Probes</h3>
+        <p>
+          Service Mapping uses specialized probes that focus on process connections rather
+          than device attributes:
+        </p>
+        <ul>
+          <li>
+            <strong>Connection probes:</strong> Read the network connections table of a server
+            (<code>netstat</code> on Linux, <code>netstat</code> on Windows) to see which
+            processes are connected to which remote addresses
+          </li>
+          <li>
+            <strong>Process probes:</strong> Identify which application process owns each connection
+          </li>
+          <li>
+            <strong>Application probes:</strong> Identify the specific application framework
+            (Apache, Nginx, Tomcat, JBoss, etc.) from process data
+          </li>
+        </ul>
+
+        <h3>The Application Service Map</h3>
+        <p>
+          The output of Service Mapping is a visual service map — a diagram showing all CIs
+          involved in the service and the connections between them. The map has tiers:
+        </p>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Load Balancer</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">Web Servers (tier 1)</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">App Servers (tier 2)</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">Database Server (tier 3)</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-note">// Each box is a CI record; each arrow is a relationship in cmdb_rel_ci</div>
+          </div>
+        </div>
+        <p>
+          The map is stored as relationships in the <span class="code-inline">cmdb_rel_ci</span> table,
+          with the Application Service CI as the parent that "uses" all component CIs.
+        </p>
+      </div>
+
+      <!-- S4: Service Mapping Discovery Flow -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Service Mapping Discovery — Step by Step</h2>
+        <p>
+          Let's trace a complete top-down Service Mapping run for "Online Banking":
+        </p>
+        <ol>
+          <li>
+            <strong>Entry Point configured:</strong>
+            Admin defines entry point <code>https://banking.company.com</code> in the Application Service record.
+          </li>
+          <li>
+            <strong>Mapping triggered:</strong>
+            Admin clicks "Run Mapping" or the scheduled mapping runs. ServiceNow sends instructions to the MID Server.
+          </li>
+          <li>
+            <strong>MID Server connects to entry point server:</strong>
+            MID Server resolves <code>banking.company.com</code> to an IP (say, 10.0.5.10),
+            connects via SSH, and reads the active process connections.
+          </li>
+          <li>
+            <strong>Process connections discovered:</strong>
+            <code>netstat</code> shows the web server (Nginx process) has established connections to 10.0.5.20:8080
+            (the app server) and 10.0.5.30:443 (a payment processing API).
+          </li>
+          <li>
+            <strong>Tier 2 exploration:</strong>
+            MID Server follows each discovered connection:
+            connects to 10.0.5.20 (app server), reads its connections,
+            finds 10.0.5.40:1521 (Oracle database).
+          </li>
+          <li>
+            <strong>Tier 3 exploration:</strong>
+            MID Server connects to 10.0.5.40 (Oracle DB server), reads its connections.
+            No further outbound connections found — this is the end of the chain.
+          </li>
+          <li>
+            <strong>Map assembled:</strong>
+            ServiceNow creates CI records for each discovered component (using IRE) and
+            creates <span class="code-inline">cmdb_rel_ci</span> records linking them under the Application Service.
+          </li>
+          <li>
+            <strong>Application Service updated:</strong>
+            The "Online Banking" Application Service CI now has a populated service map:
+            Load Balancer → Nginx Web Server → Tomcat App Server → Oracle DB.
+          </li>
+        </ol>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Key — Service Mapping Creates Relationships, Not Just CIs</strong>
+            Service Mapping's primary output is CI relationships in <span class="code-inline">cmdb_rel_ci</span>,
+            not just CI records. Discovery creates CIs. Service Mapping connects them.
+            An exam question might ask: "What does Service Mapping add to the CMDB that
+            standard Discovery does not?" → Answer: Application service relationships (the dependency map).
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Tag-Based Service Mapping -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Tag-Based Service Mapping — Cloud-Native Discovery</h2>
+        <p>
+          In cloud environments (AWS, Azure, GCP), infrastructure is ephemeral — servers
+          spin up and down dynamically. Traditional top-down mapping (which starts from a
+          fixed entry point) struggles with this because the entry point changes.
+        </p>
+        <p>
+          <span class="hl-teal">Tag-Based Service Mapping</span> solves this by using
+          cloud resource tags to group CIs into a service automatically.
+        </p>
+        <p>
+          How it works:
+        </p>
+        <ol>
+          <li>DevOps team tags all AWS resources belonging to "Online Banking" with the tag
+          <code>Service=OnlineBanking</code></li>
+          <li>ServiceNow's SGC for AWS pulls all resources and their tags</li>
+          <li>Tag-Based Service Mapping reads the tags and groups all CIs tagged
+          <code>Service=OnlineBanking</code> into the "Online Banking" Application Service</li>
+          <li>No connection tracing needed — the tag is the signal</li>
+        </ol>
+        <p>
+          Advantage: Works perfectly in auto-scaling environments where individual servers
+          change constantly, because the <em>tag</em> persists even as individual instances
+          are replaced.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Two Flavors of Service Mapping</strong>
+            Classic Service Mapping (top-down, credential-based) is best for on-premise and
+            static cloud environments. Tag-Based Service Mapping is best for modern cloud-native
+            and microservices environments where infrastructure is dynamic.
+            Both produce Application Services in the CMDB — they just use different methods
+            to discover the component CIs.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: Service Mapping and Discovery Relationship -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Service Mapping and Discovery — How They Work Together</h2>
+        <p>
+          Service Mapping is not a replacement for Discovery — it builds on top of it.
+          Here's how they complement each other:
+        </p>
+        <ul>
+          <li>
+            <strong>Discovery creates the CI records.</strong>
+            Before Service Mapping can connect "Web Server A" to "Database B," both CIs must
+            exist in the CMDB. Discovery creates them with full infrastructure attributes.
+          </li>
+          <li>
+            <strong>Service Mapping creates the service relationships.</strong>
+            It reads the running state of the application (live connections, active processes)
+            and maps which CIs are connected right now.
+          </li>
+          <li>
+            <strong>Both update the CMDB through IRE.</strong>
+            Both Discovery and Service Mapping route their data through IRE — the same
+            Identity and Reconciliation Engine — ensuring consistent deduplication and field
+            precedence rules.
+          </li>
+          <li>
+            <strong>Service Mapping enriches existing CI records.</strong>
+            When Service Mapping finds that a web server CI (already in CMDB from Discovery)
+            is running Nginx, it may enrich the CI with the Nginx version discovered
+            through the connection-tracing probes.
+          </li>
+        </ul>
+
+        <h3>Service Mapping vs. Discovery — Key Differences</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Discovery</th>
+              <th>Service Mapping</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Primary question</td>
+              <td>"What CIs exist and what are their attributes?"</td>
+              <td>"Which CIs work together to deliver this application service?"</td>
+            </tr>
+            <tr>
+              <td>Starting point</td>
+              <td>IP range sweep</td>
+              <td>Application entry point (URL/IP) or CI record</td>
+            </tr>
+            <tr>
+              <td>Primary output</td>
+              <td>CI records with detailed attributes</td>
+              <td>Application service relationships (dependency map)</td>
+            </tr>
+            <tr>
+              <td>Runs on</td>
+              <td>All IP ranges in a schedule</td>
+              <td>Specific application services</td>
+            </tr>
+            <tr>
+              <td>Frequency</td>
+              <td>Periodic (daily/weekly full scan)</td>
+              <td>Continuous or scheduled (tracks live connections)</td>
+            </tr>
+            <tr>
+              <td>Uses MID Server?</td>
+              <td>Yes</td>
+              <td>Yes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S7: Service Map Maintenance -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Keeping Service Maps Current</h2>
+        <p>
+          A service map that was accurate 6 months ago may not be accurate today —
+          applications change, servers are added or removed, connections shift.
+          Service Mapping provides several mechanisms to keep maps current.
+        </p>
+
+        <h3>Scheduled Remapping</h3>
+        <p>
+          Each Application Service has a scheduled mapping configuration. Options:
+        </p>
+        <ul>
+          <li><strong>Continuous mapping:</strong> Service Mapping runs on a short interval (every 15–30 minutes) to catch connection changes quickly</li>
+          <li><strong>Daily/weekly scheduled mapping:</strong> For stable applications that don't change frequently</li>
+          <li><strong>Manual run:</strong> "Run Mapping Now" button on the Application Service record</li>
+        </ul>
+
+        <h3>CI Retirement and Map Cleanup</h3>
+        <p>
+          When Discovery no longer finds a CI (server decommissioned), that CI's
+          <span class="code-inline">operational_status</span> is set to "Retired" and it's
+          removed from active service maps on the next mapping run. This keeps maps current
+          without manual cleanup.
+        </p>
+
+        <h3>Map Exceptions</h3>
+        <p>
+          Occasionally Service Mapping discovers connections to CIs that should NOT be in the
+          service map — monitoring agents, backup agents, security scanners. You can define
+          <span class="hl-teal">mapping exclusions</span> to prevent specific CIs or connection types
+          from being included in the map.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Service Maps Can Include Non-Application Traffic</strong>
+            Service Mapping discovers ALL connections from servers, including monitoring agent
+            connections, log shipping connections, backup connections. Without exclusions,
+            your "Online Banking" service map might include your Splunk logging server,
+            Veeam backup server, and Nagios monitoring server — making the map confusing
+            and overcrowded. Configure mapping exclusions for infrastructure services
+            that aren't actually part of the application.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: Service Mapping and Change Management -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>Service Mapping Powers Change Impact Analysis</h2>
+        <p>
+          Service Mapping's most important exam use case is change impact analysis.
+          When a change is planned for any CI, ServiceNow can use the service map to
+          automatically identify which Application Services will be affected.
+        </p>
+
+        <h3>Change Impact Analysis Flow</h3>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Change Request created</div>
+            <div class="flow-note">// "Reboot DB-PRD-01 for patch"</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">ServiceNow looks up DB-PRD-01's service map relationships</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">Finds: DB-PRD-01 supports Online Banking, HR Portal, Payroll Processing</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">Change Impact section populated with 3 affected services</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">Approvers see the full blast radius before approving</div>
+          </div>
+        </div>
+
+        <p>
+          Without an accurate service map, this impact analysis returns zero results or
+          incomplete results. A change approver sees "no known impact" and approves —
+          but in reality three critical business services go down.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Service Mapping Enables Accurate Change Impact</strong>
+            A common exam scenario: "Change managers report that impact analysis for database
+            maintenance windows consistently misses affected applications. What is the most
+            likely root cause?"
+            Answer: Application services are not mapped — Service Mapping hasn't been run,
+            or the service maps are stale. Without service map relationships, change impact
+            analysis has no data to work from.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Service Mapping — Key Facts</h2>
+        <ul>
+          <li><strong>Service Mapping discovers relationships</strong> between CIs, not just CI attributes. Discovery finds CIs; Service Mapping connects them.</li>
+          <li><strong>Application Service CI</strong> (<code>cmdb_ci_service</code>) = the top-level CI representing an end-to-end business application.</li>
+          <li><strong>Top-Down:</strong> Starts from URL/entry point, follows live connections tier by tier. Most accurate. Needs credentials per tier.</li>
+          <li><strong>Bottom-Up:</strong> Starts from a known CI, discovers services that depend on it.</li>
+          <li><strong>Traffic-Based:</strong> Uses NetFlow/SNMP network data to infer connections. No credentials needed. Less detailed.</li>
+          <li><strong>Tag-Based:</strong> Groups cloud resources by tag. Best for dynamic cloud/microservices environments.</li>
+          <li><strong>Output stored as <code>cmdb_rel_ci</code> records.</strong> Relationships are the primary artifact, not new CI records.</li>
+          <li><strong>Use Case: Change Impact Analysis.</strong> Service maps tell change approvers which business services a maintenance window will affect.</li>
+          <li><strong>Mapping exclusions</strong> prevent monitoring/backup agents from cluttering the service map.</li>
+          <li><strong>Both Discovery and Service Mapping route through IRE.</strong></li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Application Service</div>
+            <div class="term-def">A CI in <code>cmdb_ci_service</code> that represents a complete running application, including all supporting CIs and relationships discovered by Service Mapping.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Entry Point</div>
+            <div class="term-def">The starting URL or IP address for top-down Service Mapping. Service Mapping begins here and traces outward following live connections.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Top-Down Mapping</div>
+            <div class="term-def">Credential-based Service Mapping that starts from an entry point and follows process connections across tiers to build a complete service map.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Tag-Based Service Mapping</div>
+            <div class="term-def">Groups cloud resources into Application Services based on resource tags (e.g., Service=OnlineBanking). Best for dynamic cloud environments.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Service Map</div>
+            <div class="term-def">Visual and data representation of all CIs and their relationships for a given Application Service. Stored as <code>cmdb_rel_ci</code> records.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Mapping Exclusion</div>
+            <div class="term-def">Configuration that prevents specific CIs or connection types (monitoring agents, backup servers) from being included in a service map.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. Discovery has successfully created CI records for all servers in the environment. Change impact analysis for server maintenance windows consistently shows zero affected services. What is the most likely cause?</div>
+          <div class="cq-options">
+            <div>A) Discovery is not routing through IRE</div>
+            <div>B) Service Mapping has not been configured to create Application Service relationships</div>
+            <div>C) The Change Management module is not installed</div>
+            <div>D) Server CIs are in the wrong CMDB table</div>
+          </div>
+          <div class="cq-hint">💡 Change impact analysis requires service relationships, not just CI records.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Discovery creates CI records but doesn't create application service relationships. Change impact analysis depends on service map relationships (cmdb_rel_ci records linking servers to Application Services) to determine which business services are affected by a CI change. Without Service Mapping configured, there are no such relationships, so impact analysis always shows zero.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. A company uses AWS with auto-scaling groups where web server instances are constantly being created and terminated. Which Service Mapping approach is best suited for this environment?</div>
+          <div class="cq-options">
+            <div>A) Top-Down mapping starting from the load balancer entry point</div>
+            <div>B) Tag-Based Service Mapping using AWS resource tags</div>
+            <div>C) Bottom-Up mapping starting from the database server</div>
+            <div>D) Traffic-Based mapping using NetFlow data</div>
+          </div>
+          <div class="cq-hint">💡 Individual servers change constantly, but the service tag stays consistent.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — In auto-scaling environments, individual server instances are ephemeral (created and deleted constantly). Top-down and bottom-up mapping would need to re-discover entry points constantly. Tag-Based Service Mapping works by grouping all resources with a specific tag (e.g., Service=WebApp) regardless of which individual instances exist — the tag persists even as instances change.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. What is the primary data artifact that Service Mapping creates in the CMDB, beyond CI records?</div>
+          <div class="cq-options">
+            <div>A) Import Set rows (sys_import_set_row)</div>
+            <div>B) CI relationship records (cmdb_rel_ci)</div>
+            <div>C) Discovery Status records</div>
+            <div>D) Transform Map configurations</div>
+          </div>
+          <div class="cq-hint">💡 Service Mapping's unique contribution is connections between CIs, not the CIs themselves.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Service Mapping's primary output is CI relationship records in cmdb_rel_ci — these describe which CIs are connected to which, how they relate (uses, depends on, connects to), and under which Application Service. Discovery creates the CI records. Service Mapping creates the relationship records that connect them into a service map.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. Service Mapping for the "HR Portal" application shows hundreds of CIs including multiple Splunk forwarders, backup agents, and security scanners. This is causing confusion for change managers. What is the correct solution?</div>
+          <div class="cq-options">
+            <div>A) Delete the Splunk, backup, and security CI records from the CMDB</div>
+            <div>B) Set the Application Service to discovery status "Retired"</div>
+            <div>C) Configure mapping exclusions for the infrastructure service connections (Splunk, backup, security)</div>
+            <div>D) Reduce the Service Mapping scan frequency to weekly</div>
+          </div>
+          <div class="cq-hint">💡 These CIs are real but shouldn't be in this application's service map.</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — Mapping exclusions allow you to specify CIs or connection types that should not be included in a service map. Splunk forwarders, backup agents, and security scanners are real CIs and should remain in the CMDB — you just don't want them in the HR Portal service map because they're not part of the application's functional delivery. Deleting them (A) is wrong — they're legitimate CIs.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. Which Service Mapping approach would you use if you need to discover all services that depend on a specific Oracle database server that was just discovered by Discovery?</div>
+          <div class="cq-options">
+            <div>A) Top-Down mapping — start from the database's IP as an entry point</div>
+            <div>B) Bottom-Up mapping — start from the Oracle database CI and trace which application servers connect to it</div>
+            <div>C) Tag-Based mapping — tag the Oracle database CI and let Service Mapping group it</div>
+            <div>D) Traffic-Based mapping — analyze NetFlow to find all connections to the database</div>
+          </div>
+          <div class="cq-hint">💡 You have a known CI and want to find all services that use it.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Bottom-Up mapping starts from a known CI and discovers which services depend on it. You start from the Oracle database CI and Service Mapping traces inbound connections to find which application servers connect to it, and from those finds which Application Services those app servers belong to. This is exactly the use case for bottom-up — you have a specific CI and want its upstream service dependencies.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="03-patterns-probes-credentials.html" class="btn btn-secondary">← Patterns, Probes &amp; Credentials</a>
+          <a href="05-agent-client-collector.html" class="btn btn-secondary">Agent Client Collector →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p3d_t4_04';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

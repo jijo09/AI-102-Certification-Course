@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSDM Framework | CIS-DF Part 5</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .csdm-layer{border-radius:var(--radius-lg);padding:var(--space-4) var(--space-6);margin:var(--space-2) 0;font-size:0.9rem;border:1px solid}
+    .csdm-layer-1{background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.25);color:#c4b5fd}
+    .csdm-layer-2{background:rgba(8,145,178,0.08);border-color:rgba(8,145,178,0.25);color:#67e8f9}
+    .csdm-layer-3{background:rgba(52,211,153,0.07);border-color:rgba(52,211,153,0.22);color:#6ee7b7}
+    .csdm-layer-4{background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.22);color:#fde68a}
+    .csdm-layer-title{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:var(--space-1)}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 5: CMDB &amp; CSDM</a>
+        <span class="sep">›</span>
+        <span class="current">CSDM Framework</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 5 · Topic 6</div>
+        <h1 class="topic-title">CSDM Framework — The Common Service Data Model Explained</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          You've learned how CIs are captured, stored, and organized in the CMDB.
+          But a CMDB full of servers and applications doesn't automatically tell you how
+          they connect to the business — which services they support, who owns them,
+          and how they deliver value. The Common Service Data Model (CSDM) is ServiceNow's
+          framework for answering those questions. It's a prescribed way of modeling
+          IT services from the business perspective down to the infrastructure.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>9 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~11% exam weight (CSDM domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>CSDM · Business Capability · Business Application · Technical Service</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: Why CSDM Exists -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>The Business-to-Infrastructure Gap That CSDM Bridges</h2>
+        <p>
+          Imagine a critical incident: your email system is down. From the business perspective,
+          "email is down" — that's all the executives know. But in the CMDB, the actual failure
+          might be a load balancer CI in the network tier, a database CI in the data tier,
+          or an application server CI in the application tier.
+        </p>
+        <p>
+          Without CSDM, these two views — "email is a business service" and "load balancer
+          LB-PROD-01 is down" — exist in separate mental models. Incident responders must
+          manually figure out which infrastructure CIs support "email." This takes precious
+          time during an outage.
+        </p>
+        <p>
+          CSDM creates a structured, machine-readable map from business services down to
+          infrastructure CIs. When LB-PROD-01 has an incident, the system automatically
+          knows it affects the Email business application, which affects the Communications
+          business service, which is owned by the HR department.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🏗️</span>
+          <div class="callout-body">
+            <strong>Analogy — CSDM as an Org Chart for IT Services</strong>
+            A company has an organizational chart: CEO → VP of Sales → Regional Manager → Sales Rep.
+            Each person is a "CI" (a person with attributes). But the org chart shows how they relate
+            to the company's business functions. CSDM is the org chart for IT: Business Capability →
+            Business Application → Technical Service → Application Service → Infrastructure CIs.
+            Without the chart, you have a list of people (CIs) with no context. With the chart,
+            you understand how each person (CI) contributes to the company's outcomes.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: CSDM Four Domains Overview -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>CSDM's Four Domains — The Layered Model</h2>
+        <p>
+          CSDM organizes IT data into four domains, arranged from business-level at the top
+          to infrastructure at the bottom. Each domain is a distinct layer, and the layers
+          are connected by relationships.
+        </p>
+
+        <div class="csdm-layer csdm-layer-1">
+          <div class="csdm-layer-title">Domain 1: Business</div>
+          Business Capability · Business Application · Business Process · Product
+          <div style="font-size:0.82rem;margin-top:4px;opacity:0.85">Answers: What does the business do? What business outcomes does IT enable?</div>
+        </div>
+        <div style="text-align:center;color:#0891b2;font-size:1.3rem;padding:4px 0">↕</div>
+        <div class="csdm-layer csdm-layer-2">
+          <div class="csdm-layer-title">Domain 2: Design</div>
+          Application Service · Business Service · Service Offering · Service Commitment
+          <div style="font-size:0.82rem;margin-top:4px;opacity:0.85">Answers: What IT services exist? What do we promise to deliver and to whom?</div>
+        </div>
+        <div style="text-align:center;color:#0891b2;font-size:1.3rem;padding:4px 0">↕</div>
+        <div class="csdm-layer csdm-layer-3">
+          <div class="csdm-layer-title">Domain 3: Manage</div>
+          Technical Service · Software Product · Vendor · Contract
+          <div style="font-size:0.82rem;margin-top:4px;opacity:0.85">Answers: What IT components/services need to be managed operationally?</div>
+        </div>
+        <div style="text-align:center;color:#0891b2;font-size:1.3rem;padding:4px 0">↕</div>
+        <div class="csdm-layer csdm-layer-4">
+          <div class="csdm-layer-title">Domain 4: Build/Sell/Support (CMDB CIs)</div>
+          Server, Network Device, Database, Application Instance, Cloud Resource
+          <div style="font-size:0.82rem;margin-top:4px;opacity:0.85">Answers: What infrastructure exists? What can be discovered, tracked, and monitored?</div>
+        </div>
+
+        <p style="margin-top:var(--space-5)">
+          The power of CSDM is in these <em>connections between layers</em>. A CI in Domain 4
+          (a specific Linux server) is linked upward to a Technical Service (Domain 3),
+          which is linked to an Application Service (Domain 2), which is linked to a
+          Business Application (Domain 1). This chain allows ServiceNow to automatically
+          determine business impact when any CI fails.
+        </p>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — CSDM Is Prescriptive, Not Custom</strong>
+            CSDM is a specific, opinionated framework published by ServiceNow. It defines
+            exactly which CI classes should represent each concept (e.g., Business Application
+            must be <code>cmdb_ci_business_app</code>) and exactly how they should be related.
+            Organizations that don't follow CSDM create their own ad-hoc models that don't
+            benefit from ServiceNow's built-in workflows, reports, and impact analysis.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: Domain 1 — Business Layer -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Domain 1 — The Business Layer</h2>
+        <p>
+          The Business domain captures what the business does and what IT enables.
+          These are high-level concepts that business stakeholders (executives, product managers)
+          recognize and own.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>CSDM Concept</th>
+              <th>CI Class</th>
+              <th>Plain English Explanation</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Business Capability</td>
+              <td>cmdb_ci_business_capability</td>
+              <td>A core thing the business can do. Not a specific tool — the capability itself.</td>
+              <td>"Process Customer Orders", "Manage Payroll", "Conduct Fraud Detection"</td>
+            </tr>
+            <tr>
+              <td>Business Application</td>
+              <td>cmdb_ci_business_app</td>
+              <td>A named software application that the business uses to support a capability. Business users identify it by name.</td>
+              <td>"Salesforce CRM", "SAP ERP", "Custom Expense Reporting App"</td>
+            </tr>
+            <tr>
+              <td>Business Process</td>
+              <td>cmdb_ci_business_process</td>
+              <td>A defined set of steps the business follows. Can cross multiple applications.</td>
+              <td>"Order-to-Cash Process", "Employee Onboarding Process"</td>
+            </tr>
+            <tr>
+              <td>Product</td>
+              <td>cmdb_ci_product</td>
+              <td>A product or service the company offers to external customers.</td>
+              <td>"Online Banking App", "Premium Insurance Plan"</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Business Application Is Not a Technical Application</strong>
+            In CSDM, "Business Application" (<code>cmdb_ci_business_app</code>) is a business-level concept — it's the name
+            stakeholders use (e.g., "our HR system"). It's NOT the same as an application server CI
+            or software CI in Domain 4. A Business Application is linked DOWN to Domain 2
+            (Application Services) which are then linked down to Domain 3 and 4 (infrastructure).
+            Don't confuse the two.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Domain 2 — Design Layer -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Domain 2 — The Design Layer (Services)</h2>
+        <p>
+          The Design domain captures what IT services exist, what they promise to deliver,
+          and how they're structured technically. This is where IT service management
+          meets the CMDB.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>CSDM Concept</th>
+              <th>CI Class</th>
+              <th>Plain English Explanation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Application Service</td>
+              <td>cmdb_ci_service</td>
+              <td>A technical implementation of an application as a running service. Contains the actual server/database CIs that make it run. Discovered by Service Mapping (Part 3). This is what you model in detail.</td>
+            </tr>
+            <tr>
+              <td>Business Service</td>
+              <td>cmdb_ci_service (with service_type=business)</td>
+              <td>A grouping of Application Services that together deliver a business outcome. This is the IT perspective on a Business Application.</td>
+            </tr>
+            <tr>
+              <td>Service Offering</td>
+              <td>cmdb_ci_service_offering</td>
+              <td>What the IT organization formally offers to its customers. Tied to a Service Commitment (SLA).</td>
+            </tr>
+            <tr>
+              <td>Service Commitment</td>
+              <td>cmdb_ci_commitment</td>
+              <td>The formal SLA or OLA that defines the quality promise (availability, response time) for the service offering.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>The Application Service — CSDM's Critical Junction</h3>
+        <p>
+          The Application Service is the most important CSDM object for the CIS-DF exam.
+          It sits at the junction of business and infrastructure — it connects upward to
+          Business Applications and downward to the actual server, network, database CIs.
+        </p>
+        <p>
+          An Application Service is populated by Service Mapping (covered in Part 3 Topic 4).
+          When Service Mapping runs, it discovers all the CIs that make up an application
+          and creates an Application Service CI with those CIs as members (via <span class="code-inline">cmdb_rel_ci</span> relationships).
+        </p>
+      </div>
+
+      <!-- S5: Domain 3 — Manage Layer -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Domain 3 — The Manage Layer (Operations)</h2>
+        <p>
+          The Manage domain captures the IT components and vendor relationships that need
+          operational management. This layer is between the service definitions (Domain 2)
+          and the raw infrastructure (Domain 4).
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>CSDM Concept</th>
+              <th>CI Class</th>
+              <th>Plain English Explanation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Technical Service</td>
+              <td>cmdb_ci_service (with service_type=technical)</td>
+              <td>A specific technical capability used internally by IT — like "Database Platform" or "Load Balancing Service." Not visible to business users, but fundamental to Application Services.</td>
+            </tr>
+            <tr>
+              <td>Software Product</td>
+              <td>cmdb_ci_software_product</td>
+              <td>A specific software product (like Oracle Database 19c or Apache Tomcat 9) tracked for licensing, version management, and support lifecycle.</td>
+            </tr>
+            <tr>
+              <td>Vendor</td>
+              <td>core_company (with vendor=true)</td>
+              <td>The organization that provides a software product or hardware component.</td>
+            </tr>
+            <tr>
+              <td>Contract</td>
+              <td>ast_contract</td>
+              <td>The formal agreement with a vendor — licenses, support terms, renewal dates.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Technical Service vs. Application Service</strong>
+            Technical Service (Domain 3): An internal IT shared service used by other services.
+            Example: "Oracle Database Platform" is a Technical Service that the HR Application
+            Service, the Finance Application Service, and the CRM Application Service all depend on.
+            Application Service (Domain 2): A specific application's complete infrastructure map.
+            Example: "HR Self-Service Application" is an Application Service that uses the Oracle
+            Database Platform Technical Service.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: Domain 4 — Infrastructure CIs -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Domain 4 — Infrastructure Layer (CMDB CIs)</h2>
+        <p>
+          Domain 4 is what you've been studying throughout Parts 2 and 3 — the actual CI records
+          populated by Discovery, SGC, Import Sets, and other ingestion tools.
+        </p>
+        <p>
+          In the CSDM context, these CIs are connected upward:
+        </p>
+        <ul>
+          <li>A physical server CI belongs to a Technical Service (e.g., "Linux Platform")</li>
+          <li>A database instance CI belongs to an Application Service (e.g., "HR Application Service")</li>
+          <li>An application server CI is mapped by Service Mapping into an Application Service</li>
+        </ul>
+        <p>
+          CSDM does not change how CIs are discovered or stored — it adds a structured
+          relationship layer on top of the raw CI data.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — CSDM Requires CMDB Data to Work</strong>
+            CSDM is a model, not a tool. It only provides value if the CMDB has accurate, complete
+            CI data in Domain 4 and those CIs are properly linked up through Domains 3, 2, and 1.
+            Without good CMDB data, CSDM relationships are empty or incorrect. This is why
+            CMDB data quality (Part 6) and ingestion quality (Parts 2-4) are prerequisites
+            for effective CSDM implementation.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: CSDM Versioning -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>CSDM Versions — Understanding Framework Evolution</h2>
+        <p>
+          ServiceNow periodically updates the CSDM framework. Different versions introduce
+          new CI classes, deprecate old ones, and refine the relationship model.
+          Understanding CSDM versions matters for the exam because:
+        </p>
+        <ul>
+          <li>Organizations may be on different CSDM versions</li>
+          <li>Older ServiceNow instances may have deprecated class names</li>
+          <li>The exam may reference CSDM v3.x concepts</li>
+        </ul>
+
+        <h3>Key CSDM Version Changes</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Key Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CSDM 1.x</td>
+              <td>Initial framework. Introduced Business Application, Application Service. Basic four-domain model.</td>
+            </tr>
+            <tr>
+              <td>CSDM 2.x</td>
+              <td>Added Service Offering, Service Commitment. Refined Technical Service definition.</td>
+            </tr>
+            <tr>
+              <td>CSDM 3.x</td>
+              <td>Added Business Capability. Introduced Product. Strengthened CMDB Health scoring for CSDM completeness. Current major version for exam purposes.</td>
+            </tr>
+            <tr>
+              <td>CSDM 4.x</td>
+              <td>Further refinement. Added dynamic CI groups for CSDM modeling. Focus on automated relationship population.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — CSDM is a Framework, Not a Plugin</strong>
+            CSDM is not a plugin you activate — it's a set of best-practice CI class usages
+            and relationship patterns. The CI classes it uses already exist in ServiceNow's
+            CMDB. CSDM adoption is about using those classes correctly and building the
+            relationships between them, not about installing new software.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: CSDM Adoption Levels -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>CSDM Adoption Journey — From Zero to Full</h2>
+        <p>
+          ServiceNow recognizes that full CSDM implementation is a journey, not a one-day project.
+          They define a maturity model with levels:
+        </p>
+
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Level 0: No CSDM</div>
+            <div class="flow-note">// Raw CIs with no service relationships. No business context.</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Level 1: Basic CMDB Health</div>
+            <div class="flow-note">// CIs exist and are accurate. Identification Rules configured. But no service model.</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Level 2: Application Services Defined</div>
+            <div class="flow-note">// Application Services mapped via Service Mapping. CIs linked to services.</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Level 3: Business Applications Linked</div>
+            <div class="flow-note">// Business Applications created and linked to Application Services. Business owners assigned.</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Level 4: Full Business Hierarchy</div>
+            <div class="flow-note">// Business Capabilities, Products, Service Offerings, Commitments all populated and linked.</div>
+          </div>
+        </div>
+
+        <p>
+          The CIS-DF exam primarily tests Level 2-3 concepts: understanding what Application
+          Services are, how they relate to Business Applications, and how Service Mapping
+          populates the service model.
+        </p>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>CSDM Framework — Key Facts</h2>
+        <ul>
+          <li><strong>CSDM</strong> = Common Service Data Model. ServiceNow's framework for mapping infrastructure CIs to business services and capabilities.</li>
+          <li><strong>Four domains:</strong> (1) Business — capabilities, applications; (2) Design — services, offerings; (3) Manage — technical services, vendors, contracts; (4) Infrastructure CIs.</li>
+          <li><strong>Business Application (cmdb_ci_business_app)</strong> = business-level name for an application. NOT a server or app instance CI.</li>
+          <li><strong>Application Service (cmdb_ci_service)</strong> = the technical service map containing all CIs. Populated by Service Mapping. Sits between Business (Domain 2) and Infrastructure (Domain 4).</li>
+          <li><strong>Technical Service</strong> = internal shared IT service used by Application Services (e.g., "Database Platform").</li>
+          <li><strong>CSDM is a framework, not a plugin.</strong> Uses existing CMDB CI classes, just in a prescribed way.</li>
+          <li><strong>CSDM requires good CMDB data.</strong> No value without accurate Domain 4 CIs.</li>
+          <li><strong>Service Mapping populates Application Services.</strong> Without Service Mapping, the Domain 2 to Domain 4 link is incomplete.</li>
+          <li><strong>Business impact analysis</strong> requires CSDM relationships to be populated — CI → Technical Service → Application Service → Business Application → Business Capability chain.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">CSDM (Common Service Data Model)</div>
+            <div class="term-def">ServiceNow's prescribed framework for organizing CI data into four domains: Business, Design, Manage, and Infrastructure. Enables business impact analysis and service-aware ITSM.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Business Application (cmdb_ci_business_app)</div>
+            <div class="term-def">Domain 1 CSDM object. The business-level name for an application as recognized by stakeholders. Connected downward to Application Services (Domain 2). Not a technical CI.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Application Service (cmdb_ci_service)</div>
+            <div class="term-def">Domain 2 CSDM object. The technical service map — contains all infrastructure CIs that make the application run. Populated by Service Mapping. Critical junction between business and IT.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Technical Service</div>
+            <div class="term-def">Domain 3 CSDM object. A shared internal IT service used by Application Services. Example: "Oracle Database Platform" used by multiple applications. Not visible to business users.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Business Capability</div>
+            <div class="term-def">Domain 1 CSDM object. A core business function (what the business can do). Higher level than Business Application. Example: "Fraud Detection" is a capability enabled by multiple applications.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Service Offering</div>
+            <div class="term-def">Domain 2 CSDM object. What IT formally offers to consumers — tied to a Service Commitment (SLA). Represents the "product catalog" view of IT services.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. A company's CTO asks "When this database server fails, which business applications are impacted?" The CMDB has all server CIs accurately populated. However, the company has not implemented CSDM relationships. What answer can ServiceNow provide automatically?</div>
+          <div class="cq-options">
+            <div>A) A complete list of all affected Business Applications with their business owners</div>
+            <div>B) No answer — the system cannot automatically determine business application impact without CSDM relationships linking CIs to Business Applications</div>
+            <div>C) A partial answer showing only CIs related to the database server</div>
+            <div>D) An answer based on the database server's support_group field</div>
+          </div>
+          <div class="cq-hint">💡 What does CSDM provide that raw CMDB data alone cannot?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Without CSDM relationships (CI → Application Service → Business Application), ServiceNow has no machine-readable way to trace from a database server CI to the Business Applications it supports. The CMDB might show that the server is "related" to other CIs, but the business-level impact can't be determined automatically. This is the exact value proposition of CSDM — connecting infrastructure events to business outcomes. Raw CI data alone can only answer "what else is connected to this CI," not "what business applications does this support."</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. In CSDM, what is the correct CI class for a "Business Application" — the named application that business stakeholders identify (e.g., "Salesforce CRM")?</div>
+          <div class="cq-options">
+            <div>A) cmdb_ci_appl (software instance)</div>
+            <div>B) cmdb_ci_server (the server running the application)</div>
+            <div>C) cmdb_ci_business_app</div>
+            <div>D) cmdb_ci_service (Application Service)</div>
+          </div>
+          <div class="cq-hint">💡 CSDM uses specific CI classes for each domain concept. Which class represents the business-level application concept?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — cmdb_ci_business_app is the CSDM-prescribed CI class for Business Applications (Domain 1). This is distinct from cmdb_ci_appl (which is a software installation CI in Domain 4), cmdb_ci_server (infrastructure), and cmdb_ci_service (Application Service in Domain 2). The Business Application is the business-level name; the Application Service is the technical implementation. These are two separate records linked by a relationship.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. A ServiceNow administrator has accurate server and database CIs from Discovery. Service Mapping has been run and Application Services are defined. Business Applications have been created and linked to Application Services. Which CSDM adoption level does this represent?</div>
+          <div class="cq-options">
+            <div>A) Level 1 — Basic CMDB Health only</div>
+            <div>B) Level 2 — Application Services Defined</div>
+            <div>C) Level 3 — Business Applications Linked</div>
+            <div>D) Level 4 — Full Business Hierarchy</div>
+          </div>
+          <div class="cq-hint">💡 What's the distinguishing factor between Level 2 and Level 3?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — Level 2 means Application Services are defined and linked to infrastructure CIs (via Service Mapping). Level 3 adds Business Applications created and linked to Application Services. This scenario has both: Application Services from Service Mapping AND Business Applications linked to those services. Level 4 would additionally require Business Capabilities, Products, Service Offerings, and Service Commitments to be fully populated — which isn't described here.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. What is the difference between an "Application Service" (cmdb_ci_service, Domain 2) and a "Technical Service" (Domain 3) in CSDM?</div>
+          <div class="cq-options">
+            <div>A) Application Service is for cloud CIs only; Technical Service is for on-premises CIs</div>
+            <div>B) Application Service maps a complete application's infrastructure (visible to business users); Technical Service is a shared internal IT capability used by multiple Application Services</div>
+            <div>C) They are the same thing — "Application Service" and "Technical Service" are interchangeable CSDM terms</div>
+            <div>D) Technical Service is automatically populated by Discovery; Application Service requires manual creation</div>
+          </div>
+          <div class="cq-hint">💡 Think about who uses each type of service — end-users/business vs. IT operations internally.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Application Services (Domain 2) are the complete technical implementation of a named application that business users and service managers deal with (e.g., "HR Self-Service Application" containing its servers, databases, and load balancers). Technical Services (Domain 3) are shared internal IT components that multiple Application Services depend on (e.g., "Oracle Database Platform" used by HR, Finance, and CRM applications). The Technical Service is transparent to end users but critical for IT operations management.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. A company wants to implement CSDM to enable automated business impact analysis. Their CMDB is empty — no CIs have been discovered yet. What must happen first before CSDM relationships can provide meaningful business impact data?</div>
+          <div class="cq-options">
+            <div>A) Business Applications and Business Capabilities must be created first</div>
+            <div>B) The CSDM plugin must be installed and licensed</div>
+            <div>C) Domain 4 infrastructure CIs must first be populated (via Discovery, SGC, or Import Sets) and then linked into Application Services and Business Applications</div>
+            <div>D) Service Offering and Service Commitment records must be configured first</div>
+          </div>
+          <div class="cq-hint">💡 CSDM is a layered model — which layer is the foundation that all others depend on?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — CSDM relationships only provide value when they're connected to real CI data. Without Domain 4 CIs (servers, databases, network devices populated by Discovery or other ingestion tools), the higher CSDM layers have nothing to link to. The correct implementation order: (1) populate CI data via Discovery/SGC/Import Sets, (2) run Service Mapping to create Application Services, (3) create Business Applications and link to Application Services, (4) add Business Capabilities and other Domain 1 concepts. CSDM is not a plugin (B) — it uses existing CI classes.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="05-ci-class-manager-dynamic-groups.html" class="btn btn-secondary">← CI Class Manager</a>
+          <a href="07-csdm-service-modeling.html" class="btn btn-secondary">CSDM Service Modeling →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p5_t6_06';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

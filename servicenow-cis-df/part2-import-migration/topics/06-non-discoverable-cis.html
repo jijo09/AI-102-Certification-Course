@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Non-Discoverable CIs | CIS-DF Part 2</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 2</a>
+        <span class="sep">›</span>
+        <span class="current">Non-Discoverable CIs</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 2 · Topic 6</div>
+        <h1 class="topic-title">Non-Discoverable CIs — Managing What Automation Cannot See</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Discovery tools and Service Graph Connectors are powerful, but they cannot find everything.
+          Physical cabling, lease agreements, software licenses, business services, and
+          organizational units are real configuration items that affect your IT environment —
+          but no scanner can detect them. This topic covers how to manage these non-discoverable
+          CIs properly so your CMDB stays complete and audit-ready.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>8 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~28 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~19% exam weight (INGEST domain)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Non-Discoverable CI · Manual Entry · Import Sets · Business Service</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: The Problem -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>The Discovery Blind Spot</h2>
+        <p>
+          You have now learned the major automated ingestion pathways: Import Sets batch data in,
+          Service Graph Connectors poll APIs, and Discovery (coming in Part 3) actively scans
+          network devices. Together these tools can automatically populate a large portion of your CMDB.
+        </p>
+        <p>
+          But consider what they <em>cannot</em> find:
+        </p>
+        <ul>
+          <li>A <strong>network cable</strong> running from Switch A port 12 to Server B port 1 —
+          it has no IP address, no API, no agent</li>
+          <li>A <strong>software license</strong> agreement — a legal document, not a network device</li>
+          <li>A <strong>business application</strong> like "Customer Order Management" — it's a service
+          composed of multiple CIs, not a single discoverable thing</li>
+          <li>A <strong>vendor contract</strong> for hardware maintenance</li>
+          <li>A <strong>printer</strong> with SNMP disabled and no management agent</li>
+          <li>A <strong>UPS (uninterruptible power supply)</strong> in a server room — critical
+          dependency, zero network presence</li>
+          <li>An <strong>air-gapped system</strong> — physically isolated from any network for
+          security reasons</li>
+        </ul>
+        <p>
+          If these items aren't in your CMDB, your impact analysis is wrong. "If I take down
+          Server X, what's affected?" will give an incomplete answer because the cable connecting
+          Server X to the core switch isn't tracked. Non-discoverable CIs fill this gap.
+        </p>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🗂️</span>
+          <div class="callout-body">
+            <strong>Analogy — The Parts the Mechanic Can't Find with the Scanner</strong>
+            A car mechanic uses a diagnostic scanner to read codes from the engine computer.
+            But the scanner can't tell him whether the timing belt is near the end of its life,
+            whether the owner bought an extended warranty, or whether the car has a custom exhaust
+            modification that affects performance. Those are real facts about the car that matter
+            for service decisions — and they have to be entered manually in the service record.
+            Non-discoverable CIs are your CMDB's version of those manually-entered facts.
+          </div>
+        </div>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — What Makes a CI "Non-Discoverable"</strong>
+            A CI is non-discoverable when no automated tool can detect its existence or attributes.
+            This can be because it has no network presence (physical items), it's intentionally
+            isolated (air-gapped systems), it's a logical construct (business services), or it's
+            proprietary in a way no scanner understands. Non-discoverable does NOT mean
+            "not important" — many non-discoverable CIs are among the most critical in your environment.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: Categories -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Categories of Non-Discoverable CIs</h2>
+        <p>
+          Understanding the categories helps you recognize non-discoverable CI scenarios on the exam.
+        </p>
+
+        <h3>Physical Infrastructure — No Network Presence</h3>
+        <p>
+          These are physical items that exist in your data center or office but have no IP address
+          or management interface that automated tools can reach.
+        </p>
+        <ul>
+          <li><strong>Network cabling and patch panels:</strong> The physical wires connecting devices. Critical for physical impact analysis.</li>
+          <li><strong>Power distribution units (PDUs):</strong> Some PDUs have management cards; many do not.</li>
+          <li><strong>Uninterruptible Power Supplies (UPS):</strong> Provide backup power; physical failure affects everything connected.</li>
+          <li><strong>Rack units (empty rack space):</strong> Capacity planning requires knowing available rack space.</li>
+          <li><strong>Physical security devices:</strong> Badge readers, cameras, door locks in server rooms.</li>
+          <li><strong>KVM switches:</strong> Keyboard/video/mouse switches that connect to servers without a network connection.</li>
+        </ul>
+
+        <h3>Software and Licenses</h3>
+        <ul>
+          <li><strong>Software license records:</strong> Tracks purchased license entitlements, not installed software instances.
+          Discovery can find <em>installed software</em> but not the license agreement itself.</li>
+          <li><strong>Subscription records:</strong> Cloud service subscriptions, SaaS agreements</li>
+          <li><strong>Certificates:</strong> TLS/SSL certificates — some scanners can detect these, but many can't</li>
+        </ul>
+
+        <h3>Logical and Organizational Constructs</h3>
+        <p>
+          These CIs exist as concepts or groupings, not physical objects.
+        </p>
+        <ul>
+          <li><strong>Business Applications / Business Services:</strong> "Payroll Processing" is a service composed of many CIs. No scanner creates it — a human must define which CIs belong to it.</li>
+          <li><strong>IT Services:</strong> Higher-level service definitions that map to customer-facing capabilities</li>
+          <li><strong>Vendor records (cmdb_ci_vendor):</strong> Supplier organizations</li>
+          <li><strong>Contracts:</strong> Maintenance contracts, support agreements</li>
+          <li><strong>Service Offerings:</strong> CSDM-defined offerings (covered in Part 5)</li>
+        </ul>
+
+        <h3>Air-Gapped and Restricted Systems</h3>
+        <ul>
+          <li><strong>OT/SCADA systems:</strong> Industrial control systems for factories, utilities. Cannot have network scanners touching them due to safety risks.</li>
+          <li><strong>Classified systems:</strong> Government/defense systems physically isolated from corporate networks</li>
+          <li><strong>Legacy systems:</strong> Old mainframes or proprietary systems that don't respond to modern probes</li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Identifying Non-Discoverable Scenarios</strong>
+            Exam questions often describe a scenario and ask how a specific type of CI should
+            be created. Key signals that a CI is non-discoverable:
+            "has no IP address," "physically isolated," "software license agreement (not installed software),"
+            "business service definition," "cannot run agents on it," "vendor-managed."
+            These always point to manual entry or Import Sets as the ingestion method.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: Ingestion Methods for Non-Discoverable CIs -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>How to Populate Non-Discoverable CIs</h2>
+        <p>
+          Three primary methods exist for getting non-discoverable CIs into the CMDB.
+          Knowing which method is appropriate for which scenario is exam-tested content.
+        </p>
+
+        <h3>Method 1 — Manual Entry via the CMDB Form</h3>
+        <p>
+          The most straightforward approach: navigate to the appropriate CMDB table
+          (e.g., <span class="code-inline">cmdb_ci_netgear</span> or <span class="code-inline">cmdb_ci_business_app</span>),
+          click New, fill in fields, save. This is appropriate when:
+        </p>
+        <ul>
+          <li>Volume is low (a few dozen CIs)</li>
+          <li>The CI type is unique or complex (a specific business service with many relationships)</li>
+          <li>Initial setup of a brand new CI type with no source data to import from</li>
+        </ul>
+        <p>
+          <strong>Limitation:</strong> Doesn't scale. For 500 non-discoverable printers, you wouldn't enter each manually.
+        </p>
+
+        <h3>Method 2 — Import Sets with Spreadsheet/CSV</h3>
+        <p>
+          When you have many non-discoverable CIs already tracked in a spreadsheet, database,
+          or another system — use the Import Set pipeline you learned in Topics 1–4:
+        </p>
+        <ol>
+          <li>Export your existing tracking spreadsheet to CSV</li>
+          <li>Define a Data Source pointing to the file or a recurring export</li>
+          <li>Create a Transform Map to map spreadsheet columns to CMDB fields</li>
+          <li>Configure Coalesce on a unique identifier (serial number, asset tag, name)</li>
+          <li>Run the import; Transform Map creates/updates the CMDB records</li>
+        </ol>
+        <p>
+          This is the preferred method when:
+        </p>
+        <ul>
+          <li>Migrating from a legacy asset management tool or spreadsheet</li>
+          <li>Ongoing sync with an external asset database that exports CSV/XML</li>
+          <li>Bulk population of physical infrastructure records (hundreds to thousands)</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Non-Discoverable Import Sets Should Go Through IRE Too</strong>
+            By default, Import Sets + Transform Maps write directly to CMDB tables (bypassing IRE).
+            For non-discoverable CIs that are <em>also</em> referenced by Discovery or SGC
+            (e.g., a server where SGC tracks virtual machines but physical specs come from a spreadsheet),
+            configure the Transform Map to use the IRE API instead of direct table write.
+            This ensures proper reconciliation when multiple sources describe the same CI.
+          </div>
+        </div>
+
+        <h3>Method 3 — Dedicated SGC or Custom Integration</h3>
+        <p>
+          Some "non-discoverable" CIs actually have a data source — just not a network-scannable one.
+          For example:
+        </p>
+        <ul>
+          <li><strong>License management tools</strong> like Flexera or Snow Software track software licenses.
+          An SGC or custom integration can pull this data into the CMDB.</li>
+          <li><strong>Asset management databases</strong> (legacy CMDBs, ServiceNow Asset Management module)
+          may have records for physical items. An integration can sync these.</li>
+          <li><strong>Building management systems</strong> may track power and cooling infrastructure
+          via their own API.</li>
+        </ul>
+        <p>
+          In these cases, treat the external tool as the authoritative source and build an integration
+          (SGC if available, custom Integration Hub flow if not) to pull data in.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Best For</th>
+              <th>Scale</th>
+              <th>Goes Through IRE?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Manual form entry</td>
+              <td>One-off CIs, complex relationships, initial setup</td>
+              <td>Small (1–50)</td>
+              <td>No (direct save)</td>
+            </tr>
+            <tr>
+              <td>Import Set + Transform Map</td>
+              <td>Spreadsheet migration, recurring CSV export from external system</td>
+              <td>Medium to large</td>
+              <td>Only if configured to call IRE API</td>
+            </tr>
+            <tr>
+              <td>SGC or custom integration</td>
+              <td>Source system has an API; ongoing sync needed</td>
+              <td>Large, continuous</td>
+              <td>Yes (SGC always routes through IRE)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S4: The cmdb_ci_non_discoverable class -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>CI Classes for Non-Discoverable Items</h2>
+        <p>
+          ServiceNow's CMDB class hierarchy (fully covered in Part 5) has specific tables for
+          different types of CIs. Non-discoverable CIs go into specific classes depending on
+          what they represent.
+        </p>
+
+        <h3>Common Non-Discoverable CI Classes</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>CMDB Table</th>
+              <th>What It Represents</th>
+              <th>Example Records</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>cmdb_ci_business_app</code></td>
+              <td>Business Application — a collection of CIs that together deliver a business capability</td>
+              <td>"Payroll System", "Customer Portal", "HR Management"</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_service</code></td>
+              <td>IT Service — the service offered to users; parent of business applications</td>
+              <td>"Email Service", "VPN Service", "Internal IT Help Desk"</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_netgear</code> / <code>cmdb_ci_hardware</code></td>
+              <td>Physical hardware without network presence (patch panels, PDUs, KVM switches)</td>
+              <td>"PDU-Row3-RackA", "KVM-DataCenter-East"</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_ups</code></td>
+              <td>Uninterruptible Power Supply</td>
+              <td>"UPS-ServerRoom-A", "UPS-NetworkCloset-3F"</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_cable</code></td>
+              <td>Physical network cable</td>
+              <td>"Cable-SW1-P12-to-SRV4-E1"</td>
+            </tr>
+            <tr>
+              <td><code>cmdb_ci_endpoint</code> (restricted)</td>
+              <td>Endpoint devices that can't be scanned (air-gapped, SCADA)</td>
+              <td>Industrial sensors, isolated workstations</td>
+            </tr>
+            <tr>
+              <td><code>ast_contract</code></td>
+              <td>Maintenance or support contracts associated with CIs</td>
+              <td>"Dell Hardware Support - 3yr", "Cisco SmartNet"</td>
+            </tr>
+            <tr>
+              <td><code>alm_license</code></td>
+              <td>Software license records (license entitlement, not installed instance)</td>
+              <td>"Microsoft Office 365 - 500 seats", "Oracle DB - 10 CPUs"</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Choosing the Right Class Matters</strong>
+            Putting a CI in the wrong class breaks relationships and reports. A UPS should be
+            in <span class="code-inline">cmdb_ci_ups</span>, not a generic <span class="code-inline">cmdb_ci</span>.
+            The class determines: which fields are available, which relationships are valid,
+            what appears in dependency views, and how CSDM frameworks interpret the CI.
+            This is especially important for Business Applications and Services (Part 5).
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Maintaining Non-Discoverable CIs -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Maintaining Non-Discoverable CIs Over Time</h2>
+        <p>
+          The hardest part of non-discoverable CIs isn't creating them — it's keeping them
+          accurate. Unlike discovered CIs which get updated automatically, non-discoverable CIs
+          become stale unless you build explicit processes to update them.
+        </p>
+
+        <h3>The Staleness Problem</h3>
+        <p>
+          Discovered CIs have a <span class="code-inline">last_discovered</span> field that
+          updates every time a scan runs. When that field is old, you know the CI might have changed.
+          Non-discoverable CIs have no equivalent automatic refresh. A cable CI from 2019 might
+          still say port 12 connects to Server X, even though a technician recabled it in 2022 and
+          never updated the CMDB.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Stale Non-Discoverable CIs Are a Major CMDB Health Risk</strong>
+            ServiceNow's CMDB Health dashboards (Part 6) include a staleness metric. Non-discoverable
+            CIs that haven't been updated in a long time drag down your health score. More importantly,
+            stale non-discoverable CIs lead to incorrect impact analysis. If the CMDB shows
+            "UPS-A powers 30 servers" but UPS-A was replaced two years ago, a change to UPS-A's
+            replacement will appear to have zero impact. This is worse than not having the CI at all —
+            it creates false confidence.
+          </div>
+        </div>
+
+        <h3>Governance Processes for Maintaining Non-Discoverable CIs</h3>
+        <p>
+          Because automation can't maintain these CIs, you need process-driven governance:
+        </p>
+        <ul>
+          <li>
+            <strong>Change Management integration:</strong> Require that any Change Request touching
+            physical infrastructure includes a CMDB update task. When a technician recables a server,
+            the Change Request workflow must include "Update cable CIs in CMDB" as a required step.
+          </li>
+          <li>
+            <strong>Periodic audit tasks:</strong> Create scheduled tasks (quarterly/annually) to
+            audit non-discoverable CIs. A network team audit task: "Verify all cable CIs in Rows 3–5
+            are current."
+          </li>
+          <li>
+            <strong>Asset tag integration:</strong> If physical items have asset tags, integrate with
+            the Asset Management module. Physical asset audits (barcode scanning) can trigger CMDB updates.
+          </li>
+          <li>
+            <strong>Business service reviews:</strong> Schedule quarterly business service review
+            meetings where application owners confirm that the business application CI still accurately
+            reflects the components.
+          </li>
+        </ul>
+
+        <h3>Using CMDB Health to Track Non-Discoverable CI Staleness</h3>
+        <p>
+          In Part 6, you will learn that ServiceNow's CMDB Health dashboard tracks health KPIs
+          including <span class="hl-teal">staleness</span> and <span class="hl-teal">completeness</span>.
+          For non-discoverable CIs specifically:
+        </p>
+        <ul>
+          <li>Define a <strong>completeness rule</strong> for your non-discoverable CI class that
+          requires specific fields (e.g., cable CI must have both endpoint fields populated)</li>
+          <li>Define a <strong>staleness rule</strong> that flags CIs not updated in more than X days</li>
+          <li>Route flagged CIs to a <strong>Data Manager</strong> task queue for review (Part 6)</li>
+        </ul>
+      </div>
+
+      <!-- S6: Relationships for Non-Discoverable CIs -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Relationships — Why Non-Discoverable CIs Matter for Impact Analysis</h2>
+        <p>
+          A CI record without relationships is nearly useless for impact analysis. Relationships
+          connect CIs together into the dependency map that powers ServiceNow's change impact
+          analysis, availability tracking, and service health views.
+        </p>
+        <p>
+          When you create a non-discoverable CI, you must also define its relationships to other CIs.
+          These relationships are created in the <span class="code-inline">cmdb_rel_ci</span> table
+          using relationship types defined in the CI Relationship Type table.
+        </p>
+
+        <h3>Common Relationship Types for Non-Discoverable CIs</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Relationship Type</th>
+              <th>Example Usage</th>
+              <th>Direction</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Powered by / Powers</td>
+              <td>UPS Powers → Server, PDU Powers → Switch</td>
+              <td>UPS → Server</td>
+            </tr>
+            <tr>
+              <td>Connected by / Connects</td>
+              <td>Cable connects Switch Port to Server NIC</td>
+              <td>Cable → Switch Port; Cable → Server NIC</td>
+            </tr>
+            <tr>
+              <td>Depends on / Used by</td>
+              <td>Business App depends on Database CI, Web Server CI</td>
+              <td>Business App → Database</td>
+            </tr>
+            <tr>
+              <td>Hosted on / Hosts</td>
+              <td>Virtual Machine hosted on ESXi host</td>
+              <td>VM → ESXi host</td>
+            </tr>
+            <tr>
+              <td>Maintained by</td>
+              <td>Hardware CI maintained by vendor contract</td>
+              <td>CI → Contract</td>
+            </tr>
+            <tr>
+              <td>Owned by / Owns</td>
+              <td>Application owned by business unit</td>
+              <td>Business App → Department</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Relationships Enable the Dependency Map</strong>
+            ServiceNow's <em>Dependency Views</em> (accessible from any CI form) show a visual
+            map of CI relationships. This powers change impact analysis: "If I take down
+            Switch-Core-1, what CIs are downstream?" If your UPS and cable CIs are in the CMDB
+            with proper relationships, the answer includes power and connectivity dependencies,
+            not just logical software dependencies. Without non-discoverable CIs and their
+            relationships, your dependency map has blind spots.
+          </div>
+        </div>
+
+        <h3>Creating Relationships via Import Sets</h3>
+        <p>
+          When bulk-importing non-discoverable CIs, you can also import relationships in the
+          same Transform Map or a separate one. The Transform Map can:
+        </p>
+        <ul>
+          <li>Look up related CIs by name or IP address using reference field mapping</li>
+          <li>Insert rows into <span class="code-inline">cmdb_rel_ci</span> directly to establish relationships</li>
+          <li>Use a script field in the Transform Map to programmatically create relationship records</li>
+        </ul>
+      </div>
+
+      <!-- S7: Air-Gapped and Restricted CI Strategies -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Special Strategies for Air-Gapped and High-Sensitivity Systems</h2>
+        <p>
+          Some non-discoverable CIs aren't just "hard to discover" — they <em>must not</em> be
+          scanned. Industrial control systems, classified networks, and high-security environments
+          require special handling.
+        </p>
+
+        <h3>OT/SCADA Systems</h3>
+        <p>
+          Operational Technology (OT) systems control physical industrial processes —
+          manufacturing lines, power grids, water treatment, building automation. These systems
+          often run on decades-old software and cannot tolerate the network traffic that a Discovery
+          probe would generate. A port scan against a SCADA controller could disrupt an industrial
+          process.
+        </p>
+        <p>
+          Strategies for OT in the CMDB:
+        </p>
+        <ul>
+          <li>
+            <strong>Vendor-provided inventory:</strong> Ask the OT vendor for a CSV export of
+            their asset inventory. Import via Import Sets.
+          </li>
+          <li>
+            <strong>Physical audit:</strong> Walk the factory floor, record every device.
+            Enter via manual form or bulk Import Set.
+          </li>
+          <li>
+            <strong>Passive Discovery:</strong> Some Discovery tools support a read-only,
+            non-invasive mode. ServiceNow's Discovery can use passive network traffic analysis
+            rather than active probing (check with your Discovery team).
+          </li>
+          <li>
+            <strong>Network segmentation documentation:</strong> If OT systems are on isolated
+            network segments, document the segment as a CI and relate OT devices to it.
+          </li>
+        </ul>
+
+        <h3>Air-Gapped Classification Networks</h3>
+        <p>
+          Government and defense environments often have physically isolated networks for
+          classified information. These cannot be touched by any tool connected to a corporate network.
+        </p>
+        <ul>
+          <li>Maintain a separate, manual CMDB for classified assets using a dedicated ServiceNow
+          instance (not connected to the corporate instance)</li>
+          <li>Or maintain classified asset records in a separate, air-gapped system and
+          periodically export a sanitized list to the corporate CMDB (without sensitive attributes)</li>
+          <li>Define relationship stubs: "CI: Classified System Group (details restricted)" as
+          a placeholder CI linked to the systems that interface with it</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Placeholder CIs Maintain Relationship Integrity</strong>
+            When you cannot document a CI fully (security restrictions, vendor confidentiality),
+            create a minimal placeholder CI with only non-sensitive fields populated.
+            This preserves the relationship chain for dependency analysis without exposing
+            sensitive information. For example, "Classified Processing Cluster (details restricted)"
+            as a CI lets you say "Business App X depends on Classified Processing Cluster" without
+            documenting what that cluster actually is.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Non-Discoverable CIs — Key Facts</h2>
+        <ul>
+          <li><strong>Non-discoverable CI:</strong> Any CI that no automated tool can detect. Physical items, logical constructs, air-gapped systems, software licenses.</li>
+          <li><strong>Three ingestion methods:</strong> Manual form entry (small volume), Import Set + Transform Map (bulk), SGC/custom integration (API-accessible source).</li>
+          <li><strong>Common non-discoverable examples:</strong> Cables, UPS, PDUs, KVM switches, business applications, software licenses, contracts, SCADA systems.</li>
+          <li><strong>Staleness is the biggest risk.</strong> Unlike discovered CIs, non-discoverable CIs have no automatic refresh. Require Change Management integration and periodic audits.</li>
+          <li><strong>Relationships are mandatory.</strong> A non-discoverable CI without relationships adds nothing to impact analysis. Always define "Powers," "Connects," "Depends on" etc.</li>
+          <li><strong>Use correct CI class.</strong> A UPS → <code>cmdb_ci_ups</code>; cable → <code>cmdb_ci_cable</code>; business app → <code>cmdb_ci_business_app</code>. Wrong class = missing fields + broken reports.</li>
+          <li><strong>SCADA/OT cannot be scanned.</strong> Use vendor CSV exports + Import Sets, or passive-mode Discovery.</li>
+          <li><strong>Placeholder CIs</strong> preserve relationship chains for systems you cannot fully document.</li>
+          <li><strong>CMDB Health completeness rules</strong> can flag non-discoverable CIs with missing required fields.</li>
+          <li><strong>Change Management integration</strong> is the primary process control for keeping non-discoverable CIs current.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Non-Discoverable CI</div>
+            <div class="term-def">A CI that cannot be automatically detected by Discovery or SGC. Requires manual entry, Import Sets, or API-based integration from a managing system.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Business Application CI</div>
+            <div class="term-def">Logical CI in <code>cmdb_ci_business_app</code> representing a set of components that deliver a business capability. Must be manually defined with component relationships.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Dependency View</div>
+            <div class="term-def">Visual map of CI relationships accessible from any CI form. Non-discoverable CIs with proper relationships appear here, enabling full impact analysis.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CI Staleness</div>
+            <div class="term-def">The condition where a CI's recorded attributes no longer match reality. Non-discoverable CIs are especially prone to staleness because no tool auto-refreshes them.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Placeholder CI</div>
+            <div class="term-def">Minimal CI record created to preserve relationship integrity for systems that cannot be fully documented (security-restricted, classified).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">OT/SCADA System</div>
+            <div class="term-def">Operational Technology CI controlling industrial processes. Cannot be scanned — requires vendor inventory exports or manual entry.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. A company wants to track their UPS units in the CMDB because a UPS failure could affect multiple servers. Discovery has never found these UPS units. What is the correct approach?</div>
+          <div class="cq-options">
+            <div>A) Configure Discovery to scan for UPS units using SNMP — they will eventually be found</div>
+            <div>B) Create UPS CI records manually or via Import Set in the <code>cmdb_ci_ups</code> table with relationships to the servers they power</div>
+            <div>C) UPS units cannot be tracked in the CMDB — only network-accessible CIs can be stored</div>
+            <div>D) Create a custom table for UPS units outside the CMDB hierarchy</div>
+          </div>
+          <div class="cq-hint">💡 Non-discoverable does not mean untraceable.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — UPS units without SNMP management cards are non-discoverable, but they can and should be tracked in the CMDB. The correct approach is to create CI records in <code>cmdb_ci_ups</code> (using manual entry or Import Sets from a facilities spreadsheet) and define "Powers" relationships to the servers they support. This enables proper impact analysis.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. A change manager reports that impact analysis for a server maintenance window keeps missing dependencies. Investigation shows the server connects to a critical switch via a cross-connect cable that isn't in the CMDB. What governance process would prevent this going forward?</div>
+          <div class="cq-options">
+            <div>A) Increase Discovery scan frequency to every 15 minutes</div>
+            <div>B) Require that Change Requests for physical infrastructure include a mandatory task to update cable and connection CIs in the CMDB</div>
+            <div>C) Create a business rule that automatically creates cable CIs when server CIs are created</div>
+            <div>D) Accept that physical cabling cannot be tracked; use only logical dependencies for impact analysis</div>
+          </div>
+          <div class="cq-hint">💡 Discovery cannot find cables. The fix must be process-based.</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Physical cables are non-discoverable. Discovery cannot find them regardless of scan frequency. The correct fix is a Change Management process integration: require that any Change Request touching physical infrastructure includes a step to update relevant cable and connection CIs. A business rule (C) cannot auto-create accurate cable records because it doesn't know the physical reality.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. Your organization needs to add 800 patch panel ports as CIs in the CMDB. Each port has a label, the rack it's in, and the device it connects to. What is the most efficient ingestion approach?</div>
+          <div class="cq-options">
+            <div>A) Manual entry — open each CI form and type in the details</div>
+            <div>B) Configure Discovery to scan the patch panels</div>
+            <div>C) Export the patch panel documentation to CSV, create an Import Set data source, and run a Transform Map to create the CI records</div>
+            <div>D) Use the REST Table API to post all 800 records directly to the CMDB table</div>
+          </div>
+          <div class="cq-hint">💡 800 records — manual entry is impractical. What method handles bulk non-discoverable CI population best?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — With 800 records, manual entry (A) is impractical. Patch panels have no network presence to scan (B). Direct Table API (D) bypasses IRE and is not recommended for bulk CMDB population. Import Sets + Transform Maps are designed for exactly this scenario: bulk population from a spreadsheet or exported document.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. A business analyst creates a "Customer Billing Portal" business application CI and populates all required fields. Six months later, the application team adds three new microservices and a CDN. The CI still shows the old component list. What term describes this condition and what is the recommended solution?</div>
+          <div class="cq-options">
+            <div>A) CI fragmentation — run a Discovery scan to refresh the components</div>
+            <div>B) CI staleness — implement a governance process requiring application owners to update the CMDB as part of deployment workflows</div>
+            <div>C) CI orphaning — run the CMDB deduplication playbook to merge the records</div>
+            <div>D) CI overloading — split the business application CI into smaller CIs</div>
+          </div>
+          <div class="cq-hint">💡 No automation can detect this change. How do you keep manually-managed CIs current?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — This is CI staleness — the CI's recorded state no longer matches reality. Discovery cannot fix this (business application composition isn't discoverable). The solution is governance: integrate CMDB updates into deployment workflows so that when developers deploy new components, they also update the business application CI's relationships.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. A manufacturing company wants to track their industrial SCADA systems in ServiceNow. These systems control assembly line machinery and CANNOT tolerate any network scanning traffic. What is the recommended approach?</div>
+          <div class="cq-options">
+            <div>A) Configure Discovery with a very slow scan rate to minimize traffic impact</div>
+            <div>B) These systems cannot be tracked in ServiceNow — skip them</div>
+            <div>C) Obtain an inventory CSV from the SCADA vendor or OT team and import via Import Sets; define relationships to connected IT systems manually</div>
+            <div>D) Install a MID Server inside the OT network to scan passively</div>
+          </div>
+          <div class="cq-hint">💡 Any active scan is forbidden. What passive data collection approach works?</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — Active scanning (A, D) is explicitly forbidden for SCADA systems — even slow scans can disrupt industrial control processes. These systems absolutely should be tracked in the CMDB (skipping them creates impact analysis blind spots). The approach is: get inventory data from the OT team or vendor (they know what's there), import it via Import Sets, and manually define relationships to the IT systems that interface with the OT network.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">6. Which CMDB table is the correct home for a "Microsoft Office 365 Enterprise — 1,000 seat license" record?</div>
+          <div class="cq-options">
+            <div>A) <code>cmdb_ci_software</code></div>
+            <div>B) <code>cmdb_ci_business_app</code></div>
+            <div>C) <code>alm_license</code></div>
+            <div>D) <code>cmdb_ci_service</code></div>
+          </div>
+          <div class="cq-hint">💡 This is a license agreement, not an installed software instance or a business application.</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — <code>alm_license</code> is the Software Asset Management table for license entitlement records. <code>cmdb_ci_software</code> tracks installed software instances (which Discovery can find on servers). A license record is the legal/contractual entitlement — it's a non-discoverable CI in the SAM module tables, not the core CMDB hardware/software tables.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="05-service-graph-connectors.html" class="btn btn-secondary">← Service Graph Connectors</a>
+          <a href="../../part3-discovery/topics/01-discovery-architecture.html" class="btn btn-secondary">Part 3: Discovery Architecture →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p2_t6_06';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

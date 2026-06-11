@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deduplication &amp; Remediation | CIS-DF Part 4</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .flow-diagram{background:rgba(8,145,178,0.05);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-5) 0;font-size:0.85rem;color:#67e8f9;line-height:2.2;overflow-x:auto}
+    .flow-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-1);flex-wrap:wrap}
+    .flow-box{background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);color:#e0f7fa;font-size:0.83rem;white-space:nowrap}
+    .flow-arrow{color:#0891b2;font-size:1.1rem;flex-shrink:0}
+    .flow-note{color:var(--text-muted);font-size:0.78rem;margin-left:var(--space-2)}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 4: IRE</a>
+        <span class="sep">›</span>
+        <span class="current">Deduplication &amp; Remediation</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 4 · Topic 4</div>
+        <h1 class="topic-title">Deduplication &amp; Remediation Playbooks — Finding and Fixing Duplicate CIs</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          Even with perfect Identification Rules, duplicate CIs can creep into your CMDB —
+          from legacy migrations, misconfigured integrations, or before IRE was enabled.
+          IRE's third phase detects these duplicates. Remediation Playbooks define what
+          happens next: auto-merge, keep-primary, or flag for human review.
+          This topic completes your IRE knowledge and links it to the broader CMDB
+          data quality picture.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>9 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~35 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~19% exam weight (INGEST + GOVERN domains)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Deduplication · Remediation Playbooks · cmdb_dedup · Merge CI</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: How Duplicates Form -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>How Duplicate CIs Form in the Real World</h2>
+        <p>
+          Duplicate CIs are one of the most damaging CMDB quality problems. A duplicate CI
+          means two records in the CMDB represent the same real-world device or application.
+          This causes:
+        </p>
+        <ul>
+          <li><strong>Incorrect reporting:</strong> Reports count the server twice, inflating capacity numbers</li>
+          <li><strong>Wrong impact analysis:</strong> Change impact analysis may evaluate only one of the two duplicate CIs, missing relationships on the other</li>
+          <li><strong>Split data:</strong> One duplicate has the correct ip_address; the other has the correct serial_number. Neither has complete data.</li>
+          <li><strong>Service Mapping breakage:</strong> A Business Service links to one duplicate; incidents link to the other</li>
+        </ul>
+
+        <h3>Common Causes of Duplicates</h3>
+        <ul>
+          <li>
+            <strong>Missing or wrong Identification Rules:</strong> IRE couldn't match the incoming
+            payload to the existing CI, so it created a new one. Classic cause: Discovery pattern
+            not collecting the serial number that the Identification Rule expects.
+          </li>
+          <li>
+            <strong>Data migration without IRE:</strong> Before IRE existed (or when it was bypassed),
+            someone imported CIs directly into CMDB tables via Table API or Import Sets without IRE.
+            No deduplication occurred at import time.
+          </li>
+          <li>
+            <strong>CI class mismatch:</strong> The same device was discovered as
+            <span class="code-inline">cmdb_ci_computer</span> once and as <span class="code-inline">cmdb_ci_linux_server</span>
+            another time. Different class = different Identification Rule = IRE may not link them.
+          </li>
+          <li>
+            <strong>Multiple integration sources without rule alignment:</strong>
+            Both AWS SGC and Discovery created the same EC2 instance as separate CIs because
+            their identification approaches didn't share a common field.
+          </li>
+        </ul>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">📂</span>
+          <div class="callout-body">
+            <strong>Analogy — Duplicates as Filing Error</strong>
+            Imagine a file room where staff files client folders by name. One clerk files "Johnson, Bob"
+            under J. Another files the same client as "Bob Johnson" under B. Now the same client has
+            two folders with split information. Deduplication is the process of finding these pairs,
+            determining which is the primary folder, copying unique information from one to the other,
+            and then discarding the duplicate.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: How IRE Detects Duplicates -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>IRE Deduplication Detection — Phase 3 in Detail</h2>
+        <p>
+          IRE's Phase 3 (Deduplication) can be triggered in two ways:
+        </p>
+        <ul>
+          <li>
+            <strong>Real-time: during ingestion.</strong> When Phase 1 (Identification) finds
+            multiple existing CIs that match the incoming payload, IRE knows potential duplicates
+            exist. It flags them and creates a deduplication event.
+          </li>
+          <li>
+            <strong>Scheduled: Deduplication Job.</strong> A separate, schedulable process scans
+            the entire CMDB (or specific CI classes) looking for existing records that match each
+            other based on Identification Rules. This catches duplicates that exist from before
+            IRE was configured or that slipped through during the transition.
+          </li>
+        </ul>
+
+        <h3>What IRE Stores When It Finds a Duplicate</h3>
+        <p>
+          When IRE identifies a potential duplicate pair, it creates a record in the
+          <span class="code-inline">cmdb_dedup</span> table. Each record contains:
+        </p>
+        <ul>
+          <li><strong>Candidate CI</strong> — the CI that appears to be a duplicate</li>
+          <li><strong>Master CI</strong> — the CI that should be kept as the primary record</li>
+          <li><strong>Match reason</strong> — which identification attributes caused IRE to consider them duplicates</li>
+          <li><strong>Status</strong> — Open, In Progress, Resolved, or Dismissed</li>
+          <li><strong>Remediation Playbook</strong> — which playbook will be used to resolve this duplicate</li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Dedup Finds Pairs, Not Single Records</strong>
+            Deduplication always works on pairs: a "master" (the one to keep) and a "duplicate"
+            (the one to remove or merge into the master). IRE uses the Identification Rules to
+            determine which CIs are candidates for being the same real-world entity.
+            IRE does not automatically delete duplicate CIs — it creates a dedup event and
+            a Remediation Playbook decides what to do.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: Master CI Determination -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>Determining the Master CI — Which Duplicate Is Kept?</h2>
+        <p>
+          When two CIs are flagged as duplicates, IRE must determine which one becomes the
+          <span class="hl-teal">master CI</span> (the one kept) and which becomes the
+          <span class="hl-teal">duplicate CI</span> (the one merged/deleted).
+        </p>
+        <p>
+          IRE evaluates several criteria to determine master status:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Criterion</th>
+              <th>Logic</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Source Priority</td>
+              <td>CI from higher-priority source (e.g., Discovery over Import Set) becomes master</td>
+              <td>Higher-priority sources have more accurate data</td>
+            </tr>
+            <tr>
+              <td>Date Created</td>
+              <td>Older CI may become master (has more history and relationships)</td>
+              <td>Older records have accumulated relationships, tickets, and history</td>
+            </tr>
+            <tr>
+              <td>Data Completeness</td>
+              <td>CI with more non-null fields may be preferred as master</td>
+              <td>More complete record is better starting point after merge</td>
+            </tr>
+            <tr>
+              <td>Relationship Count</td>
+              <td>CI with more existing relationships may be preferred</td>
+              <td>Preserving relationship links is critical for impact analysis</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The specific criteria and their weights can be configured in the Remediation Playbook.
+          You can also manually designate which CI is the master when reviewing duplicates.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Trap — Master Determination Is Configurable</strong>
+            There is no single fixed rule for which duplicate becomes master. The exam may present
+            a scenario and ask which CI would be chosen as master. The answer depends on the
+            Remediation Playbook configuration and the specific criteria. However, the principle
+            is consistent: the master CI should be the one with the most accurate, complete data
+            and the most existing relationships.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Remediation Playbooks -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Remediation Playbooks — Automating the Dedup Response</h2>
+        <p>
+          A <span class="hl-teal">Remediation Playbook</span> is a configured set of instructions
+          that defines exactly what IRE should do when it finds a duplicate CI pair. Think of it
+          as the "recipe" for resolving a detected duplicate.
+        </p>
+
+        <h3>Playbook Actions — What Can Happen to the Duplicate</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>What Happens</th>
+              <th>When to Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Merge</td>
+              <td>Data from the duplicate CI is merged into the master CI. Fields from duplicate fill in blanks on the master. Then the duplicate CI is retired/deleted.</td>
+              <td>When you want to preserve unique data from both CIs into one record</td>
+            </tr>
+            <tr>
+              <td>Keep Primary (Mark Duplicate)</td>
+              <td>The master CI is kept unchanged. The duplicate CI is marked as "Duplicate" or retired. No field merging occurs.</td>
+              <td>When the master has all the data you need and the duplicate has nothing unique to contribute</td>
+            </tr>
+            <tr>
+              <td>Flag for Manual Review</td>
+              <td>A task is created for a CMDB administrator to review and resolve manually. No automatic changes to either CI.</td>
+              <td>When the duplicate situation is complex or uncertain enough that automation could make mistakes</td>
+            </tr>
+            <tr>
+              <td>Ignore/Dismiss</td>
+              <td>The dedup event is dismissed. Both CIs remain unchanged. Used when IRE incorrectly flagged two different things as duplicates.</td>
+              <td>When the two CIs are actually different entities that just happen to match on identification attributes</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Configuring a Remediation Playbook</h3>
+        <p>
+          Navigate to <strong>Configuration → CMDB → Remediation Playbooks</strong>.
+          A playbook configuration specifies:
+        </p>
+        <ul>
+          <li>Which CI classes this playbook applies to</li>
+          <li>The action to take (merge, keep primary, manual review, etc.)</li>
+          <li>Master determination criteria</li>
+          <li>Field-merge rules: which fields from the duplicate should overwrite blanks on the master</li>
+          <li>What to do with relationships on the duplicate (re-point to master, or discard)</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Relationships Are the Most Valuable Thing to Preserve</strong>
+            When merging duplicates, the most important thing to preserve is not the field data
+            (that can be re-discovered) but the <strong>relationships</strong>: open incidents,
+            change requests, service mappings, and contracts linked to either CI. A Remediation
+            Playbook should always be configured to re-point all relationships from the duplicate
+            to the master before retiring the duplicate.
+          </div>
+        </div>
+      </div>
+
+      <!-- S5: Merge Process in Detail -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>The Merge Process — Step by Step</h2>
+        <p>
+          When a Remediation Playbook with action=Merge executes, here is exactly what happens:
+        </p>
+
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box">Dedup event: Master CI (sys_id=A) ↔ Duplicate CI (sys_id=B)</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Step 1: Compare fields — for each blank field on Master A, check if Duplicate B has a value</div>
+            <div class="flow-note">// e.g., master has no serial_number, duplicate has serial_number → copy to master</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Step 2: Apply field-merge rules from Playbook — some fields from Duplicate may override Master values</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Step 3: Re-point all relationships from Duplicate B to Master A</div>
+            <div class="flow-note">// incidents, changes, cmdb_rel_ci records, service mappings</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Step 4: Retire or delete Duplicate CI (B) — mark as "Retired" in CI lifecycle</div>
+          </div>
+          <div class="flow-step"><div class="flow-arrow">↓</div></div>
+          <div class="flow-step">
+            <div class="flow-box">Step 5: Update dedup event status to "Resolved"</div>
+          </div>
+        </div>
+
+        <h3>What Happens to the Retired Duplicate CI</h3>
+        <p>
+          The duplicate CI is not always deleted — it's often "retired" (its operational_status
+          field is set to "Retired"). This preserves history: you can still see the old CI
+          and understand what happened. A truly deleted CI would remove audit history.
+        </p>
+        <p>
+          Some organizations configure playbooks to fully delete duplicates after a
+          configurable period (e.g., 90 days after retirement). This is a governance decision.
+        </p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Warning — Test Merge in Non-Production First</strong>
+            Merging CIs is partially reversible — you can restore from backup — but
+            re-pointing hundreds of relationships, incident links, and change records
+            is very difficult to undo. Always test Remediation Playbook configurations
+            in a sub-production environment with representative data before enabling
+            automatic merges in production.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: The Dedup Dashboard and Monitoring -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Finding and Managing Duplicates — The Dedup Dashboard</h2>
+        <p>
+          ServiceNow provides a dedicated Deduplication Dashboard for CMDB administrators
+          to monitor and manage duplicate CIs.
+        </p>
+
+        <h3>Accessing Deduplication Tools</h3>
+        <ul>
+          <li>
+            <strong>Deduplication Dashboard:</strong> Navigate to <strong>Configuration →
+            CMDB → Deduplication → Deduplication Dashboard</strong>. Shows a summary of
+            open dedup events, by CI class, with trends over time.
+          </li>
+          <li>
+            <strong>Duplicate CI list:</strong> Shows all CIs currently flagged as duplicates
+            with their master CI counterpart.
+          </li>
+          <li>
+            <strong>Dedup Job:</strong> The scheduled job that proactively scans for duplicates.
+            Can be run on-demand or scheduled. Navigate to <strong>Configuration → CMDB →
+            Deduplication → Run Deduplication</strong>.
+          </li>
+        </ul>
+
+        <h3>Running an On-Demand Dedup Scan</h3>
+        <p>
+          Useful scenarios for running an on-demand deduplication scan:
+        </p>
+        <ul>
+          <li>After fixing a broken Identification Rule that had been creating duplicates for months</li>
+          <li>After a large data migration (Import Set of hundreds of CIs)</li>
+          <li>After enabling a new SGC that discovered CIs already in the CMDB via Discovery</li>
+          <li>During a CMDB health remediation project</li>
+        </ul>
+        <p>
+          You can scope the dedup scan to specific CI classes rather than scanning the entire CMDB,
+          which reduces processing time in large environments.
+        </p>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — Dedup After Identification Rule Changes</strong>
+            When an Identification Rule change is made to fix a root cause of duplicate creation,
+            fixing the rule alone doesn't clean up existing duplicates — it only prevents
+            new ones from being created. An on-demand deduplication scan must be run separately
+            to detect and resolve existing duplicate pairs. The exam may test whether you know
+            this two-step process.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: Dedup vs. Manual Merge -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Deduplication vs. Manual Merge — When Each Is Right</h2>
+        <p>
+          Besides IRE's automated deduplication, administrators can also manually merge
+          CIs using the CMDB Workspace or the "Merge CI" action directly on a CI form.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Approach</th>
+              <th>How It Works</th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>IRE Auto-Dedup + Playbook</td>
+              <td>IRE detects duplicates via Identification Rules and executes a pre-configured Remediation Playbook automatically or on a schedule</td>
+              <td>Large-scale, ongoing deduplication. Hundreds or thousands of potential duplicates. Clear matching criteria.</td>
+            </tr>
+            <tr>
+              <td>Manual Merge (CMDB Workspace)</td>
+              <td>Administrator opens two CI records side-by-side, selects which fields to keep from each, and executes the merge manually</td>
+              <td>Complex individual cases where automated merge rules would make wrong decisions. When administrator judgment is required.</td>
+            </tr>
+            <tr>
+              <td>Dismiss Dedup Event</td>
+              <td>Administrator reviews the flagged pair and determines they are actually different CIs that just happen to match on identifiers. Dismisses the event.</td>
+              <td>False positives from IRE — where IRE detected "duplicates" that are legitimately separate CIs.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Some "Duplicates" Are False Positives</strong>
+            IRE identifies potential duplicates based on matching identification attributes.
+            But matching attributes don't always mean the same real-world entity. Example:
+            a serial number of "Not Specified" might match across hundreds of low-end devices
+            whose BIOS doesn't report a real serial number. IRE would flag all of these as
+            duplicates of each other — but they're actually different devices. Dismiss these events
+            and improve the Identification Rule to exclude unreliable values.
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: Dedup as Part of CMDB Health -->
+      <div class="section-block" id="s8">
+        <span class="section-label">Section 8</span>
+        <h2>Deduplication as Part of CMDB Data Quality</h2>
+        <p>
+          Deduplication is not a one-time project — it's an ongoing quality control process.
+          Even with perfect Identification Rules and Reconciliation Rules configured today,
+          future changes (new integrations, rule modifications, data migrations) can introduce
+          new duplicates.
+        </p>
+
+        <h3>Integrating Dedup with CMDB Health Metrics</h3>
+        <p>
+          CMDB Health (covered in depth in Part 6) tracks duplicate CI counts as one of its
+          key quality indicators. A high duplicate rate in any CI class should trigger:
+        </p>
+        <ol>
+          <li>Investigation into root cause (broken Identification Rule? New integration without rule?)</li>
+          <li>Fix the root cause first (prevent new duplicates from being created)</li>
+          <li>Run dedup scan to detect existing pairs</li>
+          <li>Apply Remediation Playbook to resolve detected pairs</li>
+          <li>Monitor CMDB Health metrics to confirm improvement</li>
+        </ol>
+
+        <h3>Key Metrics to Monitor</h3>
+        <ul>
+          <li><strong>Duplicate CI count per class:</strong> How many CIs are flagged as duplicates right now</li>
+          <li><strong>Dedup event resolution rate:</strong> Are flagged duplicates being resolved or piling up?</li>
+          <li><strong>Dedup age:</strong> How old are unresolved dedup events? Older = more embedded in reports and relationships</li>
+          <li><strong>Post-merge data completeness:</strong> After merging, are the resulting CIs more complete?</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Fix Root Cause Before Running Remediation</strong>
+            Never run a large-scale Remediation Playbook before fixing the underlying root cause.
+            If the Identification Rule is still broken, the dedup scan will merge pairs —
+            but Discovery will immediately re-create duplicates the next time it runs.
+            You'll be back to the same state within 24 hours. Always root-cause fix first.
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Deduplication &amp; Remediation — Key Facts</h2>
+        <ul>
+          <li><strong>Duplicates form</strong> when Identification Rules miss, data migrated without IRE, or class mismatch between sources.</li>
+          <li><strong>IRE Phase 3 (Dedup)</strong> triggered two ways: (1) real-time when Phase 1 finds multiple matches, (2) scheduled Dedup Job scanning entire CMDB.</li>
+          <li><strong>cmdb_dedup table</strong> stores dedup events — each record has a master CI and a candidate duplicate CI.</li>
+          <li><strong>Master CI</strong> is determined by source priority, data completeness, age, and relationship count. Configurable in Remediation Playbook.</li>
+          <li><strong>Remediation Playbook actions:</strong> Merge (copy data + re-point relationships + retire duplicate), Keep Primary, Flag for Manual Review, or Dismiss.</li>
+          <li><strong>Relationships are most critical to preserve.</strong> All relationships from duplicate must be re-pointed to master before retirement.</li>
+          <li><strong>Duplicates are usually retired, not deleted</strong> — preserves audit history.</li>
+          <li><strong>Fix root cause first, then run dedup.</strong> Running dedup before fixing the Identification Rule means duplicates return immediately after the next Discovery run.</li>
+          <li><strong>Manual Merge</strong> available for complex cases where automated playbook decisions would be wrong.</li>
+          <li><strong>Dismiss dedup events</strong> when IRE incorrectly flags two different entities as duplicates (false positives).</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Deduplication (IRE Phase 3)</div>
+            <div class="term-def">IRE process that detects CI records representing the same real-world entity. Runs during ingestion (when Phase 1 finds multiple matches) and via scheduled Dedup Job.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">cmdb_dedup Table</div>
+            <div class="term-def">ServiceNow table storing duplicate detection events. Each record pairs a master CI and a candidate duplicate CI with match reason, status, and assigned playbook.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Remediation Playbook</div>
+            <div class="term-def">Configured set of rules defining the automated response to a detected duplicate pair. Actions: merge, keep primary, flag for review, or dismiss.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Master CI</div>
+            <div class="term-def">The CI designated to survive after deduplication. Receives merged field data and all relationships from the duplicate CI. Determination criteria are configurable.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Dedup Job</div>
+            <div class="term-def">Scheduled (or on-demand) process that scans the CMDB for existing duplicate pairs. Does not fix duplicates — creates cmdb_dedup events for Remediation Playbooks to resolve.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Dismiss (Dedup)</div>
+            <div class="term-def">Dedup event resolution action used when IRE incorrectly flagged two different real-world entities as duplicates. Both CIs remain; the event is closed as a false positive.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. A CMDB administrator fixes a broken Identification Rule that was causing Discovery to create duplicate Linux server CIs. After fixing the rule, she wants to clean up the thousands of existing duplicate CIs created during the past 6 months. What is the correct next step?</div>
+          <div class="cq-options">
+            <div>A) Re-run Discovery — it will automatically detect and merge the existing duplicates</div>
+            <div>B) Run an on-demand Deduplication Job scoped to cmdb_ci_linux_server to detect existing pairs, then apply a Remediation Playbook to resolve them</div>
+            <div>C) Export all CIs to a spreadsheet, manually identify duplicates, then import the cleaned data</div>
+            <div>D) Delete all Linux server CIs and let Discovery recreate them from scratch</div>
+          </div>
+          <div class="cq-hint">💡 Fixing the rule prevents new duplicates. What process finds and resolves existing ones?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Fixing the Identification Rule prevents new duplicates from being created going forward, but it doesn't clean up the existing ones. The Deduplication Job (run on-demand, scoped to the affected CI class) scans the CMDB and creates cmdb_dedup events for each duplicate pair. Then a Remediation Playbook (configured to Merge) automatically resolves them. Discovery re-run (A) won't merge existing duplicates; it just updates/creates CIs.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. IRE detects two server CIs as potential duplicates: CI-A (created 2 years ago from Discovery, has 12 open incidents linked to it, ip_address=10.0.1.5, no serial_number) and CI-B (created 1 week ago from an AWS SGC, has serial_number=SN-XYZ, no incidents, ip_address=10.0.1.5). Which should be designated as the master CI and why?</div>
+          <div class="cq-options">
+            <div>A) CI-B is master because it has a serial number (better identifier)</div>
+            <div>B) CI-A is master because it's older and has 12 open incident relationships that must be preserved</div>
+            <div>C) Both are merged into a new CI-C with data from both</div>
+            <div>D) The one with more complete field data automatically becomes master</div>
+          </div>
+          <div class="cq-hint">💡 Relationships are the most critical thing to preserve. Which CI has relationships?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — While CI-B has better identifier data (serial number), CI-A should be master because it has 12 open incident relationships. Making CI-A master means those incidents are automatically preserved on the surviving CI. The Remediation Playbook would be configured to copy serial_number from CI-B (the duplicate) into CI-A (master) to fill in the missing data, then retire CI-B. Relationships are always the primary driver in master selection.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. The CMDB Dedup Dashboard shows 800 duplicate events for cmdb_ci_network_adapter. Investigation reveals that network adapters from virtual machines all have MAC address "00:00:00:00:00:00" (a placeholder value). The Identification Rule uses MAC address to identify network adapters. What is the best solution?</div>
+          <div class="cq-options">
+            <div>A) Run the Remediation Playbook to merge all 800 pairs</div>
+            <div>B) Dismiss all 800 dedup events — they are false positives. Then modify the Identification Rule to exclude the "00:00:00:00:00:00" placeholder value.</div>
+            <div>C) Delete all network adapter CIs with placeholder MAC addresses</div>
+            <div>D) Change the Identification Rule to use IP address instead of MAC address</div>
+          </div>
+          <div class="cq-hint">💡 When multiple different devices share a fake "placeholder" identifier, are they really duplicates?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — This is a false positive scenario. The 800 adapters are different real-world network interfaces that happen to share a meaningless placeholder MAC address. They are NOT duplicates — merging them would be catastrophically wrong. The correct response: dismiss all 800 events (they're false positives), then modify the Identification Rule to skip the identification check when MAC address = "00:00:00:00:00:00" or use an additional qualifying attribute. Option D (use IP) might work but IPs also change, so the root fix is excluding known-bad placeholder values.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. An administrator merges two duplicate server CIs. After the merge, users report that incident INC0012345, which was linked to the duplicate (now retired) CI, no longer shows the CI in its Configuration Items field. What went wrong during the merge?</div>
+          <div class="cq-options">
+            <div>A) The incident was automatically resolved when the CI was retired</div>
+            <div>B) The Remediation Playbook was not configured to re-point relationships from the duplicate CI to the master CI before retirement</div>
+            <div>C) Only active CIs can be linked to incidents; retired CIs lose their links</div>
+            <div>D) The merge process deleted the incident association to avoid data conflicts</div>
+          </div>
+          <div class="cq-hint">💡 What must a Remediation Playbook do before retiring the duplicate CI?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — The Remediation Playbook must re-point all relationships from the duplicate to the master BEFORE retiring the duplicate. If the playbook wasn't configured to handle incident relationships, the incident link to the duplicate CI became broken when the CI was retired. Fix: configure the Remediation Playbook to include relationship re-pointing for cmdb_ci (task_ci table) relationships. After fixing the playbook, the relationship to the master CI can be manually re-established for affected incidents.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. A CMDB administrator runs a Deduplication Job and finds it has generated 5,000 dedup events in a single evening. CMDB Health was previously showing 5,000 duplicate CIs for this class. The administrator wants to configure a Remediation Playbook to auto-merge all 5,000 pairs tonight. What critical step should they take first?</div>
+          <div class="cq-options">
+            <div>A) Notify all users that the CMDB will be unavailable during the merge</div>
+            <div>B) Verify the root cause of the duplicates is already fixed, then test the Remediation Playbook on a small subset (e.g., 10 pairs) in production or run a full test in sub-production before bulk-merging all 5,000</div>
+            <div>C) Increase the CMDB instance memory to handle the merge load</div>
+            <div>D) Export a full CMDB backup — then auto-merge all 5,000 immediately</div>
+          </div>
+          <div class="cq-hint">💡 What happens if the root cause is not fixed before running mass remediation? And what safeguard is needed before bulk automation?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Two critical pre-conditions: First, confirm the root cause (the broken Identification Rule or integration) is already fixed — otherwise Discovery will recreate all 5,000 duplicates within 24 hours of the merge. Second, test the Remediation Playbook on a small pilot set to verify it correctly identifies masters, merges fields, and re-points relationships before running it on 5,000 CIs. A mass merge that incorrectly designates masters or breaks relationship links is extremely difficult to undo and can cascade into reporting and incident management problems.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="03-reconciliation-rules.html" class="btn btn-secondary">← Reconciliation Rules</a>
+          <a href="../../part5-cmdb/topics/05-ci-class-manager-dynamic-groups.html" class="btn btn-secondary">Part 5: CI Class Manager →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p4i_t4_04';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundation Dashboards &amp; CMDB 360 | CIS-DF Part 7</title>
+  <link rel="stylesheet" href="../../../styles/main.css" />
+  <style>
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
+    #sidebar-overlay.show{display:block}
+    .topic-header{background:linear-gradient(135deg,#041e2a 0%,#062030 60%,#041520 100%);border:1px solid rgba(8,145,178,0.2);border-radius:var(--radius-2xl);padding:var(--space-10) var(--space-12);margin-bottom:var(--space-8);position:relative;overflow:hidden}
+    .topic-header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(8,145,178,0.13) 0%,transparent 70%);pointer-events:none}
+    .topic-part-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.28);padding:5px 14px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .topic-title{font-family:var(--font-heading);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:var(--space-4);background:linear-gradient(135deg,#f0faff 0%,#22d3ee 60%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topic-meta{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+    .topic-meta-item{display:flex;align-items:center;gap:var(--space-2);font-size:0.78rem;color:var(--text-muted)}
+    .topic-meta-item strong{color:#22d3ee}
+    .section-block{background:var(--glass-2);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8);margin-bottom:var(--space-6);backdrop-filter:blur(var(--blur-sm))}
+    .section-label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:0.65rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#22d3ee;background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.22);padding:4px 10px;border-radius:var(--radius-sm);margin-bottom:var(--space-4)}
+    .section-block h2{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-4)}
+    .section-block h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:#22d3ee;margin:var(--space-5) 0 var(--space-2) 0}
+    .section-block p{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;margin-bottom:var(--space-3)}
+    .section-block ul,.section-block ol{color:var(--text-secondary);font-size:0.93rem;line-height:1.75;padding-left:var(--space-6);margin-bottom:var(--space-3)}
+    .section-block li{margin-bottom:var(--space-1)}
+    .section-block li strong{color:var(--text-primary)}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-5) 0;font-size:0.9rem;line-height:1.7;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-family:var(--font-heading);font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase}
+    .callout-concept{background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.22);color:#67e8f9}
+    .callout-concept .callout-body strong{color:#22d3ee}
+    .callout-exam{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#fde68a}
+    .callout-exam .callout-body strong{color:var(--amber-300)}
+    .callout-tip{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.22);color:var(--emerald-200)}
+    .callout-tip .callout-body strong{color:var(--emerald-300)}
+    .callout-warning{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:#fecaca}
+    .callout-warning .callout-body strong{color:#f87171}
+    .callout-analogy{background:rgba(103,232,249,0.06);border:1px solid rgba(103,232,249,0.18);color:#a5f3fc}
+    .callout-analogy .callout-body strong{color:#67e8f9}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin:var(--space-5) 0}
+    .comparison-table thead tr{background:rgba(8,145,178,0.12)}
+    .comparison-table th{padding:var(--space-3) var(--space-4);text-align:left;font-family:var(--font-heading);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#22d3ee;border-bottom:1px solid rgba(8,145,178,0.25)}
+    .comparison-table td{padding:var(--space-3) var(--space-4);color:var(--text-secondary);border-bottom:1px solid var(--border-subtle);vertical-align:top}
+    .comparison-table tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .comparison-table td:first-child{color:var(--text-primary);font-weight:500}
+    .code-inline{font-family:var(--font-mono);font-size:0.82em;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:1px 6px;color:#22d3ee}
+    .hl-teal{color:#22d3ee;font-weight:600}
+    .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-5) 0}
+    .term-card{background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.18);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5)}
+    .term-card .term-name{font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:#22d3ee;margin-bottom:var(--space-2)}
+    .term-card .term-def{color:var(--text-secondary);font-size:0.85rem;line-height:1.65}
+    .exam-ref{border-color:rgba(245,158,11,0.25)!important;background:rgba(245,158,11,0.04)!important}
+    .exam-ref .section-label{color:var(--amber-300);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.22)}
+    .exam-ref h2{color:var(--amber-300)}
+    .exam-checkpoint{border-color:rgba(103,232,249,0.2)!important;background:rgba(8,145,178,0.03)!important}
+    .checkpoint-q{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);cursor:pointer;transition:border-color 0.2s}
+    .checkpoint-q:hover{border-color:rgba(8,145,178,0.35)}
+    .cq-question{font-size:0.93rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3)}
+    .cq-options{font-size:0.87rem;color:var(--text-secondary);line-height:1.85}
+    .cq-hint{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-2)}
+    .cq-answer{display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);border-radius:var(--radius-md);font-size:0.88rem;color:#6ee7b7}
+    .checkpoint-q.open .cq-answer{display:block}
+    @media(max-width:600px){.topic-header{padding:var(--space-6) var(--space-5)}.section-block{padding:var(--space-5) var(--space-4)}}
+  </style>
+</head>
+<body class="theme-cis-df">
+<div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../../index.html" style="color:var(--text-muted);text-decoration:none">CIS-DF Hub</a>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 7: Reporting</a>
+        <span class="sep">›</span>
+        <span class="current">Foundation Dashboards &amp; CMDB 360</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <div class="topic-header">
+        <div class="topic-part-badge">⬡ Part 7 · Topic 6</div>
+        <h1 class="topic-title">Foundation Dashboards &amp; CMDB 360 — Executive Visibility into CMDB Program Health</h1>
+        <p style="color:var(--text-secondary);max-width:680px;font-size:0.95rem;line-height:1.75;margin-bottom:var(--space-4)">
+          The previous topic covered how individuals access CMDB data through Workspace and NLQ.
+          This topic covers how organizations track the overall health and completeness of their
+          CMDB program through Foundation dashboards and the CMDB 360 report. These tools answer
+          the executive-level question: "Is our CMDB good enough to trust?" They connect data
+          quality metrics to governance accountability across all the technical layers we've built in this course.
+        </p>
+        <div class="topic-meta">
+          <span class="topic-meta-item">📋 <strong>8 sections</strong></span>
+          <span class="topic-meta-item">⏱ <strong>~30 min read</strong></span>
+          <span class="topic-meta-item">🎯 <strong>~20% exam weight (INSIGHT) + 35% (GOVERN)</strong></span>
+          <span class="topic-meta-item">🏷 <strong>Foundation · CMDB 360 · Dashboards · Service Model · Program Health</strong></span>
+        </div>
+      </div>
+
+      <!-- S1: What Foundation Data Means -->
+      <div class="section-block" id="s1">
+        <span class="section-label">Section 1</span>
+        <h2>Foundation Data — The Non-Negotiable CMDB Core</h2>
+        <p>
+          Before discussing dashboards, it's critical to understand what "foundation data" means
+          in CMDB context. Foundation data is the minimum set of CI attributes and relationships
+          that must be populated for the CMDB to deliver value to ITSM processes.
+        </p>
+        <p>
+          Foundation data is not everything in the CMDB — it is the <em>essential subset</em>
+          that other processes depend on. ServiceNow defines foundation data as the set of
+          information needed for CMDB to be useful, not merely populated.
+        </p>
+
+        <h3>Foundation Data Categories</h3>
+        <ul>
+          <li>
+            <strong>CI Identification data:</strong> The fields used by Identification Rules
+            to uniquely identify CIs. Without correct identification data, duplicates form and
+            IRE fails.
+          </li>
+          <li>
+            <strong>CI Ownership data:</strong> support_group, owned_by, managed_by — the fields
+            that enable correct incident routing, change approval, and SLA assignment.
+          </li>
+          <li>
+            <strong>CI Classification data:</strong> sys_class_name, location, environment,
+            operational_status — the fields that enable filtering, scoping, and impact assessment.
+          </li>
+          <li>
+            <strong>CI Relationship data:</strong> The connections between CIs (cmdb_rel_ci)
+            that enable impact analysis, service mapping, and CSDM dependency chains.
+          </li>
+          <li>
+            <strong>CSDM links:</strong> Connections from infrastructure CIs up through Application
+            Services to Business Applications — required for change impact analysis and incident
+            prioritization.
+          </li>
+        </ul>
+
+        <div class="callout callout-analogy">
+          <span class="callout-icon">🏗</span>
+          <div class="callout-body">
+            <strong>Analogy — Foundation Data as a Building's Structural Framework</strong>
+            A building can have beautiful interiors, marble floors, and ornate decor — but if
+            the structural framework (foundation, load-bearing walls, roof beams) is missing
+            or compromised, none of the decorative work matters. Foundation data is the CMDB's
+            structural framework. Everything else (custom fields, extended attributes, enriched data)
+            is decoration. Start with the foundation; add detail progressively.
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: Foundation Dashboards -->
+      <div class="section-block" id="s2">
+        <span class="section-label">Section 2</span>
+        <h2>Foundation Dashboards — Program-Level Health Reporting</h2>
+        <p>
+          ServiceNow provides pre-built Foundation Dashboards that aggregate CMDB Health scores
+          and program metrics across CI classes, teams, and service domains. These are the dashboards
+          that CMDB Managers use for governance reporting to IT leadership.
+        </p>
+
+        <h3>Key Foundation Dashboard Views</h3>
+        <ul>
+          <li>
+            <strong>CMDB Health by CI Class:</strong> Overall health score per class. Sortable.
+            Shows which classes have the most data quality issues. Color-coded (green/yellow/red).
+          </li>
+          <li>
+            <strong>Health Trend Over Time:</strong> Line chart showing how aggregate CMDB health
+            has changed over weeks/months. Used to demonstrate governance program impact.
+          </li>
+          <li>
+            <strong>Top Issues List:</strong> The specific failing Health Rules with the highest
+            CI-count impact. "1,847 server CIs missing support_group" — ranks issues by scope.
+          </li>
+          <li>
+            <strong>Coverage by Discovery Source:</strong> What percentage of each CI class is
+            being populated by which discovery sources. Identifies coverage gaps —
+            "22% of network devices have no discovery source (manually created, never verified)."
+          </li>
+          <li>
+            <strong>CSDM Completeness:</strong> What percentage of Business Applications have
+            linked Application Services. What percentage of Application Services have linked
+            infrastructure CIs. Measures the service model completeness across all CSDM domains.
+          </li>
+          <li>
+            <strong>Duplicate Rate:</strong> CI-class level duplicate percentages from the
+            Deduplication system. Target: &lt;1% across all classes.
+          </li>
+        </ul>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Foundation Dashboards Are for Program Management, Not Day-to-Day Operations</strong>
+            Foundation Dashboards answer: "How is our CMDB program doing overall?"
+            CMDB Workspace / CI 360 answers: "What is wrong with this specific CI?"
+            These are different questions for different audiences. CMDB Manager uses
+            Foundation Dashboards for monthly governance reviews. Data Stewards use
+            CMDB Workspace for daily operational work. Both are needed; neither replaces the other.
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: CMDB 360 Report -->
+      <div class="section-block" id="s3">
+        <span class="section-label">Section 3</span>
+        <h2>CMDB 360 — The Service Model Completeness View</h2>
+        <p>
+          CMDB 360 is a specific report/view that shows the completeness of the service model
+          across CSDM domains. While CMDB Health scores measure individual CI data quality,
+          CMDB 360 measures whether the connections between CIs and the CSDM service layers
+          are properly established.
+        </p>
+        <p>
+          Think of it this way: CMDB Health says "this CI has good data." CMDB 360 says
+          "this CI is properly connected into the service model so it contributes to
+          Change Impact Analysis and Business Application health tracking."
+        </p>
+
+        <h3>What CMDB 360 Measures</h3>
+        <ul>
+          <li>
+            <strong>Business Application ↔ Application Service links:</strong>
+            Are Business Applications (Domain 1) linked to their technical Application Services (Domain 2)?
+            Orphaned Business Applications can't propagate impact or receive automated criticality scoring.
+          </li>
+          <li>
+            <strong>Application Service ↔ Infrastructure CI links:</strong>
+            Are Application Services connected to the CIs they depend on (Domain 4)?
+            Without this, Service Mapping is incomplete and incident correlation fails.
+          </li>
+          <li>
+            <strong>Technical Service ↔ consuming services:</strong>
+            Are Technical Services (shared infrastructure like DNS, Active Directory) linked
+            to the Application Services that consume them?
+          </li>
+          <li>
+            <strong>CI ↔ Business Application traceability:</strong>
+            For any given infrastructure CI, can ServiceNow trace a path to a Business Application?
+            If not, the CI is "orphaned" in CSDM terms — its failure has no visible business impact.
+          </li>
+        </ul>
+
+        <div class="callout callout-exam">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">
+            <strong>Exam Pattern — CMDB 360 vs. CMDB Health</strong>
+            CMDB Health = data quality of individual CIs (completeness, correctness, staleness).<br>
+            CMDB 360 = completeness of the service model (are all CSDM connections made?).<br>
+            A CMDB can have high Health scores (all CIs have great data) but low CMDB 360
+            scores (none of the CIs are connected into Application Services). Both are required
+            for a fully functional CMDB that delivers value to ITSM processes.
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: Reporting on CMDB Health and Service Model -->
+      <div class="section-block" id="s4">
+        <span class="section-label">Section 4</span>
+        <h2>Building Custom CMDB Reports</h2>
+        <p>
+          Beyond pre-built Foundation Dashboards and CMDB 360, ServiceNow's standard Report
+          Builder can create custom CMDB reports. These are regular ServiceNow reports created
+          against CMDB tables.
+        </p>
+
+        <h3>Common Custom CMDB Reports</h3>
+        <ul>
+          <li>
+            <strong>CIs by support_group:</strong> How many CIs does each support group own?
+            Useful for capacity planning and workload balancing.
+          </li>
+          <li>
+            <strong>CIs by discovery source:</strong> Which tool is responsible for discovering
+            each CI class? Identifies gaps in discovery coverage.
+          </li>
+          <li>
+            <strong>Stale CIs by class and owner:</strong> CIs not discovered in 30/60/90 days,
+            grouped by support_group. Sends accountability to the right team.
+          </li>
+          <li>
+            <strong>CSDM gap report:</strong> Business Applications with no linked Application Service.
+            Application Services with no linked CIs. Orphan CIs with no CSDM connection.
+          </li>
+          <li>
+            <strong>Integration source quality report:</strong> Per integration source (Discovery,
+            SGC, SCCM), CI count, staleness rate, completeness rate, duplicate rate.
+            Used for Integration Owner accountability.
+          </li>
+        </ul>
+
+        <h3>Scheduled Reports for Governance</h3>
+        <p>
+          Custom reports can be scheduled to run automatically and email results to stakeholders.
+          Key scheduled governance reports:
+        </p>
+        <ul>
+          <li>Weekly: Stale CI report to Data Stewards by CI class</li>
+          <li>Monthly: Integration source quality report to Integration Owners</li>
+          <li>Quarterly: CMDB Health trend report to CMDB Manager and CMDB Owner</li>
+          <li>On-demand: CSDM completeness report before major change windows</li>
+        </ul>
+      </div>
+
+      <!-- S5: How Dashboards Connect to Governance -->
+      <div class="section-block" id="s5">
+        <span class="section-label">Section 5</span>
+        <h2>Connecting Dashboards to Governance Accountability</h2>
+        <p>
+          Dashboards and reports only create value when they are connected to accountability.
+          A score that nobody is responsible for improving is just a number.
+          The CMDB governance roles (from Part 6 Topic 5) map to specific dashboard responsibilities:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Dashboard / Report Used</th>
+              <th>Accountability</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CMDB Owner</td>
+              <td>Foundation Dashboard overview; CMDB Health trend; CSDM completeness summary</td>
+              <td>Overall CMDB program health. Escalates when scores fall below threshold. Reports to CIO.</td>
+            </tr>
+            <tr>
+              <td>CMDB Manager</td>
+              <td>All Foundation Dashboards; CMDB 360; Health Trend; Issue prioritization</td>
+              <td>Interprets scores, assigns remediation tasks, drives quarterly governance review.</td>
+            </tr>
+            <tr>
+              <td>Data Steward</td>
+              <td>CMDB Health by CI class (their class); Top Issues; Drill-down to specific failing CIs</td>
+              <td>Owns completeness, compliance, and correctness for their CI class. Accountable for class-level Health scores.</td>
+            </tr>
+            <tr>
+              <td>Integration Owner</td>
+              <td>Discovery source coverage report; integration quality report; staleness by source</td>
+              <td>Accountable for data quality of CIs populated by their integration source.</td>
+            </tr>
+            <tr>
+              <td>CMDB Architect</td>
+              <td>CMDB 360 service model completeness; Deduplication dashboard; Identification rule effectiveness</td>
+              <td>Technical design accountability. When structural issues cause quality problems, architect proposes fixes.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Tip — Build Dashboards INTO Governance Meetings, Not Separately</strong>
+            The most effective CMDB programs use dashboards as the agenda for governance meetings.
+            The monthly CMDB governance meeting opens the Foundation Dashboard, reviews scores,
+            identifies owners of red/yellow items, and assigns remediation tasks with deadlines.
+            The score trend chart at the next meeting shows whether assignments were completed.
+            This creates a feedback loop: dashboards → accountability → action → improved scores.
+          </div>
+        </div>
+      </div>
+
+      <!-- S6: The Full CMDB Program Picture -->
+      <div class="section-block" id="s6">
+        <span class="section-label">Section 6</span>
+        <h2>Putting It All Together — The CMDB Program Loop</h2>
+        <p>
+          Now that you've studied all the topics in this course, here's how they connect
+          into a continuous improvement loop:
+        </p>
+
+        <h3>The CMDB Program Continuous Improvement Loop</h3>
+        <ol>
+          <li>
+            <strong>Ingest:</strong> Discovery, SGC, and integrations populate CI data into
+            the CMDB through IRE (identification, reconciliation, deduplication).
+          </li>
+          <li>
+            <strong>Measure:</strong> CMDB Health scores measure data quality across five
+            dimensions. CMDB 360 measures service model completeness. Foundation Dashboards
+            aggregate both into program-level metrics.
+          </li>
+          <li>
+            <strong>Identify issues:</strong> Health Dashboard drill-down identifies specific
+            failing CIs and failing Health Rules. Source Attribution in CI 360 identifies
+            which source caused the problem.
+          </li>
+          <li>
+            <strong>Assign accountability:</strong> Governance roles (Data Steward, Integration Owner,
+            CMDB Architect) are assigned to remediate based on the root cause.
+          </li>
+          <li>
+            <strong>Remediate:</strong> Fix the root cause (bad Identification Rule → fix the rule;
+            bad Discovery coverage → fix the schedule; missing CSDM link → use Service Mapping
+            or manual link; wrong class → reclassify through the Data Steward process).
+          </li>
+          <li>
+            <strong>Verify:</strong> Re-run Discovery, re-score Health, check that CMDB 360
+            completeness improved. Validate the fix didn't introduce new issues.
+          </li>
+          <li>
+            <strong>Report:</strong> Health trend dashboards show improvement over time.
+            Governance meeting reviews scores. CMDB Owner reports program health to CIO.
+          </li>
+          <li>
+            <strong>Return to step 1:</strong> Continuous operation, continuous measurement,
+            continuous improvement. The CMDB is never "done" — it requires ongoing governance.
+          </li>
+        </ol>
+
+        <div class="callout callout-concept">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">
+            <strong>Key Concept — Why GOVERN Is 35% of the Exam</strong>
+            Technical tools (Discovery, IRE, SGC) solve the data ingest problem.
+            The CMDB Health, CMDB 360, and Foundation Dashboards solve the measurement problem.
+            But without governance (roles, accountability, processes, policies), the measurements
+            never translate into sustained improvement. Any organization can get data into the CMDB;
+            keeping it accurate over time requires governance. That's why GOVERN dominates the exam —
+            it's the hardest part to implement and the part most organizations get wrong.
+          </div>
+        </div>
+      </div>
+
+      <!-- S7: Practical Maturity Indicators -->
+      <div class="section-block" id="s7">
+        <span class="section-label">Section 7</span>
+        <h2>Maturity Indicators from Dashboard Patterns</h2>
+        <p>
+          Experienced CMDB practitioners can read program maturity from dashboard patterns.
+          The exam may present scenarios that require you to identify what stage of maturity an
+          organization is at and what its next priority should be:
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dashboard Pattern Observed</th>
+              <th>Maturity Diagnosis</th>
+              <th>Priority Next Step</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>High duplicate rate across all classes; low Correctness scores</td>
+              <td>Reactive / Level 0-1: Identification Rules misconfigured or missing; multi-source without reconciliation</td>
+              <td>Audit and fix Identification Rules; configure Reconciliation Rules; run Deduplication</td>
+            </tr>
+            <tr>
+              <td>Good Health scores for core classes; CMDB 360 shows 30% CSDM completeness</td>
+              <td>Defined / Level 2: Technical data quality improving but service model not built out</td>
+              <td>Implement Service Mapping for critical applications; manually link Business Applications to Application Services</td>
+            </tr>
+            <tr>
+              <td>All Health scores 80+; CMDB 360 completeness 85%; Staleness increases quarterly</td>
+              <td>Managed / Level 3: Good baseline data; discovery coverage gaps growing as infrastructure changes faster than discovery keeps up</td>
+              <td>Expand Discovery coverage (new subnets, cloud regions); implement CI Group-based Discovery for high-churn environments</td>
+            </tr>
+            <tr>
+              <td>All KPIs consistently green; CMDB 360 95%+; Health trend stable or improving each quarter</td>
+              <td>Optimized / Level 4: Program is mature; focus shifts to proactive governance and business value demonstration</td>
+              <td>Automate reporting to business stakeholders; use CMDB data to drive IT financial management and risk analysis</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Exam Quick Reference -->
+      <div class="section-block exam-ref" id="exam-ref">
+        <span class="section-label">Exam Quick Reference</span>
+        <h2>Foundation Dashboards &amp; CMDB 360 — Key Facts</h2>
+        <ul>
+          <li><strong>Foundation data</strong> = minimum CI attributes and relationships needed for CMDB to deliver ITSM value. Categories: identification, ownership, classification, relationships, CSDM links.</li>
+          <li><strong>Foundation Dashboards</strong> = program-level health reporting: Health by CI class, Health trend, Top Issues, Discovery coverage, CSDM completeness, Duplicate rate. For CMDB Manager and CMDB Owner.</li>
+          <li><strong>CMDB 360</strong> = service model completeness report. Measures whether CSDM connections (CI → Application Service → Business Application) are complete. Distinct from CMDB Health (individual CI data quality).</li>
+          <li><strong>CMDB Health (individual CI quality) + CMDB 360 (service model completeness) = both required</strong> for full CMDB program value.</li>
+          <li><strong>Custom reports</strong> can be built with Report Builder against any CMDB table and scheduled for automated delivery to stakeholders.</li>
+          <li><strong>Dashboards → Governance accountability</strong> = each score must have an owner responsible for improving it. Without accountability, scores are just numbers.</li>
+          <li><strong>The CMDB program loop:</strong> Ingest → Measure → Identify → Assign → Remediate → Verify → Report → repeat.</li>
+          <li><strong>GOVERN is 35% of exam</strong> because technology solves the ingest problem; governance solves the sustained quality problem.</li>
+        </ul>
+
+        <h3>Term Grid</h3>
+        <div class="term-grid">
+          <div class="term-card">
+            <div class="term-name">Foundation Data</div>
+            <div class="term-def">The minimum set of CI attributes and relationships required for the CMDB to deliver value to ITSM processes. Includes identification fields, ownership fields, classification fields, relationships, and CSDM service model links.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Foundation Dashboard</div>
+            <div class="term-def">Pre-built ServiceNow dashboard aggregating CMDB Health scores and program metrics across CI classes, discovery sources, and service domains. Used by CMDB Manager for governance reporting.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CMDB 360 Report</div>
+            <div class="term-def">ServiceNow report measuring service model completeness across CSDM domains. Tracks: Business Applications with linked Application Services, Application Services with linked CIs, orphan CIs with no CSDM connection. Distinct from CMDB Health (individual CI quality).</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">CSDM Completeness</div>
+            <div class="term-def">The degree to which CSDM connections are established throughout the service model hierarchy. Measured by CMDB 360. High CSDM completeness = reliable change impact analysis and business application health visibility.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Orphan CI</div>
+            <div class="term-def">A CI with no upward connection in the CSDM service model hierarchy — not linked to any Application Service or Business Application. Its failure has no visible business impact in ServiceNow. Must be linked or accepted as excluded from service model.</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Program Health Loop</div>
+            <div class="term-def">The continuous CMDB improvement cycle: Ingest → Measure (Health/CMDB360) → Identify Issues → Assign Accountability → Remediate → Verify → Report → repeat. Governed by CMDB governance framework. Never finishes — CMDB requires ongoing maintenance.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block exam-checkpoint" id="exam-checkpoint">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:var(--space-5)">Click any question to reveal the answer and explanation.</p>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">1. A CMDB program shows CMDB Health scores of 88% overall (Green) across all major CI classes. However, the CMDB Manager reports that Change Impact Analysis is still failing — changes to database servers routinely trigger unexpected outages to business applications that weren't in the change record. What is the most likely problem and what tool surfaces it?</div>
+          <div class="cq-options">
+            <div>A) CMDB Health scores are inaccurate — the Health Rules need to be recalibrated</div>
+            <div>B) CMDB 360 / service model completeness is low — Application Services and Business Applications are not linked to infrastructure CIs, so the dependency chain for change impact analysis is broken</div>
+            <div>C) Change Management workflow is misconfigured — the issue is in the change form, not the CMDB</div>
+            <div>D) Discovery is not running frequently enough — CIs need to be refreshed daily for change impact to work</div>
+          </div>
+          <div class="cq-hint">💡 High CMDB Health but failing change impact analysis — what's the difference between data quality and service model completeness?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — This is the classic "high Health, broken impact analysis" scenario. CMDB Health measures individual CI data quality (fields populated, correct values, no duplicates) — the CIs look great individually. But Change Impact Analysis works by traversing the CSDM relationship chain: CI → Application Service → Business Application. If Application Services aren't linked to the database server CIs (low CMDB 360 / CSDM completeness), the impact chain is broken regardless of how good individual CI data quality is. The fix: use Service Mapping to build proper Application Service maps connecting CIs to business applications.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">2. During a quarterly CMDB governance review, the Foundation Dashboard shows that the Staleness health score for the "cmdb_ci_win_server" class dropped from 82% (Green) to 48% (Red) this quarter. The Completeness, Compliance, and Correctness scores are all stable. What is the most appropriate first response?</div>
+          <div class="cq-options">
+            <div>A) Immediately retire all stale Windows server CIs using CMDB Data Manager</div>
+            <div>B) Investigate Discovery: check whether the Windows Server Discovery schedules, credentials, or MID Server configurations changed this quarter — the sudden staleness drop across one class is characteristic of a Discovery configuration failure</div>
+            <div>C) Adjust the Staleness Health Rule threshold from 30 days to 90 days to bring the score back to Green</div>
+            <div>D) Archive all Windows server CIs that haven't been discovered in 30 days</div>
+          </div>
+          <div class="cq-hint">💡 Sudden staleness drop for one class, stable other dimensions — what does this pattern suggest about the root cause?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — A sudden, class-specific staleness drop (from 82% to 48%) while other dimensions remain stable is the signature pattern of a Discovery configuration failure. Other dimensions are fine because the CI records still exist and still have good data — but last_discovered timestamps stopped updating because Discovery stopped running for Windows servers. First step: investigate Discovery configuration changes this quarter (credential rotation? MID Server upgrade? Schedule modification? Firewall rule change?). Options A and D (retiring/archiving stale CIs) are premature — the CIs may not actually be decommissioned, just undiscoverable due to a configuration issue. Option C (adjusting the threshold) hides the problem without fixing it.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">3. A new CMDB Manager wants to demonstrate CMDB program value to the CIO. Which combination of dashboard metrics tells the most complete story of program health?</div>
+          <div class="cq-options">
+            <div>A) Total number of CI records in the CMDB and the number of Discovery schedules running</div>
+            <div>B) CMDB Health scores (all five dimensions, trend over two quarters) combined with CMDB 360 service model completeness percentage and duplicate rate</div>
+            <div>C) The number of incidents that referenced CI records and the average incident resolution time</div>
+            <div>D) The cost of ServiceNow licensing per CI record managed</div>
+          </div>
+          <div class="cq-hint">💡 A CIO wants program health, not just raw counts. What combination captures both data quality and business model completeness?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — The most complete CMDB program health story combines: (1) CMDB Health scores across all five dimensions show that individual CI data is accurate, complete, current, compliant, and deduplicated; (2) the trend over two quarters shows whether the program is improving (demonstrates governance is working); (3) CMDB 360 completeness shows the service model is properly built, enabling change impact analysis; (4) duplicate rate shows the ingestion pipeline is under control. Option A (raw record count + schedule count) measures activity, not quality. Option C (incident metrics) is a ITSM metric, not a CMDB quality metric. Option D (cost per CI) is a financial metric, not a quality metric.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">4. A CMDB program dashboard shows: Health scores 85%+ across all classes, CMDB 360 completeness 88%, Duplicate rate &lt;0.5%, but Staleness is increasing quarter-over-quarter for cloud VM classes (from 78% to 71% to 63%). All other classes are stable. What is the most appropriate governance response?</div>
+          <div class="cq-options">
+            <div>A) This is acceptable — cloud VMs change frequently and can't be tracked like physical servers</div>
+            <div>B) Expand SGC coverage: cloud VMs should be discovered by Service Graph Connectors (not IP-range Discovery), and the Integration Owner for cloud must verify SGC is deployed and configured for all cloud regions and accounts where VMs are running</div>
+            <div>C) Increase the Staleness Health Rule threshold for cloud VM classes to stop the score from declining</div>
+            <div>D) Implement CMDB Data Manager to automatically retire cloud VMs that haven't been discovered in 30 days</div>
+          </div>
+          <div class="cq-hint">💡 Cloud VMs use a specific discovery mechanism. Who is accountable for cloud CI data quality?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Cloud VMs are typically discovered by Service Graph Connectors (SGC) for AWS/Azure/GCP, not traditional IP-based Discovery. A gradual, class-specific staleness decline for cloud VMs suggests: new cloud regions or accounts are being added (business is expanding cloud footprint) but SGC hasn't been configured for those new regions/accounts. The Integration Owner for cloud is accountable for ensuring SGC coverage matches the actual cloud infrastructure. This is a governance response: assign the Integration Owner to audit SGC configuration against the cloud account inventory. Option A ignores a real and worsening trend. Option C hides the problem. Option D would retire active cloud VMs that are simply in uncovered regions.</div>
+        </div>
+
+        <div class="checkpoint-q" onclick="this.classList.toggle('open')">
+          <div class="cq-question">5. An organization has: 10,000 CI records, CMDB Health overall 71% (Yellow), CMDB 360 service model completeness 28%, and an ongoing duplicate rate of 4.2%. The CMDB Manager must prioritize which single problem to address first. What is the correct priority order and reasoning?</div>
+          <div class="cq-options">
+            <div>A) Start with CSDM completeness (28%) — the business won't see value until the service model is built</div>
+            <div>B) Start with duplicates (4.2%) — fix identification rules and deduplicate first, because high duplicate rate means CSDM links built now will be built on the wrong CIs and will need to be rebuilt after deduplication</div>
+            <div>C) Start with CMDB Health (71%) — raise health score first before attempting service model work</div>
+            <div>D) Address all three simultaneously — they are equally important</div>
+          </div>
+          <div class="cq-hint">💡 Consider dependencies: which problem, if left unfixed, makes the other two harder or invalidates the work done on them?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — Fix duplicates first. A 4.2% duplicate rate means roughly 420 CIs have duplicate records. If you build CSDM service model links now (Application Services linked to CIs), those links will be attached to the wrong CI record after deduplication merges duplicates — the merged CI may be a different record (the Master), breaking all the relationships you just built. The principle: fix foundational problems before building on top of them. Deduplication → then improve Health (Completeness, Correctness) → then build CSDM service model links. Building the service model on a deduplicated, high-quality foundation ensures the work doesn't need to be repeated. Option A starts with the most complex layer (CSDM) before the foundation (dedup) is stable.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);padding:var(--space-6) 0;border-top:1px solid var(--border-subtle);margin-top:var(--space-8)">
+        <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <a href="05-cmdb-workspace-nlq.html" class="btn btn-secondary">← CMDB Workspace &amp; NLQ</a>
+          <a href="../../index.html" class="btn btn-primary">↩ Back to Hub</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="../../config.js"></script>
+<script src="../../../scripts/engine.js"></script>
+<script>
+  const TOPIC_ID = 'cisdf_p7_t6_06';
+  function markComplete() {
+    ProgressManager.setComplete(TOPIC_ID, true);
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ProgressManager.isComplete(TOPIC_ID)) {
+      const btn = document.getElementById('complete-btn');
+      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
+    }
+  });
+</script>
+</body>
+</html>
