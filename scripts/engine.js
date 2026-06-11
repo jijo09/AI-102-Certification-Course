@@ -127,7 +127,8 @@ const ProgressManager = (function () {
 
   /** Returns true if the topic is complete */
   function isComplete(_topicId) {
-    return _load()[_topicId] && _load()[_topicId].complete === true;
+    var _entry = _load()[_topicId];
+    return !!(_entry && _entry.complete);
   }
 
   /** Returns { done, total, pct } for a given part number */
