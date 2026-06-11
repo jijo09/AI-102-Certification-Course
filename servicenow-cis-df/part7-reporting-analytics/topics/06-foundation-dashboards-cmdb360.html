@@ -605,8 +605,8 @@
     const btn = document.getElementById('complete-btn');
     if (!btn) return;
     const done = ProgressManager.isComplete(TOPIC_ID);
-    btn.textContent = done ? '✓ Complete!' : '✓ Mark as Complete';
-    btn.classList.toggle('btn-primary', done);
+    btn.textContent = done ? '↺ Mark Incomplete' : '✓ Mark as Complete';
+    btn.classList.toggle('btn-secondary', done);
     btn.classList.toggle('btn-success', !done);
     btn.disabled = false;
   }

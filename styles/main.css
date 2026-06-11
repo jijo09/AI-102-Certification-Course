@@ -861,6 +861,21 @@ pre code {
   color: #fff;
 }
 
+.theme-cis-df .sidebar-logo-icon {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.22), transparent 50%),
+    linear-gradient(135deg, #0891b2, #22d3ee) !important;
+  box-shadow: 0 0 20px rgba(8,145,178,0.35), 0 4px 12px rgba(0,0,0,0.5),
+              inset 0 1px 0 rgba(255,255,255,0.2) !important;
+}
+
+.theme-cis-df .sidebar-logo-icon::before {
+  content: 'DF';
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+
 .sidebar-logo-text {
   font-family: var(--font-heading);
   font-weight: 700;
@@ -995,7 +1010,7 @@ body.sidebar-collapsed .sidebar-desktop-toggle::before {
   transition: max-height 0.25s ease;
   background: rgba(255,255,255,0.01);
 }
-.sidebar-group.open .sidebar-group-body { max-height: 520px; }
+.sidebar-group.open .sidebar-group-body { max-height: 900px; }
 
 /* ── Standalone nav tabs (Dashboard, Revision) — match group-header look ── */
 .sidebar-item.sidebar-nav-tab {
@@ -2977,6 +2992,41 @@ body.theme-csa {
 
 body.theme-csa ::-webkit-scrollbar-thumb:hover { background: var(--emerald-600); }
 
+/* 3. ServiceNow CIS-DF Theme (Cyan/Teal) */
+body.theme-cis-df {
+  --part1-color: #0e7490;
+  --part2-color: #0891b2;
+  --part3-color: #06b6d4;
+  --part4-color: #22d3ee;
+  --part5-color: #67e8f9;
+  --part6-color: #a5f3fc;
+
+  --cisdf-700: #0e7490;
+  --cisdf-600: #0891b2;
+  --cisdf-500: #06b6d4;
+  --cisdf-400: #22d3ee;
+  --cisdf-300: #67e8f9;
+  --cisdf-200: #a5f3fc;
+
+  --glass-cy:   rgba(8,145,178,0.07);
+  --glass-cy-h: rgba(8,145,178,0.13);
+
+  --text-accent:     var(--cisdf-400);
+  --accent-primary:  var(--cisdf-500);
+  --accent-glow:     rgba(8,145,178,0.25);
+}
+
+body.theme-cis-df ::-webkit-scrollbar-thumb:hover { background: var(--cisdf-700); }
+
+body.light-mode.theme-cis-df .hero-eyebrow {
+  color: #0e7490;
+  background: rgba(8,145,178,0.08);
+  border-color: rgba(8,145,178,0.22);
+}
+body.light-mode.theme-cis-df .op-pct        { color: #0e7490; }
+body.light-mode.theme-cis-df .next-up-title { color: #0e7490; }
+body.light-mode.theme-cis-df .part-mini-link:hover { color: #0e7490; }
+
 /* Body override class for selector portal page state */
 body.selector-active {
   background-image:
@@ -3563,6 +3613,20 @@ body.selector-active {
   --cta-glow: rgba(124,58,237,0.4);
 }
 
+.wh-card-cisdf {
+  --card-accent-border: rgba(8,145,178,0.45);
+  --card-glow: rgba(8,145,178,0.07);
+  --card-gradient: linear-gradient(90deg, #0891b2, #22d3ee);
+  --ring-stroke: #22d3ee;
+  --ring-glow: rgba(34,211,238,0.55);
+  --vendor-bg: rgba(8,145,178,0.10);
+  --vendor-border: rgba(8,145,178,0.22);
+  --vendor-clr: #67e8f9;
+  --cta-from: #0891b2;
+  --cta-to: #22d3ee;
+  --cta-glow: rgba(8,145,178,0.4);
+}
+
 /* Top accent stripe */
 .wh-card-accent {
   position: absolute;
@@ -3785,8 +3849,9 @@ body.selector-active {
   transition: width 1.4s cubic-bezier(0.16,1,0.3,1);
 }
 
-.wh-card-ai102 .wh-prog-fill { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
-.wh-card-csa   .wh-prog-fill { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+.wh-card-ai102  .wh-prog-fill { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
+.wh-card-csa    .wh-prog-fill { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+.wh-card-cisdf  .wh-prog-fill { background: linear-gradient(90deg, #0891b2, #22d3ee); }
 
 /* CTA button */
 .wh-cta {

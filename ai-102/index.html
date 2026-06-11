@@ -528,6 +528,7 @@
         </div>
         <span class="op-pct" data-progress-pct>0%</span>
         <span class="op-done"><span data-progress-done>0 / 18</span> topics</span>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;font-size:0.7rem;color:var(--text-muted);opacity:0.6" onclick="if(confirm('Reset all AI-102 progress?')){localStorage.removeItem('ai102_progress');location.reload();}">↺ Reset</button>
       </div>
       <div style="display:flex;gap:var(--space-2);margin-bottom:var(--space-8);margin-top:calc(-1 * var(--space-6))">
         <button class="btn btn-ghost btn-sm" onclick="exportProgress()" title="Export progress to JSON file">📤 Export Progress</button>
