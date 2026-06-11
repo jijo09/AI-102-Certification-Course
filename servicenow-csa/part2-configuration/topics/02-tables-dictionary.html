@@ -739,17 +739,19 @@
 <script src="../../config.js"></script>
 <script src="../../../scripts/engine.js"></script>
 <script>
-  function markComplete() {
-    ProgressManager.setComplete('csa-p2-tables-dictionary', true);
+  const TOPIC_ID = 'csa-p2-tables-dictionary';
+  function _syncBtn() {
     const btn = document.getElementById('complete-btn');
-    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+    if (!btn) return;
+    const done = ProgressManager.isComplete(TOPIC_ID);
+    btn.textContent = done ? '✓ Complete!' : '✓ Mark as Complete';
+    btn.classList.toggle('btn-primary', done);
+    btn.classList.toggle('btn-success', !done);
+    btn.disabled = false;
   }
-  document.addEventListener('DOMContentLoaded', () => {
-    if (ProgressManager.isComplete('csa-p2-tables-dictionary')) {
-      const btn = document.getElementById('complete-btn');
-      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
-    }
-  });
+  function markComplete() { ProgressManager.toggle(TOPIC_ID); _syncBtn(); }
+  document.addEventListener('DOMContentLoaded', _syncBtn);
+  window.addEventListener('pageshow', function(e) { if (e.persisted) _syncBtn(); });
 </script>
 </body>
 </html>

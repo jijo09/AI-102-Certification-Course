@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -601,17 +601,18 @@
 <script src="../../../scripts/engine.js"></script>
 <script>
   const TOPIC_ID = 'cisdf_p7_t6_06';
-  function markComplete() {
-    ProgressManager.setComplete(TOPIC_ID, true);
+  function _syncBtn() {
     const btn = document.getElementById('complete-btn');
-    btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true;
+    if (!btn) return;
+    const done = ProgressManager.isComplete(TOPIC_ID);
+    btn.textContent = done ? '✓ Complete!' : '✓ Mark as Complete';
+    btn.classList.toggle('btn-primary', done);
+    btn.classList.toggle('btn-success', !done);
+    btn.disabled = false;
   }
-  document.addEventListener('DOMContentLoaded', () => {
-    if (ProgressManager.isComplete(TOPIC_ID)) {
-      const btn = document.getElementById('complete-btn');
-      if (btn) { btn.textContent = '✓ Complete!'; btn.classList.add('btn-primary'); btn.disabled = true; }
-    }
-  });
+  function markComplete() { ProgressManager.toggle(TOPIC_ID); _syncBtn(); }
+  document.addEventListener('DOMContentLoaded', _syncBtn);
+  window.addEventListener('pageshow', function(e) { if (e.persisted) _syncBtn(); });
 </script>
 </body>
 </html>

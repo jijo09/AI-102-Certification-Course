@@ -1081,10 +1081,15 @@ const SidebarManager = (function () {
     const _currentSegs = _currentPath.split('/').filter(Boolean);
     const _currentFile = _currentSegs[_currentSegs.length - 1] || 'index.html';
 
-    // Auto-open the accordion group that matches the URL
-    const _partMatch = _currentPath.match(/part(\d+)-/);
-    if (_partMatch) {
-      const _activeGroup = document.querySelector('.sidebar-group[data-part-group="' + _partMatch[1] + '"]');
+    // Auto-open the accordion group that matches the URL — keyed from partIndexFiles directory names
+    const _pif = (window.COURSE_CONFIG && window.COURSE_CONFIG.partIndexFiles) || {};
+    let _autoOpenPart = null;
+    Object.keys(_pif).forEach(function (_key) {
+      const _dir = (_pif[_key] || '').split('/')[0];
+      if (_dir && _currentPath.indexOf('/' + _dir + '/') !== -1) { _autoOpenPart = _key; }
+    });
+    if (_autoOpenPart) {
+      const _activeGroup = document.querySelector('.sidebar-group[data-part-group="' + _autoOpenPart + '"]');
       if (_activeGroup) _activeGroup.classList.add('open');
     }
 
@@ -1456,6 +1461,9 @@ function toggleTheme() {
    BOOT — auto-init on DOMContentLoaded
    ============================================================ */
 document.addEventListener('DOMContentLoaded', function () { CourseEngine.init(); });
+window.addEventListener('pageshow', function (e) {
+  if (e.persisted) document.dispatchEvent(new CustomEvent('progressUpdated'));
+});
 
 /* ============================================================
    EXPOSE GLOBALS
