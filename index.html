@@ -43,12 +43,12 @@
       </div>
       <div class="wh-stat-sep"></div>
       <div class="wh-stat">
-        <span class="wh-stat-val">40+</span>
+        <span class="wh-stat-val">65+</span>
         <span class="wh-stat-lbl">Total Topics</span>
       </div>
       <div class="wh-stat-sep"></div>
       <div class="wh-stat">
-        <span class="wh-stat-val">2</span>
+        <span class="wh-stat-val">3</span>
         <span class="wh-stat-lbl">Certifications</span>
       </div>
       <div class="wh-stat-sep"></div>
@@ -134,7 +134,6 @@
     <!-- ServiceNow CSA Card -->
     <div class="wh-card wh-card-csa" onclick="selectCourse('servicenow-csa')">
       <div class="wh-card-accent"></div>
-      <div class="wh-new-badge">NEW</div>
 
       <div class="wh-card-inner">
         <div class="wh-card-left">
@@ -194,6 +193,69 @@
       </div>
     </div>
 
+    <!-- ServiceNow CIS-DF Card -->
+    <div class="wh-card wh-card-cisdf" onclick="selectCourse('servicenow-cis-df')">
+      <div class="wh-card-accent"></div>
+      <div class="wh-new-badge">NEW</div>
+
+      <div class="wh-card-inner">
+        <div class="wh-card-left">
+          <div class="wh-ring-wrap">
+            <svg class="wh-ring-svg" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+              <circle class="wh-ring-track" cx="18" cy="18" r="15.9155"/>
+              <circle class="wh-ring-fill" cx="18" cy="18" r="15.9155"
+                id="ring-cisdf" stroke-dasharray="0 100" stroke-dashoffset="25"/>
+            </svg>
+            <div class="wh-ring-icon">🗄️</div>
+          </div>
+          <div class="wh-pct-label" id="ring-cisdf-pct">0%</div>
+        </div>
+
+        <div class="wh-card-right">
+          <div class="wh-vendor-row">
+            <span class="wh-vendor-badge">ServiceNow</span>
+          </div>
+          <div class="wh-exam-code">CIS-DF</div>
+          <h2 class="wh-exam-name">Certified Implementation Specialist — Data Foundations</h2>
+          <p class="wh-exam-desc">ServiceNow data model, import sets & transform maps, data quality policies, CMDB architecture, reporting & Performance Analytics, and REST API integration.</p>
+          <div class="wh-meta-grid">
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Pass Score</span>
+              <span class="wh-meta-val">~70%</span>
+            </div>
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Questions</span>
+              <span class="wh-meta-val">~60</span>
+            </div>
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Domains</span>
+              <span class="wh-meta-val">8</span>
+            </div>
+            <div class="wh-meta-item">
+              <span class="wh-meta-lbl">Topics</span>
+              <span class="wh-meta-val">43</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wh-card-footer">
+        <div class="wh-prog-wrap">
+          <div class="wh-prog-info">
+            <span class="wh-prog-lbl">Readiness</span>
+            <span class="wh-prog-pct" id="prog-cisdf-pct">0%</span>
+          </div>
+          <div class="wh-prog-bar">
+            <div class="wh-prog-fill" id="prog-cisdf-fill" style="width:0%"></div>
+          </div>
+        </div>
+        <button class="wh-cta">
+          <span id="cta-cisdf-text">Start Learning</span>
+          <span class="wh-cta-arrow">→</span>
+        </button>
+      </div>
+    </div>
+
   </div><!-- /wh-courses -->
 
   <footer class="wh-footer">
@@ -213,7 +275,12 @@
 
   function selectCourse(courseId) {
     localStorage.setItem('active_course', courseId);
-    window.location.assign(courseId === 'servicenow-csa' ? 'servicenow-csa/index.html' : 'ai-102/index.html');
+    const routes = {
+      'servicenow-csa':  'servicenow-csa/index.html',
+      'servicenow-cis-df': 'servicenow-cis-df/index.html',
+      'ai-102':          'ai-102/index.html',
+    };
+    window.location.assign(routes[courseId] || 'ai-102/index.html');
   }
 
   (function init() {
@@ -249,9 +316,25 @@
       if (el) el.textContent = 'Resume Study';
     }
 
+    // CIS-DF progress
+    let cisdfDone = 0;
+    try {
+      const cisdfProgress = JSON.parse(localStorage.getItem('cisdf_progress') || '{}');
+      cisdfDone = Object.values(cisdfProgress).filter(p => p.complete === true).length;
+    } catch(e){}
+    const cisdfPct = Math.round((cisdfDone / 43) * 100) || 0;
+    document.getElementById('prog-cisdf-pct').textContent = `${cisdfPct}%`;
+    document.getElementById('prog-cisdf-fill').style.width = `${cisdfPct}%`;
+    document.getElementById('ring-cisdf-pct').textContent = `${cisdfPct}%`;
+    setProgressRing('ring-cisdf', cisdfPct);
+    if (cisdfDone > 0) {
+      const el = document.getElementById('cta-cisdf-text');
+      if (el) el.textContent = 'Resume Study';
+    }
+
     // Total mastered counter
     const totalEl = document.getElementById('total-mastered');
-    if (totalEl) totalEl.textContent = aiDone + csaDone;
+    if (totalEl) totalEl.textContent = aiDone + csaDone + cisdfDone;
   })();
 </script>
 </body>
