@@ -285,9 +285,9 @@ border-radius: 20px
 4. ~~**`color: #ffffff !important`** on `.text-primary`~~ — ✅ Fixed: now `var(--text-primary)` / `var(--text-secondary)`; removed redundant light-mode overrides
 
 ### Nice to Fix
-5. **Focus rings** — not explicitly styled; browsers default may strip in some contexts
-6. **`aria-live` regions** — quiz feedback, toast notifications
-7. **Skip link** — missing for keyboard users
+5. ~~**Focus rings**~~ — ✅ Fixed: global `:focus-visible` (emerald-400 dark / #047857 light); `.tryit-input` uses `:focus-visible` + box-shadow ring; `border-radius: 3px` on outline
+6. ~~**`aria-live` regions**~~ — ✅ Fixed: `aria-live="polite" role="status"` on all quiz result divs
+7. ~~**Skip link**~~ — ✅ Fixed: `<a href="#main-content" class="skip-link">` in all 150 HTML files
 8. **`min-h-dvh`** — uses `min-height: 100vh` (fine for desktop, check mobile)
 
 ---
@@ -298,7 +298,7 @@ border-radius: 20px
 - `!important` chains for light mode (use `:is(body.light-mode .component)` specificity properly)
 - Emoji as icons anywhere structural
 - Hardcoded dark gradients on `.hero` overridden again in light mode (fix source, not override)
-- Multiple `backdrop-filter: blur()` stacked in nested elements (GPU perf)
+- ~~Multiple `backdrop-filter: blur()` stacked in nested elements~~ — ✅ Fixed: removed from quiz-scenario, quiz-option, quiz-explanation, tryit-input
 
 ---
 

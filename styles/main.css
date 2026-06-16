@@ -2303,9 +2303,10 @@ table.comparison-table tr:hover td { background: rgba(16,185,129,0.04); }
   outline: none;
 }
 
-.tryit-input:focus {
+.tryit-input:focus-visible {
   border-color: var(--gb-em);
-  box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+  outline: none;
 }
 
 .tryit-textarea { min-height: 80px; resize: vertical; }
@@ -3961,6 +3962,11 @@ body.selector-active {
 :focus-visible {
   outline: 2px solid var(--emerald-400);
   outline-offset: 3px;
+  border-radius: 3px;
+}
+/* emerald-400 (#34d399) fails 3:1 on light bg — use emerald-700 instead */
+body.light-mode :focus-visible {
+  outline-color: #047857;
 }
 
 /* ── Reduced Motion ────────────────────────────────────────────────────── */
