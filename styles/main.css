@@ -185,6 +185,10 @@
   --btn-success-bg-h:      rgba(16,185,129,0.3);
   --btn-success-border-h:  rgba(16,185,129,0.6);
   --btn-success-color-h:   var(--emerald-200);
+  /* Hero component tokens — dark defaults; theme pages override :root values for theme-specific gradients */
+  --hero-bg:     linear-gradient(135deg, var(--navy-800) 0%, var(--navy-900) 60%, #0a0f1e 100%);
+  --hero-border: var(--border-subtle);
+  --hero-shadow: none;
 }
 
 /* ── Light Mode Override ── */
@@ -254,6 +258,9 @@ body.light-mode {
   background-image:
     radial-gradient(ellipse 80% 50% at 10% -10%, rgba(16,185,129,0.04) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 90% 110%, rgba(16,185,129,0.03) 0%, transparent 60%);
+  --hero-bg:     linear-gradient(135deg, rgba(255,255,255,0.97) 0%, #f1f5f9 100%);
+  --hero-border: rgba(0,0,0,0.1);
+  --hero-shadow: 0 2px 16px rgba(0,0,0,0.06);
 }
 
 body.light-mode .sidebar {
@@ -436,12 +443,7 @@ body.light-mode .part-hero-eyebrow { color: #065f46; background: rgba(16,185,129
 body.light-mode .meta-value { color: #047857; }
 body.light-mode .meta-label { color: var(--text-muted); }
 
-/* Dashboard hero — hardcoded dark gradients in both AI-102 and CSA */
-body.light-mode .hero {
-  background: linear-gradient(135deg, rgba(255,255,255,0.97) 0%, #f1f5f9 100%) !important;
-  border-color: rgba(0,0,0,0.1) !important;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
-}
+/* Dashboard hero — decorative glows reduced in light mode; bg/border/shadow handled via --hero-* tokens */
 body.light-mode .hero::before,
 body.light-mode .hero::after { opacity: 0.4; }
 

@@ -297,7 +297,7 @@ border-radius: 20px
 - Raw hex values in component styles (use CSS vars)
 - `!important` chains for light mode (use `:is(body.light-mode .component)` specificity properly)
 - Emoji as icons anywhere structural
-- Hardcoded dark gradients on `.hero` overridden again in light mode (fix source, not override)
+- ~~Hardcoded dark gradients on `.hero` overridden again in light mode~~ — ✅ Fixed: `--hero-bg/border/shadow` tokens in `:root` (dark) + `body.light-mode` (light); theme pages set dark values via `:root` override; no `!important` needed
 - ~~Multiple `backdrop-filter: blur()` stacked in nested elements~~ — ✅ Fixed: removed from quiz-scenario, quiz-option, quiz-explanation, tryit-input
 
 ---

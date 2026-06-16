@@ -14,16 +14,21 @@
         radial-gradient(ellipse 100% 80% at 50% 50%, rgba(255,255,255,0.01) 0%, transparent 100%);
     }
 
-    /* Hero */
+    /* Hero — dark values set via :root tokens; light mode handled by body.light-mode in main.css */
+    :root {
+      --hero-bg:     linear-gradient(135deg, #120a2a 0%, #0d0520 60%, #080310 100%);
+      --hero-border: rgba(124,58,237,0.18);
+      --hero-shadow: 0 0 60px rgba(124,58,237,0.08), var(--shadow-glass);
+    }
     .hero {
-      background: linear-gradient(135deg, #120a2a 0%, #0d0520 60%, #080310 100%);
-      border: 1px solid rgba(124,58,237,0.18);
+      background: var(--hero-bg);
+      border: 1px solid var(--hero-border);
       border-radius: var(--radius-2xl);
       padding: var(--space-10) var(--space-12);
       margin-bottom: var(--space-8);
       position: relative;
       overflow: hidden;
-      box-shadow: 0 0 60px rgba(124,58,237,0.08), var(--shadow-glass);
+      box-shadow: var(--hero-shadow);
     }
     .hero::before {
       content: '';

@@ -19,18 +19,22 @@
       --cisdf-400: #06b6d4;
       --cisdf-300: #22d3ee;
       --cisdf-200: #67e8f9;
+      /* Hero dark values — light mode handled by body.light-mode in main.css */
+      --hero-bg:     linear-gradient(135deg, #021a20 0%, #021520 60%, #010c10 100%);
+      --hero-border: rgba(8,145,178,0.18);
+      --hero-shadow: 0 0 60px rgba(8,145,178,0.08), var(--shadow-glass);
     }
 
     /* Hero */
     .hero {
-      background: linear-gradient(135deg, #021a20 0%, #021520 60%, #010c10 100%);
-      border: 1px solid rgba(8,145,178,0.18);
+      background: var(--hero-bg);
+      border: 1px solid var(--hero-border);
       border-radius: var(--radius-2xl);
       padding: var(--space-10) var(--space-12);
       margin-bottom: var(--space-8);
       position: relative;
       overflow: hidden;
-      box-shadow: 0 0 60px rgba(8,145,178,0.08), var(--shadow-glass);
+      box-shadow: var(--hero-shadow);
     }
     .hero::before {
       content: '';
