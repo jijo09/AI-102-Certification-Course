@@ -682,7 +682,6 @@ body {
     radial-gradient(ellipse 80% 50% at 10% -10%, rgba(16,185,129,0.07) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 90% 110%, rgba(16,185,129,0.05) 0%, transparent 60%),
     radial-gradient(ellipse 100% 80% at 50% 50%, rgba(255,255,255,0.012) 0%, transparent 100%);
-  background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.7;
   min-height: 100vh;
@@ -933,14 +932,24 @@ pre code {
 }
 
 .sidebar-desktop-toggle::before {
-  content: '<<';
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: -0.12em;
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='11 17 6 12 11 7'/%3E%3Cpolyline points='18 17 13 12 18 7'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='11 17 6 12 11 7'/%3E%3Cpolyline points='18 17 13 12 18 7'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 body.sidebar-collapsed .sidebar-desktop-toggle::before {
-  content: '>>';
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='13 17 18 12 13 7'/%3E%3Cpolyline points='6 17 11 12 6 7'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='13 17 18 12 13 7'/%3E%3Cpolyline points='6 17 11 12 6 7'/%3E%3C/svg%3E");
 }
 
 /* ── Sidebar accordion groups ───────────────────────────────── */
@@ -1169,12 +1178,20 @@ button.sidebar-group-header {
 }
 
 .sidebar-settings-toggle::before {
-  content: '\2699';
-  font-size: 1rem;
-  width: 20px;
-  text-align: center;
+  content: '';
+  display: block;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
-  color: var(--text-secondary);
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .sidebar-settings-panel {
@@ -2829,9 +2846,8 @@ body.sidebar-collapsed .sidebar-group.all-done:not(.open) .sidebar-group-header:
 }
 
 body.sidebar-collapsed .sidebar-settings-toggle::before {
-  content: '\2699';
-  font-size: 1.1rem;
-  letter-spacing: 0;
+  width: 18px;
+  height: 18px;
 }
 
 body.sidebar-collapsed .sidebar-item:hover,
@@ -3033,7 +3049,6 @@ body.selector-active {
     radial-gradient(ellipse 80% 50% at 30% -10%, rgba(59,130,246,0.06) 0%, transparent 60%),
     radial-gradient(ellipse 80% 50% at 70% 110%, rgba(16,185,129,0.06) 0%, transparent 60%),
     radial-gradient(ellipse 100% 80% at 50% 50%, rgba(255,255,255,0.01) 0%, transparent 100%);
-  background-attachment: fixed;
 }
 
 /* ============================================================
@@ -3930,3 +3945,46 @@ body.selector-active {
   .wh-cta { justify-content: center; }
 }
 
+/* ── Skip Link ─────────────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: var(--space-2);
+  z-index: 9999;
+  padding: var(--space-3) var(--space-5);
+  background: var(--emerald-500);
+  color: #fff;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+.skip-link:focus {
+  left: var(--space-4);
+}
+
+/* ── Focus Visible ─────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--emerald-400);
+  outline-offset: 3px;
+}
+
+/* ── Reduced Motion ────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Dynamic Viewport Height ───────────────────────────────────────────── */
+@supports (min-height: 100dvh) {
+  .sidebar {
+    min-height: 100dvh;
+  }
+  body.selector-active .wh-wrap {
+    min-height: 100dvh;
+  }
+}
