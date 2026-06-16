@@ -171,6 +171,20 @@
   --blur-md:  16px;
   --blur-lg:  24px;
   --blur-xl:  40px;
+
+  /* Button adaptive tokens — override in body.light-mode */
+  --btn-primary-bg:        rgba(16,185,129,0.15);
+  --btn-primary-border:    rgba(16,185,129,0.35);
+  --btn-primary-color:     var(--emerald-300);
+  --btn-primary-bg-h:      rgba(16,185,129,0.22);
+  --btn-primary-border-h:  rgba(16,185,129,0.55);
+  --btn-primary-color-h:   var(--emerald-200);
+  --btn-success-bg:        rgba(16,185,129,0.2);
+  --btn-success-border:    rgba(16,185,129,0.4);
+  --btn-success-color:     var(--emerald-300);
+  --btn-success-bg-h:      rgba(16,185,129,0.3);
+  --btn-success-border-h:  rgba(16,185,129,0.6);
+  --btn-success-color-h:   var(--emerald-200);
 }
 
 /* ── Light Mode Override ── */
@@ -223,6 +237,20 @@ body.light-mode {
   --bg-elevated: rgba(0,0,0,0.03);
   --surface-2:   rgba(0,0,0,0.04);
 
+  /* Button tokens: solid emerald replaces invisible glass on white bg */
+  --btn-primary-bg:        #059669;
+  --btn-primary-border:    #047857;
+  --btn-primary-color:     #ffffff;
+  --btn-primary-bg-h:      #047857;
+  --btn-primary-border-h:  #065f46;
+  --btn-primary-color-h:   #ffffff;
+  --btn-success-bg:        #059669;
+  --btn-success-border:    #047857;
+  --btn-success-color:     #ffffff;
+  --btn-success-bg-h:      #047857;
+  --btn-success-border-h:  #065f46;
+  --btn-success-color-h:   #ffffff;
+
   background-image:
     radial-gradient(ellipse 80% 50% at 10% -10%, rgba(16,185,129,0.04) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 90% 110%, rgba(16,185,129,0.03) 0%, transparent 60%);
@@ -255,33 +283,6 @@ body.light-mode .progress-bar {
   border-color: rgba(0,0,0,0.08);
 }
 
-/* Ghost/secondary buttons: dark text so it's readable on light backgrounds */
-body.light-mode .btn-ghost,
-body.light-mode .btn-secondary {
-  color: #0f172a !important;
-}
-
-/* Primary/success buttons: solid emerald bg with white text (pale glass invisible on white) */
-body.light-mode .btn-primary {
-  background: #059669 !important;
-  border-color: #047857 !important;
-  color: #ffffff !important;
-}
-body.light-mode .btn-primary:hover:not(:disabled) {
-  background: #047857 !important;
-  border-color: #065f46 !important;
-  color: #ffffff !important;
-}
-body.light-mode .btn-success {
-  background: #059669 !important;
-  border-color: #047857 !important;
-  color: #ffffff !important;
-}
-body.light-mode .btn-success:hover:not(:disabled) {
-  background: #047857 !important;
-  border-color: #065f46 !important;
-  color: #ffffff !important;
-}
 
 /* Code blocks in light mode */
 body.light-mode pre {
@@ -305,16 +306,6 @@ body.light-mode .bg-card {
 
 /* ── Light mode element fixes ── */
 
-/* Utility text classes (global contrast fix uses !important, override here) */
-body.light-mode .text-primary  { color: #0f172a !important; }
-body.light-mode .text-secondary { color: #334155 !important; }
-
-/* Global contrast fix forces #fff on these — override for light mode */
-body.light-mode .part-btn,
-body.light-mode .topic-btn,
-body.light-mode .rating-btn,
-body.light-mode .part-btn-title,
-body.light-mode .topic-btn-title { color: var(--text-primary) !important; }
 
 /* Selector card button: glass bg + white text = invisible in light mode */
 body.light-mode .selector-card-btn {
@@ -652,12 +643,12 @@ body.light-mode .quiz-result-score {
 }
 
 /* ── Global Contrast Fixes ── */
-.btn, .part-btn, .topic-btn, .rating-btn, .part-btn-title, .topic-btn-title {
-  color: #ffffff !important;
+.part-btn, .topic-btn, .rating-btn, .part-btn-title, .topic-btn-title {
+  color: var(--text-primary);
 }
 
-.text-primary { color: #ffffff !important; }
-.text-secondary { color: #e2e8f0 !important; }
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
 
 body.sidebar-collapsed {
   --sidebar-width: var(--sidebar-collapsed-width);
@@ -1371,17 +1362,17 @@ button.sidebar-group-header {
   cursor: not-allowed;
 }
 
-/* Primary — emerald glass */
+/* Primary — adaptive (glass in dark, solid in light) */
 .btn-primary {
-  background: rgba(16,185,129,0.15);
-  border-color: rgba(16,185,129,0.35);
-  color: var(--emerald-300);
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+  color: var(--btn-primary-color);
   box-shadow: var(--shadow-btn);
 }
 .btn-primary:hover:not(:disabled) {
-  background: rgba(16,185,129,0.22);
-  border-color: rgba(16,185,129,0.55);
-  color: var(--emerald-200);
+  background: var(--btn-primary-bg-h);
+  border-color: var(--btn-primary-border-h);
+  color: var(--btn-primary-color-h);
   box-shadow: var(--shadow-btn-em);
 }
 
@@ -1411,17 +1402,17 @@ button.sidebar-group-header {
   color: var(--text-primary);
 }
 
-/* Success — emerald solid glass */
+/* Success — adaptive (glass in dark, solid in light) */
 .btn-success {
-  background: rgba(16,185,129,0.2);
-  border-color: rgba(16,185,129,0.4);
-  color: var(--emerald-300);
+  background: var(--btn-success-bg);
+  border-color: var(--btn-success-border);
+  color: var(--btn-success-color);
   box-shadow: var(--shadow-btn-em);
 }
 .btn-success:hover:not(:disabled) {
-  background: rgba(16,185,129,0.3);
-  border-color: rgba(16,185,129,0.6);
-  color: var(--emerald-200);
+  background: var(--btn-success-bg-h);
+  border-color: var(--btn-success-border-h);
+  color: var(--btn-success-color-h);
   box-shadow: 0 0 30px rgba(16,185,129,0.3), var(--shadow-btn);
 }
 
@@ -3943,6 +3934,17 @@ body.selector-active {
   .wh-meta-grid { grid-template-columns: repeat(2,1fr); }
   .wh-card-footer { flex-direction: column; align-items: stretch; gap: var(--space-4); }
   .wh-cta { justify-content: center; }
+}
+
+/* ── Screen-reader only utility ────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ── Skip Link ─────────────────────────────────────────────────────────── */

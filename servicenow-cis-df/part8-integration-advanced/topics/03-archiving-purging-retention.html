@@ -58,12 +58,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -244,6 +245,105 @@
           <li>Archive Rules = any table; CMDB Data Manager = CI tables only</li>
           <li>Purging from active table skips the archive safety window — avoid unless intentional</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p8-t3-quiz" id="cisdf-p8-t3-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Archiving, Purging &amp; Retention Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">An auditor requests access to an Incident that was closed 3 years ago. The instance has an Archive Rule that archived closed Incidents after 2 years. Can the auditor access the record?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">No — archived records are permanently deleted and cannot be accessed</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Yes — archived records are moved to an archive table (not deleted). They can be accessed via the archive table or by enabling "Show Archived" in list views, provided the auditor has appropriate access.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only if the record was manually exported before archiving</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Archived records can be accessed but only by users with the archive_admin role</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Archiving in ServiceNow is NOT deletion. Archived records are moved to a separate archive table (e.g., ar_incident for archived Incidents) but remain accessible. Users can access archived records by: (1) querying the archive table directly, or (2) using the "Show Archived" toggle in list views to include archived records in results. Archiving's purpose is to reduce the active table size for performance while retaining data for compliance and audit purposes. Purging is the irreversible operation — only purged records are truly gone. This distinction is a frequent exam trap.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is the key difference between CMDB Data Manager and Archive Rules for managing old CI records?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">CMDB Data Manager permanently deletes CIs; Archive Rules only move them to an archive table</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">CMDB Data Manager is purpose-built for CI tables (CMDB-specific operations like aging/retirement); Archive Rules apply to any ServiceNow table and are the general-purpose archiving mechanism</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Archive Rules require admin role; CMDB Data Manager can be used by any user</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">They are identical — CMDB Data Manager is just the UI for Archive Rules on CMDB tables</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> CMDB Data Manager is specifically designed for CI lifecycle management: aging (changing operational_status based on staleness), archiving CI records, and managing CI retirement workflow. It understands CMDB concepts like operational_status, last_discovered, and CI class hierarchy. Archive Rules are the general-purpose ServiceNow archiving framework that can be applied to any table (Incidents, Change Requests, user records, etc.) — they move old records to archive tables based on configurable conditions. For CI records, you can use either, but CMDB Data Manager provides CMDB-aware operations that Archive Rules don't have.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A compliance team requires that closed Change Requests be retained for 7 years but not appear in normal list views. They also want to ensure records cannot be accidentally deleted during the retention period. What is the recommended approach?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Archive records immediately after closing — archive table hides them from normal views and they remain retrievable for 7 years</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Configure an Archive Rule to archive closed Change Requests after 30 days. Configure a separate Purge Rule to permanently delete from the archive table after 7 years. This achieves: hidden from active views, retained and accessible, with guaranteed 7-year retention before deletion.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Purge closed Change Requests immediately — purging moves them to a long-term cold storage system</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Export closed Change Requests to a shared drive and delete them from ServiceNow</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The recommended two-stage pattern: (1) Archive — moves records to the archive table, hiding them from normal views while keeping them accessible for audit/retrieval. Active table performance improves. (2) Purge from archive after the retention period — permanently deletes records once the compliance retention window (7 years) has expired. This provides: invisible in daily operations (archived), accessible when needed (audit retrieval), and guaranteed deletion after retention period (purge rule). Purging immediately (C) would destroy records that may be needed for compliance. Exporting to a shared drive (D) creates data governance and security risks outside the platform.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An administrator accidentally runs a Purge Rule against the active Incident table, deleting 500 Incident records that were still within the active retention period. Can these records be recovered?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — ServiceNow maintains a 30-day recycle bin for purged records</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — purging is irreversible. Records can only be recovered from a database backup taken before the purge. This is why purging from the active table (bypassing archive) should be avoided.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Yes — raise a ServiceNow Support case and they can restore purged records within 7 days</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Partially — records purged within the last 24 hours can be restored via the Purge History log</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Purging in ServiceNow is permanently irreversible — there is no recycle bin, no undo, and no built-in recovery mechanism. Records can only be recovered from a database backup taken before the purge was executed. This is why the recommended pattern always archives first (safe, recoverable) and only purges from the archive after the retention period is confirmed expired. Running a Purge Rule directly against an active table skips the archive safety window and immediately destroys records. Before executing any purge operation, verify the scope carefully — purging cannot be undone.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

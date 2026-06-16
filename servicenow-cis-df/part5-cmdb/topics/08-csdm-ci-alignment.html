@@ -69,12 +69,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -546,6 +547,105 @@
           </div>
           <div class="cq-hint">💡 Who sets business_criticality and IT owner? Can automation do it?</div>
           <div class="cq-answer"><strong>Answer: B</strong> — Business Application fields like business_criticality and IT owner reflect business decisions that humans must make — Discovery cannot determine business criticality from a network scan. The correct approach is a governance initiative: identify Business Application owners, assign them responsibility for keeping their application's CSDM data current, use CMDB Health reporting to show gaps and progress, and potentially create tasks for owners with incomplete records. Option C (default "Medium") improves the score artificially without improving actual data quality — this defeats the purpose of CMDB Health.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p5-t8-quiz" id="cisdf-p5-t8-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">CSDM CI Alignment Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">Discovery patterns are creating server CIs in the cmdb_ci_computer class instead of cmdb_ci_linux_server. An admin manually reclassifies 2,000 CIs. The next morning, they are back in cmdb_ci_computer. What is the root cause?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Reclassification is temporary and always reverts after 24 hours</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The Discovery patterns still specify cmdb_ci_computer — IRE processed the next Discovery run and re-created CIs in the wrong class. Fix the pattern first, then reclassify.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">CMDB Health automatically reverts class changes to maintain data consistency</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE Identification Rules require cmdb_ci_computer for these CIs</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The Discovery patterns are still configured to send CI payloads with class=cmdb_ci_computer to IRE. When Discovery ran the next morning, it re-created or updated those CIs in cmdb_ci_computer. The manual reclassification was undone by the automated ingestion process. The correct sequence is: (1) fix the Discovery pattern to specify cmdb_ci_linux_server, (2) then reclassify the existing misaligned CIs. Without fixing the source, reclassification is perpetually undone by the next Discovery run.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">The CSDM Alignment Report shows 3,000 AWS EC2 instance CIs labeled as "Orphan CIs." The SGC is running successfully. What does "Orphan CI" mean in this context?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The EC2 CIs have duplicate records that need merging</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The EC2 CIs exist correctly in the CMDB but are not linked to any Application Service or Technical Service — they have no CSDM service layer connection</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The EC2 CIs are in the wrong CI class and need reclassification</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The EC2 CIs are missing identification attributes and can't be matched by IRE</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Orphan CIs are correctly classified and properly stored in the CMDB, but they have no upward connection to any CSDM service layer object (Application Service or Technical Service). The SGC is working fine — it created accurate Domain 4 CIs. The gap is in the CSDM model: no Service Mapping has run to link these EC2 instances to Application Services, and no manual service membership has been configured. High orphan count = low CSDM maturity.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">When creating a new Application Service record in cmdb_ci_service, which field is most critical for CSDM compliance to distinguish it from Business Services and Technical Services?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The name field (must follow CSDM naming convention)</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The service_type field (must be set to "Application Service" to distinguish from Business Service and Technical Service)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The operational_status field (must be set to Operational)</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The support_group field (must be assigned for CSDM compliance)</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> All three CSDM service types (Application Service, Business Service, Technical Service) use the same cmdb_ci_service table. The service_type field is the critical CSDM discriminator. Without service_type="Application Service," CSDM workflows, Change Impact Analysis, and CMDB Health checks cannot correctly classify the record. Leaving service_type blank means the record appears as uncategorized in CSDM reports and doesn't participate in CSDM impact traversal correctly.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An organization migrates an on-premises application to a cloud-native architecture. Which CSDM actions are needed to keep the model accurate?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Delete the old Business Application and create a new one for the cloud version</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Retire the old Application Service, configure SGC for cloud CIs, run Service Mapping to create a new Application Service for cloud, re-link the existing Business Application to the new Application Service, and retire old on-premises CIs</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Rename the old Application Service to include "Cloud" and manually update the CI list</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">No CSDM changes needed — the Business Application captures the business concept which doesn't change</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> A cloud migration requires layered CSDM updates. The Business Application (Domain 1) represents the business function — keep it, don't delete it. Retire the old Application Service (preserve history). New cloud CIs are created by the SGC (Domain 4). Service Mapping creates a new Application Service from cloud infrastructure (Domain 2). Finally, re-link the Business Application from the retired old Application Service to the new cloud one. This preserves business continuity while accurately reflecting the new technical implementation.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
         </div>
       </div>
 

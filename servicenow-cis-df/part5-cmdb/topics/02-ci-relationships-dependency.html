@@ -57,12 +57,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -302,6 +303,105 @@
           <li>Relationship type is in <code>cmdb_rel_type</code> — has outbound and inbound descriptors</li>
           <li>Map quality depends entirely on relationship completeness — missing relationships = disconnected nodes</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p5-t2-quiz" id="cisdf-p5-t2-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">CI Relationships &amp; Dependency Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A server CI has its assigned_to field pointing to a technician's User record. Will this relationship appear in the Dependency View?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — all relationships between CI records appear in Dependency View</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — Dependency View only shows relationships stored in cmdb_rel_ci; reference fields like assigned_to do not appear</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Yes — but only if the technician also has a CI record in the CMDB</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">No — Dependency View only shows hardware CIs, not relationships to users</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Dependency View reads exclusively from the cmdb_rel_ci table (the Many-to-Many relationship table with parent, child, and type columns). Reference fields (like assigned_to, managed_by, owned_by) are regular database foreign keys but are NOT stored in cmdb_rel_ci. To show a "CI managed by person" relationship in Dependency View, you must create a row in cmdb_rel_ci — a reference field alone is insufficient.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">In cmdb_rel_ci, a relationship is recorded as: parent=Application CI, child=Server CI, type="Runs on::Hosted by". Which CI "does" the relationship and in which direction does impact propagate?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Server (parent) hosts the Application (child); impact goes from Application up to Server</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The Application (parent) "Runs on" the Server (child); if the Server fails, impact propagates downstream to the Application</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Both CIs are equally impacted regardless of direction</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Server (child) is the impacted party; impact never propagates to the parent</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> In cmdb_rel_ci, the parent CI "does" the relationship to the child. The Application (parent) "Runs on" the Server (child). Impact propagates downstream — from what a CI depends on, up to the CI itself. If the Server (child, the dependency) fails, the Application (parent, which runs on it) is impacted. Think: root cause is upstream (at the dependency); impact flows downstream to everything depending on it.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">The Unified Map for the "HR Portal" Business Service shows isolated CI nodes with no connections. What is the most likely cause?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Unified Map feature requires a separate license that isn't installed</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Service Mapping has not run for the HR Portal Application Service — no cmdb_rel_ci relationship records connect the component CIs</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The HR Portal CIs are in the wrong CI class and can't be included in Unified Map</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Unified Map only shows network device relationships, not server relationships</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The Unified Map's quality depends entirely on the completeness of cmdb_rel_ci relationship records. Isolated nodes with no connections indicate that Service Mapping hasn't populated the application service relationships. When Service Mapping runs for the HR Portal Application Service, it creates cmdb_rel_ci records linking web servers, app servers, and databases — these then appear as connections in the Unified Map.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An administrator wants to model that a Virtual Machine is hosted on a physical Hypervisor server. Which relationship type from cmdb_rel_type should they use?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Depends on::Used by (VM depends on Hypervisor)</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Virtualized by::Virtualizes (VM is virtualized by the Hypervisor)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Connected by::Connects (VM is connected to the Hypervisor)</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Members of::Contains (VM is a member of the Hypervisor)</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> "Virtualized by::Virtualizes" is the standard CMDB relationship type for the VM-to-Hypervisor relationship. The VM (parent) is "Virtualized by" the Hypervisor (child). This relationship type accurately describes the virtualization hosting relationship. "Depends on" (A) is more generic; "Members of" (D) is for cluster membership. Using the correct relationship type ensures proper display in Dependency View and correct impact analysis behavior.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

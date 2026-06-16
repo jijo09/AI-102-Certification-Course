@@ -64,12 +64,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -467,6 +468,105 @@
           <li>Merge re-points all references from loser to winner — does NOT delete referenced records</li>
           <li>IRE tables: <code>cmdb_identifier</code>, <code>cmdb_identifier_entry</code>, <code>cmdb_reconciliation_rule</code></li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p5-t3-quiz" id="cisdf-p5-t3-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Discovery &amp; IRE Deep Dive Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">An Identification Entry lists "name" and "ip_address" as its attributes. A payload arrives with name="WEB-01" but no ip_address field. What does IRE do with this entry?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">IRE matches using name only since it's available</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IRE skips this entry entirely because all attributes must be present (AND logic); it tries the next Identification Entry in priority order</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">IRE creates a new CI since no complete match is possible</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE queries the CMDB for all CIs with name="WEB-01" and uses the first result</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Identification Entry attributes use AND logic — ALL fields in the entry must be present in the payload for the entry to even attempt a match. If ip_address is missing, the entire entry is skipped. IRE then tries the next entry (lower priority, higher number) in sequence. This is a common cause of duplicate CI creation: Discovery doesn't collect a key identifier field, so IRE skips the matching entry and creates a new record every run.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A Transform Map writes CI data directly to cmdb_ci_server (the CMDB table). What CMDB quality risk does this create compared to using a Service Graph Connector?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The records will be placed in a staging table and require manual approval</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Direct table writes bypass IRE — no duplicate detection, no reconciliation rules honored, and last-write-wins for all fields</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Transform Maps can only create records, not update them</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The records are automatically flagged as low-quality and excluded from reports</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Direct Import Set writes to CMDB tables bypass IRE entirely — no Identification, no Reconciliation, no deduplication. This means the import can create duplicate CIs and overwrite accurate Discovery-sourced data with stale spreadsheet values. Service Graph Connectors (and the IRE API in Transform scripts) route through IRE so all three quality phases execute. This is why ServiceNow recommends SGC over direct table imports for CMDB data.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Discovery's MID Server executes probes. What is the role of Sensors in the Discovery → CMDB flow?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Sensors scan IP ranges to identify live devices (horizontal Discovery)</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Sensors are MID Server hardware components that physically detect network traffic</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Sensors process raw probe output and transform it into structured CI payloads that IRE can consume</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Sensors validate CI payloads against CMDB Health rules before IRE processes them</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> In the Discovery flow, Probes collect raw data from devices (SSH output, WMI registry data, SNMP response). Sensors then process that raw output and transform it into structured CI payloads — structured objects with CI class, field values, and identification attributes that IRE can understand. The flow is: IP Range → Horizontal Discovery → Probes (collect raw data) → Sensors (transform to CI payload) → IRE (identify, reconcile) → CMDB.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Two server CIs are merged in the CMDB. CI-B is the duplicate (loser). Incident INC0055 was linked to CI-B. What happens to INC0055 after the merge?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">INC0055 is automatically closed because its CI was retired</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">INC0055 is deleted along with CI-B to keep the CMDB clean</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">INC0055's CI link is re-pointed from CI-B to CI-A (the master) — the incident itself is unchanged</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">INC0055 retains the link to CI-B (now retired) so the audit history is preserved</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> When CIs are merged, ServiceNow re-points all references from the loser CI (CI-B) to the winner CI (CI-A). INC0055's configuration item field is updated to point to CI-A. The incident itself is not deleted, closed, or modified in any other way — only the CI link is updated. This is by design: the merge is a pointer update operation, not a data deletion. All related records (incidents, changes, relationships) are preserved and re-linked to the master.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

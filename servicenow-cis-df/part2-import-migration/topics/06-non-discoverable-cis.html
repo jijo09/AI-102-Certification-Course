@@ -64,12 +64,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -750,6 +751,97 @@
           </div>
           <div class="cq-hint">💡 This is a license agreement, not an installed software instance or a business application.</div>
           <div class="cq-answer"><strong>Answer: C</strong> — <code>alm_license</code> is the Software Asset Management table for license entitlement records. <code>cmdb_ci_software</code> tracks installed software instances (which Discovery can find on servers). A license record is the legal/contractual entitlement — it's a non-discoverable CI in the SAM module tables, not the core CMDB hardware/software tables.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p2-t6-quiz" id="cisdf-p2-t6-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Non-Discoverable CIs Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A company tracks physical power distribution units (PDUs) in their data center. These cannot be discovered automatically. What is the biggest ongoing data quality risk for these CIs?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">IRE will create duplicate records every time Discovery runs</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Staleness — without automatic refresh, the CI data will drift from reality unless manually maintained</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The CI will be automatically deleted by CMDB Health rules</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The CI cannot participate in impact analysis without a Discovery source</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Staleness is the biggest risk for non-discoverable CIs. Unlike discovered CIs that are refreshed automatically, non-discoverable CIs have no automatic update mechanism. They require Change Management integration and periodic audits to stay current. A is wrong — no Discovery means no IRE processing for these CIs. C is wrong — Health rules flag issues but don't auto-delete. D is incorrect — manual CIs can have relationships and participate in impact analysis.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A team needs to bulk-load 500 physical cable CIs into CMDB. What is the recommended approach?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Manually create each CI through the ServiceNow form one at a time</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Use an Import Set with a Transform Map targeting the correct CI class table</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Ask Discovery team to add cables to the agentless scan patterns</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Configure a Service Graph Connector for physical cable inventory</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> For bulk-loading non-discoverable CIs, Import Set with a Transform Map is the standard approach. It allows loading from a spreadsheet or CSV, applying transformation logic, and writing to the correct CI class table. A is impractical at 500 records. C is wrong — cables cannot be discovered by network scanning. D is wrong — SGC is for API-accessible sources, not physical cable inventory.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A non-discoverable CI for a business application is added to CMDB without any relationships. What is the primary consequence?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The CI will fail CMDB Health completeness checks</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The CI adds nothing to impact analysis — isolated nodes have no downstream or upstream relationships to traverse</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The CI cannot be viewed in CMDB Workspace</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The CI will be automatically retired after 90 days</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> A CI without relationships is an isolated node in the CMDB graph. Impact analysis, change impact, and service dependency views all rely on the <code>cmdb_rel_ci</code> relationship chain. A CI with no relationships contributes nothing to these use cases. A may also be true but is a secondary concern. C and D are incorrect.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A company has SCADA/OT systems that cannot be scanned by Discovery. What is the recommended approach for getting these CIs into CMDB?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Deploy a MID Server inside the OT network segment to scan them</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Use vendor CSV exports loaded via Import Sets, or passive-mode Discovery</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Install Agent Client Collector on each SCADA device</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">SCADA systems cannot be tracked in CMDB</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> SCADA/OT systems cannot be actively scanned due to the risk of disrupting industrial processes. The recommended approaches are vendor CSV exports loaded via Import Sets, or passive-mode Discovery that listens without sending active probes. A would risk disrupting OT systems. C is not feasible on embedded OT devices. D is wrong — they can and should be tracked, just using safe ingestion methods.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
         </div>
       </div>
 

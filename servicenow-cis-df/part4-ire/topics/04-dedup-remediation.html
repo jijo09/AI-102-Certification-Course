@@ -69,12 +69,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -658,6 +659,105 @@
           </div>
           <div class="cq-hint">💡 What happens if the root cause is not fixed before running mass remediation? And what safeguard is needed before bulk automation?</div>
           <div class="cq-answer"><strong>Answer: B</strong> — Two critical pre-conditions: First, confirm the root cause (the broken Identification Rule or integration) is already fixed — otherwise Discovery will recreate all 5,000 duplicates within 24 hours of the merge. Second, test the Remediation Playbook on a small pilot set to verify it correctly identifies masters, merges fields, and re-points relationships before running it on 5,000 CIs. A mass merge that incorrectly designates masters or breaks relationship links is extremely difficult to undo and can cascade into reporting and incident management problems.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p4-t4-quiz" id="cisdf-p4-t4-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Dedup &amp; Remediation Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">An administrator fixes a broken Identification Rule that caused Discovery to create thousands of duplicate server CIs. What is the correct next step to clean up existing duplicates?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Re-run Discovery — it will automatically detect and merge duplicates</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Run an on-demand Deduplication Job scoped to the affected CI class, then apply a Remediation Playbook to merge the detected pairs</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Export all CIs to a spreadsheet, manually identify duplicates, and import the cleaned data</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Delete all server CIs and let Discovery recreate them from scratch</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Fixing the Identification Rule prevents new duplicates but doesn't clean up existing ones. The Deduplication Job scans the CMDB for existing duplicate pairs and creates cmdb_dedup events. Then the Remediation Playbook (configured to Merge) automatically resolves them — copying data from duplicates to the master CI and re-pointing all relationships before retiring the duplicates. Re-running Discovery (A) just updates/creates CIs; it won't merge existing duplicates.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">The CMDB Dedup dashboard shows 500 duplicate events for network adapters. Investigation reveals all virtual machine adapters share the placeholder MAC address "00:00:00:00:00:00." The Identification Rule uses MAC address. What is the correct response?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Run the Remediation Playbook to merge all 500 pairs into one adapter CI</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Dismiss all 500 events as false positives, then fix the Identification Rule to exclude the placeholder MAC value</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Delete all network adapter CIs with the placeholder MAC address</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Switch the Identification Rule to use IP address instead of MAC address</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> These 500 adapters are different real-world network interfaces that happen to share a meaningless placeholder MAC value — they are NOT duplicates. Merging them (A) would catastrophically destroy 500 valid CI records. The correct steps: dismiss all 500 events (false positives), then fix the Identification Rule to skip identification when MAC = "00:00:00:00:00:00" or add additional qualifying attributes. Deleting the CIs (C) removes legitimate records.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">When merging two duplicate server CIs, which factor is most important in determining which CI should be the master?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The CI with the most complete field data (fewest empty fields)</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The older CI because it was created first</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The CI with more existing relationships (incidents, changes, service maps) — these must be preserved on the surviving CI</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The CI sourced from Discovery since Discovery is most authoritative</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Relationships are the most critical consideration when choosing the master CI. The master CI survives the merge; all relationships from the duplicate are re-pointed to the master. If a CI has 20 open incidents, 5 change requests, and 3 service map relationships, it must be the master to preserve those links naturally. The duplicate's field data can be merged into the master — but reassigning relationships correctly is the harder part and the primary risk in deduplication.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">After merging two duplicate CIs, incident INC0099 that was linked to the duplicate (now retired) CI no longer shows in the CI's related records. What went wrong?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Incidents are automatically closed when their associated CI is retired</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The Remediation Playbook was not configured to re-point relationships from the duplicate to the master before retirement</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only active CIs can be associated with incidents; retired CIs lose all links automatically</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The merge deleted the incident association to prevent data conflicts</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The Remediation Playbook must re-point all relationships from the duplicate to the master BEFORE retiring the duplicate. If the playbook wasn't configured to handle incident relationships (task_ci table), the link to the duplicate CI was broken when the CI was retired. The fix: configure the Remediation Playbook to include all relationship types including incidents and change requests. The broken link to INC0099 must be manually re-established on the master CI.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
         </div>
       </div>
 

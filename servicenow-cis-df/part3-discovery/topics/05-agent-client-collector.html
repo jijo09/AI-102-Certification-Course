@@ -69,12 +69,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -649,6 +650,105 @@
           </div>
           <div class="cq-hint">💡 Can you install a software agent on a Cisco IOS switch?</div>
           <div class="cq-answer"><strong>Answer: B</strong> — Network devices like Cisco switches and routers run specialized firmware (IOS, Junos, etc.) that doesn't support installing third-party software agents. ACC requires an installable agent, which is not possible on network hardware. For network devices, agentless Discovery using SNMP is the correct approach — it queries the device externally without requiring any software installation.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p3-t5-quiz" id="cisdf-p3-t5-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Agent Client Collector Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A security team refuses to open inbound SSH (port 22) from the MID Server to production Linux servers. Which approach lets ServiceNow discover these servers without requiring inbound ports?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Configure Discovery to use port 443 as an SSH alternative</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Deploy the Agent Client Collector (ACC) — it makes outbound HTTPS connections only, requiring no inbound ports on the server</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Use Service Graph Connectors to reach the servers via the cloud API</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Enable SNMP on the Linux servers so Discovery can use port 161 instead</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> ACC is specifically designed for environments where inbound connections are restricted. The agent installed on the server makes outbound HTTPS connections to ServiceNow — the server doesn't need any inbound ports opened. This is one of ACC's primary advantages over agentless Discovery. SNMP (D) still requires inbound port 161 on the device; it doesn't solve the security team's concern.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Company-issued laptops roam between office networks, home networks, and VPN. Agentless Discovery misses many of them because their IPs change constantly. What is the best solution?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Add all possible home network IP ranges to Discovery Schedules</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Deploy ACC agents on all laptops — the agent reports to ServiceNow from any network location via outbound HTTPS</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Use a Service Graph Connector for the endpoint management platform</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Require laptops to VPN before Discovery runs each night</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> ACC is purpose-built for roaming endpoints. The agent on the laptop makes outbound connections from wherever the device is — home, office, or VPN. It consistently reports to ServiceNow regardless of current IP or network location. Option A is impractical (home networks use millions of possible IP ranges). Option C could work as a supplement but doesn't provide the real-time, device-level detail that ACC provides.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is the difference between ACC-D and ACC-M, and can they run together?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">ACC-D runs on Linux; ACC-M runs on Windows. They cannot run together on the same server.</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">ACC-D collects CI configuration data for the CMDB; ACC-M collects real-time performance metrics for monitoring. Both can run simultaneously on the same server.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">ACC-D requires a MID Server relay; ACC-M connects directly to ServiceNow. They cannot run together.</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">ACC-D is deprecated and replaced by ACC-M. They are not used together.</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> ACC-D (Discovery) collects configuration inventory data — hardware, OS, installed software, network interfaces — and populates the CMDB through IRE. ACC-M (Monitoring) collects real-time performance metrics (CPU, memory, disk, network throughput) for ITOM Event Management and AIOps. Both editions can run simultaneously on the same server, giving ServiceNow both CI configuration and live health data from the same endpoint.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">After deploying ACC agents to 200 new servers, the agents show as "connected" in the ACC management console but no new CI records appear in the CMDB. What is the most likely cause?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The ACC agents need SSH credentials configured before they can collect data</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The ACC agents are in a "pending approval" state and must be approved in ServiceNow before data flows</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The MID Server is offline so ACC data cannot reach ServiceNow</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">ACC data goes into Import Sets which need Transform Maps configured before processing</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> When ACC agents register with ServiceNow for the first time, they enter a "pending approval" state. Data does not flow until an administrator approves each agent (or auto-approval is enabled). This is analogous to MID Server validation. Check the ACC Agent records in ServiceNow and approve them. ACC does not use SSH credentials (A) — the agent is pre-authenticated with ServiceNow's identity. ACC data does not use Import Sets (D).</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
         </div>
       </div>
 

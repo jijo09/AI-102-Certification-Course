@@ -52,12 +52,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -193,6 +194,105 @@
           <li>Business Rules = synchronous, server-side JS; Flow Designer = async, no-code</li>
           <li>Legacy Workflows are being replaced by Flow Designer — for new builds, use Flow Designer</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p8-t2-quiz" id="cisdf-p8-t2-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">IntegrationHub &amp; Flow Designer Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A business analyst needs to create an automated process that: when an Incident is resolved (trigger), sends a Slack notification to the assignment group channel (action), and creates a follow-up task (action). No coding experience. Which tool should be used?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Business Rule — the most reliable server-side automation tool</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Flow Designer with IntegrationHub Slack Spoke — no-code visual Trigger → Action workflow using a pre-built Slack integration action</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Client Script — runs when the form is saved, triggering both actions</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">REST API — the analyst would call the Slack API and ServiceNow Task API directly</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Flow Designer is specifically designed for no-code/low-code automation with a visual interface: define a Trigger (Incident state changes to Resolved), add Actions (Slack notification via IntegrationHub Slack Spoke, Create Task record). IntegrationHub Spokes provide pre-built Actions for external systems like Slack, Jira, and ServiceNow itself. No coding required. Business Rules (A) require JavaScript. Client Scripts (C) are browser-side and only run during form interactions, not suitable for reliable server-side automation. REST API (D) requires coding and infrastructure, not a no-code tool.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A field validation that must block an Incident from saving when impact=1 AND urgency=3 needs to be implemented. Should this use a Business Rule or Flow Designer?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Flow Designer — it supports blocking save operations through its Condition engine</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Business Rule (Before timing) — synchronous execution before the database write allows setAbortAction(true) to block the save. Flow Designer runs asynchronously and cannot block saves.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Either works — both can block saves with equivalent timing</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">UI Policy — the client-side validation blocks the save before it reaches the server</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Business Rules with Before timing execute synchronously before the record is committed to the database. This allows calling current.setAbortAction(true) to prevent the save. Flow Designer is asynchronous by default — it fires after the record is saved, so it cannot block the save operation. For blocking operations (field validation that prevents saves), Business Rule Before timing is the only correct choice. UI Policies (D) block form submissions client-side but are bypassed by API calls. For server-enforced save blocking, Before Business Rule is required.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An IntegrationHub Spoke for Jira requires a separate license. A team builds a Flow Designer flow that calls the Jira REST API directly using the HTTP Action instead. What is the implication?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The HTTP Action approach is not supported and will be blocked by ServiceNow</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The HTTP Action approach works but requires configuring the Jira API calls manually (authentication, endpoint, payload mapping). The Spoke provides pre-built, tested Actions for common Jira operations — reducing implementation effort and maintenance burden.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">HTTP Actions in Flow Designer always require admin role; Spokes can be used by any user</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IntegrationHub Spokes always outperform HTTP Actions in execution speed</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> IntegrationHub Spokes are pre-built, tested collections of Actions for specific external systems — they provide "Create Jira Issue," "Update Jira Status," etc. as ready-to-use Actions without needing to configure API endpoints, authentication, or request/response mapping. Using the generic HTTP Action instead is functionally equivalent but requires manually setting up everything the Spoke would handle automatically. The tradeoff: Spoke requires a license but saves significant implementation and maintenance effort; HTTP Action approach is free but requires more technical configuration work. Both are valid approaches depending on licensing and technical resources.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An organization is updating existing automation that currently uses Legacy Workflows. New automation requirements are being added. Should they extend the Legacy Workflow or build new automation?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Extend the Legacy Workflow — consistency with existing automation is more important</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Build new automation in Flow Designer. Legacy Workflows are deprecated; new builds should use Flow Designer. Over time, existing Legacy Workflows should be migrated to Flow Designer.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Both Workflow and Flow Designer run equally well for all use cases — choose based on team preference</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Flow Designer cannot handle complex multi-step automation — Legacy Workflow is still needed for sophisticated processes</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> ServiceNow's official guidance is that Legacy Workflows are being replaced by Flow Designer. For new automation requirements, Flow Designer should always be used. Legacy Workflows are still supported for backward compatibility but receive no new investment. Adding new automation to a Legacy Workflow increases technical debt and extends the migration surface. The recommended approach: build all new automation in Flow Designer, and plan to migrate existing Legacy Workflows to Flow Designer incrementally. Flow Designer supports all the capabilities needed for complex multi-step automation (D is incorrect).</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

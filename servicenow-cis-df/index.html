@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -292,6 +292,7 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <div id="sidebar-overlay"></div>
 
@@ -299,10 +300,10 @@
 
   <div id="app-sidebar"></div>
 
-  <main class="main-content">
+  <main class="main-content" id="main-content">
 
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span style="color:var(--text-muted);font-size:0.75rem;margin:0 4px">›</span>
@@ -377,7 +378,9 @@
       <div class="parts-grid">
 
         <!-- Part 1 -->
-        <div onclick="window.location.assign('part1-data-model/index.html')" class="part-card" style="--part-color:var(--part1-color)">
+        <div onclick="window.location.assign('part1-data-model/index.html')" class="part-card"
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part1-data-model/index.html')"
+          style="--part-color:var(--part1-color)">
           <div class="part-card-head">
             <div class="part-icon">🏗️</div>
             <span class="part-weight-badge">Foundation</span>
@@ -415,7 +418,9 @@
         </div>
 
         <!-- Part 2 -->
-        <div onclick="window.location.assign('part2-import-migration/index.html')" class="part-card" style="--part-color:var(--part2-color)">
+        <div onclick="window.location.assign('part2-import-migration/index.html')" class="part-card"
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part2-import-migration/index.html')"
+          style="--part-color:var(--part2-color)">
           <div class="part-card-head">
             <div class="part-icon">📥</div>
             <span class="part-weight-badge">INGEST 19%</span>
@@ -453,7 +458,9 @@
         </div>
 
         <!-- Part 3 — Discovery (NEW) -->
-        <div onclick="window.location.assign('part3-discovery/index.html')" class="part-card" style="--part-color:var(--part3-color)">
+        <div onclick="window.location.assign('part3-discovery/index.html')" class="part-card"
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part3-discovery/index.html')"
+          style="--part-color:var(--part3-color)">
           <div class="part-card-head">
             <div class="part-icon">🔭</div>
             <span class="part-weight-badge">INGEST 19%</span>
@@ -495,7 +502,9 @@
         </div>
 
         <!-- Part 4 — IRE (NEW) -->
-        <div onclick="window.location.assign('part4-ire/index.html')" class="part-card" style="--part-color:var(--part4-color)">
+        <div onclick="window.location.assign('part4-ire/index.html')" class="part-card"
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part4-ire/index.html')"
+          style="--part-color:var(--part4-color)">
           <div class="part-card-head">
             <div class="part-icon">⚙️</div>
             <span class="part-weight-badge">INGEST 19%</span>
@@ -533,7 +542,9 @@
         </div>
 
         <!-- Part 5 — CMDB & CSDM -->
-        <div onclick="window.location.assign('part5-cmdb/index.html')" class="part-card" style="--part-color:var(--part5-color)">
+        <div onclick="window.location.assign('part5-cmdb/index.html')" class="part-card"
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part5-cmdb/index.html')"
+          style="--part-color:var(--part5-color)">
           <div class="part-card-head">
             <div class="part-icon">🕸️</div>
             <span class="part-weight-badge">CONFIG+CSDM 26%</span>
@@ -571,7 +582,9 @@
         </div>
 
         <!-- Part 6 — Governance -->
-        <div onclick="window.location.assign('part6-governance/index.html')" class="part-card" style="--part-color:var(--part6-color)">
+        <div onclick="window.location.assign('part6-governance/index.html')" class="part-card"
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part6-governance/index.html')"
+          style="--part-color:var(--part6-color)">
           <div class="part-card-head">
             <div class="part-icon">🏛️</div>
             <span class="part-weight-badge">GOVERN 35% ★</span>
@@ -609,7 +622,9 @@
         </div>
 
         <!-- Part 7 — Reporting & CMDB Workspace -->
-        <div onclick="window.location.assign('part7-reporting-analytics/index.html')" class="part-card" style="--part-color:var(--part5-color)">
+        <div onclick="window.location.assign('part7-reporting-analytics/index.html')" class="part-card"
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part7-reporting-analytics/index.html')"
+          style="--part-color:var(--part5-color)">
           <div class="part-card-head">
             <div class="part-icon">📊</div>
             <span class="part-weight-badge">INSIGHT 20%</span>
@@ -647,7 +662,9 @@
         </div>
 
         <!-- Part 8 — Integration & Advanced -->
-        <div onclick="window.location.assign('part8-integration-advanced/index.html')" class="part-card" style="--part-color:var(--part6-color)">
+        <div onclick="window.location.assign('part8-integration-advanced/index.html')" class="part-card"
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part8-integration-advanced/index.html')"
+          style="--part-color:var(--part6-color)">
           <div class="part-card-head">
             <div class="part-icon">🔌</div>
             <span class="part-weight-badge">Advanced</span>
@@ -715,32 +732,32 @@
       <!-- ── STUDY RESOURCES ── -->
       <h2 style="margin-bottom:var(--space-5)">Official Study Resources</h2>
       <div class="resources-grid">
-        <a href="https://nowlearning.servicenow.com/" target="_blank" class="resource-card">
+        <a href="https://nowlearning.servicenow.com/" target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">🎓</div>
           <div class="resource-title">Now Learning</div>
           <div class="resource-desc">Official ServiceNow CIS-DF training path and learning plans.</div>
         </a>
-        <a href="https://developer.servicenow.com/" target="_blank" class="resource-card">
+        <a href="https://developer.servicenow.com/" target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">🛠️</div>
           <div class="resource-title">Developer Portal</div>
           <div class="resource-desc">Free Personal Developer Instance to practice Import Sets and CMDB.</div>
         </a>
-        <a href="https://docs.servicenow.com/" target="_blank" class="resource-card">
+        <a href="https://docs.servicenow.com/" target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">📖</div>
           <div class="resource-title">Product Docs</div>
           <div class="resource-desc">Official documentation: Import Sets, CMDB Health, Data Policies.</div>
         </a>
-        <a href="https://www.servicenow.com/services/training-and-certification/certified-implementation-specialist-data-foundations.html" target="_blank" class="resource-card">
+        <a href="https://www.servicenow.com/services/training-and-certification/certified-implementation-specialist-data-foundations.html" target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">📋</div>
           <div class="resource-title">Exam Spec</div>
           <div class="resource-desc">Official CIS-DF exam blueprint — domain weights and objectives.</div>
         </a>
-        <a href="https://www.servicenow.com/community/certification-and-training/ct-p/CertificationandTraining" target="_blank" class="resource-card">
+        <a href="https://www.servicenow.com/community/certification-and-training/ct-p/CertificationandTraining" target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">🏆</div>
           <div class="resource-title">Cert Community</div>
           <div class="resource-desc">ServiceNow community forums for CIS-DF study tips and discussion.</div>
         </a>
-        <a href="https://developer.servicenow.com/dev.do#!/learn/learning-plans" target="_blank" class="resource-card">
+        <a href="https://developer.servicenow.com/dev.do#!/learn/learning-plans" target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">🚀</div>
           <div class="resource-title">Learning Plans</div>
           <div class="resource-desc">Structured developer learning plans covering Data Foundations topics.</div>
@@ -789,7 +806,7 @@
       <div style="text-align:center;padding:var(--space-8) 0;color:var(--text-muted);font-size:0.72rem;border-top:1px solid var(--border-subtle);">
         ServiceNow CIS-DF Study Hub · Aligned to official exam blueprint ·
         <a href="https://www.servicenow.com/services/training-and-certification/certified-implementation-specialist-data-foundations.html"
-           target="_blank" style="color:var(--cisdf-300)">Source</a>
+           target="_blank" rel="noopener noreferrer" style="color:var(--cisdf-300)">Source</a>
       </div>
 
     </div><!-- /page-content -->

@@ -52,12 +52,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -221,6 +222,105 @@
           <li>Database Views are read-only — cannot be used for inserts, updates, or import targets</li>
           <li>Use Database Views when dot-walking doesn't cover the join you need, or multiple writers need the same cross-table view</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p7-t2-quiz" id="cisdf-p7-t2-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Database Views in Reporting Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A report needs to show Incident records alongside the CI class name and support_group of the affected CI, but the CI data is in a separate CMDB table. What is the simplest approach?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Create a Database View joining Incident and cmdb_ci tables</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Use dot-walking in the Report Builder: cmdb_ci.sys_class_name and cmdb_ci.support_group traverse the reference field from incident.cmdb_ci to the CI record</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Export both tables to Excel and use VLOOKUP to join them</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Create a separate report for CIs and manually correlate with the Incident report</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> When a report needs fields from a referenced table that's only one level away (incident.cmdb_ci → cmdb_ci.sys_class_name), dot-walking is simpler and more maintainable than creating a Database View. In the Report Builder, you can select "cmdb_ci.sys_class_name" and "cmdb_ci.support_group" directly as fields, and ServiceNow automatically traverses the reference field. Database Views (A) are needed when dot-walking isn't sufficient — for example, many-to-many joins, left joins showing all records even without a match, or complex multi-table joins that dot-walking can't express.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A Database View is created joining the Incident table (left) with the CMDB CI table using an Inner Join on the cmdb_ci field. Which Incident records appear in reports built on this view?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">All Incidents, regardless of whether they have a CI associated</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Only Incidents where the cmdb_ci field is populated with a matching CI record — Incidents without a CI are excluded by the Inner Join</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only CI records that have associated Incidents</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">All Incidents, but those without a CI show null values for CI fields</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> An Inner Join only returns rows where there is a matching record in BOTH tables. For the Incident-CI Inner Join: only Incidents that have a cmdb_ci value that matches an existing CI record appear. Incidents where cmdb_ci is null, or where the referenced CI has been deleted, are excluded entirely. If you need all Incidents regardless of CI association (with null CI fields for those without), you need a Left Outer Join — this includes all left-table (Incident) records, with null values for right-table (CI) fields when no match exists. Option D correctly describes Left Join behavior, not Inner Join.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An administrator wants to use a Database View as the target for an Import Set to bulk-update CMDB CI records. What will happen?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It will work as long as the Database View includes the cmdb_ci table</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Database Views are read-only — they cannot be used as import targets, for data inserts, or updates. The import will fail.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It will work but updates will only affect the left table in the join</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Database Views support inserts but not updates</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Database Views in ServiceNow are strictly read-only virtual constructs — they represent a joined view of data from multiple tables for querying and reporting purposes only. They cannot accept inserts, updates, or deletes. An Import Set requires a writable target table; using a Database View as the target will fail. To bulk-update CMDB records via Import Set, use the actual underlying table (e.g., cmdb_ci_server) as the target, with IRE handling identification and reconciliation.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">When should a Database View be used instead of dot-walking in a report?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Always — Database Views are more efficient than dot-walking</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Database Views are appropriate when: the join cannot be expressed via dot-walking (e.g., many-to-many, left outer join needed), the same joined view will be used by multiple reports, or the relationship between tables is not a direct reference field</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Database Views should only be used for reports with more than 1,000 records</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Database Views should be used when ACL enforcement needs to be bypassed</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Database Views have specific use cases where dot-walking falls short: (1) Left outer joins — needed when you want all records from the left table even without a match in the right table; dot-walking only does inner joins. (2) Many-to-many joins — when multiple right-table records match a single left-table record (e.g., one Incident linked to multiple CIs). (3) Reusable joins — when many reports need the same cross-table join, creating one Database View is more maintainable than configuring dot-walk paths in every report independently. For simple one-level reference field access, dot-walking is simpler and should be preferred.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

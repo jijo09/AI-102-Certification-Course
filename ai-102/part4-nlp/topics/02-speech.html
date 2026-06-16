@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,12 +10,13 @@
   </style>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sbo"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sbo').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb"><a href="../../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a><span class="sep">›</span><a href="../index.html" style="color:var(--text-muted);text-decoration:none">Part 4</a><span class="sep">›</span><span class="current">Speech Services</span></div>
     </header>
     <div class="page-content">
@@ -429,7 +430,7 @@ result = translator.recognize_once()
               <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish ✓</button>
             </div>
           </div>
-          <div data-quiz-result style="display:none"></div>
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
         </div>
       </div>
 

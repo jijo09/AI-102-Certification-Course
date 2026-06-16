@@ -69,12 +69,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -669,6 +670,105 @@
           </div>
           <div class="cq-hint">💡 CMDB Workspace has a specific view for per-field source attribution.</div>
           <div class="cq-answer"><strong>Answer: B</strong> — CMDB Workspace provides a Source tab on each CI record that shows field-level source attribution: which source last set each field, and when. This is the easiest and most direct way to investigate why a field has a specific value. It's more efficient than filtering the cmdb_ire_event log (D), though that log provides more detailed history of all update decisions.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p4-t3-quiz" id="cisdf-p4-t3-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Reconciliation Rules Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">An IT manager manually sets owned_by="Jane Smith" on a CI. That evening, Discovery runs with owned_by="" (blank) in the payload. The next morning, owned_by still shows "Jane Smith." Which IRE behaviors explain this?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Discovery cannot update CI fields set by humans</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Reconciliation Rules mark Manual Entry as authoritative for owned_by AND null values do not overwrite non-null values by default</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Discovery's payload didn't include owned_by at all</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The manager's change was cached and auto-restored</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Two IRE behaviors protect the field simultaneously. First, Reconciliation Rules typically make Manual Entry fully authoritative for owned_by — Discovery's value is ignored regardless. Second, even if Discovery were authoritative, the default "null does not overwrite non-null" behavior prevents a blank value from clearing "Jane Smith." Both protections ensure human-set business attributes aren't corrupted by automated tool payloads.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Discovery is the authoritative source for ip_address with a 30-day Staleness Period. Discovery hasn't run in 45 days due to an outage. An SGC now sends a new ip_address value. What happens?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The SGC value is ignored — Discovery is always authoritative regardless of staleness</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IRE creates a conflict alert and leaves the field unchanged</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The SGC value overwrites ip_address because Discovery's 30-day freshness window has expired</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE rejects the SGC payload until Discovery runs again to re-establish authority</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Staleness Period exists precisely for this situation. After 45 days without a Discovery update, the ip_address field is considered stale (past the 30-day window). A lower-priority source (SGC) is then allowed to update it. This prevents old, potentially incorrect data from being locked in permanently when the authoritative source stops running. Staleness Period is a safety valve that keeps data current even when the primary source is unavailable.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A legacy CMDB spreadsheet import consistently overwrites correct Discovery-sourced cpu_count values with outdated data. What is the proper fix using IRE?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Schedule Discovery to run immediately after every import to restore correct values</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Configure a Reconciliation Rule giving Discovery higher source priority than the Import source for the cpu_count field</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Disable the Import Set permanently</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Lock the cpu_count field so no source can update it after first population</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Reconciliation Rules are the correct solution. By making Discovery the authoritative source for cpu_count (higher priority than the Import source), IRE will ignore the Import's cpu_count value and preserve Discovery's accurate value. The Import can still update fields it IS authoritative for (like contract numbers or custom attributes). This is exactly the scenario Reconciliation Rules are designed to solve — preventing low-quality sources from overwriting high-quality data.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">The instance_type field on AWS EC2 CIs always shows a value derived from Discovery (e.g., inferred from CPU count) rather than the actual EC2 instance type from the AWS SGC. Both sources run successfully. What is the likely cause?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The AWS SGC is not configured to send the instance_type field</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A Reconciliation Rule designates Discovery as the authoritative source for instance_type, overriding the AWS SGC's more accurate value</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The cmdb_ci_aws_ec2_instance class doesn't have an instance_type field</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE runs Discovery first so it always wins before SGC data arrives</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> If a Reconciliation Rule marks Discovery as authoritative for instance_type, Discovery's derived value wins over the AWS SGC's native value, even though the SGC has better data for this cloud-specific field. The fix is to update the Reconciliation Rule to make the AWS SGC the authoritative source for instance_type — since instance_type is a cloud-native concept, the cloud provider's API data is more reliable than Discovery's inference.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
         </div>
       </div>
 

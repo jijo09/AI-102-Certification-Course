@@ -49,12 +49,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -287,6 +288,97 @@
           <li>"Run business rules" = false skips Business Rules on target table — use cautiously</li>
           <li>Transform hook order: onStart → per row (onBefore → fields → onAfter) → onComplete</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p2-t4-quiz" id="cisdf-p2-t4-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Coalesce &amp; Scripts Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A Transform Map coalesces on a Reference field that points to a User record. What value does the coalesce match against?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The sys_id of the User record</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The display value (e.g., the user's name) of the referenced record</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The user's email address</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The user's employee number</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> When coalescing on a Reference field, the Transform Map matches against the display value of the referenced record (e.g., the user's full name), not the sys_id. This is a key exam trap — the source data typically contains a human-readable name, not a sys_id. A is incorrect because source data rarely contains sys_ids. C and D are field values, not the reference display value.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">The "Copy empty fields" option on a Transform Map is set to <code>true</code>. What is the risk of this setting?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Rows with empty fields will be skipped entirely</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Empty source fields will overwrite existing target data with blank values</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Empty fields cause the transform to insert duplicates</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The target record's sys_id is replaced with a new one</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> When "Copy empty fields" is true, blank/null values in the source overwrite populated values in the target. This can cause unexpected data loss — fields that exist in ServiceNow but are absent from the source get wiped. The default (false) preserves existing target data when the source field is empty. A, C, and D are not effects of this setting.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">In a Transform Map onAfter script, how can you determine whether the current row resulted in an insert or an update?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Check <code>source.row_state</code></span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Call <code>target.operation()</code> which returns 'insert' or 'update'</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Check <code>action == 'INSERT'</code></span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Compare <code>target.sys_created_on</code> to the current time</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> In the onAfter script, <code>target.operation()</code> returns the string 'insert' or 'update' indicating what happened to the target record. This is the standard pattern for differentiating insert vs. update actions in transform scripts. A is not a valid property. C checks a variable that is for forcing an action, not reading what happened. D is unreliable and verbose.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">When "Run business rules" is set to <code>false</code> on a Transform Map, what is the effect?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Transform scripts (onBefore, onAfter) are also skipped</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Business Rules on the target table do not fire when records are written</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Coalesce matching is disabled</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Email notifications are suppressed for the affected records</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Setting "Run business rules" to false suppresses Business Rules on the target table during the transform write operation. This can improve performance but may bypass important logic (validations, notifications, downstream automations). Transform scripts (onBefore/onAfter) still run. A is incorrect. C and D are not effects of this setting.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+        </div>
       </div>
 
       <!-- Navigation -->

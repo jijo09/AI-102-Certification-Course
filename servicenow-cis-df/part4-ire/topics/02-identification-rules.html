@@ -69,12 +69,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -692,6 +693,105 @@
           </div>
           <div class="cq-hint">💡 What does a ServiceNow-published SGC plugin include beyond just connector code?</div>
           <div class="cq-answer"><strong>Answer: B</strong> — ServiceNow-published Service Graph Connector plugins are comprehensive packages. Installing the plugin deploys the connector configuration, CI class extensions, Identification Rules, Reconciliation Rules, and often default Reconciliation Priority. You only need to create Identification Rules manually when building custom integrations or custom CI classes not covered by any existing SGC plugin.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p4-t2-quiz" id="cisdf-p4-t2-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Identification Rules Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">Discovery is creating duplicate Linux server CIs nightly. The IRE log shows action="insert" for CIs that already exist. The Identification Rule uses Entry 1: serial_number + manufacturer + model_id. What is the most likely root cause?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Identification Rule is configured for the wrong CI class</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Discovery patterns are not collecting serial_number — IRE skips Entry 1 (missing field) and finds no match, treating each run as a new CI</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The IRE log is showing false positives</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Discovery runs too frequently, exceeding IRE's processing capacity</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> If the Discovery pattern doesn't collect serial_number, the payload arrives at IRE without that field. Since Entry 1 requires ALL three fields (AND logic), IRE skips the entire entry when any field is missing. With no matching entry, IRE treats the CI as new and inserts a duplicate. The fix: ensure Discovery patterns collect serial_number, or add a fallback Identifier Entry using fields that ARE collected (e.g., hostname + ip_address as a secondary fallback).</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An Identification Rule for cmdb_ci_linux_server has two entries: Entry 1 (priority 10): serial_number + manufacturer, Entry 2 (priority 20): ip_address + host_name. A payload arrives with serial_number but no ip_address. Which entry does IRE use?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Entry 2 only — IRE always uses ip_address entries when available</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Both entries are evaluated simultaneously and the first match wins</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Entry 1 (priority 10) — lower number is higher priority. IRE tries Entry 1 first; if it matches, Entry 2 is never evaluated</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The payload fails because ip_address is missing</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> IRE evaluates Identification Entries in priority order — lower priority number = higher priority = tried first. Entry 1 (priority 10) is tried first. Since the payload has serial_number and manufacturer, Entry 1 can match an existing CI. If it succeeds, IRE uses that match and stops — Entry 2 is never evaluated. Entry 2 would only be used if Entry 1 has no fields or all required fields are missing from the payload.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Which identifier combination is most reliable for physical server Identification Rules and why?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">ip_address + host_name — both are always available and unique on a network</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">serial_number + manufacturer + model_id — hardware-assigned, stable across renames and IP/network changes</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">MAC address alone — globally unique and never changes</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">host_name alone — DNS enforces uniqueness across the enterprise</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Serial number + manufacturer + model_id is the gold standard for physical servers. The serial number is assigned by the hardware manufacturer and does not change throughout the server's life. IP addresses change in DHCP environments or when servers are moved. Hostnames change during renames. MAC addresses can change when NICs are replaced. Only hardware-assigned identifiers survive server lifecycle events without causing duplicate CIs.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A Lookup Rule for cmdb_ci_db_instance requires finding its host server first. Discovery sends a database instance payload but the host server CI doesn't yet exist in the CMDB. What happens?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">IRE creates the database instance CI without a host relationship</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IRE creates both the server CI and the database instance CI simultaneously</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Lookup Rule fails — the database instance cannot be identified and is not created until the host server CI exists in the CMDB</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE creates the database instance and flags it for manual host assignment</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> A Lookup Rule requires the referenced CI (the host server) to already exist in the CMDB. If the host doesn't exist, the Lookup Rule cannot locate it, identification fails, and the dependent CI (database instance) is not created. Discovery processes CIs in dependency order — infrastructure before applications — to minimize this. If a server CI is missing, its dependent application CIs will also be missing from the CMDB until the server CI is created first.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
         </div>
       </div>
 

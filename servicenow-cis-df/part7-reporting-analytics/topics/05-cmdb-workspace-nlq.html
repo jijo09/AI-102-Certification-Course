@@ -64,12 +64,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -583,6 +584,105 @@
           </div>
           <div class="cq-hint">💡 What does this scenario demonstrate about CMDB as a source of operational intelligence for non-infrastructure teams?</div>
           <div class="cq-answer"><strong>Answer: B</strong> — This scenario demonstrates the INSIGHT domain in action: accurate CMDB data (correct OS version fields, current operational_status) enables the security team to perform vulnerability assessment without running separate scans. The CMDB becomes a source of operational intelligence across IT disciplines. This is why CMDB data quality matters — it's not just about keeping records; it's about enabling informed decisions across operations, security, finance, and compliance. The result depends on Discovery accurately populating OS version fields, which connects back to the entire ingestion pipeline taught in prior topics.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint Quiz -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p7-t5-quiz" id="cisdf-p7-t5-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">CMDB Workspace &amp; NLQ Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">An admin discovers that cpu_count=4 on a production server CI, but the server actually has 16 CPUs. Discovery is supposed to be authoritative for cpu_count. Where should the admin look first to identify which source populated the incorrect value?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The IRE Log (cmdb_ire_event) for recent ingestion events</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The Source Attribution tab in CI 360 View, which shows which source last wrote each field and when</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The CMDB Health Correctness score for the server class</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Discovery schedule to verify it ran for this CI recently</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The Source Attribution tab in CI 360 View is the fastest diagnostic tool for "which source wrote this wrong value?" It shows a field-by-field breakdown of which data source last populated each field and when. If cpu_count was last written by SCCM (not Discovery), Source Attribution reveals this immediately — and points to either a Reconciliation Rule misconfiguration (SCCM shouldn't be authoritative for cpu_count) or a timing issue (Discovery ran first with the correct value, then SCCM overwrote it). The IRE Log (A) is useful for understanding why IRE made a decision, but Source Attribution is the targeted first step for field-level source diagnosis.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">During a major incident involving a failed database server, the help desk needs to quickly identify which business applications and services are at risk. Which CI 360 View tab should they use first?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Health tab — check the CMDB Health score of the affected CI</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Relationships tab — use the Impact view to trace CSDM propagation from the database server upward to affected Application Services and Business Applications</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Source Attribution tab — identify which discovery tool last updated the CI</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">ITSM Records tab — look for previous incidents on this server</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> During an active major incident, the priority is business impact assessment. The Relationships tab with Impact view traces the CSDM propagation chain upward: Database Server → Application Servers → Application Service → Business Application → Business Owner. This tells the help desk which business services are affected and who to notify immediately. The Health tab (A) shows CI data quality — irrelevant during an active incident. Source Attribution (C) is a data quality diagnostic tool. ITSM Records (D) shows historical incidents but not current impact scope. Impact analysis via Relationships tab is the designed use case for major incident response.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">NLQ (Natural Language Query) returns incomplete results for the question "Show all CIs related to the payment processing application." Some known CIs are missing. What is the most likely root cause?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">NLQ has a 100-record limit and the result set was truncated</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">NLQ result quality depends on CMDB data quality. Inconsistent field values (e.g., some CIs say "Payment Processing" while others say "PayProc" or "payments-app") cause NLQ to miss CIs that don't match the expected term.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">NLQ requires admin role; some CIs are ACL-restricted from the current user</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">NLQ only searches the CI name field, not relationship fields</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> NLQ translates natural language questions into CMDB filters and relies on consistent, accurate CMDB data to return complete results. If the application is called "Payment Processing" in some CIs but "PayProc" or "payments-app" in others, NLQ will only find CIs matching the specific term it resolves. This is a CMDB data quality issue (Compliance dimension — inconsistent values). The fix is CMDB data quality remediation: standardize the application name field value across all related CIs. This is a key INSIGHT domain concept: NLQ quality directly reflects underlying CMDB data quality.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">The CMDB Workspace and NLQ serve which CIS-DF exam domain, and why is that domain weighted at 20%?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">INGEST domain (40%) — because getting data in is the most important function</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">INSIGHT domain (20%) — because the value of CMDB data is realized only when it can be accessed and used for decision-making by all IT roles, not just CMDB specialists</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">GOVERN domain (35%) — because CMDB Workspace is a governance tool</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">MANAGE domain (25%) — because workspace tools are primarily for CI management</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> CMDB Workspace, NLQ, and CI 360 View serve the INSIGHT domain — the 20% of the exam focused on making CMDB data accessible and actionable for all IT roles (operations, security, finance, compliance), not just CMDB administrators. The 20% weighting reflects that CMDB value is realized at the point of consumption: accurate CI data enables faster incident resolution, more reliable change impact analysis, security vulnerability identification, and financial planning. INGEST (how data gets in) and GOVERN (how quality is sustained) are foundational, but INSIGHT is where the return on CMDB investment is delivered.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
         </div>
       </div>
 

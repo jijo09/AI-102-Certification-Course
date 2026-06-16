@@ -54,12 +54,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -328,6 +329,97 @@
           <li><strong>Principal Class Filtering</strong> restricts which CI class can be picked in a Reference field on CMDB tables</li>
           <li>Related Lists on forms are query-based — not a stored field, but a live filtered query result</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p1-t3-quiz" id="cisdf-p1-t3-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Relationships Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A CI-to-CI many-to-many relationship needs to be modeled in ServiceNow. What is the correct approach?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Use a Reference field on each CI pointing to the other</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Use the <code>cmdb_rel_ci</code> junction table with a relationship type</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Create a Database View joining the two CI tables</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Store both CI sys_ids in a list-type field on one CI</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> <code>cmdb_rel_ci</code> is the standard M2M junction table for CI-to-CI relationships. Each row links a parent CI to a child CI via a relationship type. A (Reference field) only supports one-to-many. C (Database View) is read-only and doesn't store relationship data. D (list field) is not a recognized relationship model and doesn't integrate with impact analysis.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An admin creates a Database View joining two tables and wants to update records through it. What will happen?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Updates succeed if the user has write ACLs on both underlying tables</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Updates succeed only for the left (primary) table</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Database Views are read-only; updates cannot be performed through them</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Updates succeed but only for fields from the right (joined) table</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Database Views in ServiceNow are strictly read-only and exist for reporting purposes only. You cannot insert, update, or delete records through a Database View. All write operations must be performed on the underlying tables directly. A, B, and D all incorrectly suggest that writes are possible.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A Reference Qualifier is configured on a Reference field in ServiceNow. What does this qualifier enforce?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It blocks API and script writes that reference disallowed records</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">It filters the UI reference picker only; API and script inserts are not blocked</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It encrypts the stored sys_id of the referenced record</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">It prevents users from viewing the referenced record</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Reference Qualifiers only filter what appears in the UI reference picker. They do not enforce constraints on API or script inserts — those bypass the picker entirely. To enforce constraints server-side, you need a Business Rule or Data Policy. A is incorrect because API writes are not blocked. C and D are unrelated to qualifiers.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is the purpose of <strong>Principal Class Filtering</strong> on a CMDB Reference field?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It restricts which CI class can be selected in the reference picker</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">It filters CI records by their operational status</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It assigns a principal role to the CI record owner</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">It prevents CIs from appearing in reporting dashboards</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="A">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>A is correct.</strong> Principal Class Filtering restricts which CI class (and its subclasses) can be picked in a CMDB Reference field. This ensures, for example, that a "Runs on" field only allows server CIs to be selected, not printers or network devices. B, C, and D describe unrelated features.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+        </div>
       </div>
 
       <!-- Navigation -->

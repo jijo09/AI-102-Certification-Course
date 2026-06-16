@@ -69,12 +69,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -890,6 +891,97 @@
           </div>
           <div class="cq-hint">💡 The AWS API is cloud-accessible. Private VPCs are not.</div>
           <div class="cq-answer"><strong>Answer: C</strong> — The AWS EC2 API itself (used by the SGC to list instances) is publicly accessible, so ServiceNow can call it directly without a MID Server. However, if the SGC needs to reach resources inside a private VPC (e.g., performing additional checks via private IP), a MID Server deployed inside that VPC is needed. The exam often draws this distinction.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p2-t5-quiz" id="cisdf-p2-t5-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Service Graph Connectors Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A Service Graph Connector (SGC) is configured to ingest data from a cloud provider. How does SGC process the ingested CI data before writing it to CMDB?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It writes directly to CMDB CI tables via the Table API</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">It routes all CI data through the IRE for identification and reconciliation</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It first loads data into an Import Set staging table, then uses a Transform Map</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">It sends CI data to the ECC Queue for MID Server processing</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> SGC always routes through the IRE. This is the key distinction that makes SGC the preferred CMDB ingestion method — it ensures identification rules run, deduplication occurs, and reconciliation rules determine field authority. A is wrong (that's the dangerous direct-write pattern). C is wrong (SGC does NOT use Import Sets). D is for agentless Discovery probes.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An SGC job is failing to create CI records. A colleague suggests checking Transform Map logs. Is this the right approach?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — SGC uses Transform Maps, so Transform Map logs are the first diagnostic step</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — SGC does not use Import Sets or Transform Maps; check SGC connector job logs and IRE logs</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Yes — all ServiceNow data ingestion goes through Transform Maps</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">No — SGC failures only appear in the system log (syslog)</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> SGC does NOT use Import Sets or Transform Maps. SGC activity is tracked in the connector job logs and IRE logs (<code>cmdb_ire_event</code>). Looking at Transform Map logs would yield no relevant results. A and C are incorrect because they incorrectly assume SGC uses the Import Set pipeline. D is incorrect — SGC has its own dedicated logs.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An SGC is configured to pull from an on-premise VMware vCenter server. Which component is required for the SGC to reach vCenter?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A VPN tunnel from ServiceNow to the corporate network</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A MID Server deployed inside the corporate network</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">An inbound firewall rule allowing ServiceNow to reach vCenter</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A Discovery Behavior configured for VMware</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> On-premise targets like vCenter are inside the corporate network and unreachable from ServiceNow's cloud. A MID Server deployed inside the network makes outbound connections to ServiceNow — no inbound firewall holes are needed. A is not how ServiceNow connectivity works. C requires inbound connections which is the opposite of MID Server architecture. D is for agentless Discovery, not SGC.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What does the <code>discovery_source</code> field on a CI record represent?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The original tool that first created the CI in CMDB</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The SGC or Discovery schedule that last successfully updated the CI</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The MID Server that performed the last Discovery scan</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The IRE reconciliation rule that last applied to the CI</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The <code>discovery_source</code> field records which SGC connector or Discovery schedule last successfully updated the CI. It is a string field and is overwritten each time a source successfully processes the CI. A is incorrect — it reflects the last source, not the first. C and D are not what this field stores.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
         </div>
       </div>
 

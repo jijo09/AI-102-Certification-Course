@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Certification Study Hub</title>
+  <title>Certification Study Hub — AI-102, CSA & CIS-DF</title>
+  <meta name="description" content="Free certification study hub for Microsoft AI-102, ServiceNow CSA and CIS-DF. Structured topics, built-in quizzes, and flashcards aligned to official exam blueprints." />
   <link rel="stylesheet" href="styles/main.css" />
 </head>
 <body class="selector-active">
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <!-- Animated background -->
 <div class="wh-bg">
@@ -18,7 +21,7 @@
 
 <div class="wh-wrap">
 
-  <header class="wh-header"></header>
+  <main id="main-content">
 
   <!-- Hero -->
   <section class="wh-hero">
@@ -70,7 +73,7 @@
   <div class="wh-courses">
 
     <!-- AI-102 Card -->
-    <div class="wh-card wh-card-ai102" onclick="selectCourse('ai-102')">
+    <a href="ai-102/index.html" class="wh-card wh-card-ai102" onclick="localStorage.setItem('active_course','ai-102')" aria-label="AI-102 Azure AI Engineer Associate — Start Learning">
       <div class="wh-card-accent"></div>
 
       <div class="wh-card-inner">
@@ -81,7 +84,7 @@
               <circle class="wh-ring-fill" cx="18" cy="18" r="15.9155"
                 id="ring-ai102" stroke-dasharray="0 100" stroke-dashoffset="25"/>
             </svg>
-            <div class="wh-ring-icon">🎯</div>
+            <div class="wh-ring-icon" aria-hidden="true">🎯</div>
           </div>
           <div class="wh-pct-label" id="ring-ai102-pct">0%</div>
         </div>
@@ -124,15 +127,15 @@
             <div class="wh-prog-fill" id="prog-ai102-fill" style="width:0%"></div>
           </div>
         </div>
-        <button class="wh-cta">
+        <span class="wh-cta" aria-hidden="true">
           <span id="cta-ai102-text">Start Learning</span>
           <span class="wh-cta-arrow">→</span>
-        </button>
+        </span>
       </div>
-    </div>
+    </a>
 
     <!-- ServiceNow CSA Card -->
-    <div class="wh-card wh-card-csa" onclick="selectCourse('servicenow-csa')">
+    <a href="servicenow-csa/index.html" class="wh-card wh-card-csa" onclick="localStorage.setItem('active_course','servicenow-csa')" aria-label="ServiceNow CSA Certified System Administrator — Start Learning">
       <div class="wh-card-accent"></div>
 
       <div class="wh-card-inner">
@@ -143,7 +146,7 @@
               <circle class="wh-ring-fill" cx="18" cy="18" r="15.9155"
                 id="ring-csa" stroke-dasharray="0 100" stroke-dashoffset="25"/>
             </svg>
-            <div class="wh-ring-icon">⚙️</div>
+            <div class="wh-ring-icon" aria-hidden="true">⚙️</div>
           </div>
           <div class="wh-pct-label" id="ring-csa-pct">0%</div>
         </div>
@@ -186,15 +189,15 @@
             <div class="wh-prog-fill" id="prog-csa-fill" style="width:0%"></div>
           </div>
         </div>
-        <button class="wh-cta">
+        <span class="wh-cta" aria-hidden="true">
           <span id="cta-csa-text">Start Learning</span>
           <span class="wh-cta-arrow">→</span>
-        </button>
+        </span>
       </div>
-    </div>
+    </a>
 
     <!-- ServiceNow CIS-DF Card -->
-    <div class="wh-card wh-card-cisdf" onclick="selectCourse('servicenow-cis-df')">
+    <a href="servicenow-cis-df/index.html" class="wh-card wh-card-cisdf" onclick="localStorage.setItem('active_course','servicenow-cis-df')" aria-label="ServiceNow CIS-DF Certified Implementation Specialist Data Foundations — Start Learning">
       <div class="wh-card-accent"></div>
       <div class="wh-new-badge">NEW</div>
 
@@ -206,7 +209,7 @@
               <circle class="wh-ring-fill" cx="18" cy="18" r="15.9155"
                 id="ring-cisdf" stroke-dasharray="0 100" stroke-dashoffset="25"/>
             </svg>
-            <div class="wh-ring-icon">🗄️</div>
+            <div class="wh-ring-icon" aria-hidden="true">🗄️</div>
           </div>
           <div class="wh-pct-label" id="ring-cisdf-pct">0%</div>
         </div>
@@ -249,14 +252,16 @@
             <div class="wh-prog-fill" id="prog-cisdf-fill" style="width:0%"></div>
           </div>
         </div>
-        <button class="wh-cta">
+        <span class="wh-cta" aria-hidden="true">
           <span id="cta-cisdf-text">Start Learning</span>
           <span class="wh-cta-arrow">→</span>
-        </button>
+        </span>
       </div>
-    </div>
+    </a>
 
   </div><!-- /wh-courses -->
+
+  </main>
 
   <footer class="wh-footer">
     Content aligned to official exam blueprints · Progress saved locally in your browser
@@ -271,16 +276,6 @@
     setTimeout(() => {
       ring.setAttribute('stroke-dasharray', `${pct} ${100 - pct}`);
     }, 80);
-  }
-
-  function selectCourse(courseId) {
-    localStorage.setItem('active_course', courseId);
-    const routes = {
-      'servicenow-csa':  'servicenow-csa/index.html',
-      'servicenow-cis-df': 'servicenow-cis-df/index.html',
-      'ai-102':          'ai-102/index.html',
-    };
-    window.location.assign(routes[courseId] || 'ai-102/index.html');
   }
 
   (function init() {

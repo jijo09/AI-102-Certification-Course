@@ -64,12 +64,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -589,6 +590,105 @@
           </div>
           <div class="cq-hint">💡 Connect the metric improvement to the business outcomes it enables.</div>
           <div class="cq-answer"><strong>Answer: B</strong> — A CMDB Health score improvement from 58% (Red/Critical) to 79% (Yellow/Caution) means real, measurable improvements: more CIs have complete required fields (fewer incidents routed to wrong teams), fewer duplicates exist (more accurate impact analysis), and more CIs have current data (change risk assessment is more reliable). The business translation: faster incident resolution, fewer failed changes, better IT planning data. This is the kind of language that resonates with the CIO — outcomes, not technical metrics.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint Quiz -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p6-t6-quiz" id="cisdf-p6-t6-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">CMDB Health KPIs &amp; Data Manager Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">The CMDB Health Completeness score for Windows servers is 45% (Red). The IP address field is populated on 95% of CIs. The support_group field is populated on only 40%. Which Health dimension is failing, and what is the targeted remediation?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Staleness — run Discovery more frequently to populate missing fields</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Completeness — the support_group field is required but missing. Use the Health Dashboard drill-down to list the specific CIs missing it, then assign them to the appropriate support groups.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Compliance — the support_group values are in an invalid format</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Correctness — the support_group values don't match the authoritative HR system</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Completeness measures whether required fields are populated. A field that is blank on 60% of CIs is a Completeness failure. The correct approach: use CMDB Health dashboard drill-down to identify exactly which CIs are missing support_group (not all 2,000 servers — just the ~1,200 that are failing this specific rule). Staleness (A) measures time since last Discovery, not missing field values. Compliance (C) applies when values exist but violate format rules. Correctness (D) applies when values exist but are inaccurate compared to authoritative sources.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A CMDB Data Manager policy is set to automatically move server CIs with last_discovered > 90 days to operational_status = "Absent". An administrator wants to run this policy. What should be done before enabling auto-execution on all 5,000 server CIs?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Run it immediately — the policy only moves CIs to Absent, which is a safe intermediate state</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Test the policy on a small scoped subset (e.g., 50 CIs in a non-production environment or low-risk CI group) before enabling bulk execution</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Get approval from the CMDB Owner since all Data Manager operations require executive sign-off</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Enable it only if CMDB Health Staleness score is below 50%</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> CMDB Data Manager policies can affect thousands of CIs simultaneously. A misconfigured policy (wrong filter, wrong target state, wrong threshold) could mark thousands of operational servers as Absent, breaking incident routing, change management, and CSDM impact analysis for all of them. Always test on a small, controlled subset first to validate the policy behaves as expected before enabling broad execution. Even though Absent is an intermediate state (not Retired), moving 5,000 servers to Absent without verification could cause significant operational disruption if the policy catches CIs that are actually still operational.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A CI has operational_status = "Absent" (5). What does this mean, and what is the appropriate next step?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The CI has been formally decommissioned through the change management process and should be archived</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Discovery did not find the CI on its last scan. Investigate: is the device actually decommissioned, offline, or is there a Discovery coverage gap? Human confirmation is required before moving to Retired.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The CI record was created manually and Discovery has never found it</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The CI's data is incomplete — the Absent state means required fields are missing</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Absent (operational_status=5) means Discovery's last scan did not find this CI. It could mean: (1) the device was decommissioned without going through the formal CI retirement process, (2) the device is temporarily offline, or (3) there's a Discovery configuration gap (wrong IP range, expired credentials). Human investigation is required before taking action. Never automatically retire an Absent CI — some Absent states have innocuous explanations. The distinction between Absent and Retired is a classic exam trap: Absent = "not found, investigate"; Retired = "formally decommissioned through change management".</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Which CMDB Health dimension should be used to flag CI records where the ip_address field contains the string "N/A" instead of a valid IPv4 format?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Completeness — the field has a value so it is "complete"</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Compliance — the field has a value but it violates the expected format rule (must be a valid IPv4 address)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Staleness — the IP address hasn't been updated recently</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Duplicate — the same IP address appears on multiple CIs</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Compliance measures whether CI values conform to defined rules — valid formats, allowed values, field constraints. A field containing "N/A" when it should contain a valid IPv4 address is a Compliance failure: the value exists but violates the format rule. Completeness (A) only cares whether a value is present — "N/A" counts as present even though it's meaningless. This is an important distinction: a field can be "complete" (not blank) but still fail Compliance (invalid value format). Configure a Compliance Health Rule with a condition like "ip_address matches IPv4 regex" to catch these cases.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
         </div>
       </div>
 

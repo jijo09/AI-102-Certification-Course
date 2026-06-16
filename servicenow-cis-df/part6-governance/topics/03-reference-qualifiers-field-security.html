@@ -51,12 +51,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -287,6 +288,105 @@
           <li>Principal Class Filtering respects inheritance — allowing <code>cmdb_ci_hardware</code> also allows all classes that extend it</li>
           <li>Encrypted fields cannot be used as coalesce fields in imports</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p6-t3-quiz" id="cisdf-p6-t3-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Reference Qualifiers &amp; Field Security Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A REST API integration sets the "assignment_group" field on an Incident to a sys_id of a group that is filtered out by the Reference Qualifier on that field. What happens?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The API call fails with a validation error because the Reference Qualifier blocks the value</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The write succeeds. Reference Qualifiers only filter the UI picker — they don't enforce constraints on API or script writes.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The field is silently ignored and assignment_group is set to null</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The write succeeds but triggers a Business Rule that reverses the change</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Reference Qualifiers are purely a UI-side filter — they narrow what appears in the reference field picker dialog for users interacting with forms. They have zero enforcement power over scripts, REST API calls, or import sets. Any valid sys_id can be written to a reference field via API regardless of Reference Qualifier configuration. For server-side enforcement, you need a Data Policy or a Before Business Rule that validates the value programmatically.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A user with a field-level read ACL failure on the "salary" field queries a record via the Table API. What does the API response contain for that field?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The API returns an error message: "Access denied: field salary"</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The API returns the field with value "***REDACTED***"</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The salary field is simply absent from the JSON response — no error, no indication it exists</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The entire API call fails and returns HTTP 403 Forbidden</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> When a user fails a field-level read ACL, the Table API silently omits that field from the JSON response. There is no error, no placeholder, no indication the field even exists. This is an intentional security feature — revealing that a field exists (even if you can't read its value) could itself be a security leak. Similarly, if a user tries to PATCH a field they don't have write ACL on, the write is silently ignored. This silent behavior is a common source of confusion when debugging integrations — always check ACLs when fields mysteriously disappear from API responses.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A Change Request's "Affected CI" reference field points to cmdb_ci (all CIs). The change manager wants to restrict the picker so only servers (cmdb_ci_server) and hardware (cmdb_ci_hardware) can be selected. Which mechanism should be used?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Static Reference Qualifier: active=true^sys_class_name=cmdb_ci_server</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Field-level ACL restricting which CI records are visible</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Principal Class Filtering — configure Reference Specification entries for cmdb_ci_server and cmdb_ci_hardware on the change_request.cmdb_ci dictionary entry</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Dictionary Override on the Affected CI field in the change_request table</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Principal Class Filtering is the CMDB-specific mechanism for restricting which CI class can appear in reference fields that point to cmdb_ci or its children. Configured via the Reference Specification related list on the dictionary entry, it also respects inheritance — allowing cmdb_ci_hardware also allows all classes extending it (like cmdb_ci_computer, cmdb_ci_server). Option A (static qualifier) could work but would need to handle the full inheritance hierarchy manually and breaks when new subclasses are added. Principal Class Filtering is the designed solution for this exact use case.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A payroll application has an "employee_ssn" field that is encrypted. An integration that imports employee records uses the serial_number field of this encrypted field as a coalesce key. What problem will occur?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The import will succeed but create duplicate records each time</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The encrypted field cannot be used as a coalesce key — the encrypted stored value won't match the plain-text import value, so every import will create new records instead of updating existing ones</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The import will automatically decrypt the field for comparison purposes</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The import will fail with an encryption error before processing any records</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Encrypted fields store values in encrypted form in the database. When an Import Set tries to coalesce (match existing records) on an encrypted field, it compares the encrypted stored value against the plain-text import value — these will never match. The result: every import creates a new record instead of updating the existing one, flooding the database with duplicates. This is a well-known limitation. The fix: use a non-encrypted field (like asset_tag or a hash) as the coalesce key when working with imports that touch encrypted fields.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

@@ -49,12 +49,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -242,6 +243,105 @@
           <li>Deactivating a choice hides it from dropdowns but existing records still display it correctly</li>
           <li>Use Choice Lists for small stable sets; use Lookup Tables for large, changing, or metadata-rich option sets</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p6-t2-quiz" id="cisdf-p6-t2-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Field Validation &amp; Choice Lists Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A report filter uses "state = 'In Progress'" but returns no results, even though many incidents are in progress. What is the most likely cause?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The state field is not indexed, causing the filter to miss records</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Choice fields store integer values (e.g., 2), not labels (e.g., "In Progress"). The filter must use "state = 2" to match In Progress incidents.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The report is filtered to a specific assignment group that has no incidents</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The state field label was renamed and the filter needs to be updated to use the new label</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> ServiceNow choice fields store numeric integer values in the database, not the display labels users see. For Incident state: 1=New, 2=In Progress, 3=On Hold, 6=Resolved, 7=Closed, 8=Cancelled. Filtering on the string "In Progress" finds nothing because the database contains "2". Scripts and conditions must always reference the stored value (integer), not the display label. Options A, C, and D describe unrelated issues — the root cause is the value-vs-label distinction.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An administrator deactivates the "Vendor Support" choice option from the Incident category field. What is the effect on existing records that already have "Vendor Support" as their category?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Existing records are automatically updated to the closest active category</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The choice is hidden from dropdown menus for new selections, but existing records continue to display "Vendor Support" unchanged</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Existing records show an error because the stored value no longer has a matching active choice</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Deactivating a choice deletes it from the choice table and clears the field on all existing records</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Deactivating a choice only hides it from the dropdown — users can no longer select it for new/edited records, but all existing records retain their stored value and display the label correctly. The underlying value is still in sys_choice (just inactive) so ServiceNow can still resolve it to its label. Options A and D are wrong — deactivation never alters existing data. Option C is wrong — ServiceNow handles inactive choice values gracefully and continues to display them on existing records.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Which mechanism should be used when users must select a Sub-category value that dynamically narrows based on which Category was selected?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Reference Qualifier on the Sub-category field</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">ACL restricting Sub-category values by Category</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Dependent Choice List — the Sub-category choices are filtered based on the current value of the Category field</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Dictionary Override on the Sub-category field for each Category value</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Dependent Choice Lists are specifically designed for parent-child choice relationships where available child choices depend on the selected parent value. When Category = "Hardware", only hardware Sub-categories appear; when Category = "Software", software Sub-categories appear. Reference Qualifiers (A) are for reference fields pointing to another table, not choice fields. ACLs (B) control access/permissions, not choice filtering. Dictionary Overrides (D) change field attributes per-table, not per-choice-value.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A new field must accept only values matching the pattern "PRJ-NNNN" (e.g., PRJ-1234). Which validation mechanism enforces this format on the field?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Choice List limited to pre-approved PRJ values</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Regex validation on the field's dictionary entry — a pattern like <code>^PRJ-\d{4}$</code> blocks saves for non-matching input</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A "mandatory" checkbox on the field to require a value</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">An ACL granting write access only to users who know the correct format</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Regex validation on the field's dictionary entry enforces that input must match a specific pattern before the record saves. A pattern like <code>^PRJ-\d{4}$</code> requires exactly "PRJ-" followed by 4 digits. This applies to both form submissions AND API calls. Choice Lists (A) only work for predefined discrete values, not freeform pattern matching. The mandatory checkbox (C) only ensures a value exists, not that it matches a specific format. ACLs (D) control access permissions, not input format validation.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

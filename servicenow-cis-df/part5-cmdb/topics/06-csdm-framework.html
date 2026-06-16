@@ -75,12 +75,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -617,6 +618,105 @@
           </div>
           <div class="cq-hint">💡 CSDM is a layered model — which layer is the foundation that all others depend on?</div>
           <div class="cq-answer"><strong>Answer: C</strong> — CSDM relationships only provide value when they're connected to real CI data. Without Domain 4 CIs (servers, databases, network devices populated by Discovery or other ingestion tools), the higher CSDM layers have nothing to link to. The correct implementation order: (1) populate CI data via Discovery/SGC/Import Sets, (2) run Service Mapping to create Application Services, (3) create Business Applications and link to Application Services, (4) add Business Capabilities and other Domain 1 concepts. CSDM is not a plugin (B) — it uses existing CI classes.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p5-t6-quiz" id="cisdf-p5-t6-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">CSDM Framework Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A CTO asks which business applications are impacted when the database server DB-PROD-01 fails. The CMDB has accurate CI data but no CSDM relationships. What can ServiceNow automatically determine?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A complete list of all Business Applications and their owners that depend on DB-PROD-01</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Nothing about Business Application impact — without CSDM relationships linking CIs to Application Services to Business Applications, there is no traversable path from CI to business outcome</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The support group responsible for DB-PROD-01 and their escalation path</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">All CIs that share the same data center as DB-PROD-01</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Without CSDM relationships (CI → Application Service → Business Application), ServiceNow has no machine-readable path from a database server CI to the Business Applications it supports. Accurate CI data alone only tells you what the server is — not what business functions it enables. CSDM relationships are the bridge between infrastructure events and business outcomes. This is the core value proposition of CSDM implementation.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Which CMDB CI class should be used for the business-level application named "Salesforce CRM" in CSDM (the application as business stakeholders identify it, not the technical servers)?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">cmdb_ci_appl (software installation)</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">cmdb_ci_service (Application Service)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">cmdb_ci_business_app (Business Application)</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">cmdb_ci_server (the Salesforce server)</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> cmdb_ci_business_app is the CSDM-prescribed class for Business Applications (Domain 1). This represents "Salesforce CRM" as business stakeholders know it — the named application, not the technical servers or software installations. cmdb_ci_appl (A) is a software installation CI in Domain 4. cmdb_ci_service (B) is the Application Service (the technical service map). These are distinct objects at different CSDM layers, all connected by relationships.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is the relationship between an Application Service (Domain 2) and a Technical Service (Domain 3) in CSDM?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Application Services are cloud-based; Technical Services are on-premises. They don't interact.</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Application Service is a specific application's full infrastructure map; Technical Service is a shared internal IT capability (like "Database Platform") that multiple Application Services can depend on</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Technical Service replaces Application Service in newer versions of CSDM</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">They are the same thing — CSDM uses both terms interchangeably</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Application Services (Domain 2) map the complete infrastructure for a specific named application — "HR Self-Service" containing its web servers, app servers, and database. Technical Services (Domain 3) are shared internal IT capabilities — "Oracle Database Platform" that the HR, Finance, and CRM Application Services all depend on. Multiple Application Services can depend on one Technical Service. The distinction is specific application vs. shared infrastructure service.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">CSDM is described as a "framework, not a plugin." What does this mean for implementation?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">CSDM must be purchased as an add-on license separate from the base ServiceNow platform</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">CSDM is a set of best practices for using existing ServiceNow CI classes in a prescribed way — no new software is installed; deviating from it breaks integrations that depend on the standard class hierarchy</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">CSDM is optional documentation with no enforcement in the platform</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">CSDM is a ServiceNow department that provides consulting services for CMDB implementation</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> CSDM is a prescriptive framework — a set of recommended practices for organizing CI classes and relationships that are already in the ServiceNow platform. No new plugin is installed. When you deviate from CSDM (creating non-standard CI classes, wrong relationship types, skipping layers), ServiceNow features that assume the standard hierarchy — Discovery Identification Rules, Service Mapping, CMDB Health scoring, Change Impact Analysis — may not work correctly without custom configuration to compensate.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
         </div>
       </div>
 

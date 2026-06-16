@@ -51,12 +51,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -319,6 +320,97 @@
           <li>Incremental imports miss deleted records — use full loads with deactivation logic to handle removes</li>
           <li>"Execute now" button on Scheduled Import Set triggers an immediate run without waiting for schedule</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p2-t3-quiz" id="cisdf-p2-t3-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Data Sources Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A Scheduled Import Set needs to pull data from an internal Oracle database. What infrastructure is almost certainly required?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">An IntegrationHub spoke for Oracle</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A MID Server installed within the corporate network</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A Service Graph Connector for Oracle</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">An HTTPS REST endpoint exposed by Oracle</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> JDBC data sources (like Oracle databases) live inside the corporate network behind firewalls, unreachable from ServiceNow's cloud. A MID Server deployed inside the network acts as an outbound proxy, connecting to the database and relaying results to ServiceNow. A and C are not standard solutions for JDBC. D is impossible — databases do not expose REST APIs natively.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A Scheduled Import Set runs on a nightly schedule. An admin wants to trigger it immediately without waiting for the schedule. What is the correct action?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Temporarily change the schedule to the current time, save, then revert</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Click the "Execute now" button on the Scheduled Import Set record</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Manually create an Import Set record and link the Transform Map</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Use the ServiceNow REST API to POST directly to the target table</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The "Execute now" button on a Scheduled Import Set triggers an immediate run without altering the schedule. This is the standard way to run a scheduled import on demand. A is a workaround that can cause errors. C does not use the configured Data Source and Transform Map. D bypasses the import pipeline entirely.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An incremental import runs nightly but records deleted from the source system remain active in ServiceNow. What is the recommended approach to handle this?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Use a full load with deactivation logic to retire records not present in the source</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Enable the "Delete missing records" flag on the Transform Map</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The IRE automatically detects and removes orphaned records</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Configure the Data Source to send deletion events via webhook</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="A">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>A is correct.</strong> Incremental imports only send new and changed records — deleted records are simply absent from the import. The only way to detect them is a full load where you can compare the full source set against ServiceNow records and deactivate those not present. B is not a standard Transform Map option. C is incorrect — IRE does not auto-delete. D is not a standard Import Set pattern.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Where should credentials for a JDBC Data Source be stored in ServiceNow?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">In the Data Source record's password field (plain text)</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Hardcoded in the onBefore transform script</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">In a Discovery Credential record, referenced by the Data Source</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">In a System Property with restricted read access</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Credentials should always be stored in Discovery Credential records in the ServiceNow Credential Vault — never hard-coded in scripts or stored as plain text. Credential records are encrypted, audited, and can be rotated without changing script code. A, B, and D are all insecure or non-standard approaches.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+        </div>
       </div>
 
       <!-- Navigation -->

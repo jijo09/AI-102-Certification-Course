@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -244,6 +244,7 @@
   </style>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <!-- ── Course Selector Portal (hidden — portal lives at root index.html) -->
 <div id="course-selector-portal" class="hidden">
@@ -466,11 +467,11 @@
   <!-- ════════════════════════════════════
        MAIN CONTENT
   ════════════════════════════════════ -->
-  <main class="main-content">
+  <main class="main-content" id="main-content">
 
     <!-- Top Bar -->
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span style="color:var(--text-muted);font-size:0.75rem;margin:0 4px">›</span>
@@ -553,7 +554,8 @@
 
         <!-- Part 1 -->
         <div onclick="window.location.assign('part1-plan-manage/index.html')" class="part-card"
-          style="--part-color:var(--part1-color)" style="cursor: pointer;">
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part1-plan-manage/index.html')"
+          style="--part-color:var(--part1-color)">
           <div class="part-card-head">
             <div class="part-icon">⚙️</div>
             <span class="part-weight-badge">20–25%</span>
@@ -596,7 +598,8 @@
 
         <!-- Part 2 -->
         <div onclick="window.location.assign('part2-generative-ai/index.html')" class="part-card"
-          style="--part-color:var(--part2-color)" style="cursor: pointer;">
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part2-generative-ai/index.html')"
+          style="--part-color:var(--part2-color)">
           <div class="part-card-head">
             <div class="part-icon">🤖</div>
             <span class="part-weight-badge">15–20%</span>
@@ -631,7 +634,8 @@
 
         <!-- Part 3 -->
         <div onclick="window.location.assign('part3-agentic/index.html')" class="part-card"
-          style="--part-color:var(--part3-color)" style="cursor: pointer;">
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part3-agentic/index.html')"
+          style="--part-color:var(--part3-color)">
           <div class="part-card-head">
             <div class="part-icon">🕵️</div>
             <span class="part-weight-badge">5–10%</span>
@@ -658,7 +662,8 @@
 
         <!-- Part 4 -->
         <div onclick="window.location.assign('part4-nlp/index.html')" class="part-card"
-          style="--part-color:var(--part4-color)" style="cursor: pointer;">
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part4-nlp/index.html')"
+          style="--part-color:var(--part4-color)">
           <div class="part-card-head">
             <div class="part-icon">💬</div>
             <span class="part-weight-badge">15–20%</span>
@@ -693,7 +698,8 @@
 
         <!-- Part 5 -->
         <div onclick="window.location.assign('part5-knowledge-mining/index.html')" class="part-card"
-          style="--part-color:var(--part5-color)" style="cursor: pointer;">
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part5-knowledge-mining/index.html')"
+          style="--part-color:var(--part5-color)">
           <div class="part-card-head">
             <div class="part-icon">🔍</div>
             <span class="part-weight-badge">15–20%</span>
@@ -728,7 +734,8 @@
 
         <!-- Part 6 -->
         <div onclick="window.location.assign('part6-computer-vision/index.html')" class="part-card"
-          style="--part-color:var(--part6-color)" style="cursor: pointer;">
+          role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.assign('part6-computer-vision/index.html')"
+          style="--part-color:var(--part6-color)">
           <div class="part-card-head">
             <div class="part-icon">👁️</div>
             <span class="part-weight-badge">10–15%</span>
@@ -767,34 +774,34 @@
       <h2 style="margin-bottom:var(--space-5)">Quick Resources</h2>
       <div class="resources-grid">
         <a href="https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-102"
-           target="_blank" class="resource-card">
+           target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">📋</div>
           <div class="resource-title">Official Study Guide</div>
           <div class="resource-desc">Microsoft's official skills measured document (Dec 2025)</div>
         </a>
         <a href="https://learn.microsoft.com/en-us/credentials/certifications/exams/ai-102/practice/assessment?assessment-type=practice&assessmentId=61"
-           target="_blank" class="resource-card">
+           target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">🧪</div>
           <div class="resource-title">Free Practice Assessment</div>
           <div class="resource-desc">Official Microsoft practice questions — free</div>
         </a>
         <a href="https://learn.microsoft.com/en-us/azure/ai-services/"
-           target="_blank" class="resource-card">
+           target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">☁️</div>
           <div class="resource-title">Azure AI Services Docs</div>
           <div class="resource-desc">Official Microsoft documentation for all AI services</div>
         </a>
-        <a href="https://portal.azure.com" target="_blank" class="resource-card">
+        <a href="https://portal.azure.com" target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">🏠</div>
           <div class="resource-title">Azure Portal</div>
           <div class="resource-desc">Create resources and follow along with walkthroughs</div>
         </a>
-        <a href="https://ai.azure.com" target="_blank" class="resource-card">
+        <a href="https://ai.azure.com" target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">🤖</div>
           <div class="resource-title">Azure AI Foundry</div>
           <div class="resource-desc">Microsoft Foundry portal — central to the exam</div>
         </a>
-        <a href="https://aka.ms/examdemo" target="_blank" class="resource-card">
+        <a href="https://aka.ms/examdemo" target="_blank" rel="noopener noreferrer" class="resource-card">
           <div class="resource-icon">🖥️</div>
           <div class="resource-title">Exam Sandbox</div>
           <div class="resource-desc">Explore the real exam UI before test day</div>
@@ -843,7 +850,7 @@
       <!-- Footer -->
       <div style="text-align:center;padding:var(--space-8) 0;color:var(--text-muted);font-size:0.75rem;border-top:1px solid var(--border-subtle);">
         AI-102 Study Hub · Built for your exam · All content aligned to official Microsoft study guide (Dec 2025) ·
-        <a href="https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-102" target="_blank" style="color:var(--blue-300)">Source</a>
+        <a href="https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-102" target="_blank" rel="noopener noreferrer" style="color:var(--blue-300)">Source</a>
       </div>
 
     </div><!-- /page-content -->

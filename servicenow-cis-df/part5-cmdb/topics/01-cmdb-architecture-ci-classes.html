@@ -59,12 +59,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -406,6 +407,105 @@
           <li>Dynamic group membership does NOT update in real time — it re-evaluates when the group is queried</li>
           <li>Business Service (<code>cmdb_ci_service</code>) = high-level user-facing; Application Service (<code>cmdb_ci_service_auto</code>) = technical map</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p5-t1-quiz" id="cisdf-p5-t1-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">CMDB Architecture &amp; CI Classes Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A developer writes a report against the cmdb_ci table. Which CI records will the report return?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Only records stored directly in cmdb_ci with no class extension</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">All CI records across every CI class, because all CI tables extend cmdb_ci</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only server CIs — cmdb_ci is the server base table</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Only CIs that have not been assigned a specific class</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> In ServiceNow's table inheritance model, all CI class tables (cmdb_ci_server, cmdb_ci_linux_server, cmdb_ci_network_adapter, etc.) extend cmdb_ci. Querying cmdb_ci returns ALL CI records from all child tables. This is why cmdb_ci is the "universal" starting point for cross-class CI reports. To filter by type, use the sys_class_name field which stores the exact CI class for every record.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is the difference between a Business Service and an Application Service in the CMDB?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">They are the same thing — "Application Service" is just the technical name for "Business Service"</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Business Service (cmdb_ci_service) is the high-level user-facing service; Application Service (cmdb_ci_service_auto) is the technical implementation showing all supporting CIs and their connections</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Business Services are in the Service Catalog; Application Services are in the CMDB — they don't relate to each other</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Application Services are created manually; Business Services are created by Service Mapping</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Business Service (cmdb_ci_service) is what business users recognize — "Email Service," "HR Portal." It's a high-level grouping visible to non-technical stakeholders. Application Service (cmdb_ci_service_auto) is the technical map — all the servers, databases, and network components that make the Business Service work, discovered by Service Mapping. In the CSDM model, Business Services contain Application Services.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A Dynamic CI Group is configured with condition: class=cmdb_ci_linux_server AND location=DC-East AND operational_status=Operational. A server is decommissioned and its operational_status changes to "Non-Operational." When does the server leave the Dynamic CI Group?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Immediately — Dynamic Groups update in real time when any CI field changes</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The next time the Dynamic CI Group is evaluated (e.g., when used by a Discovery Schedule, Change Request, or report)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Never — the server must be manually removed from the group</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">After the nightly batch job runs to refresh all group memberships</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> "Dynamic" in Dynamic CI Groups means the membership is determined by a query evaluated at use time — not in real time. The group doesn't maintain a pre-computed list that updates instantly. When the group is next evaluated (e.g., when a Discovery Schedule runs using it as a scope, or when a report queries it), the condition is re-evaluated against current CMDB data, and the decommissioned server will be excluded at that point.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">CSDM (Common Service Data Model) is described as a prescriptive standard. What does this mean for CMDB implementation?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">CSDM is a mandatory plugin that must be installed before using the CMDB</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">CSDM is a recommended framework for organizing CI data — deviating from it can break Discovery mappings, IRE rules, and ServiceNow application integrations that depend on the standard class hierarchy</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">CSDM is only relevant for Service Catalog configuration, not CMDB data management</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">CSDM replaces the CMDB class hierarchy with a flat structure for easier reporting</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> CSDM is a prescriptive standard/framework, not a plugin — it's a set of recommended practices for organizing CI classes and relationships. When you deviate from CSDM (e.g., creating non-standard CI classes or relationship types), ServiceNow features that rely on the standard hierarchy (Discovery Identification Rules, IRE mappings, CMDB Health scoring, Service Mapping) may not work correctly or require custom configuration to compensate.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

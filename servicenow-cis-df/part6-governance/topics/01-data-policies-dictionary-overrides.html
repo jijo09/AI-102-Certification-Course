@@ -53,12 +53,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -270,6 +271,105 @@
           <li>Modifying the parent field affects ALL child tables — use Override or conditional Data Policy for child-only changes</li>
           <li>Business Rule with <strong>Before</strong> timing + <code>setAbortAction(true)</code> = custom field validation that blocks saves</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p6-t1-quiz" id="cisdf-p6-t1-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Data Policies &amp; Dictionary Overrides Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A UI Policy makes the "category" field mandatory on the Incident form. A REST API integration creates incidents without a category and succeeds. What is the problem?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The REST API is using a different authentication method that bypasses policies</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">UI Policies are client-side only — they don't apply to API calls. A Data Policy is required to enforce mandatory fields for API and script-based writes.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The REST API needs to include a "enforce_policies=true" header parameter</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">UI Policies apply to all write operations including API; the integration must have admin rights that bypass policies</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> UI Policies run in the browser (client-side JavaScript) and only enforce rules when a user submits a form through the UI. They have zero effect on REST API calls, import sets, scripts, or any server-side operation. Data Policies, by contrast, are enforced server-side and apply to ALL write operations regardless of source — UI, API, import, or script. To enforce mandatory fields for API integrations, you need a Data Policy.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An administrator wants to make the "business_justification" field mandatory on Change Requests but NOT on Incidents (both extend the "task" table). What is the correct approach?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Edit the task table's dictionary entry for business_justification and set mandatory=true</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Use a Dictionary Override on the change_request table to set mandatory=true, leaving the parent task table and other subtypes unaffected</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Create a UI Policy on the Change Request form only</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Remove business_justification from the Incident table dictionary</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> A Dictionary Override on the change_request table sets the field's behavior (mandatory=true) only for that child table, leaving all other task subtypes (Incident, Problem, etc.) unaffected. Option A is wrong — modifying the parent task table's dictionary makes the field mandatory on ALL subtypes. Option C (UI Policy) only applies to browser-based form submissions, not API calls. Dictionary Overrides are the correct server-side mechanism for per-child-table field behavior changes.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A Business Rule is needed to prevent saving an Incident when impact=1 (High) and urgency=3 (Low) simultaneously. Which Business Rule timing should be used?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">After — fires after the record is saved, allowing the rule to check the saved values</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Before — fires before the record is committed, allowing setAbortAction(true) to prevent the save</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Async — fires asynchronously after the save for background validation</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Display — fires when the form loads to pre-validate the fields</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Only "Before" timing Business Rules can abort a save using current.setAbortAction(true). Before rules fire before the record is written to the database — if setAbortAction(true) is called, the insert/update is cancelled and the error message shown to the user. "After" timing rules fire after the record is already committed — you cannot abort at that point. For data validation that must block saves, always use Before timing.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Which approach enforces field validation server-side for ALL write operations (forms, REST API, Import Sets, scripts) without exception?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">UI Policy with "Applies to all" checkbox enabled</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Client Script with type "onChange"</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Data Policy with "Apply to import sets" and "Apply to API" checkboxes enabled</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">ACL (Access Control List) on the field</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Data Policies are the server-side enforcement mechanism that applies to ALL write operations regardless of source. The "Apply to import sets" and "Apply to API" checkboxes extend enforcement to programmatic sources. UI Policies (A) are client-side only. Client Scripts (B) are browser-only. ACLs (D) control read/write access to records/fields, not data value validation. Data Policy is the only mechanism that truly enforces validation universally across all write pathways.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

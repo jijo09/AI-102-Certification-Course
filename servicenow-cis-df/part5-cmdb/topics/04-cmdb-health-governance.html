@@ -63,12 +63,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -467,6 +468,107 @@
           <li>A CI can be Non-Operational while still in Operate lifecycle stage</li>
           <li>CMDB Data Manager: Retire (status change only) → Archive (removed from default views) → Delete (permanent)</li>
           <li>Delete is irreversible — always archive before configuring a delete policy</li>
+        </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p5-t4-quiz" id="cisdf-p5-t4-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">CMDB Health &amp; Governance Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A CMDB Health rule requires that all server CIs have a non-empty "owned_by" field. 300 of the 500 servers in scope have owned_by populated. What is the health score for this rule?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">0% — the rule fails because not all servers comply</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">60% — 300 of 500 servers pass the rule (300/500)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">40% — 200 servers fail the rule (200/500)</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">100% — health rules only fail if zero CIs comply</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> CMDB Health scoring is a percentage of CIs that pass the rule within the scope of the inclusion filter. 300 out of 500 servers have owned_by populated, so the score is 300/500 = 60%. The health score reflects compliance rate, not a binary pass/fail. This percentage then feeds into the overall weighted CMDB Health score across all rules. Improving the score means getting more CIs to comply with the rules.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is the difference between a CI with operational_status="Non-Operational" and one in the "Retire" lifecycle stage?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">They mean the same thing — Non-Operational and Retired are synonyms</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">operational_status reflects real-time health (is it working now?); lifecycle_stage reflects the CI's phase in its overall life cycle (has it been decommissioned?). A CI can be Non-Operational while still in the Operate stage.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">lifecycle_stage is for hardware CIs; operational_status is for software CIs</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Non-Operational means the CI is being patched; Retired means it's been decommissioned permanently</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> These are two separate dimensions. operational_status is real-time health: Operational (working normally), Non-Operational (down/failed), Repair in Progress (being fixed). lifecycle_stage is the CI's position in its overall life (Design, Build, Test, Operate, Retire). A server that's temporarily down for maintenance is Non-Operational but still in the Operate stage. A server that's been permanently decommissioned would be in the Retire stage.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A CMDB Data Manager policy is configured to Archive server CIs where last_discovered is older than 90 days. What does "Archive" mean for those CI records?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Archive permanently deletes the CI records from the database</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Archive removes the CI records from default list views and searches but retains them in the database for historical reference</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Archive moves the CI records to a separate archive database outside ServiceNow</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Archive changes the CI's operational_status to "Non-Operational"</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Archive in CMDB Data Manager removes CI records from default list views and standard searches — they're hidden from day-to-day operations — but the records remain in the ServiceNow database. This preserves audit history and allows recovery if a CI was archived by mistake. The CMDB Data Manager lifecycle is: Retire (status change only) → Archive (hidden from views) → Delete (permanent, irreversible). Always configure Archive before Delete policies.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An administrator configures a CMDB Health inclusion filter for "class = cmdb_ci_server AND location = DC-East." There are 200 servers in DC-East and 300 servers in DC-West. How are the 300 DC-West servers counted in the health score?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">They are scored as 0% (failing) because they weren't included</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">They are NOT counted in the health score at all — the inclusion filter completely excludes them from scoring</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">They are scored separately with a default 50% score</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">They are automatically included with a passing score since they weren't explicitly excluded</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The inclusion filter defines the exact scope of CIs that CMDB Health scoring evaluates. CIs outside the filter are completely invisible to the health rule — they don't count as passing or failing. Only the 200 DC-East servers are scored. This is an important exam trap: excluding CIs from the filter doesn't penalize them with a 0% score; it removes them from the calculation entirely. Use inclusion filters to scope health scoring to the CIs you're responsible for managing.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
+      </div>
           <li>Data Manager can require human review task before executing each action</li>
         </ul>
       </div>

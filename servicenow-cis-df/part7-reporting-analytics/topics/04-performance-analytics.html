@@ -52,12 +52,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -242,6 +243,105 @@
           <li>Scores stored in <code>pa_scores</code> table</li>
           <li>PA Trend report type requires PA data — not available for ad-hoc table queries</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p7-t4-quiz" id="cisdf-p7-t4-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Performance Analytics Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A CMDB Manager wants to see a trend chart of CMDB Health scores over the past 12 months. The standard Report Builder only shows today's scores. What is needed?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Export CMDB Health data to Excel monthly and build the trend chart manually</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Performance Analytics — configure an Indicator for CMDB Health scores and a Data Collector to capture scores periodically. PA stores historical scores in pa_scores and enables trend visualization.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Use a line chart in Report Builder — it can show 12-month historical data from any table</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Run CMDB Health retroactively for the past 12 months to generate historical scores</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Performance Analytics is designed for historical time-series tracking. Configure a PA Indicator that captures CMDB Health score, and a Data Collector that runs periodically (daily, weekly) to save the score as a PA Score in the pa_scores table. After collecting data over time, PA can visualize it as a trend chart. Standard Report Builder (C) only shows current table state — it can't show how a value changed over 12 months because the historical values aren't stored in the source table. PA cannot backfill history (D) — it can only collect going forward from when it's configured.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Performance Analytics is configured for CMDB Health score tracking, but the Data Collector was only activated 2 months ago. The team wants to show a 12-month trend. What constraint exists?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">PA can retroactively calculate scores for the past 12 months by querying historical data</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">PA cannot backfill historical data — only 2 months of scores exist (since the Data Collector was activated). A 12-month trend chart cannot be produced until 12 months of collection has occurred.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">PA can use CMDB Health snapshots from any source to reconstruct missing months</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Data Collector should be set to a higher frequency to generate more data points retroactively</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Performance Analytics can only track data going forward from the moment a Data Collector is activated. There is no mechanism to retroactively compute or import historical PA scores. If the Data Collector started 2 months ago, only 2 months of pa_scores data exists. The trend chart will have data for those 2 months only. This is a critical operational implication: you should configure PA indicators and start collection as early as possible — even before you have a use case — so historical data is available when you need it. Increasing collection frequency (D) just creates more data points in the 2-month window, not historical data from before activation.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A PA Indicator tracks "Number of Open P1 Incidents." A Breakdown is added by "Assignment Group." What does this enable?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">It filters the Indicator to only count P1 incidents assigned to a specific group</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">It creates separate score tracks for each Assignment Group — so you can see the total P1 count AND drill into how many belong to each team, with trend history per group</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">It averages the P1 count across all assignment groups</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">It sends separate email alerts to each Assignment Group when their P1 count increases</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> A PA Breakdown segments an Indicator's score by a dimension. Adding "Assignment Group" as a Breakdown creates child score series for each group — you see the overall total AND the per-group breakdown, all with historical trend data. This enables analysis like: "Network team's P1 incident count has been increasing quarter-over-quarter while Database team's is stable." Without a Breakdown, you'd only see the total count. Breakdowns are PA's aggregation/segmentation feature — they're not filters (A), they're additional scoring dimensions on top of the Indicator.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is the key difference between a standard ServiceNow Report and a Performance Analytics Trend chart?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">PA Trend charts are faster to generate than standard reports</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Standard reports show current state of live table data; PA Trend charts show how a metric changed over time using historically collected score snapshots stored in pa_scores</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Standard reports require admin access; PA Trend charts are accessible to all users</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">PA Trend charts support more data sources than standard reports</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The fundamental distinction: Standard reports query live table data and show its current state — they reflect what's in the database right now. PA Trend charts visualize how a metric changed over time by reading from the pa_scores table, which contains point-in-time snapshots collected by Data Collectors on a schedule. If you deleted 100 incidents today, a standard report would show 100 fewer incidents; a PA Trend chart would still show the historical peak because those scores were saved in pa_scores. PA is the only mechanism in standard ServiceNow for "what was the value of this metric last month/quarter/year?"</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

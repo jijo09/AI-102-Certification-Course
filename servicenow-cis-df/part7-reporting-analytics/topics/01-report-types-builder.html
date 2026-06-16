@@ -56,12 +56,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -273,6 +274,105 @@
           <li>Group by Reference field uses the display value (name), not the sys_id</li>
           <li>Query <code>cmdb_ci</code> without class filter returns ALL CI types — always add class filter</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p7-t1-quiz" id="cisdf-p7-t1-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Report Types &amp; Report Builder Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A manager shares a report showing all open Incidents with the entire IT department. A junior analyst views the report and sees only 15 incidents, while a senior engineer sees 200 incidents. Why?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The report creator configured different filters for different roles</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Report visibility (who sees the report) is separate from ACLs (what data they see). Both users see the same report definition, but each sees only the records they have ACL permission to read.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The report needs to be re-shared with different permissions for each user group</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Report sharing only works for users with the report_admin role</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Report visibility (Me/Group/Global) controls who can see and run the report — not what data appears in it. When two users run the same report, they each see different results based on their individual ACLs. If the junior analyst can only read incidents assigned to their team, they'll see 15. If the senior engineer has broader ACL access, they'll see 200. The report definition is identical; the data returned is filtered by each viewer's permissions. This is a fundamental ServiceNow security behavior that applies to all reports and dashboards.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An administrator wants to build a line chart showing incident volume over the past 6 months, with month on the X-axis. Which field must be available on the Incident table for this chart type?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">A Reference field pointing to a time dimension table</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A Date or DateTime field (e.g., sys_created_on or opened_at) to use as the X-axis time dimension</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A Performance Analytics Indicator tracking incident volume</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">A Choice field with month values for grouping</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Line charts in the Report Builder require a Date or DateTime field on the X-axis to plot data over time. Without a date field, you cannot create a line chart — it's a hard requirement. The field must be of type Date or DateTime (like sys_created_on, opened_at, or closed_at). Option C would be needed for a Trend chart type (PA-based), not a standard line chart. Choice fields (D) could group data but don't provide the time-series axis needed for a line chart. Reference fields (A) don't provide date-based time axis functionality.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A report is built on the cmdb_ci table to count all CIs. The result shows 250,000 records. When the analyst runs the same filter but on cmdb_ci_server, it returns only 8,000. Why is the cmdb_ci query problematic?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The cmdb_ci table has stricter ACLs than cmdb_ci_server</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Querying cmdb_ci without a class filter returns ALL CI types (servers, databases, applications, network devices, etc.) — not just servers. Always add a sys_class_name filter when you need a specific CI type.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The cmdb_ci query includes archived records; cmdb_ci_server doesn't</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">250,000 is incorrect — cmdb_ci should always return fewer records than a child class</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> In ServiceNow's table inheritance model, all CI classes (cmdb_ci_server, cmdb_ci_netgear_switch, cmdb_ci_linux_server, etc.) extend the base cmdb_ci table. Querying cmdb_ci without a class filter (sys_class_name=cmdb_ci_server) returns every CI of every type — all 250,000. This is correct behavior but often produces unintended results when the goal is a specific CI class analysis. Best practice: always add a sys_class_name filter in CMDB reports. The 250,000 number (D) is expected when querying the base table without a class constraint — parent tables always have more records than individual child classes.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A report groups Incidents by "Assigned to" (a reference field to sys_user). The report shows "John Smith" as a group label. What value is actually stored in the database for the assigned_to field?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">"John Smith" — reference fields store display names for readability</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The sys_id (GUID) of John Smith's user record in sys_user. The report uses the display value (name) for the group label, but the stored value is the sys_id.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">John Smith's email address — reference fields store unique identifiers like email</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">John Smith's employee number from the HR system</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Reference fields in ServiceNow store the sys_id (GUID) of the referenced record in the database, not the display name. The Report Builder automatically resolves the sys_id to the display value (John Smith's name) for human-readable group labels — but the underlying stored value is always a sys_id. This has practical implications: when filtering a report or condition on a reference field, you filter by sys_id (or use the display value lookup), not by a readable name. Scripts working with reference fields need to use .getDisplayValue() to get the name, or .getValue() to get the sys_id.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

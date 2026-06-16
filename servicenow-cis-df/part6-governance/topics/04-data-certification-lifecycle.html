@@ -59,12 +59,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -344,6 +345,105 @@
           <li>Asset-CI reconciliation matching uses serial number or asset tag as identity keys</li>
           <li>IRE is authoritative for CI technical fields; procurement system authoritative for Asset financial fields</li>
         </ul>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p6-t4-quiz" id="cisdf-p6-t4-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Data Certification &amp; Asset-CI Lifecycle Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A certifier reviews a CI in a Data Certification run and marks it "Rejected" because the support_group field is wrong. What happens to the CI record immediately after the rejection?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The CI's support_group field is automatically cleared and set to null</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The CI data is unchanged. Data Certification only marks the cert_result record as Rejected — a separate task or change must be raised to correct the actual CI data.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The CI is locked from further Discovery updates until the rejection is resolved</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The certifier's user account is assigned as the new support_group owner</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Data Certification is a quality tracking process, not a data correction process. When a certifier marks a record "Rejected," the cert_result record is flagged and a task/change may be triggered to investigate and fix the CI — but the CI's actual field values are completely unaffected by the certification action. The CI data stays exactly as it was. This is a key exam trap: certification verifies data, it doesn't update it. The correction requires a separate workflow involving the responsible team updating the CI directly.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A server is discovered by ServiceNow Discovery and its OS version changes from "Windows Server 2019" to "Windows Server 2022". Which records are automatically updated?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Both the CI record and the linked Asset record are updated</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Only the CI record (cmdb_ci_server) is updated via IRE. The linked Asset record (alm_asset) is not updated by Discovery.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only the Asset record is updated; CI records require manual confirmation before changes take effect</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Neither — OS version changes require a Change Request before the CMDB is updated</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> ServiceNow Discovery updates CI records through the IRE pipeline — it has no mechanism to update Asset records (alm_asset). Asset records are updated by procurement systems, service desk agents, field technicians, or import sets from financial systems. The CI and Asset records represent the same physical object from different perspectives: CI = technical view (Discovery updates it), Asset = financial/lifecycle view (procurement/HR updates it). Discovery touching the Asset table would create unintended financial record changes.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An Asset record for a laptop is in "In Use" state with assigned_to = "Jane Smith". The laptop is decommissioned and the Asset is moved to "Retired" state. The linked CI's operational_status is still "Operational". What is this an example of?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Normal behavior — Asset and CI states are always independent and never need to match</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">A deliberate security feature preventing unauthorized CI state changes</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">A data quality issue — lifecycle state mismatch between Asset (Retired) and CI (Operational). Detected by CMDB Health. Should be remediated through proper offboarding process.</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Expected behavior when Discovery hasn't run yet to update the CI state</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Asset and CI lifecycle states don't automatically synchronize — this is by design (they serve different audiences), but it creates data quality risks when they diverge. A "Retired" Asset with an "Operational" CI is a CMDB health issue: incident management might still route tickets to this CI, change management might list it as in scope, and CSDM impact analysis might include it. CMDB Health flags these mismatches. The proper fix is a complete offboarding process that updates both the Asset state AND the CI operational_status to Retired/Decommissioned simultaneously.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">A new server is procured. An Asset record is created in "On Order" state. Six weeks later, it's deployed and ServiceNow Discovery finds it on the network. What is the expected behavior for Asset-CI linking?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Discovery creates a new CI and the Asset record is automatically deleted to avoid duplication</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IRE creates or updates the CI record and attempts to match it to the existing Asset record using serial number or asset tag. If matched, they are linked and shared fields synchronized. The Asset moves to In Use.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Discovery cannot create CI records when an Asset already exists for the same device</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Discovery creates the CI and the Asset record must be manually linked by a technician</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> When Discovery finds a new server, IRE processes the payload and either creates or updates a CI record. The system then checks for a matching Asset record using identity attributes (serial number, asset tag). If a match is found, the CI and Asset are linked via the alm_asset.ci and cmdb_ci.asset reference fields, and shared fields (like serial number) are synchronized. If auto-create Asset is enabled and no match exists, a new Asset record is created and linked automatically. Option D describes the manual fallback when auto-create is disabled — this creates reconciliation gaps that require manual cleanup.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
+        </div>
       </div>
 
       <!-- Navigation -->

@@ -64,12 +64,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -582,6 +583,105 @@
           </div>
           <div class="cq-hint">💡 Consider dependencies: which problem, if left unfixed, makes the other two harder or invalidates the work done on them?</div>
           <div class="cq-answer"><strong>Answer: B</strong> — Fix duplicates first. A 4.2% duplicate rate means roughly 420 CIs have duplicate records. If you build CSDM service model links now (Application Services linked to CIs), those links will be attached to the wrong CI record after deduplication merges duplicates — the merged CI may be a different record (the Master), breaking all the relationships you just built. The principle: fix foundational problems before building on top of them. Deduplication → then improve Health (Completeness, Correctness) → then build CSDM service model links. Building the service model on a deduplicated, high-quality foundation ensures the work doesn't need to be repeated. Option A starts with the most complex layer (CSDM) before the foundation (dedup) is stable.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint Quiz -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p7-t6-quiz" id="cisdf-p7-t6-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Foundation Dashboards &amp; CMDB 360 Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">CMDB Health shows all CI classes at 88%+ (Green). Yet Change Impact Analysis is failing — changes routinely trigger unexpected outages. What additional metric would explain this, and what tool surfaces it?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The CMDB Health Staleness dimension — CIs are stale even though scores appear Green</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">CMDB 360 / service model completeness is low. Individual CI data quality is fine, but Application Services and Business Applications aren't linked to infrastructure CIs — the CSDM chain needed for change impact is broken.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The CMDB Health Duplicate dimension — duplicate CIs are causing impact analysis to miss affected records</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The Change Management workflow has a configuration error unrelated to CMDB</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> CMDB Health and CMDB 360 measure different things. CMDB Health measures individual CI data quality (are fields complete, correct, compliant, current, deduplicated?). CMDB 360 measures service model completeness (are CIs connected upward through the CSDM chain to Application Services and Business Applications?). Change Impact Analysis traverses the CSDM relationship chain — if that chain is broken (low CMDB 360), impact analysis fails even if every individual CI has perfect data quality. High CMDB Health + low CMDB 360 is the classic scenario where "the data is great but the model is missing."</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">An organization has 10,000 CIs with a 4.2% duplicate rate and 28% CMDB 360 completeness. The CMDB Manager must choose a single area to address first. What is the correct priority and reasoning?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Address CMDB 360 first — business value requires the service model to be built</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Fix duplicates first — CSDM service model links built now will attach to the wrong CI records and break after deduplication merges duplicates</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Address both simultaneously — they are equally important and independent</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Neither — a 4.2% duplicate rate and 28% CSDM completeness are acceptable for most organizations</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Fix foundational problems before building on top of them. At 4.2% duplicate rate, approximately 420 CIs have duplicate records. If you build CSDM service model connections now (linking Application Services to CIs), those links attach to specific CI records. When deduplication later merges the duplicate pairs, the "loser" CI is retired — and any relationship links attached to it are broken, requiring manual re-linking. The principle: clean the foundation first (dedup), then build the structure on top (CSDM). Building CSDM on an unstable, duplicate-filled foundation means the work will need to be repeated.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">The Foundation Dashboard shows cloud VM class Staleness declining quarter-over-quarter (78% → 71% → 63%) while all other classes are stable. What is the most likely cause and the correct governance response?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Cloud VMs naturally have higher staleness — no action needed</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">New cloud regions/accounts are being added without corresponding SGC configuration. The Integration Owner for cloud must audit SGC coverage against actual cloud account inventory and expand SGC to new regions.</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Increase the Staleness Health Rule threshold for cloud VMs to stop the declining score</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Retire all stale cloud VM CIs using CMDB Data Manager</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> A gradual, class-specific staleness decline for cloud VMs while other classes are stable suggests expanding cloud infrastructure without corresponding discovery coverage expansion. Cloud VMs are discovered by Service Graph Connectors (not IP-based Discovery), and SGC must be configured per cloud account and region. As the business adds new cloud accounts or deploys VMs in new regions, those VMs aren't being discovered, making them stale. The governance response: assign the cloud Integration Owner to audit SGC configuration against the actual cloud account inventory and extend coverage. Option C hides the problem; Option D would incorrectly retire active cloud VMs in uncovered regions.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">The CMDB program improvement loop is: Ingest → Measure → Identify → Assign → Remediate → Verify → Report → repeat. What does this loop represent about CMDB governance?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Once completed, the loop can stop — CMDB quality is achieved and requires no further maintenance</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">CMDB governance is a continuous, never-ending process — new CIs are constantly ingested, new data quality issues emerge, and the organization's IT environment changes continuously, requiring ongoing measurement, remediation, and verification</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The loop only needs to run once per year during the annual CMDB audit</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Automation can replace the entire loop — with proper IRE and Discovery configuration, human governance becomes unnecessary</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> The CMDB program loop is continuous by design. The IT environment constantly changes: new servers are provisioned, applications are decommissioned, cloud infrastructure scales up and down, and new integrations are added. Each change creates potential for new data quality issues. CMDB governance is not a project with a completion date — it's an ongoing operational process. The "repeat" at the end of the loop is not optional; it's the mechanism that keeps the CMDB accurate over time. This is why GOVERN is 35% of the exam: sustained quality requires sustained governance, not a one-time configuration effort.</p>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /quiz-body -->
+
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
+
         </div>
       </div>
 

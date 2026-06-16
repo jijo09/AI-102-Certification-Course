@@ -281,8 +281,8 @@ border-radius: 20px
 ### Must Fix
 1. ~~**`prefers-reduced-motion` missing**~~ — ✅ Already implemented (line ~3955)
 2. ~~**Emoji icons in sidebar** (`⚙️`, `<<`, `>>`)~~ — ✅ Fixed: SVG mask-image (Lucide ChevronsLeft/Right + Settings)
-3. **Light mode `.btn-primary`** — glass bg nearly invisible; workaround via `!important` exists, needs cleanup
-4. **`color: #ffffff !important`** on `.text-primary` — too broad; causes light mode leaks requiring cascade of `!important` overrides (brittle)
+3. ~~**Light mode `.btn-primary`**~~ — ✅ Fixed: CSS tokens `--btn-primary-*` / `--btn-success-*` in `:root` + `body.light-mode`; no `!important`
+4. ~~**`color: #ffffff !important`** on `.text-primary`~~ — ✅ Fixed: now `var(--text-primary)` / `var(--text-secondary)`; removed redundant light-mode overrides
 
 ### Nice to Fix
 5. **Focus rings** — not explicitly styled; browsers default may strip in some contexts

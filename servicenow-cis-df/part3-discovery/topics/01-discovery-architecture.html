@@ -71,12 +71,13 @@
   </style>
 </head>
 <body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 <div class="app-shell">
   <div id="app-sidebar"></div>
-  <main class="main-content">
+  <main class="main-content" id="main-content">
     <header class="topbar">
-      <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
       <div class="topbar-breadcrumb">
         <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
         <span class="sep">›</span>
@@ -827,6 +828,97 @@
           </div>
           <div class="cq-hint">💡 Duplicates despite same IP indicate IRE couldn't match the existing CI to the incoming data.</div>
           <div class="cq-answer"><strong>Answer: B</strong> — Duplicate CIs are an IRE Identification failure. IRE should match the incoming CI to the existing one using Identification Rules (e.g., match on IP address or serial number). If the rule matches on hostname and the hostname format changed (FQDN vs. short name), IRE sees two different CIs. The fix is to configure Identification Rules to use a more stable identifier, or add hostname normalization.</div>
+        </div>
+      </div>
+
+      <!-- Exam Checkpoint -->
+      <div class="section-block" style="margin-top:var(--space-2)">
+        <span class="section-label">Exam Checkpoint</span>
+        <h2>Practice Questions</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:var(--space-6)">4 questions · Select an answer to see the explanation immediately.</p>
+        <div class="quiz-container" data-quiz="cisdf-p3-t1-quiz" id="cisdf-p3-t1-quiz">
+          <div class="quiz-header">
+            <span class="font-heading" style="font-size:0.875rem;font-weight:600">Discovery Architecture Quiz</span>
+            <span class="quiz-question-count" data-q-counter>1 / 4</span>
+          </div>
+          <div style="height:3px;background:var(--navy-800)">
+            <div style="height:3px;background:var(--blue-400);transition:width 0.4s ease;width:25%" data-q-progress></div>
+          </div>
+          <div data-quiz-body>
+            <!-- Q1 -->
+            <div data-question>
+              <div class="quiz-body">
+                <p class="quiz-question">A Discovery run shows a device with an IP found but no detailed CI attributes were collected. What is this Discovery result state called?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Failed Discovery</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Horizontal-only Discovery</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Partial Discovery</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Incomplete Scan</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> "Partial Discovery" is the specific term for when horizontal discovery succeeded (the IP is found and the device is reachable) but vertical discovery failed (credentials or firewall blocked deep attribute collection). A and D are informal terms not used in ServiceNow. B is descriptive but not the official term. The root cause of partial discovery is almost always a credentials or firewall issue.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q2 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">What is the difference between a Discovery Schedule and a Discovery Behavior?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">They are the same thing — Behavior is the modern name for Schedule</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Schedule defines what to scan and when; Behavior defines which probes/patterns run and which CI classes to create</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Schedule defines CI classes; Behavior defines IP ranges</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Schedule runs horizontally; Behavior runs vertically</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> A Discovery Schedule defines the IP ranges to scan, the timing, and which MID Server to use. A Discovery Behavior is a named profile attached to the Schedule that controls depth — which probes and patterns run, which CI classes to create, and how deep to go. A is incorrect — they are separate configurations. C and D swap or misrepresent the roles.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q3 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Discovery is creating duplicate CI records for the same server. What is the first diagnostic step?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Check MID Server logs for connection errors</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Check the Identification Rules for the CI class</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Check the Discovery Behavior configuration</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Increase the MID Server worker thread count</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="B">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>B is correct.</strong> Duplicate CIs are a symptom of IRE Identification Rules failing to match incoming data to existing records. The rule may be missing, using a bad identifier (like a changing IP), or the incoming payload may lack the expected attributes. MID Server logs (A) help with connectivity issues, not duplicates. Discovery Behavior (C) controls what is scanned, not how CIs are identified. Worker threads (D) are a performance setting.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Q4 -->
+            <div data-question style="display:none">
+              <div class="quiz-body">
+                <p class="quiz-question">Which phase of Discovery requires credentials to the target device?</p>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Horizontal Discovery only</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Neither phase requires credentials</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Vertical Discovery requires credentials; Horizontal does not</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Both Horizontal and Vertical require credentials</span></button>
+                </div>
+                <div class="quiz-explanation" data-correct="C">
+                  <div class="quiz-explanation-title">💡 Explanation</div>
+                  <p><strong>C is correct.</strong> Horizontal Discovery uses ping and port scans — unauthenticated probes that only determine if a device is alive and listening. Vertical Discovery uses SSH, WMI, SNMP, and other protocols to deep-dive into device internals, and these all require valid credentials. This is why partial Discovery (horizontal success + vertical failure) almost always indicates a credential problem.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="quiz-footer" data-quiz-footer>
+            <span class="quiz-score-display" data-q-score>Score: 0 / 4</span>
+            <div style="display:flex;gap:var(--space-3)">
+              <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
+              <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
+              <button class="btn btn-success btn-sm" data-q-submit style="display:none">Finish Quiz ✓</button>
+            </div>
+          </div>
+          <div data-quiz-result style="display:none" aria-live="polite" role="status"></div>
         </div>
       </div>
 
