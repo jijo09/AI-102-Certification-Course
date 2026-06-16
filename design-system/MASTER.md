@@ -288,7 +288,7 @@ border-radius: 20px
 5. ~~**Focus rings**~~ — ✅ Fixed: global `:focus-visible` (emerald-400 dark / #047857 light); `.tryit-input` uses `:focus-visible` + box-shadow ring; `border-radius: 3px` on outline
 6. ~~**`aria-live` regions**~~ — ✅ Fixed: `aria-live="polite" role="status"` on all quiz result divs
 7. ~~**Skip link**~~ — ✅ Fixed: `<a href="#main-content" class="skip-link">` in all 150 HTML files
-8. **`min-h-dvh`** — uses `min-height: 100vh` (fine for desktop, check mobile)
+8. ~~**`min-h-dvh`**~~ — ✅ Fixed: `@supports (min-height: 100dvh)` block upgraded body, .app-shell, .sidebar, .main-content, .selector-portal-wrap, #course-selector-portal; `100vh` kept as fallback
 
 ---
 

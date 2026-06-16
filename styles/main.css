@@ -3980,11 +3980,17 @@ body.light-mode :focus-visible {
 }
 
 /* ── Dynamic Viewport Height ───────────────────────────────────────────── */
+/* 100vh = static on iOS Safari (ignores URL bar); 100dvh = actual viewport */
 @supports (min-height: 100dvh) {
-  .sidebar {
-    min-height: 100dvh;
-  }
+  body,
+  .app-shell,
+  .main-content,
+  .selector-portal-wrap,
+  #course-selector-portal,
   body.selector-active .wh-wrap {
     min-height: 100dvh;
+  }
+  .sidebar {
+    height: 100dvh;
   }
 }
