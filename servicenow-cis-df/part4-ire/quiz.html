@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -49,12 +49,12 @@
       <div style="margin-bottom:var(--space-6)">
         <div class="badge" style="background:rgba(124,58,237,0.15);color:#a78bfa;border:1px solid rgba(124,58,237,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 4 · All 4 Topics</div>
         <h1 style="margin-bottom:var(--space-3)">Part 4 Full Quiz — IRE: Identity &amp; Reconciliation Engine</h1>
-        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions covering IRE architecture, identification rules, reconciliation rules, and deduplication &amp; remediation. Multiple exam traps included — read each question carefully.</p>
+        <p style="color:var(--text-muted);font-size:0.9rem">18 questions (15 topic questions + 3 cross-topic integration) covering IRE architecture, identification rules, reconciliation rules, and deduplication. Multiple exam traps included. Select an answer to reveal the explanation.</p>
       </div>
 
       <div class="quiz-strip" id="quiz-strip">
-        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
-        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#a78bfa">0 / 15</div></div>
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 18</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#a78bfa">0 / 18</div></div>
         <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
         <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#7c3aed"></div></div></div>
       </div>
@@ -64,7 +64,7 @@
       <div class="quiz-container" id="main-quiz">
         <div class="quiz-header">
           <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 4 — IRE: Identity &amp; Reconciliation Engine</span>
-          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+          <span class="quiz-question-count" data-q-counter>1 / 18</span>
         </div>
         <div style="height:3px;background:var(--navy-800)">
           <div style="height:3px;background:#7c3aed;transition:width 0.4s ease;width:0%" data-q-progress></div>
@@ -357,10 +357,65 @@
             </div>
           </div>
 
+
+          <!-- Q16 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: An IRE Identification Rule for cmdb_ci_server uses only serial_number as the lookup identifier. A Discovery payload arrives for a VM with serial_number = NULL (the virtualization layer didn't expose a serial number).</div>
+              <p class="quiz-question">What does IRE do when the payload's lookup identifier field is null?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">IRE creates a new CI — null identifiers always trigger CI creation</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IRE raises a critical error in cmdb_ire_event and halts all processing for the current Discovery run</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">IRE skips this Identification Rule and checks the next rule in priority order; if no rule matches, IRE may create a new CI or leave the payload unresolved depending on rule configuration</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE uses the IP address as a fallback identifier automatically, regardless of rule configuration</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> IRE processes Identification Rules in priority order. If a rule's lookup identifier field is null or absent in the payload, that rule cannot match — IRE moves to the next rule. If no rule matches, behavior depends on whether 'create if no match' is enabled. cmdb_ire_event (B) logs events but does not halt the entire run. Automatic IP fallback (D) only happens if an IP-based Identification Rule exists and is configured.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q17 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: Three data sources have Reconciliation Rules for cmdb_ci_server.cpu_count: Discovery (priority 10), an Import Set integration (priority 30), and a Service Graph Connector (priority 60). Discovery says cpu_count=8; Import Set says cpu_count=4; SGC says cpu_count=16.</div>
+              <p class="quiz-question">Which value wins for cpu_count, and why?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">16 — the most recently received payload always wins (last-write-wins)</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">8 — the source with the LOWEST priority number has the HIGHEST precedence; Discovery (priority 10) wins</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">4 — IRE averages values when three sources conflict</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">16 — the source with the highest priority number wins</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> IRE Reconciliation Rule priority: LOWER number = HIGHER authority. Priority 10 (Discovery) beats priority 30 (Import Set) beats priority 60 (SGC). Discovery's value of 8 wins cpu_count. This deterministic model prevents last-write-wins chaos (A). Averaging (C) is not an IRE behavior. This is one of the most-tested IRE concepts on the CIS-DF exam.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q18 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: The CMDB Deduplication task runs and successfully merges 200 duplicate CI pairs. An admin checks the CMDB Health dashboard afterward.</div>
+              <p class="quiz-question">Which official CMDB Health KPI dimension is most directly improved by this deduplication work?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Completeness — deduplication adds missing required fields to CI records</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Compliance — deduplication ensures CIs align with CSDM class standards</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Correctness — deduplication removes duplicate CIs, directly improving the Duplicate sub-metric within Correctness</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Staleness — deduplication removes outdated CIs from the active CMDB</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> CMDB Health has three official KPIs: Completeness, Correctness, and Compliance. Correctness has two sub-metrics: Duplicate (eliminated by deduplication) and Staleness (eliminated by refreshing or retiring stale CIs). Deduplication directly improves the Duplicate sub-metric under Correctness. This connects Part 4 (IRE Deduplication) with Part 5/6 (CMDB Health). Completeness (A) measures field population — merging duplicates doesn't add field values.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
         </div><!-- /quiz-body -->
 
         <div class="quiz-footer" data-quiz-footer>
-          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 18</span>
           <div style="display:flex;gap:var(--space-3)">
             <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
             <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
@@ -392,7 +447,7 @@
 <script src="../config.js"></script>
 <script src="../../scripts/engine.js"></script>
 <script>
-  const TOTAL = 15;
+  const TOTAL = 18;
   const dots = document.getElementById('q-dots');
 
   for (let i = 0; i < TOTAL; i++) {

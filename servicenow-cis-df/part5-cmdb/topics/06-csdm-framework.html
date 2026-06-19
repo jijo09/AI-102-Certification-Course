@@ -114,6 +114,20 @@
         </div>
       </div>
 
+      <!-- Builds On callout -->
+      <div class="callout callout-concept" style="margin-bottom:var(--space-6)">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-body">
+          <strong>Builds On</strong>
+          This topic assumes you understand three prior concepts: (1) <strong>CI class hierarchy</strong> from
+          Part 5 Topic 1 — CIs extend <code>cmdb_ci</code> into specific classes like <code>cmdb_ci_server</code>;
+          (2) <strong>Service Mapping</strong> from Part 3 Topic 4 — Service Mapping discovers application
+          infrastructure and creates Application Services (<code>cmdb_ci_service_auto</code>); (3)
+          <strong>CI relationships</strong> from Part 5 Topic 2 — <code>cmdb_rel_ci</code> links CIs
+          together. CSDM builds on all three to create a business-to-infrastructure chain.
+        </div>
+      </div>
+
       <!-- S1: Why CSDM Exists -->
       <div class="section-block" id="s1">
         <span class="section-label">Section 1</span>
@@ -287,12 +301,12 @@
           <tbody>
             <tr>
               <td>Application Service</td>
-              <td>cmdb_ci_service</td>
-              <td>A technical implementation of an application as a running service. Contains the actual server/database CIs that make it run. Discovered by Service Mapping (Part 3). This is what you model in detail.</td>
+              <td>cmdb_ci_service_auto</td>
+              <td>A technical implementation of an application as a running service. Contains the actual server/database CIs that make it run. Discovered by Service Mapping (Part 3). Note: CSDM 5 (Zurich+) renamed this to "Service Instance."</td>
             </tr>
             <tr>
               <td>Business Service</td>
-              <td>cmdb_ci_service (with service_type=business)</td>
+              <td>cmdb_ci_service_business</td>
               <td>A grouping of Application Services that together deliver a business outcome. This is the IT perspective on a Business Application.</td>
             </tr>
             <tr>
@@ -342,7 +356,7 @@
           <tbody>
             <tr>
               <td>Technical Service</td>
-              <td>cmdb_ci_service (with service_type=technical)</td>
+              <td>cmdb_ci_service_technical</td>
               <td>A specific technical capability used internally by IT — like "Database Platform" or "Load Balancing Service." Not visible to business users, but fundamental to Application Services.</td>
             </tr>
             <tr>
@@ -445,11 +459,15 @@
             </tr>
             <tr>
               <td>CSDM 3.x</td>
-              <td>Added Business Capability. Introduced Product. Strengthened CMDB Health scoring for CSDM completeness. Current major version for exam purposes.</td>
+              <td>Added Business Capability. Introduced Product. Strengthened CMDB Health scoring for CSDM completeness.</td>
             </tr>
             <tr>
               <td>CSDM 4.x</td>
               <td>Further refinement. Added dynamic CI groups for CSDM modeling. Focus on automated relationship population.</td>
+            </tr>
+            <tr>
+              <td>CSDM 5 (Zurich+)</td>
+              <td>Renamed "Application Service" → "Service Instance" (<code>cmdb_ci_service_auto</code> remains the table name). Introduced Foundation domain. Current version. High-probability exam trap: exam scenarios may use either term — know both.</td>
             </tr>
           </tbody>
         </table>
@@ -517,7 +535,7 @@
           <li><strong>CSDM</strong> = Common Service Data Model. ServiceNow's framework for mapping infrastructure CIs to business services and capabilities.</li>
           <li><strong>Four domains:</strong> (1) Business — capabilities, applications; (2) Design — services, offerings; (3) Manage — technical services, vendors, contracts; (4) Infrastructure CIs.</li>
           <li><strong>Business Application (cmdb_ci_business_app)</strong> = business-level name for an application. NOT a server or app instance CI.</li>
-          <li><strong>Application Service (cmdb_ci_service)</strong> = the technical service map containing all CIs. Populated by Service Mapping. Sits between Business (Domain 2) and Infrastructure (Domain 4).</li>
+          <li><strong>Application Service (cmdb_ci_service_auto)</strong> = the technical service map containing all CIs. Populated by Service Mapping. Sits between Business (Domain 2) and Infrastructure (Domain 4). Renamed "Service Instance" in CSDM 5 (Zurich+).</li>
           <li><strong>Technical Service</strong> = internal shared IT service used by Application Services (e.g., "Database Platform").</li>
           <li><strong>CSDM is a framework, not a plugin.</strong> Uses existing CMDB CI classes, just in a prescribed way.</li>
           <li><strong>CSDM requires good CMDB data.</strong> No value without accurate Domain 4 CIs.</li>
@@ -536,7 +554,7 @@
             <div class="term-def">Domain 1 CSDM object. The business-level name for an application as recognized by stakeholders. Connected downward to Application Services (Domain 2). Not a technical CI.</div>
           </div>
           <div class="term-card">
-            <div class="term-name">Application Service (cmdb_ci_service)</div>
+            <div class="term-name">Application Service (cmdb_ci_service_auto)</div>
             <div class="term-def">Domain 2 CSDM object. The technical service map — contains all infrastructure CIs that make the application run. Populated by Service Mapping. Critical junction between business and IT.</div>
           </div>
           <div class="term-card">
@@ -578,10 +596,10 @@
             <div>A) cmdb_ci_appl (software instance)</div>
             <div>B) cmdb_ci_server (the server running the application)</div>
             <div>C) cmdb_ci_business_app</div>
-            <div>D) cmdb_ci_service (Application Service)</div>
+            <div>D) cmdb_ci_service_auto (Application Service)</div>
           </div>
           <div class="cq-hint">💡 CSDM uses specific CI classes for each domain concept. Which class represents the business-level application concept?</div>
-          <div class="cq-answer"><strong>Answer: C</strong> — cmdb_ci_business_app is the CSDM-prescribed CI class for Business Applications (Domain 1). This is distinct from cmdb_ci_appl (which is a software installation CI in Domain 4), cmdb_ci_server (infrastructure), and cmdb_ci_service (Application Service in Domain 2). The Business Application is the business-level name; the Application Service is the technical implementation. These are two separate records linked by a relationship.</div>
+          <div class="cq-answer"><strong>Answer: C</strong> — cmdb_ci_business_app is the CSDM-prescribed CI class for Business Applications (Domain 1). This is distinct from cmdb_ci_appl (software installation CI in Domain 4), cmdb_ci_server (infrastructure), and cmdb_ci_service_auto (Application Service in Domain 2). The Business Application is the business-level name; the Application Service is the technical implementation. These are two separate records linked by a relationship.</div>
         </div>
 
         <div class="checkpoint-q" onclick="this.classList.toggle('open')">
@@ -597,7 +615,7 @@
         </div>
 
         <div class="checkpoint-q" onclick="this.classList.toggle('open')">
-          <div class="cq-question">4. What is the difference between an "Application Service" (cmdb_ci_service, Domain 2) and a "Technical Service" (Domain 3) in CSDM?</div>
+          <div class="cq-question">4. What is the difference between an "Application Service" (cmdb_ci_service_auto, Domain 2) and a "Technical Service" (Domain 3) in CSDM?</div>
           <div class="cq-options">
             <div>A) Application Service is for cloud CIs only; Technical Service is for on-premises CIs</div>
             <div>B) Application Service maps a complete application's infrastructure (visible to business users); Technical Service is a shared internal IT capability used by multiple Application Services</div>
@@ -659,13 +677,13 @@
                 <p class="quiz-question">Which CMDB CI class should be used for the business-level application named "Salesforce CRM" in CSDM (the application as business stakeholders identify it, not the technical servers)?</p>
                 <div class="quiz-options">
                   <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">cmdb_ci_appl (software installation)</span></button>
-                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">cmdb_ci_service (Application Service)</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">cmdb_ci_service_auto (Application Service)</span></button>
                   <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">cmdb_ci_business_app (Business Application)</span></button>
                   <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">cmdb_ci_server (the Salesforce server)</span></button>
                 </div>
                 <div class="quiz-explanation" data-correct="C">
                   <div class="quiz-explanation-title">💡 Explanation</div>
-                  <p><strong>C is correct.</strong> cmdb_ci_business_app is the CSDM-prescribed class for Business Applications (Domain 1). This represents "Salesforce CRM" as business stakeholders know it — the named application, not the technical servers or software installations. cmdb_ci_appl (A) is a software installation CI in Domain 4. cmdb_ci_service (B) is the Application Service (the technical service map). These are distinct objects at different CSDM layers, all connected by relationships.</p>
+                  <p><strong>C is correct.</strong> cmdb_ci_business_app is the CSDM-prescribed class for Business Applications (Domain 1). This represents "Salesforce CRM" as business stakeholders know it — the named application, not the technical servers or software installations. cmdb_ci_appl (A) is a software installation CI in Domain 4. cmdb_ci_service_auto (B) is the Application Service (the technical service map). These are distinct objects at different CSDM layers, all connected by relationships.</p>
                 </div>
               </div>
             </div>

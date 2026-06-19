@@ -36,11 +36,23 @@ Each exam objective gets a dedicated page built for retention:
 
 ### Practice Quizzes
 - **Scenario-based questions** — written in real exam style
+- **18 questions per part** — including 3 cross-topic questions at the end of each set
 - **Shuffle on load** — questions randomise on each attempt
-- **Exam mode** — answer all first, then review all at once
-- **Instant feedback mode** — explanation shown immediately after each answer
+- **Instant feedback** — explanation shown immediately after each answer
 - **Per-topic score breakdown** — end screen splits score by domain
 - **Score history** — persisted per course in `localStorage`
+- **Quiz hub** — `quizzes.html` top-level hub; accessible via sidebar "Practice Quizzes" tab
+
+### Mock Exams (CIS-DF)
+Full-length exam simulations in `mock-exams/`:
+- **3 exams × 60 questions** — unique questions per exam, no repeats across exams
+- **90-minute countdown timer** — amber at 15 min, red at 5 min, auto-submits at 0:00
+- **70% pass mark** — PASS / FAIL verdict with SVG score circle
+- **Answers hidden during exam** — revealed only after Submit (real exam behaviour)
+- **Post-exam review** — per-domain score bars + full explanations for every question
+- **Flag for review** — 🚩 button marks questions; dot navigator highlights flagged
+- **Mix of single-select and multi-select** (~20% "Select TWO" questions)
+- **Best score persistence** — top score per exam saved to `localStorage`
 
 ### Revision Center
 Unified study session without page-hopping:
@@ -172,9 +184,17 @@ Certification-Study-Hub/
 └── servicenow-cis-df/
     ├── index.html                    # CIS-DF dashboard
     ├── config.js                     # CIS-DF course config
-    ├── revision.html                 # CIS-DF revision center
+    ├── revision.html                 # CIS-DF revision center (flashcard hub)
+    ├── quizzes.html                  # Practice quiz hub (links all 8 part quizzes)
     ├── scripts/
     │   └── study-data.js             # CIS-DF flashcard data (43 topics, 8 parts)
+    ├── mock-exams/
+    │   ├── index.html                # Mock exam hub (shows best scores)
+    │   ├── exam1.html                # Exam 1 — GOVERN & Foundations (60 Q)
+    │   ├── exam2.html                # Exam 2 — INGEST & IRE Deep Dive (60 Q)
+    │   ├── exam3.html                # Exam 3 — Advanced & INSIGHT Focus (60 Q)
+    │   ├── mock-engine.js            # Shared exam engine (timer, scoring, review)
+    │   └── mock-exams.css            # Exam UI styles
     ├── part1-data-model/
     ├── part2-import-migration/
     ├── part3-discovery/

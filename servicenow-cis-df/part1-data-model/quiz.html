@@ -49,12 +49,12 @@
       <div style="margin-bottom:var(--space-6)">
         <div class="badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 1 · All 4 Topics</div>
         <h1 style="margin-bottom:var(--space-3)">Part 1 Full Quiz — ServiceNow Data Model</h1>
-        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions on table hierarchy, field types, relationships, and schema design. Select an answer to reveal the explanation.</p>
+        <p style="color:var(--text-muted);font-size:0.9rem">18 questions (15 topic questions + 3 cross-topic integration) on table hierarchy, field types, relationships, schema design, and CMDB connections. Select an answer to reveal the explanation.</p>
       </div>
 
       <div class="quiz-strip" id="quiz-strip">
-        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
-        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 15</div></div>
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 18</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 18</div></div>
         <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
         <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0891b2"></div></div></div>
       </div>
@@ -357,10 +357,67 @@
             </div>
           </div>
 
+          <!-- Q16 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: A report runs against <code>cmdb_ci</code> with no conditions and returns 85,000 records spanning servers, laptops, applications, and network devices. A junior admin expected far fewer because they only see a few fields in the <code>cmdb_ci</code> form.</div>
+              <p class="quiz-question">Why does a query on <code>cmdb_ci</code> return records from child tables like <code>cmdb_ci_server</code> and <code>cmdb_ci_appl</code>?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">ServiceNow nightly jobs copy all child-table records into <code>cmdb_ci</code> as flat rows</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text"><code>cmdb_ci</code> is a database view that UNIONs all CMDB child tables on every query</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">ServiceNow uses single-table inheritance — all CI records share the same underlying storage and are queryable via parent-class selectors; <code>sys_class_name</code> identifies each record's actual class</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The report tool automatically expands Reference fields to include child-table data</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Single-table inheritance (Part 1 Topic 1) means all CI records exist in a unified physical table. Querying <code>cmdb_ci</code> returns all CIs regardless of class because they share that base. The <code>sys_class_name</code> field identifies each record's real class (e.g., <code>cmdb_ci_server</code>). This is the foundation for CMDB architecture in Part 5 — the entire CI class hierarchy is built on this inheritance model.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q17 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: An admin needs a report showing open Incidents with the <code>name</code> and <code>operational_status</code> of each affected CI. The Incident table only has a Reference field to <code>cmdb_ci</code>, not flat CI columns.</div>
+              <p class="quiz-question">Which Part 1 feature creates a virtual read-only joined table that lets the Report Builder access both Incident and <code>cmdb_ci</code> columns as flat fields?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Import Sets — stage CI data into an Incident staging table for reporting</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Coalesce — merges Incident and CI data at query time based on a shared field</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Database Views — define a cross-table join that exposes fields from multiple tables as a single flat virtual table</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">GlideRecord — allows scripts to join tables at runtime for report generation</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Database Views (Part 1 Topic 3) are exactly this: virtual read-only tables defined in ServiceNow that join related tables. Once created, the Report Builder treats the view as a flat table. This is the direct prerequisite for Part 7's advanced reporting scenarios. Import Sets (A) are for data ingestion. Coalesce (B) is a Transform Map deduplication technique. GlideRecord (D) is a scripting API, not a reporting configuration.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q18 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: An admin queries <code>sys_user_role</code> to find all users assigned the <code>itil</code> role. The query returns only 4 rows — the exact number of role definitions in the system, not the hundreds of users expected.</div>
+              <p class="quiz-question">What is wrong with the approach, and which table contains the actual user-to-role assignments?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text"><code>sys_user_role</code> only stores roles for administrators — regular user role assignments are in <code>sys_group_has_role</code></span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text"><code>sys_user_role</code> is the role DEFINITION table (each row = one role). User-to-role assignments (each row = one user having one role) are in the M2M junction table <code>sys_user_has_role</code></span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The admin needs to add a <code>user IS NOT NULL</code> filter to <code>sys_user_role</code> to see user records</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text"><code>sys_user_role</code> only shows direct role grants; inherited roles from groups are in <code>sys_user_role_inherited</code></span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> This is a classic exam trap also corrected in Part 1 Topic 3. <code>sys_user_role</code> stores ROLE DEFINITIONS (name, description, elevated_privilege) — there are only a few rows because there are few distinct roles. The M2M junction <code>sys_user_has_role</code> has one row per user-role assignment. This "definition table vs assignment junction" pattern repeats throughout ServiceNow (e.g., <code>sys_group</code> defines groups, <code>sys_user_grmember</code> assigns users to groups).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
         </div><!-- /quiz-body -->
 
         <div class="quiz-footer" data-quiz-footer>
-          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 18</span>
           <div style="display:flex;gap:var(--space-3)">
             <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
             <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
@@ -392,7 +449,7 @@
 <script src="../config.js"></script>
 <script src="../../scripts/engine.js"></script>
 <script>
-  const TOTAL = 15;
+  const TOTAL = 18;
   const dots = document.getElementById('q-dots');
 
   for (let i = 0; i < TOTAL; i++) {

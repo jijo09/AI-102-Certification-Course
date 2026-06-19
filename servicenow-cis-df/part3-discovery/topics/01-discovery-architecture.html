@@ -140,8 +140,9 @@
             Many organizations use both. SGC for AWS tells you which EC2 instances exist and
             their AWS-level properties (instance type, AMI, tags). Discovery then scans those
             same EC2 instances via their IP addresses to find OS-level details (exact kernel
-            version, installed packages, running services). IRE reconciles both data streams
-            onto the same CI record.
+            version, installed packages, running services). IRE (Identity &amp; Reconciliation Engine
+            — covered fully in Part 4) reconciles both data streams onto the same CI record,
+            preventing duplicates and resolving field-level conflicts between sources.
           </div>
         </div>
 

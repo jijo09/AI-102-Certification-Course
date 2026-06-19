@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Practice Quizzes — CIS-DF Study Hub</title>
+  <link rel="stylesheet" href="../styles/main.css" />
+  <style>
+    .qhub { max-width: 860px; margin: 0 auto; padding: var(--space-8) var(--space-6); }
+    .qhub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: var(--space-4); margin-top: var(--space-6); }
+    .qhub-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-2xl); padding: var(--space-6);
+      text-decoration: none; color: inherit;
+      transition: all 0.2s; display: flex; flex-direction: column; gap: var(--space-3);
+      position: relative; overflow: hidden;
+    }
+    .qhub-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--card-accent, #0891b2);
+      border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    }
+    .qhub-card:hover { transform: translateY(-3px); border-color: rgba(8,145,178,0.3); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+    .qhub-part { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .qhub-title { font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700; line-height: 1.3; }
+    .qhub-meta { font-size: 0.75rem; color: var(--text-muted); }
+    .qhub-weight { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; align-self: flex-start; }
+    .mock-banner {
+      margin-top: var(--space-8); padding: var(--space-6);
+      background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.25);
+      border-radius: var(--radius-2xl); display: flex; align-items: center; gap: var(--space-5);
+      text-decoration: none; color: inherit; transition: background 0.2s;
+    }
+    .mock-banner:hover { background: rgba(168,85,247,0.14); }
+  </style>
+</head>
+<body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content" id="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" aria-label="Open navigation menu"
+        onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <span class="current">Practice Quizzes</span>
+      </div>
+    </header>
+
+    <div class="qhub animate-fade-in">
+      <div class="badge" style="background:rgba(8,145,178,0.12);color:#22d3ee;margin-bottom:var(--space-4);display:inline-block;padding:4px 14px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading)">✏️ Practice Quizzes</div>
+      <h1 style="margin-bottom:var(--space-2)">CIS-DF Practice Quizzes</h1>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:var(--space-6);max-width:600px;line-height:1.7">
+        18 questions per part — answers revealed after each selection with full explanations.
+        Work through each part in order or jump to any section you want to reinforce.
+      </p>
+
+      <div class="qhub-grid">
+        <a href="part1-data-model/quiz.html" class="qhub-card" style="--card-accent:#0891b2">
+          <div class="qhub-part">Part 1</div>
+          <div class="qhub-title">ServiceNow Data Model</div>
+          <div class="qhub-meta">18 questions · Tables, Fields, Relationships, Database Views</div>
+          <div class="qhub-weight" style="background:rgba(8,145,178,0.14);color:#22d3ee">15% exam weight</div>
+        </a>
+        <a href="part2-import-migration/quiz.html" class="qhub-card" style="--card-accent:#7c3aed">
+          <div class="qhub-part">Part 2</div>
+          <div class="qhub-title">Import Sets, SGC &amp; Ingestion</div>
+          <div class="qhub-meta">18 questions · Import Sets, Transform Maps, Data Sources, SGC</div>
+          <div class="qhub-weight" style="background:rgba(124,58,237,0.14);color:#a78bfa">10% exam weight</div>
+        </a>
+        <a href="part3-discovery/quiz.html" class="qhub-card" style="--card-accent:#0e7490">
+          <div class="qhub-part">Part 3</div>
+          <div class="qhub-title">Discovery &amp; Service Mapping</div>
+          <div class="qhub-meta">18 questions · Discovery Architecture, MID Server, Patterns, ACC</div>
+          <div class="qhub-weight" style="background:rgba(14,116,144,0.14);color:#67e8f9">7% exam weight</div>
+        </a>
+        <a href="part4-ire/quiz.html" class="qhub-card" style="--card-accent:#059669">
+          <div class="qhub-part">Part 4</div>
+          <div class="qhub-title">IRE — Identity &amp; Reconciliation</div>
+          <div class="qhub-meta">18 questions · Identification, Reconciliation, Deduplication</div>
+          <div class="qhub-weight" style="background:rgba(5,150,105,0.14);color:#4ade80">2% exam weight</div>
+        </a>
+        <a href="part5-cmdb/quiz.html" class="qhub-card" style="--card-accent:#d97706">
+          <div class="qhub-part">Part 5</div>
+          <div class="qhub-title">CMDB, CSDM &amp; Service Modeling</div>
+          <div class="qhub-meta">18 questions · CI Classes, CSDM Framework, CI Alignment</div>
+          <div class="qhub-weight" style="background:rgba(217,119,6,0.14);color:#fbbf24">11% exam weight</div>
+        </a>
+        <a href="part6-governance/quiz.html" class="qhub-card" style="--card-accent:#be185d">
+          <div class="qhub-part">Part 6</div>
+          <div class="qhub-title">Governance &amp; Data Quality</div>
+          <div class="qhub-meta">18 questions · Data Policies, CMDB Health, Data Certification</div>
+          <div class="qhub-weight" style="background:rgba(190,24,93,0.14);color:#f472b6">35% exam weight</div>
+        </a>
+        <a href="part7-reporting-analytics/quiz.html" class="qhub-card" style="--card-accent:#4f46e5">
+          <div class="qhub-part">Part 7</div>
+          <div class="qhub-title">Reporting, Analytics &amp; CMDB WS</div>
+          <div class="qhub-meta">18 questions · Reports, PA, CMDB Workspace, NLQ, CMDB 360</div>
+          <div class="qhub-weight" style="background:rgba(79,70,229,0.14);color:#a5b4fc">20% exam weight</div>
+        </a>
+        <a href="part8-integration-advanced/quiz.html" class="qhub-card" style="--card-accent:#0f766e">
+          <div class="qhub-part">Part 8</div>
+          <div class="qhub-title">Integration &amp; Advanced</div>
+          <div class="qhub-meta">18 questions · REST API, IntegrationHub, Archiving, Data Health</div>
+          <div class="qhub-weight" style="background:rgba(15,118,110,0.14);color:#2dd4bf">Advanced topics</div>
+        </a>
+      </div>
+
+      <a href="mock-exams/index.html" class="mock-banner">
+        <div style="font-size:2.2rem">🎯</div>
+        <div>
+          <div style="font-family:var(--font-heading);font-weight:800;font-size:1rem;color:#c084fc;margin-bottom:4px">Ready for the full exam experience?</div>
+          <div style="font-size:0.85rem;color:var(--text-muted)">Take a Mock Exam — 60 questions, 90-minute timer, 70% pass mark. Answers revealed only after you submit.</div>
+        </div>
+        <div style="margin-left:auto;font-size:1.3rem;color:var(--text-muted)">›</div>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script src="../scripts/engine.js"></script>
+<script src="scripts/study-data.js"></script>
+</body>
+</html>

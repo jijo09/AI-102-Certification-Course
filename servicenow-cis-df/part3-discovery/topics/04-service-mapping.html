@@ -607,7 +607,7 @@
         <h2>Service Mapping — Key Facts</h2>
         <ul>
           <li><strong>Service Mapping discovers relationships</strong> between CIs, not just CI attributes. Discovery finds CIs; Service Mapping connects them.</li>
-          <li><strong>Application Service CI</strong> (<code>cmdb_ci_service</code>) = the top-level CI representing an end-to-end business application.</li>
+          <li><strong>Application Service CI</strong> (<code>cmdb_ci_service_auto</code>) = the top-level CI representing an end-to-end business application. Called "Service Instance" in CSDM 5 (Zurich+).</li>
           <li><strong>Top-Down:</strong> Starts from URL/entry point, follows live connections tier by tier. Most accurate. Needs credentials per tier.</li>
           <li><strong>Bottom-Up:</strong> Starts from a known CI, discovers services that depend on it.</li>
           <li><strong>Traffic-Based:</strong> Uses NetFlow/SNMP network data to infer connections. No credentials needed. Less detailed.</li>

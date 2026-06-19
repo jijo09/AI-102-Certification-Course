@@ -92,6 +92,19 @@
         </div>
       </div>
 
+      <div class="callout callout-concept" style="margin-bottom:var(--space-6)">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-body">
+          <strong>Builds On — Part 1 Data Model</strong>
+          Import Sets write data into ServiceNow's live tables — the same tables you studied in Part 1.
+          You need <strong>table inheritance</strong> (Part 1 Topic 1) to understand which target table
+          to write a CI into (<code>cmdb_ci_server</code> vs <code>cmdb_ci_computer</code>), and
+          <strong>field types and the dictionary</strong> (Part 1 Topic 2) to understand why Transform
+          Maps must coerce data types before writing. The staging table is temporary; the target table
+          is a real Part 1 table in the live CMDB.
+        </div>
+      </div>
+
       <!-- S1 -->
       <div class="section-block" id="s1">
         <span class="section-label">Section 1</span>

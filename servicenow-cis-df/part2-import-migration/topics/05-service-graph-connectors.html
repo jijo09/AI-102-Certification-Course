@@ -107,6 +107,19 @@
         </div>
       </div>
 
+      <!-- Forward references callout -->
+      <div class="callout callout-concept" style="margin-bottom:var(--space-6)">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-body">
+          <strong>Forward References — Concepts Introduced Here, Covered Later</strong>
+          This topic introduces two key concepts that are covered in depth in later parts:
+          <strong>MID Server</strong> (covered fully in Part 3 Topic 2 — Discovery Architecture) and
+          <strong>IRE</strong> — the Identity and Reconciliation Engine that processes all SGC data
+          (covered fully in Part 4). You only need a working understanding of both here;
+          the exam details are in those dedicated topics.
+        </div>
+      </div>
+
       <!-- S1: Why direct writes fail -->
       <div class="section-block" id="s1">
         <span class="section-label">Section 1</span>
@@ -238,8 +251,7 @@
         <h2>The MID Server — ServiceNow's On-Premise Proxy</h2>
         <p>
           Many of your data sources sit inside a private network — on-premise servers,
-          private cloud VPCs, internal databases. ServiceNow runs in the cloud (on Anthropic's or
-          ServiceNow's own data centers). These two worlds cannot talk directly because your
+          private cloud VPCs, internal databases. ServiceNow runs in the cloud (on ServiceNow's own data centers). These two worlds cannot talk directly because your
           firewall blocks inbound connections from the internet.
         </p>
         <p>

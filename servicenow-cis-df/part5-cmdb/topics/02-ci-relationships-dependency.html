@@ -93,6 +93,20 @@
         </div>
       </div>
 
+      <div class="callout callout-concept" style="margin-bottom:var(--space-6)">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-body">
+          <strong>Builds On — Part 1 Topic 3 &amp; Part 5 Topic 1</strong>
+          <code>cmdb_rel_ci</code> is a many-to-many join table — exactly the pattern covered in
+          <strong>Part 1 Topic 3</strong> (Relationships &amp; Database Views). If the concept of a
+          self-referential M2M table feels unfamiliar, review that topic first. <strong>Part 5 Topic
+          1</strong> (CI class hierarchy) is the other prerequisite: both the <code>parent</code> and
+          <code>child</code> columns in <code>cmdb_rel_ci</code> are references to <code>cmdb_ci</code>
+          — the root class from Topic 1. CI Relationships are also what CSDM service modeling (Part 5
+          Topics 6–7) uses to link Business Applications to Technical Services to Infrastructure CIs.
+        </div>
+      </div>
+
       <!-- S1 -->
       <div class="section-block" id="s1">
         <span class="section-label">Section 1</span>

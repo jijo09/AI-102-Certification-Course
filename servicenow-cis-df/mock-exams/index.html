@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mock Exams — CIS-DF Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <link rel="stylesheet" href="mock-exams.css" />
+</head>
+<body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content" id="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <span class="current">Mock Exams</span>
+      </div>
+    </header>
+
+    <div class="me-hub animate-fade-in">
+
+      <div class="badge" style="background:rgba(8,145,178,0.12);color:#22d3ee;margin-bottom:var(--space-4);display:inline-block;padding:4px 14px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading)">🎯 Exam Simulation</div>
+      <h1 style="margin-bottom:var(--space-3)">CIS-DF Mock Exams</h1>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:var(--space-3);max-width:600px;line-height:1.7">
+        Three full-length timed exams matching the real CIS-DF format: 60 questions, 90 minutes, 70% pass mark.
+        Answers and explanations are revealed after you submit — just like the real thing.
+      </p>
+
+      <div style="display:flex;gap:var(--space-6);flex-wrap:wrap;margin-bottom:var(--space-8);padding:var(--space-5) var(--space-6);background:rgba(8,145,178,0.06);border:1px solid rgba(8,145,178,0.15);border-radius:var(--radius-xl)">
+        <div><div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:2px">Questions</div><div style="font-family:var(--font-heading);font-weight:800;color:#22d3ee">60 per exam</div></div>
+        <div><div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:2px">Time Limit</div><div style="font-family:var(--font-heading);font-weight:800;color:#22d3ee">90 minutes</div></div>
+        <div><div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:2px">Pass Mark</div><div style="font-family:var(--font-heading);font-weight:800;color:#22c55e">70% (42/60)</div></div>
+        <div><div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:2px">Question Types</div><div style="font-family:var(--font-heading);font-weight:800">Single &amp; Multi-Select</div></div>
+        <div><div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:2px">Auto-Submit</div><div style="font-family:var(--font-heading);font-weight:800">At time 00:00</div></div>
+      </div>
+
+      <div class="me-hub-grid" id="exam-grid"></div>
+
+      <div style="margin-top:var(--space-10);padding:var(--space-6);background:rgba(255,255,255,0.02);border:1px solid var(--border-subtle);border-radius:var(--radius-xl)">
+        <div style="font-family:var(--font-heading);font-size:0.8rem;font-weight:700;color:var(--text-muted);margin-bottom:var(--space-4)">📋 Exam Tips</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--space-4)">
+          <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6"><strong style="color:var(--text-primary)">Flag &amp; Review</strong><br>Use the 🚩 flag button to mark uncertain questions. Come back via the dot navigator before submitting.</div>
+          <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6"><strong style="color:var(--text-primary)">Multi-Select</strong><br>Questions saying "Select TWO" require exactly that many answers. Partial credit is not awarded — all correct options must be chosen.</div>
+          <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6"><strong style="color:var(--text-primary)">Timer Warning</strong><br>Timer turns amber at 15 minutes remaining, red at 5 minutes. At 00:00 the exam auto-submits with current answers.</div>
+          <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6"><strong style="color:var(--text-primary)">Domain Focus</strong><br>GOVERN is 35% of the exam. If short on time, prioritize GOVERN questions — they carry the most weight.</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script src="../scripts/study-data.js"></script>
+<script>
+  var EXAMS = [
+    {
+      id: 'exam1',
+      file: 'exam1.html',
+      title: 'Mock Exam 1',
+      subtitle: 'GOVERN & Foundations Focus',
+      desc: 'Strong coverage of Data Policies, Dictionary Overrides, CMDB Health KPIs, operational_status, IRE fundamentals, and CSDM basics.',
+      accent: '#0891b2',
+      tags: [
+        { label:'GOVERN 35%', bg:'rgba(168,85,247,0.14)', fg:'#c084fc' },
+        { label:'CSDM 15%',   bg:'rgba(239,68,68,0.14)',  fg:'#f87171' },
+        { label:'INGEST 19%', bg:'rgba(8,145,178,0.14)',  fg:'#22d3ee' },
+        { label:'CONFIG 11%', bg:'rgba(34,197,94,0.14)',  fg:'#4ade80' },
+        { label:'INSIGHT 20%',bg:'rgba(251,191,36,0.14)', fg:'#fbbf24' },
+      ]
+    },
+    {
+      id: 'exam2',
+      file: 'exam2.html',
+      title: 'Mock Exam 2',
+      subtitle: 'INGEST & IRE Deep Dive',
+      desc: 'Heavy focus on Discovery lifecycle, Import Sets, Transform Maps, Service Graph Connectors, IRE phases, and Reconciliation Rule priority.',
+      accent: '#7c3aed',
+      tags: [
+        { label:'GOVERN 35%', bg:'rgba(168,85,247,0.14)', fg:'#c084fc' },
+        { label:'INGEST 19%', bg:'rgba(8,145,178,0.14)',  fg:'#22d3ee' },
+        { label:'CONFIG 11%', bg:'rgba(34,197,94,0.14)',  fg:'#4ade80' },
+        { label:'CSDM 15%',   bg:'rgba(239,68,68,0.14)',  fg:'#f87171' },
+        { label:'INSIGHT 20%',bg:'rgba(251,191,36,0.14)', fg:'#fbbf24' },
+      ]
+    },
+    {
+      id: 'exam3',
+      file: 'exam3.html',
+      title: 'Mock Exam 3',
+      subtitle: 'Advanced & INSIGHT Focus',
+      desc: 'Advanced scenarios: CSDM alignment, PA analytics, Agent Client Collector, complex multi-source IRE conflicts, and governance workflows.',
+      accent: '#059669',
+      tags: [
+        { label:'GOVERN 35%', bg:'rgba(168,85,247,0.14)', fg:'#c084fc' },
+        { label:'INSIGHT 20%',bg:'rgba(251,191,36,0.14)', fg:'#fbbf24' },
+        { label:'CSDM 15%',   bg:'rgba(239,68,68,0.14)',  fg:'#f87171' },
+        { label:'CONFIG 11%', bg:'rgba(34,197,94,0.14)',  fg:'#4ade80' },
+        { label:'INGEST 19%', bg:'rgba(8,145,178,0.14)',  fg:'#22d3ee' },
+      ]
+    }
+  ];
+
+  function renderHub() {
+    var grid = document.getElementById('exam-grid');
+    grid.innerHTML = EXAMS.map(function(e, i) {
+      var best = parseInt(localStorage.getItem('cisdf_mock_' + e.id) || '0', 10);
+      var bestColor = best >= 70 ? '#22c55e' : best > 0 ? '#fbbf24' : 'var(--text-muted)';
+      var tagsHtml = e.tags.map(function(t) {
+        return '<span class="me-hub-tag" style="background:' + t.bg + ';color:' + t.fg + '">' + t.label + '</span>';
+      }).join('');
+      return '<a href="' + e.file + '" class="me-hub-card" style="--card-accent:' + e.accent + '">' +
+        '<div class="me-hub-num">EXAM ' + (i+1) + ' OF 3 · 60 QUESTIONS · 90 MIN</div>' +
+        '<div class="me-hub-title">' + e.title + '</div>' +
+        '<div class="me-hub-meta">' + e.desc + '</div>' +
+        '<div class="me-hub-best" style="color:' + bestColor + ';margin-bottom:var(--space-4)">' +
+          (best > 0 ? 'Best score: ' + best + '%' + (best >= 70 ? ' ✓ PASS' : ' — keep going') : 'Not attempted yet') +
+        '</div>' +
+        '<div class="me-hub-tags">' + tagsHtml + '</div>' +
+      '</a>';
+    }).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', renderHub);
+</script>
+</body>
+</html>

@@ -100,6 +100,20 @@
         </div>
       </div>
 
+      <div class="callout callout-concept" style="margin-bottom:var(--space-6)">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-body">
+          <strong>Builds On — Parts 3 and 4</strong>
+          This topic brings Discovery and IRE together from a CMDB perspective. You need two
+          prior topics for this to make sense: <strong>Part 3 (Discovery)</strong> — specifically
+          how Vertical Discovery sends a CI payload after classification; and <strong>Part 4 T1-T3
+          (IRE Architecture, Identification Rules, Reconciliation Rules)</strong> — the three
+          IRE phases and how rules are configured. This topic focuses on how those systems interact
+          with the CMDB, what logs to check, and the exam-tested edge cases for combined Discovery+IRE
+          scenarios.
+        </div>
+      </div>
+
       <!-- S1 -->
       <div class="section-block" id="s1">
         <span class="section-label">Section 1</span>
@@ -113,11 +127,12 @@
         </p>
         <p>
           The <span class="hl-teal">Identification and Reconciliation Engine (IRE)</span> solves this
-          in two phases:
+          in three phases:
         </p>
         <ol>
           <li><strong>Identification</strong> — Is this CI already in the CMDB? Find the existing record, or create a new one if it's genuinely new. Never create a duplicate.</li>
           <li><strong>Reconciliation</strong> — Multiple sources are reporting values for this CI. Which source should win for each field? Apply the authoritative source rules.</li>
+          <li><strong>Deduplication</strong> — After identification and reconciliation, detect near-duplicate CIs (records that represent the same real-world device) and merge them. See Part 4 Topic 4 for the full deduplication workflow.</li>
         </ol>
 
         <div class="callout callout-analogy">
@@ -446,7 +461,7 @@
             <tr><td>cmdb_identifier_entry</td><td>Identification Entry — the specific field combinations used for matching</td></tr>
             <tr><td>cmdb_reconciliation_rule</td><td>Reconciliation Rule — field-level authoritative source configuration</td></tr>
             <tr><td>cmdb_datasource_filter</td><td>Data Source Filter — restrict which CIs a source can create/update</td></tr>
-            <tr><td>cmdb_ire_log</td><td>IRE processing log — tracks each payload processed, result, and any errors</td></tr>
+            <tr><td>cmdb_ire_event</td><td>IRE event log — tracks each payload processed, result, and any errors</td></tr>
           </tbody>
         </table>
       </div>
@@ -456,7 +471,7 @@
         <span class="section-label">Exam Quick Reference</span>
         <h2>Common Exam Traps — Discovery &amp; IRE</h2>
         <ul>
-          <li>IRE has two phases: <strong>Identification</strong> (find/create CI) then <strong>Reconciliation</strong> (apply authoritative field values)</li>
+          <li>IRE has three phases: <strong>Identification</strong> (find/create CI), <strong>Reconciliation</strong> (apply authoritative field values), then <strong>Deduplication</strong> (detect and merge duplicate CIs) — see Part 4 for full detail</li>
           <li>Identification Rule = one per CI class; contains one or more Identification Entries</li>
           <li>Identification Entry attributes = AND logic (all must match); multiple Entries = OR logic</li>
           <li>Priority on Entries: lower number = tried first</li>

@@ -164,7 +164,7 @@
             <tr><td>sys_user_grmember</td><td>sys_user (user)</td><td>sys_user_group (group)</td><td>User is member of Group</td></tr>
             <tr><td>task_ci</td><td>task</td><td>cmdb_ci</td><td>Task affects this CI</td></tr>
             <tr><td>cmdb_rel_ci</td><td>cmdb_ci (parent)</td><td>cmdb_ci (child)</td><td>CI has relationship with CI</td></tr>
-            <tr><td>sys_user_role</td><td>sys_user</td><td>sys_user_role (role)</td><td>User has role (via group membership)</td></tr>
+            <tr><td>sys_user_has_role</td><td>sys_user</td><td>sys_user_role (role)</td><td>User is directly assigned a role (sys_user_role is the role definition table, not the junction)</td></tr>
           </tbody>
         </table>
 

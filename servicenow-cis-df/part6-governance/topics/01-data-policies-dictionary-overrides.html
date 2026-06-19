@@ -89,6 +89,21 @@
         </div>
       </div>
 
+      <div class="callout callout-concept" style="margin-bottom:var(--space-6)">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-body">
+          <strong>Builds On — Part 1 Topics 1 &amp; 2</strong>
+          Both mechanisms in this topic operate on the data dictionary you studied in <strong>Part 1
+          Topic 2</strong> (Field Types &amp; Dictionary): a Data Policy makes a dictionary field
+          mandatory or read-only at runtime, and a Dictionary Override customizes a field's
+          dictionary entry for a specific child table. You also need <strong>Part 1 Topic 1</strong>
+          (table inheritance) to understand why Data Policies say "applies to all child tables" —
+          because in ServiceNow, child tables inherit their parent's fields via single-table
+          inheritance, so a policy on <code>task</code> propagates to <code>incident</code>,
+          <code>sc_req_item</code>, and every other <code>task</code> child.
+        </div>
+      </div>
+
       <!-- S1 -->
       <div class="section-block" id="s1">
         <span class="section-label">Section 1</span>

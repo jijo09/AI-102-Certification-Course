@@ -49,12 +49,12 @@
       <div style="margin-bottom:var(--space-6)">
         <div class="badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 2 · All 6 Topics</div>
         <h1 style="margin-bottom:var(--space-3)">Part 2 Full Quiz — Import Sets &amp; Data Migration</h1>
-        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions on Import Set lifecycle, Transform Maps, Data Sources, and coalesce. Select an answer to reveal the explanation.</p>
+        <p style="color:var(--text-muted);font-size:0.9rem">18 questions (15 topic questions + 3 cross-topic integration) on Import Set lifecycle, Transform Maps, Data Sources, coalesce, and connections to IRE and Discovery. Select an answer to reveal the explanation.</p>
       </div>
 
       <div class="quiz-strip" id="quiz-strip">
-        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
-        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 15</div></div>
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 18</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 18</div></div>
         <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
         <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0891b2"></div></div></div>
       </div>
@@ -64,7 +64,7 @@
       <div class="quiz-container" id="main-quiz">
         <div class="quiz-header">
           <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 2 — Import Sets &amp; Data Migration</span>
-          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+          <span class="quiz-question-count" data-q-counter>1 / 18</span>
         </div>
         <div style="height:3px;background:var(--navy-800)">
           <div style="height:3px;background:#0891b2;transition:width 0.4s ease;width:0%" data-q-progress></div>
@@ -357,10 +357,67 @@
             </div>
           </div>
 
+          <!-- Q16 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: A team loads CI data into the CMDB using two parallel processes: (1) an Import Set Transform Map with <code>serial_number</code> as the coalesce field, and (2) a ServiceNow Discovery run. Both target the same <code>cmdb_ci_server</code> records. After both run, some field values toggle between the two sources' values on each run cycle.</div>
+              <p class="quiz-question">Why does the Import Set approach create this "value toggling" problem, and which Part 4 engine prevents this for Discovery?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The Transform Map runs before Discovery finishes — a scheduling conflict causes the toggling; IRE has no effect on this</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The coalesce Transform Map uses last-write-wins for all fields — whoever ran last overwrites the other's values. Discovery payloads pass through IRE, which applies Reconciliation Rules to assign per-field source authority, preventing toggling</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Discovery uses a lower-priority CMDB write mechanism than Import Sets — it always defers to Import Set values</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">IRE blocks all Import Set writes to CMDB tables — only Discovery can update CI fields</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Import Set Transform Maps use simple coalesce (find existing record → update all mapped fields). If two sources both map the same field, the last one to run wins — producing the toggling. IRE (Part 4) uses Reconciliation Rules to define SOURCE AUTHORITY per field: "Discovery owns <code>cpu_count</code>; Import Set owns <code>warranty_end</code>" — each source can only win its authorized fields. IRE is not automatically invoked by Import Set transforms; you'd need to call the IRE API explicitly for multi-source reconciliation.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q17 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: A company runs both on-premises Discovery (scanning 300 servers in their private data center) and an AWS Service Graph Connector (pulling EC2 instance data from AWS public APIs). The network team asks whether both require a MID Server.</div>
+              <p class="quiz-question">Which statement correctly describes MID Server requirements for these two scenarios?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Both require a MID Server — all ServiceNow outbound connections must route through a MID Server proxy</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">On-premises Discovery requires a MID Server (private network proxy); the AWS SGC can call public AWS APIs directly from ServiceNow's cloud instance without a MID Server</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only the AWS SGC requires a MID Server to authenticate with AWS IAM</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Neither requires a MID Server — ServiceNow cloud can reach both private networks and public APIs directly</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> A MID Server bridges ServiceNow's cloud instance to a private network that ServiceNow cannot reach directly. On-premises servers behind a firewall require a MID Server as the on-premises proxy. AWS public APIs (EC2, RDS, CloudWatch) are internet-accessible — the SGC calls them from ServiceNow's cloud without a MID Server. This connects Part 2 (SGC, Topic 5) with Part 3 (MID Server, Topic 2).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Q18 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+              <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: An architect explains: "A Transform Map coalesce field and an IRE Identification Rule are solving the same problem by different means."</div>
+              <p class="quiz-question">What problem are both solving, and what is the key advantage IRE Identification Rules provide over a simple coalesce field?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Both solve data type conversion — IRE Identification Rules handle more data types than coalesce</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Both solve the "find or create" problem. IRE Identification Rules can use multiple lookup identifiers with priority ordering, handle cross-class matching, and integrate with Reconciliation + Deduplication, whereas coalesce uses a single field with last-write-wins semantics</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Both solve duplicate detection — the only difference is coalesce works on Import Sets and IRE works on Discovery</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Both solve field mapping — IRE Identification Rules are more flexible because they support wildcard field matching</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Coalesce (Part 2) and IRE Identification Rules (Part 4) both answer "does a CI for this device already exist?" — if yes, update it; if no, create it. But IRE goes further: multiple identifier priority chains, CI class-specific rules, and integration with Reconciliation (who owns which field) and Deduplication (merge near-duplicates). Coalesce is sufficient for simple single-source loads. IRE is required for multi-source, multi-authority CMDB management.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+
         </div><!-- /quiz-body -->
 
         <div class="quiz-footer" data-quiz-footer>
-          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 18</span>
           <div style="display:flex;gap:var(--space-3)">
             <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
             <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
@@ -392,7 +449,7 @@
 <script src="../config.js"></script>
 <script src="../../scripts/engine.js"></script>
 <script>
-  const TOTAL = 15;
+  const TOTAL = 18;
   const dots = document.getElementById('q-dots');
   for (let i = 0; i < TOTAL; i++) {
     const d = document.createElement('div');

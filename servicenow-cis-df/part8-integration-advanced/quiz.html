@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -49,12 +49,12 @@
       <div style="margin-bottom:var(--space-6)">
         <div class="badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 8 · All 4 Topics</div>
         <h1 style="margin-bottom:var(--space-3)">Part 8 Full Quiz — Integration &amp; Advanced</h1>
-        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions on Table API, IntegrationHub, archiving vs purging, and instance data health. Select an answer to reveal the explanation.</p>
+        <p style="color:var(--text-muted);font-size:0.9rem">18 questions (15 topic questions + 3 cross-topic integration) on Table API, IntegrationHub, archiving vs purging, and instance data health. Select an answer to reveal the explanation.</p>
       </div>
 
       <div class="quiz-strip" id="quiz-strip">
-        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
-        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 15</div></div>
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 18</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 18</div></div>
         <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
         <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0891b2"></div></div></div>
       </div>
@@ -64,7 +64,7 @@
       <div class="quiz-container" id="main-quiz">
         <div class="quiz-header">
           <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 8 — Integration &amp; Advanced</span>
-          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+          <span class="quiz-question-count" data-q-counter>1 / 18</span>
         </div>
         <div style="height:3px;background:var(--navy-800)">
           <div style="height:3px;background:#0891b2;transition:width 0.4s ease;width:0%" data-q-progress></div>
@@ -357,10 +357,65 @@
             </div>
           </div>
 
+
+          <!-- Q16 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: An external system calls POST /api/now/table/cmdb_ci to create a server CI, passing CPU and RAM fields in the JSON body. A colleague argues the call should target cmdb_ci_server instead.</div>
+              <p class="quiz-question">What is the practical difference between creating a CI in cmdb_ci vs cmdb_ci_server via the Table API?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">No difference — ServiceNow auto-corrects the class to cmdb_ci_server if CPU/RAM fields are detected in the payload</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Posting to cmdb_ci_server creates a CI with sys_class_name = cmdb_ci_server (correct class, all server-specific fields available); posting to cmdb_ci creates a base CI with sys_class_name = cmdb_ci — wrong class, missing server-specific fields, invisible in server-scoped reports and Discovery CI Groups</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Table API only supports root tables like cmdb_ci — child tables are not addressable via the API</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Both calls go through IRE, which auto-determines the correct class from the payload content</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The Table API writes to exactly the table specified and sets sys_class_name accordingly (Part 1 Topic 1). A CI in cmdb_ci has sys_class_name = cmdb_ci — it won't appear in server-specific views, Discovery CI Groups filtered by server class, or CMDB Health rules for cmdb_ci_server. Always target the correct subclass when creating CIs via the Table API. The Table API supports any table (C is false). IRE is not automatically invoked by Table API calls (D is false).</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q17 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: A Flow Designer flow uses an Integration Hub spoke to update cpu_count on a CI via direct PATCH to /api/now/table/cmdb_ci_server/{sys_id} whenever an asset record changes in an external ITSM tool. The CMDB team is concerned this will override Discovery's authoritative cpu_count values.</div>
+              <p class="quiz-question">Does the direct Table API call go through IRE Reconciliation?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Yes — all writes to any CMDB table automatically pass through IRE Reconciliation Rules before being committed</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">No — direct Table API calls and GlideRecord writes bypass IRE entirely. For multi-source reconciliation you must explicitly use the IRE API. The direct write will overwrite Discovery's value regardless of Reconciliation Rule priorities</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Yes, but only for fields that have an active Reconciliation Rule defined</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">No — Table API writes to CMDB tables are blocked; you must use the dedicated CMDB REST API</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> IRE is NOT a transparent interceptor for all CMDB writes. It is only invoked when Discovery sends payloads, SGC processes data, or you explicitly call the IRE API. A direct PATCH to the Table API goes straight to the database — bypassing Identification, Reconciliation, and Deduplication. This means the Integration Hub flow will overwrite Discovery's cpu_count value ignoring source authority rules. The correct architecture is to route external data through the IRE API. This is a critical architecture trap connecting Part 8 with Part 4.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q18 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: An admin enables archiving for the incident table with a 3-year retention policy. After archiving runs, a compliance auditor needs to review a specific incident from 4 years ago. It no longer appears in the standard Incident list.</div>
+              <p class="quiz-question">Where are archived records stored, and how can the auditor access them?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Archived records are permanently deleted — they cannot be recovered after archiving runs</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Archived records are exported to a flat CSV file stored in the MID Server's local file system</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Archived records are moved to an archive table (naming convention: ar_archive_incident or ar_incident) — they can be accessed via the Archive API or by directly querying that archive table through the ServiceNow interface</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Archived records remain in the incident table but are hidden by a system filter — an admin can disable the filter to see them</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> ServiceNow archiving (Part 8 Topic 3) moves records to a dedicated archive table. Records are removed from the active table (so standard queries don't find them) but remain in the database in the archive table, accessible via the Archive API or direct table queries. Archiving is NOT deletion (A). Records are not exported to CSV (B). Active-table filtering (D) describes something different — archive records are physically relocated to the archive table.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
         </div><!-- /quiz-body -->
 
         <div class="quiz-footer" data-quiz-footer>
-          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 18</span>
           <div style="display:flex;gap:var(--space-3)">
             <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
             <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
@@ -392,7 +447,7 @@
 <script src="../config.js"></script>
 <script src="../../scripts/engine.js"></script>
 <script>
-  const TOTAL = 15;
+  const TOTAL = 18;
   const dots = document.getElementById('q-dots');
   for (let i = 0; i < TOTAL; i++) {
     const d = document.createElement('div');

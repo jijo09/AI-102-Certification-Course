@@ -133,10 +133,14 @@
       <!-- S2: The Five CMDB Health Dimensions -->
       <div class="section-block" id="s2">
         <span class="section-label">Section 2</span>
-        <h2>The Five CMDB Health Dimensions</h2>
+        <h2>CMDB Health Dimensions</h2>
         <p>
-          CMDB Health evaluates each CI class across five independent dimensions.
-          Each dimension contributes to the overall health score:
+          CMDB Health evaluates each CI class across health dimensions. The official ServiceNow
+          model defines <strong>three top-level KPIs</strong>: Completeness, Correctness, and Compliance.
+          Within the dashboard, Correctness is further broken down into sub-metrics including
+          <strong>Staleness</strong> and <strong>Duplicate</strong>, which are surfaced as separate
+          scored dimensions. You will see five scores on the dashboard, but Staleness and Duplicate
+          are components of Correctness, not independent top-level KPIs:
         </p>
 
         <table class="comparison-table">
@@ -179,11 +183,13 @@
         <div class="callout callout-concept">
           <span class="callout-icon">💡</span>
           <div class="callout-body">
-            <strong>Key Concept — Each Dimension Has Independent Scoring</strong>
+            <strong>Key Concept — Each Dimension Is a Separate Signal</strong>
             A CI class can score 95% on Completeness but 40% on Staleness (all fields are
             filled in, but no Discovery has run in months). Or it can score well on Staleness
             but poorly on Duplicates (Discovery runs daily but keeps creating duplicates because
-            Identification Rules are broken). Each dimension is a separate signal.
+            Identification Rules are broken). The dashboard shows each as a separate score.
+            Exam note: official ServiceNow documentation groups Staleness and Duplicate as
+            sub-metrics under the Correctness KPI — not independent top-level dimensions.
           </div>
         </div>
       </div>
@@ -431,14 +437,24 @@
               <td>Staleness threshold extended — DR systems may not be scanned as frequently</td>
             </tr>
             <tr>
-              <td>5 — Absent</td>
-              <td>CI was expected but not found in the last Discovery scan — may be decommissioned or offline</td>
-              <td>Data Manager aging often sets CIs to Absent before Retired. Investigation triggered.</td>
+              <td>5 — Ready</td>
+              <td>CI is provisioned and ready but not yet in active production (e.g., pre-deployment staging)</td>
+              <td>May be excluded from some Staleness rules depending on organization policy</td>
             </tr>
             <tr>
               <td>6 — Retired</td>
               <td>CI has been formally decommissioned. No longer in use. Kept for audit history.</td>
               <td>Health Rules largely suspended. Staleness monitoring not relevant.</td>
+            </tr>
+            <tr>
+              <td>7 — Pipeline</td>
+              <td>CI is in procurement or development pipeline — ordered but not yet delivered</td>
+              <td>Discovery doesn't apply. Health Rules scoped to asset tracking only.</td>
+            </tr>
+            <tr>
+              <td>8 — Catalog</td>
+              <td>CI is a catalog template or standard build — not an active deployed instance</td>
+              <td>Not tracked by Discovery. Excluded from Staleness measurement.</td>
             </tr>
           </tbody>
         </table>
@@ -447,12 +463,13 @@
           <span class="callout-icon">⚠</span>
           <div class="callout-body">
             <strong>Exam Trap — Absent vs. Retired</strong>
-            Absent (5) = Discovery didn't find the CI on its last run. Could be a network issue,
-            a decommission that wasn't documented, or a temporary outage. Requires investigation.
-            Retired (6) = The CI has been formally decommissioned through the change management process.
-            This is a deliberate, governed state change.
-            Data Manager typically sets stale CIs to Absent first (letting humans investigate),
-            then to Retired only after confirmation. Never auto-retire without human review.
+            <strong>Absent</strong> is an operational_status value that CMDB Data Manager sets on CIs it did
+            not find in the last Discovery scan. It signals "investigate — this CI may be decommissioned,
+            offline, or have a Discovery coverage gap." It is NOT slot 5 in the standard choice list
+            (slot 5 = Ready). Absent is a distinct value added by CMDB Data Manager.
+            <strong>Retired (6)</strong> = formally decommissioned through the change management process —
+            a deliberate, governed state change. Data Manager sets stale CIs to Absent first (letting
+            humans investigate), then to Retired only after confirmation. Never auto-retire without human review.
           </div>
         </div>
       </div>
@@ -485,12 +502,13 @@
         <span class="section-label">Exam Quick Reference</span>
         <h2>CMDB Health KPIs &amp; Data Manager — Key Facts</h2>
         <ul>
-          <li><strong>Five CMDB Health dimensions:</strong> Completeness, Compliance, Correctness, Staleness, Duplicate.</li>
+          <li><strong>Three CMDB Health KPIs:</strong> Completeness, Compliance, Correctness. The dashboard also surfaces Staleness and Duplicate as separate scores — these are sub-metrics of Correctness, not independent top-level KPIs.</li>
           <li><strong>Health Rules</strong> define what's measured. Configurable per class. ServiceNow ships hundreds out-of-box.</li>
           <li><strong>Traffic light scoring:</strong> Green (80-100) = healthy, Yellow (60-79) = caution, Red (0-59) = critical.</li>
           <li><strong>Staleness uses last_discovered field.</strong> Threshold varies by CI class and environment volatility.</li>
-          <li><strong>Absent (5)</strong> = not found in Discovery. Requires investigation. NOT the same as Retired.</li>
+          <li><strong>Absent</strong> = operational_status set by CMDB Data Manager when CI not found in Discovery. Requires investigation. NOT the same as Retired. Not slot 5 (slot 5 = Ready in OOTB).</li>
           <li><strong>Retired (6)</strong> = formally decommissioned through change management. Deliberate state.</li>
+          <li><strong>operational_status OOTB values:</strong> 1=Operational, 2=Non-Operational, 3=Repair in Progress, 4=DR Standby, 5=Ready, 6=Retired, 7=Pipeline, 8=Catalog.</li>
           <li><strong>CMDB Data Manager</strong> provides bulk CI lifecycle management: aging, archiving, deletion, field cleanup.</li>
           <li><strong>Data Manager Policies</strong> = automated rules for moving CIs through lifecycle states based on conditions.</li>
           <li><strong>Test Data Manager policies on a small subset</strong> before bulk execution — misconfiguration affects thousands of CIs.</li>
@@ -516,8 +534,8 @@
             <div class="term-def">ServiceNow tool for bulk CI lifecycle management. Supports aging (auto-setting operational_status based on staleness), archiving, deletion, and field cleanup across large CI populations.</div>
           </div>
           <div class="term-card">
-            <div class="term-name">Absent (operational_status=5)</div>
-            <div class="term-def">CI lifecycle state set when Discovery does not find the CI on its last scan. Indicates the CI may be decommissioned, offline, or have a Discovery coverage gap. Requires human investigation before proceeding to Retired.</div>
+            <div class="term-name">Absent (operational_status)</div>
+            <div class="term-def">Operational status set by CMDB Data Manager when Discovery does not find the CI on its last scan. Not OOTB slot 5 (that is Ready). Indicates the CI may be decommissioned, offline, or have a Discovery coverage gap. Requires human investigation before proceeding to Retired (6).</div>
           </div>
           <div class="term-card">
             <div class="term-name">Data Manager Policy</div>
@@ -654,7 +672,7 @@
                 </div>
                 <div class="quiz-explanation" data-correct="B">
                   <div class="quiz-explanation-title">💡 Explanation</div>
-                  <p><strong>B is correct.</strong> Absent (operational_status=5) means Discovery's last scan did not find this CI. It could mean: (1) the device was decommissioned without going through the formal CI retirement process, (2) the device is temporarily offline, or (3) there's a Discovery configuration gap (wrong IP range, expired credentials). Human investigation is required before taking action. Never automatically retire an Absent CI — some Absent states have innocuous explanations. The distinction between Absent and Retired is a classic exam trap: Absent = "not found, investigate"; Retired = "formally decommissioned through change management".</p>
+                  <p><strong>B is correct.</strong> The Absent operational_status is set by CMDB Data Manager when Discovery's last scan did not find a CI. It could mean: (1) the device was decommissioned without going through the formal CI retirement process, (2) the device is temporarily offline, or (3) there's a Discovery configuration gap (wrong IP range, expired credentials). Human investigation is required before taking action. Never automatically retire an Absent CI — some have innocuous explanations. The distinction between Absent and Retired is a classic exam trap: Absent = "not found, investigate"; Retired = "formally decommissioned through change management." Note: slot 5 in the OOTB operational_status choice list is "Ready," not "Absent" — Absent is a separate value added by CMDB Data Manager.</p>
                 </div>
               </div>
             </div>
@@ -697,7 +715,7 @@
         <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
         <div style="display:flex;gap:var(--space-3)">
           <a href="05-governance-framework.html" class="btn btn-secondary">← Governance Framework</a>
-          <a href="../../part7-reporting-analytics/topics/05-cmdb-workspace-nlq.html" class="btn btn-secondary">Part 7: CMDB Workspace →</a>
+          <a href="../../part7-reporting-analytics/topics/01-report-types-builder.html" class="btn btn-secondary">Part 7: Report Types →</a>
         </div>
       </div>
 

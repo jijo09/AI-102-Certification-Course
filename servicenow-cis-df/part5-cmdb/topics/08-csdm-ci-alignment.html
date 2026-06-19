@@ -171,18 +171,18 @@
             </tr>
             <tr>
               <td>Application Service (technical map)</td>
-              <td>cmdb_ci_service (service_type=Application Service)</td>
-              <td>Using wrong service_type, or using cmdb_ci_service without type field</td>
+              <td>cmdb_ci_service_auto (CSDM 5: "Service Instance")</td>
+              <td>Using base cmdb_ci_service without subclass, or confusing with Business Service</td>
             </tr>
             <tr>
               <td>Business Service</td>
-              <td>cmdb_ci_service (service_type=Business Service)</td>
-              <td>Confusing with Application Service; omitting service_type field</td>
+              <td>cmdb_ci_service_business</td>
+              <td>Confusing with Application Service; using base cmdb_ci_service without subclass</td>
             </tr>
             <tr>
               <td>Technical Service</td>
-              <td>cmdb_ci_service (service_type=Technical Service)</td>
-              <td>Creating as a generic cmdb_ci_service without type</td>
+              <td>cmdb_ci_service_technical</td>
+              <td>Creating as a generic cmdb_ci_service without the correct subclass</td>
             </tr>
             <tr>
               <td>Physical server</td>
@@ -444,7 +444,7 @@
         <h2>CSDM CI Alignment — Key Facts</h2>
         <ul>
           <li><strong>CSDM prescribes specific CI classes</strong> for each type of IT entity. Wrong class = broken CSDM model.</li>
-          <li><strong>service_type field on cmdb_ci_service</strong> distinguishes Application Service vs. Business Service vs. Technical Service. Never leave blank.</li>
+          <li><strong>Distinct subclasses</strong> distinguish service types: <code>cmdb_ci_service_auto</code> (Application Service / CSDM 5: Service Instance), <code>cmdb_ci_service_business</code> (Business Service), <code>cmdb_ci_service_technical</code> (Technical Service). Older deployments used a <code>service_type</code> field on the base <code>cmdb_ci_service</code> — both models exist, but current CSDM best practice uses subclasses.</li>
           <li><strong>Reclassification</strong> = moving a CI to the correct class. Must fix the source (pattern/SGC) first, or reclassification repeats after next scan.</li>
           <li><strong>Discovery patterns assign CI classes</strong> in pattern steps. Audit these for CSDM alignment when implementing CSDM.</li>
           <li><strong>SGC creates Domain 4 CIs</strong> (infrastructure). Doesn't automatically create Business Applications (Domain 1) — that needs human input.</li>
@@ -466,7 +466,7 @@
           </div>
           <div class="term-card">
             <div class="term-name">service_type Field</div>
-            <div class="term-def">Field on cmdb_ci_service that distinguishes CSDM service types: "Application Service" (technical map), "Business Service" (business grouping), "Technical Service" (shared internal capability).</div>
+            <div class="term-def">In older CSDM deployments, the service_type field on cmdb_ci_service distinguished service types. Current CSDM best practice uses distinct subclasses: cmdb_ci_service_auto (Application Service), cmdb_ci_service_business, cmdb_ci_service_technical.</div>
           </div>
           <div class="term-card">
             <div class="term-name">Orphan CI</div>
@@ -502,15 +502,15 @@
         </div>
 
         <div class="checkpoint-q" onclick="this.classList.toggle('open')">
-          <div class="cq-question">2. An administrator creates a new Application Service record for the company's ERP system. When creating the record in the cmdb_ci_service table, which field is MOST critical to set correctly for CSDM compliance?</div>
+          <div class="cq-question">2. An administrator creates a new Application Service record for the company's ERP system in a CSDM 5 (Zurich+) instance. Which CI class should be used to correctly represent an Application Service?</div>
           <div class="cq-options">
-            <div>A) The name field</div>
-            <div>B) The service_type field (must be set to "Application Service")</div>
-            <div>C) The operational_status field</div>
-            <div>D) The support_group field</div>
+            <div>A) cmdb_ci_service (with service_type=Application Service)</div>
+            <div>B) cmdb_ci_service_auto</div>
+            <div>C) cmdb_ci_business_app</div>
+            <div>D) cmdb_ci_appl</div>
           </div>
-          <div class="cq-hint">💡 cmdb_ci_service is used for multiple CSDM concepts. How does CSDM distinguish between them?</div>
-          <div class="cq-answer"><strong>Answer: B</strong> — All three CSDM service types (Application Service, Business Service, Technical Service) use the same cmdb_ci_service table. The service_type field is what distinguishes them. Without service_type="Application Service", the record exists but CSDM workflows, impact analysis, and CMDB Health checks cannot correctly classify it as an Application Service. CSDM reports may show it as uncategorized. While name (A), operational_status (C), and support_group (D) are all important, service_type is the critical CSDM-specific field.</div>
+          <div class="cq-hint">💡 CSDM 5 uses dedicated subclasses for each service type. Which subclass represents the technical service map?</div>
+          <div class="cq-answer"><strong>Answer: B</strong> — In CSDM 5 (Zurich+), cmdb_ci_service_auto is the correct subclass for Application Services (also called "Service Instances" in CSDM 5). Older deployments (CSDM 3.x) used the base cmdb_ci_service table with a service_type field set to "Application Service" (option A). Both exist in modern instances, but the subclass approach (B) is the current best practice. cmdb_ci_business_app (C) is the Business Application (Domain 1 concept). cmdb_ci_appl (D) is a software installation CI in Domain 4.</div>
         </div>
 
         <div class="checkpoint-q" onclick="this.classList.toggle('open')">
@@ -602,16 +602,16 @@
             <!-- Q3 -->
             <div data-question style="display:none">
               <div class="quiz-body">
-                <p class="quiz-question">When creating a new Application Service record in cmdb_ci_service, which field is most critical for CSDM compliance to distinguish it from Business Services and Technical Services?</p>
+                <p class="quiz-question">When creating a new Application Service in CSDM 5 (Zurich+), which CI class correctly represents the technical service map (the set of CIs that make an application work)?</p>
                 <div class="quiz-options">
-                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The name field (must follow CSDM naming convention)</span></button>
-                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The service_type field (must be set to "Application Service" to distinguish from Business Service and Technical Service)</span></button>
-                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The operational_status field (must be set to Operational)</span></button>
-                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The support_group field (must be assigned for CSDM compliance)</span></button>
+                  <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">cmdb_ci_service with service_type="Application Service" (legacy approach)</span></button>
+                  <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">cmdb_ci_service_auto (current CSDM best practice; also called "Service Instance" in CSDM 5)</span></button>
+                  <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">cmdb_ci_business_app (the Business Application record)</span></button>
+                  <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">cmdb_ci_appl (a software installation CI)</span></button>
                 </div>
                 <div class="quiz-explanation" data-correct="B">
                   <div class="quiz-explanation-title">💡 Explanation</div>
-                  <p><strong>B is correct.</strong> All three CSDM service types (Application Service, Business Service, Technical Service) use the same cmdb_ci_service table. The service_type field is the critical CSDM discriminator. Without service_type="Application Service," CSDM workflows, Change Impact Analysis, and CMDB Health checks cannot correctly classify the record. Leaving service_type blank means the record appears as uncategorized in CSDM reports and doesn't participate in CSDM impact traversal correctly.</p>
+                  <p><strong>B is correct.</strong> cmdb_ci_service_auto is the correct subclass for Application Services in current CSDM best practice. In CSDM 5 (Zurich+), this concept was also renamed "Service Instance" but the table name remains cmdb_ci_service_auto. Option A (service_type approach on the base cmdb_ci_service table) was the legacy CSDM 3.x approach and still exists in many instances, but the subclass approach is preferred. CSDM distinguishes service types through dedicated subclasses: cmdb_ci_service_auto (Application Service/Service Instance), cmdb_ci_service_business (Business Service), cmdb_ci_service_technical (Technical Service).</p>
                 </div>
               </div>
             </div>
@@ -654,7 +654,7 @@
         <button id="complete-btn" class="btn btn-success" onclick="markComplete()">✓ Mark as Complete</button>
         <div style="display:flex;gap:var(--space-3)">
           <a href="07-csdm-service-modeling.html" class="btn btn-secondary">← CSDM Service Modeling</a>
-          <a href="../../part6-governance/topics/05-governance-framework.html" class="btn btn-secondary">Part 6: Governance Framework →</a>
+          <a href="../../part6-governance/topics/01-data-policies-dictionary-overrides.html" class="btn btn-secondary">Part 6: Data Policies →</a>
         </div>
       </div>
 

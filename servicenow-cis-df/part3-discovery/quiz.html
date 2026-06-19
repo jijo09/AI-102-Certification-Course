@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -49,12 +49,12 @@
       <div style="margin-bottom:var(--space-6)">
         <div class="badge" style="background:rgba(3,105,161,0.15);color:#38bdf8;border:1px solid rgba(3,105,161,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 3 · All 5 Topics</div>
         <h1 style="margin-bottom:var(--space-3)">Part 3 Full Quiz — Discovery &amp; Service Mapping</h1>
-        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions covering Discovery architecture, MID Server, patterns &amp; probes, Service Mapping, and ACC. Select an answer to reveal the explanation.</p>
+        <p style="color:var(--text-muted);font-size:0.9rem">18 questions (15 topic questions + 3 cross-topic integration) covering Discovery architecture, MID Server, patterns &amp; probes, Service Mapping, and ACC. Select an answer to reveal the explanation.</p>
       </div>
 
       <div class="quiz-strip" id="quiz-strip">
-        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
-        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#38bdf8">0 / 15</div></div>
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 18</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#38bdf8">0 / 18</div></div>
         <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
         <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0369a1"></div></div></div>
       </div>
@@ -64,7 +64,7 @@
       <div class="quiz-container" id="main-quiz">
         <div class="quiz-header">
           <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 3 — Discovery &amp; Service Mapping</span>
-          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+          <span class="quiz-question-count" data-q-counter>1 / 18</span>
         </div>
         <div style="height:3px;background:var(--navy-800)">
           <div style="height:3px;background:#0369a1;transition:width 0.4s ease;width:0%" data-q-progress></div>
@@ -357,10 +357,65 @@
             </div>
           </div>
 
+
+          <!-- Q16 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: Discovery completes a successful Vertical scan of a Linux server. The MID Server collected hostname, IP address, OS version, CPU count, and RAM. This payload is sent from the MID Server back to ServiceNow.</div>
+              <p class="quiz-question">Which engine processes this Discovery payload BEFORE any CI record is created or updated in the CMDB?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">The MID Server — it validates and deduplicates the data before forwarding to ServiceNow</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The Import Set Transformer — all Discovery data goes through an Import Set staging table before reaching the CMDB</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">The Identity and Reconciliation Engine (IRE) — Discovery payloads pass through IRE for identification (find/create the CI), reconciliation (apply authoritative field values), and deduplication before CI data is written</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">The CMDB Health Scorer — it validates data completeness before allowing CI record writes</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Discovery does NOT write directly to CMDB tables. The payload flows to IRE (Part 4), which runs three phases: Identification (find the existing CI or create a new one), Reconciliation (apply source-authoritative field values), and Deduplication (detect near-duplicate CIs). Only after IRE completes does the CI record reflect the new data. MID Server (A) is a network proxy. Import Sets (B) are a separate ingestion mechanism unrelated to Discovery.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q17 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: Service Mapping runs successfully for the 'Order Management' application. It creates a top-level CI in the CMDB representing the application's complete infrastructure topology.</div>
+              <p class="quiz-question">In CSDM 5 (Zurich release and later), what is this top-level CI called and in which table is it stored?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Business Service, stored in cmdb_ci_service_business</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Application Service, stored in cmdb_ci_service (base table)</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Service Instance (formerly Application Service), stored in cmdb_ci_service_auto — CSDM 5 renamed the concept but the table name did not change</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Technical Service, stored in cmdb_ci_service_technical</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Service Mapping always creates its top-level CI in cmdb_ci_service_auto. CSDM 5 (Zurich) renamed 'Application Service' to 'Service Instance' — but the table name is unchanged. High-frequency exam trap: exam scenarios using 'Service Instance' mean the same CI type as 'Application Service.' The base cmdb_ci_service table (B) is not what Service Mapping writes to. Business Service (A) and Technical Service (D) are different CSDM layers.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q18 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: A Discovery Schedule scans a /24 subnet (256 IPs). The MID Server PINGs 80 devices successfully. For 30 of those, Horizontal Discovery matches a pattern. For the remaining 50, no Horizontal Pattern matches.</div>
+              <p class="quiz-question">What is the final state of the CMDB after this Discovery run?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">80 CI records are created — one per device that responded to PING, classified as 'Unknown'</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">256 CI records are attempted — Discovery creates placeholder CIs for all scanned IPs</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">30 CI records are created or updated — devices that matched a Horizontal Pattern; the 50 unclassified devices have no CI created because Vertical Discovery only runs after Horizontal classification</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">50 CI records are created as 'Unclassified Device' and flagged for manual classification</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Vertical Discovery — which collects the detailed attributes that populate CI fields — only runs AFTER Horizontal Discovery successfully classifies a device. No pattern match = no CI class = no CI creation. The 50 unclassified devices remain invisible in the CMDB. The fix is to create Horizontal Patterns for the unmatched device types. This connects the Discovery lifecycle (Topic 1) directly to the IRE pipeline (Part 4).</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
         </div><!-- /quiz-body -->
 
         <div class="quiz-footer" data-quiz-footer>
-          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 18</span>
           <div style="display:flex;gap:var(--space-3)">
             <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
             <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
@@ -392,7 +447,7 @@
 <script src="../config.js"></script>
 <script src="../../scripts/engine.js"></script>
 <script>
-  const TOTAL = 15;
+  const TOTAL = 18;
   const dots = document.getElementById('q-dots');
 
   for (let i = 0; i < TOTAL; i++) {

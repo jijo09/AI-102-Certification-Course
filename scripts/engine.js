@@ -254,6 +254,45 @@ const QuizEngine = (function () {
 
   let _state = {};
 
+  function _shuffleOptions(_questionEl) {
+    var _optionsContainer = _questionEl.querySelector('.quiz-options');
+    if (!_optionsContainer) return;
+
+    var _buttons = Array.from(_optionsContainer.querySelectorAll('[data-option]'));
+    if (_buttons.length < 2) return;
+
+    var _expEl = _questionEl.querySelector('[data-correct]');
+    if (!_expEl) return;
+
+    var _oldCorrect = _expEl.dataset.correct;
+
+    for (var _i = _buttons.length - 1; _i > 0; _i--) {
+      var _j = Math.floor(Math.random() * (_i + 1));
+      var _tmp = _buttons[_i]; _buttons[_i] = _buttons[_j]; _buttons[_j] = _tmp;
+    }
+
+    var _letters = ['A', 'B', 'C', 'D'];
+    var _newCorrect = _oldCorrect;
+
+    _buttons.forEach(function (_btn, _idx) {
+      var _wasCorrect = _btn.dataset.option === _oldCorrect;
+      var _newLetter  = _letters[_idx];
+      _btn.dataset.option = _newLetter;
+      var _ls = _btn.querySelector('.quiz-option-letter');
+      if (_ls) _ls.textContent = _newLetter;
+      if (_wasCorrect) _newCorrect = _newLetter;
+      _optionsContainer.appendChild(_btn);
+    });
+
+    _expEl.dataset.correct = _newCorrect;
+    // quiz.html uses a separate hidden <p data-correct>, topic files put it on .quiz-explanation
+    var _textEl = _questionEl.querySelector('.quiz-explanation') || _expEl;
+    _textEl.innerHTML = _textEl.innerHTML.replace(
+      /(<strong>)[A-D]( is correct\.)/,
+      '$1' + _newCorrect + '$2'
+    );
+  }
+
   function init(_containerId) {
     const _container = document.getElementById(_containerId) ||
                        document.querySelector('[data-quiz]');
@@ -263,6 +302,8 @@ const QuizEngine = (function () {
     if (!_questions.length) return;
 
     const _topicId = _container.dataset.quiz;
+
+    _questions.forEach(function (_q) { _shuffleOptions(_q); });
 
     _state[_containerId] = {
       questions:  _questions,
@@ -936,6 +977,7 @@ const SidebarBuilder = {
     const _accentColor    = _config.accentColor     || 'var(--course-accent, #0078d4)';
     const _showSearch     = _config.showSearch !== false;
     const _showRevision   = _config.showRevisionCenter !== false;
+    const _showQuizzes    = _config.showQuizTab !== false;
 
     // Build part accordion groups
     const _groups = Object.keys(_partsMeta).map(function (_partNum) {
@@ -971,6 +1013,9 @@ const SidebarBuilder = {
     const _revisionHtml = _showRevision
       ? '    <a href="' + _prefixPath + 'revision.html" class="sidebar-item sidebar-nav-tab"><span class="item-icon">\uD83E\uDDE0</span><span>Revision Center</span></a>'
       : '';
+    const _quizzesHtml = _showQuizzes
+      ? '    <a href="' + _prefixPath + 'quizzes.html" class="sidebar-item sidebar-nav-tab"><span class="item-icon">\u270F\uFE0F</span><span>Practice Quizzes</span></a>'
+      : '';
 
     return [
       '<aside class="sidebar">',
@@ -986,6 +1031,7 @@ const SidebarBuilder = {
       '    <a href="' + _prefixPath + 'index.html" class="sidebar-item sidebar-nav-tab"><span class="item-icon">\u2302</span><span>Dashboard</span></a>',
       _groups,
       _revisionHtml,
+      _quizzesHtml,
       '    <a href="#" onclick="ProgressManager.reset()" class="sidebar-item"><span class="item-icon">\u21BA</span><span>Reset Progress</span></a>',
       '  </nav>',
       '  <div class="sidebar-progress" id="sidebar-overall-progress">',
@@ -1177,8 +1223,10 @@ const SidebarManager = (function () {
       'dashboard':     '\u2302',
       'set exam date': '\u25F7',
       'reset progress': '\u21BA',
-      'flashcards':    '\uD83C\uDCCF',
-      'part quiz':     '?',
+      'flashcards':       '\uD83C\uDCCF',
+      'part quiz':        '?',
+      'practice quizzes': '\u270F\uFE0F',
+      'revision center':  '\uD83E\uDDE0',
     };
     if (_specialMap[_normalized]) return _specialMap[_normalized];
     const _words = _label
@@ -1398,6 +1446,52 @@ const PageHelpers = {
 };
 
 /* ============================================================
+   SECTION 15b — CHECKPOINT QUIZ SHUFFLER
+   Shuffles options in click-to-reveal .checkpoint-q blocks so
+   the correct answer isn't always the same letter on every load.
+   ============================================================ */
+function initCheckpointQuizzes() {
+  var _alpha = ['A', 'B', 'C', 'D'];
+
+  document.querySelectorAll('.checkpoint-q').forEach(function (_cq) {
+    var _optionsEl = _cq.querySelector('.cq-options');
+    var _answerEl  = _cq.querySelector('.cq-answer');
+    if (!_optionsEl || !_answerEl) return;
+
+    var _divs = Array.from(_optionsEl.children);
+    if (_divs.length < 2) return;
+
+    var _ansMatch = _answerEl.innerHTML.match(/Answer:\s*([A-D])/i);
+    if (!_ansMatch) return;
+    var _oldCorrect = _ansMatch[1].toUpperCase();
+
+    var _items = _divs.map(function (_d) {
+      var _lm = _d.innerHTML.match(/^([A-D])\)\s*/i);
+      return {
+        html:       _lm ? _d.innerHTML.slice(_lm[0].length) : _d.innerHTML,
+        wasCorrect: _lm ? _lm[1].toUpperCase() === _oldCorrect : false,
+      };
+    });
+
+    for (var _i = _items.length - 1; _i > 0; _i--) {
+      var _j = Math.floor(Math.random() * (_i + 1));
+      var _t = _items[_i]; _items[_i] = _items[_j]; _items[_j] = _t;
+    }
+
+    var _newCorrect = _oldCorrect;
+    _items.forEach(function (_item, _idx) {
+      _divs[_idx].innerHTML = _alpha[_idx] + ') ' + _item.html;
+      if (_item.wasCorrect) _newCorrect = _alpha[_idx];
+    });
+
+    _answerEl.innerHTML = _answerEl.innerHTML.replace(
+      /(Answer:\s*)[A-D]/i,
+      '$1' + _newCorrect
+    );
+  });
+}
+
+/* ============================================================
    SECTION 16 — COURSE ENGINE — global init object
    Call CourseEngine.init() (or let DOMContentLoaded do it).
    ============================================================ */
@@ -1413,6 +1507,7 @@ const CourseEngine = {
     initSmoothScroll();
     initTooltips();
     initSidebarSearch();
+    initCheckpointQuizzes();
 
     // Auto-init quiz containers
     document.querySelectorAll('[data-quiz]').forEach(function (_el) {

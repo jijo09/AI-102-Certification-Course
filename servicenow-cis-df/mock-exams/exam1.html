@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mock Exam 1 — CIS-DF Study Hub</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <link rel="stylesheet" href="mock-exams.css" />
+</head>
+<body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <main class="main-content" id="main-content" style="padding:0">
+    <header class="topbar">
+      <button class="menu-toggle" aria-label="Open navigation menu" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="../index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Mock Exams</a>
+        <span class="sep">›</span>
+        <span class="current">Exam 1</span>
+      </div>
+    </header>
+    <div id="mock-exam-root"></div>
+  </main>
+</div>
+
+<script src="../config.js"></script>
+<script src="../../scripts/engine.js"></script>
+<script src="../scripts/study-data.js"></script>
+<script src="mock-engine.js"></script>
+<script>
+var Q = [
+  /* ══════════════════════════════════════════════════════ GOVERN — 21 Qs */
+  {domain:'GOVERN',type:'single',
+   scenario:'An admin configures a Data Policy on the incident table making category mandatory. A user submits an incident via the mobile app, and a developer inserts an incident via GlideRecord in a Business Rule.',
+   q:'Which statement correctly describes Data Policy enforcement in both cases?',
+   opts:['Data Policies apply only to browser-based forms; GlideRecord and mobile apps are exempt','Data Policies are client-side — the mandatory rule runs in the browser only','The mandatory rule applies to BOTH the mobile app and the GlideRecord insert; Data Policies are server-side and enforce on every save regardless of access channel','GlideRecord inserts bypass all Data Policies unless the script explicitly calls validateMandatory()'],
+   correct:[2],exp:'Data Policies are server-side enforcement rules — they run on the server before every record save, regardless of how data arrives: form, mobile, REST API, GlideRecord, or Import Set transform. This server-side enforcement is what distinguishes them from UI Policies (browser only).'},
+
+  {domain:'GOVERN',type:'single',
+   scenario:'A security admin wants to prevent agents from editing the impact field on resolved incidents via any access path, including REST API integrations.',
+   q:'Which mechanism enforces read-only field state server-side for ALL access channels?',
+   opts:['UI Policy — set impact to read-only on the incident form','ACL — deny write access to the impact field for agent roles','Data Policy — set impact to read-only when state = Resolved','Business Rule — reject before-update saves when impact changes on resolved incidents'],
+   correct:[2],exp:'Data Policies enforce read-only (and mandatory) field states server-side across all channels — forms, REST API, GlideRecord, Import Sets. UI Policies (A) are browser-only. ACLs (B) control field-level security but through object-level access control, not conditional field state. Business Rules (C) are script automation, not declarative governance — Data Policy is the exam-preferred tool for conditional field state.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'An administrator creates a Dictionary Override for the location field on cmdb_ci_server. What is the effect?',
+   opts:['The override changes the location field definition globally — all CI tables inheriting from cmdb_ci are affected','A new separate location field is created exclusively for cmdb_ci_server, replacing the inherited one','The override customizes specific attributes of the location field (label, mandatory, default value) for cmdb_ci_server only, without changing the parent cmdb_ci definition','Dictionary Overrides can only change a field\'s default value — label and mandatory cannot be overridden'],
+   correct:[2],exp:'A Dictionary Override creates a child-table-specific dictionary record that overrides selected field attributes for that table only. All other tables inheriting the location field from cmdb_ci are unaffected. Overridable attributes include: label, mandatory, read-only, default value, max length, reference qualifier, and choice list.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'Which operational_status value indicates a CI has been ordered and is in the procurement pipeline but not yet deployed?',
+   opts:['5 — Ready','6 — Retired','7 — Pipeline','8 — Catalog'],
+   correct:[2],exp:'OOTB operational_status: 1=Operational, 2=Non-Operational, 3=Repair in Progress, 4=DR Standby, 5=Ready, 6=Retired, 7=Pipeline, 8=Catalog. Pipeline (7) = CI ordered or in procurement but not yet deployed. Ready (5) = staged and available but not in production service. Catalog (8) = available for ordering through the product catalog.'},
+
+  {domain:'GOVERN',type:'multi',multiCount:2,
+   q:'Which TWO operational_status values indicate a CI is not currently providing active operational service? (Select TWO)',
+   opts:['1 — Operational','2 — Non-Operational','6 — Retired','4 — DR Standby'],
+   correct:[1,2],exp:'Non-Operational (2) = the CI is offline or non-functioning. Retired (6) = decommissioned, no longer in service. Both indicate the CI is not providing active service. Operational (1) = actively serving. DR Standby (4) = deployed and available for failover but not currently primary — exam context typically considers standby as "deployed."'},
+
+  {domain:'GOVERN',type:'single',
+   scenario:'CMDB Data Manager marks a server CI as "Absent." The CI\'s operational_status still shows 1 (Operational). An admin searches for an operational_status choice value of "Absent" but cannot find it.',
+   q:'What does "Absent" mean and why does it not appear in the operational_status field?',
+   opts:['Absent is a hidden operational_status value (value=0) reserved for CMDB Data Manager','Absent is a CMDB Data Manager workflow state meaning no data source has confirmed this CI within the staleness threshold — it is NOT an operational_status value; no such slot exists in the 1-8 list','Absent means operational_status was automatically set to 2 (Non-Operational) by Data Manager','Absent is a Discovery Identification Rule state used when a CI cannot be matched'],
+   correct:[1],exp:'"Absent" is a CMDB Data Manager workflow concept — a state indicating no data source confirmed the CI within the staleness threshold, triggering a review workflow. It is NOT stored in operational_status and has no corresponding value in the 1-8 choice list. This is one of the highest-frequency CIS-DF exam traps.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'What are the three official CMDB Health KPI dimensions?',
+   opts:['Accuracy, Coverage, Freshness','Completeness, Correctness, Compliance','Availability, Reliability, Completeness','Discovery, Governance, Integration'],
+   correct:[1],exp:'CMDB Health has exactly three KPI dimensions: Completeness (required fields populated?), Correctness (CIs accurate — no duplicates, not stale?), and Compliance (CIs conform to CSDM class standards?). These are tested heavily in the GOVERN domain.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'CMDB Health Completeness for cmdb_ci_server shows 42%. Which statement correctly describes what Completeness measures?',
+   opts:['The percentage of server CIs confirmed by at least one active data source in the last 90 days','The percentage of server CIs with no duplicate records in the CMDB','The percentage of server CIs where all fields defined in the Completeness Rule are populated with non-null values','The percentage of server CIs whose sys_class_name matches cmdb_ci_server (not a parent class)'],
+   correct:[2],exp:'Completeness measures field population against Completeness Rules. A rule defines which fields must be non-null (e.g., ip_address, cpu_count, ram, os). A CI scores as complete only if ALL required fields have values. 42% means 58% of server CIs are missing at least one required field. Duplicate detection is Correctness; data source confirmation is Staleness (a Correctness sub-metric).'},
+
+  {domain:'GOVERN',type:'multi',multiCount:2,
+   q:'The Correctness CMDB Health KPI has two sub-metrics. Which TWO are they? (Select TWO)',
+   opts:['Completeness','Staleness','Compliance','Duplicate'],
+   correct:[1,3],exp:'Correctness KPI has two sub-metrics: (1) Staleness — CIs not confirmed by any data source within the threshold; (2) Duplicate — CI records representing the same real-world entity. Completeness (A) and Compliance (C) are the other two top-level KPIs, not sub-metrics of Correctness.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'In CMDB Data Certification, what is the role of an "attestor"?',
+   opts:['A scheduled job that automatically certifies CI data by comparing against Discovery results','A person or group responsible for reviewing assigned CIs and confirming or correcting their data accuracy during a certification task','A system property defining the minimum Completeness score required before a CI passes certification','An IRE Identification Rule that validates CI identity before data is written to the CMDB'],
+   correct:[1],exp:'Data Certification creates tasks assigned to attestors — typically CI owners, service owners, or asset managers. They review their assigned CIs, confirm accuracy, correct errors, and complete the task. Certification is human-driven, not automated. The exam tests whether candidates understand this governance process requires people, not just automation.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'A developer wants to limit a "Supported By" Reference field on incident forms to show only users with the sn_itil role. Which mechanism achieves this?',
+   opts:['A Data Policy with a condition filtering the reference field choices','A Reference Qualifier — an encoded query or script applied to the Reference field definition that filters which records appear in the field lookup','A Dictionary Override on the incident table overriding the reference_qual attribute','A UI Policy with a script dynamically filtering choices based on the current user\'s role'],
+   correct:[1],exp:'A Reference Qualifier is defined on a Reference field in the Dictionary (sys_dictionary.reference_qual) and restricts which records from the target table appear as valid choices. It can be a static encoded query or a dynamic script. Dictionary Overrides (C) can override a Reference Qualifier for a specific child table — but the mechanism itself is the Reference Qualifier.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'Which CMDB Data Manager lifecycle state means a CI IS being actively managed by at least one data source?',
+   opts:['Absent','Managed','Not Managed','Duplicate'],
+   correct:[1],exp:'CMDB Data Manager states: Managed = confirmed by a data source within the threshold (CI is current), Absent = not confirmed within threshold (review triggered), Not Managed = no data source has ever managed this CI (orphaned), Duplicate = identified as a duplicate. These are governance workflow states, NOT operational_status values.'},
+
+  {domain:'GOVERN',type:'single',
+   scenario:'A Data Policy on the task table makes priority mandatory. An admin checks whether this applies to incident records (task child table) and to incidents created via the REST API.',
+   q:'What is the correct behavior?',
+   opts:['Applies to task forms only; incident has its own form validation layer','Applies to incident forms but NOT to REST API calls — APIs bypass server-side policies','Applies to BOTH incident forms AND REST API calls — Data Policies on parent tables enforce on all child tables via all access channels','Does not apply to incident because incident has its own Data Policy'],
+   correct:[2],exp:'Data Policies on a parent table (task) apply to ALL child tables (incident, problem, change, etc.) because of single-table inheritance. Because Data Policies are server-side, enforcement covers all channels: forms, REST API, GlideRecord, Import Sets. Both inheritance propagation AND server-side enforcement are tested simultaneously here.'},
+
+  {domain:'GOVERN',type:'single',
+   scenario:'CMDB Health shows cmdb_ci_server Staleness at 41% despite Discovery running daily. Sample stale CIs all have recent entries in sys_discovery_status.',
+   q:'What is the most likely cause of high Staleness despite active Discovery?',
+   opts:['Discovery is writing to cmdb_ci instead of cmdb_ci_server, so the Staleness Rule cannot find the updates','The Staleness Rule threshold is shorter than the Discovery interval — if Discovery runs every 24h and the threshold is 12h, CIs are stale for half of each day','IRE Reconciliation Rules are blocking Discovery from updating these CIs','CMDB Data Manager is marking CIs as Absent before Discovery can refresh them'],
+   correct:[1],exp:'Staleness Rules define a threshold — if the threshold is shorter than the Discovery run interval, CIs will be "stale" for the gap period. Example: Discovery runs every 24 hours, Staleness threshold = 18 hours → CIs are stale for 6 hours each cycle. Fix: align the Staleness Rule threshold to match your slowest Discovery schedule, or increase Discovery frequency.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'Where in ServiceNow are CMDB Health Completeness Rules configured?',
+   opts:['In the CMDB Health application — Configure Completeness Rules — defining per CI class which fields must be non-null','In the Data Policy for each CI table, using the mandatory field setting','In CI Class Manager, under the class definition, Required Fields tab','In sys_dictionary for each field, by setting Mandatory = true on the field record'],
+   correct:[0],exp:'CMDB Health Completeness Rules are configured in the CMDB Health application (accessible via the navigator). They define per CI class which fields must be populated for a CI to score as complete. This is separate from Data Policy mandatory enforcement — Completeness Rules govern the HEALTH SCORE metric, not record validation on save.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'A CI has operational_status = 6. What does this indicate?',
+   opts:['The CI is in DR Standby mode, available for failover','The CI is available in the product catalog for ordering','The CI has been decommissioned — it is Retired and no longer in active service','The CI is in repair and temporarily non-operational'],
+   correct:[2],exp:'operational_status = 6 = Retired. Full OOTB list: 1=Operational, 2=Non-Operational, 3=Repair in Progress, 4=DR Standby, 5=Ready, 6=Retired, 7=Pipeline, 8=Catalog. Retired = decommissioned, no longer in service. DR Standby = 4. Catalog = 8. Repair in Progress = 3.'},
+
+  {domain:'GOVERN',type:'multi',multiCount:2,
+   q:'A Data Policy can enforce which TWO field states on forms and server-side? (Select TWO)',
+   opts:['Hidden — field is not visible on the form','Mandatory — field must be populated before the record saves','Read-Only — field cannot be edited','Encrypted — field value is masked in the database'],
+   correct:[1,2],exp:'Data Policies enforce Mandatory and Read-Only field states server-side. Hidden (A) is a UI Policy-only behavior (browser rendering) — Data Policies cannot hide fields. Encryption (D) is managed through field-level encryption in the Dictionary, not via Data Policies.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'The CMDB Health Compliance KPI measures which of the following?',
+   opts:['Whether CIs were confirmed by an authorized data source within the last 30 days','Whether CI records conform to CSDM class standards — correct table, correct sys_class_name, and required CSDM attributes populated','Whether all required CI fields have non-null values as defined in Completeness Rules','Whether duplicate CIs have been merged within an SLA window'],
+   correct:[1],exp:'Compliance checks structural and taxonomic conformance: Is the CI in the correct table? Does sys_class_name match the expected CI class? Are CSDM-required attributes (like managed_by_group) present? Compliance differs from Completeness (custom field population rules) and Correctness (duplicates + staleness).'},
+
+  {domain:'GOVERN',type:'multi',multiCount:2,
+   scenario:'A developer needs to: (1) filter which CIs appear in a Reference field based on business rules, and (2) show/hide a form field based on the current user\'s role.',
+   q:'Which TWO tools should be used for these requirements respectively? (Select TWO)',
+   opts:['Reference Qualifier for filtering CI choices in the Reference field','Data Policy for filtering CI choices','UI Policy for showing/hiding the field based on user role','ACL for showing/hiding the field based on role'],
+   correct:[0,2],exp:'Reference Qualifiers filter which records appear in a Reference field lookup — exactly right for requirement (1). UI Policies control form field visibility, mandatory, and read-only in the browser — right for requirement (2) based on role. Data Policies (B) enforce mandatory/read-only server-side but cannot filter Reference field choices. ACLs (D) control security access, not form field visibility.'},
+
+  {domain:'GOVERN',type:'single',
+   scenario:'A Data Policy has condition "state = Resolved" and makes close_notes mandatory.',
+   q:'When does this mandatory enforcement take effect?',
+   opts:['Immediately when a user opens any incident form','Only when a user explicitly clicks Apply Policy on the incident','Whenever a record with state = Resolved is saved — via form, API, or script','Only on new record creation; existing Resolved incidents are not affected'],
+   correct:[2],exp:'Data Policy conditions evaluate on every save. When an incident transitions to Resolved or is saved while in Resolved state, the condition fires and enforces close_notes as mandatory. This applies to every save action — form, API, GlideRecord, Import Set. Existing Resolved incidents are subject to the policy on their next save.'},
+
+  {domain:'GOVERN',type:'single',
+   q:'Which field attribute CANNOT be changed by a Dictionary Override on a child table?',
+   opts:['Field label (display name)','Default value','Field data type (e.g., changing String to Integer)','Mandatory status'],
+   correct:[2],exp:'Dictionary Overrides can customize: label, mandatory, read-only, default value, max length, choice list, reference qualifier, and more — all without modifying the parent table. However, a field\'s data type is defined at the base level in the parent table\'s dictionary and CANNOT be changed via a Dictionary Override. Changing data type requires modifying the parent field definition directly.'},
+
+  /* ══════════════════════════════════════════════════════ CSDM — 9 Qs */
+  {domain:'CSDM',type:'single',
+   q:'Which ServiceNow table stores Business Application CIs?',
+   opts:['cmdb_ci_service_auto','cmdb_ci_service_business','cmdb_ci_business_app','cmdb_ci_service'],
+   correct:[2],exp:'Business Application CIs are stored in cmdb_ci_business_app (Design domain). This is separate from Application Service / Service Instance CIs (cmdb_ci_service_auto), which are technical artifacts created by Service Mapping. Business Applications represent business ownership, cost center, and business capability.'},
+
+  {domain:'CSDM',type:'single',
+   q:'In CSDM 5 (Zurich release and later), what is "Service Instance" and where is it stored?',
+   opts:['A business-level CI stored in cmdb_ci_service_business','The renamed "Application Service" CI created by Service Mapping, stored in cmdb_ci_service_auto — the table name is unchanged','A new CI type introduced in Zurich, stored in a new cmdb_ci_service_instance table','The top-level CI for a CSDM stack, stored in cmdb_ci_service'],
+   correct:[1],exp:'CSDM 5 (Zurich) renamed Application Service → Service Instance. The underlying table cmdb_ci_service_auto is unchanged. High-frequency exam trap: scenarios referencing "Service Instance" and scenarios referencing "Application Service" describe the same CI type. Always check CSDM version context.'},
+
+  {domain:'CSDM',type:'single',
+   q:'CSDM defines four domains. Which domain is responsible for defining Business Applications and mapping them to business capabilities?',
+   opts:['Build — where Application Services are created by Service Mapping','Manage — where CIs are operationally managed','Design — where Business Applications are defined and linked to business capabilities and cost centers','Sell/Consume — where services are offered in the Service Catalog'],
+   correct:[2],exp:'CSDM four domains: Design (business concept layer — Business Apps, Business Capabilities), Build (technical layer — Application Services/Service Instances created by Service Mapping), Manage (operational — Managed Services, Service Offerings), Sell/Consume (catalog/portal — Service Catalog items). Business Applications live in the Design domain.'},
+
+  {domain:'CSDM',type:'single',
+   q:'After Service Mapping successfully maps the Payroll application, what does it create in the CMDB?',
+   opts:['A Business Application CI in cmdb_ci_business_app','A Technical Service CI in cmdb_ci_service','A Service Instance (Application Service) CI in cmdb_ci_service_auto, representing the technical infrastructure topology','A Managed Service CI linked to the business owner'],
+   correct:[2],exp:'Service Mapping creates Service Instance (formerly Application Service) CIs in cmdb_ci_service_auto. These technical artifacts represent the infrastructure topology delivering the application. Business Application CIs must be created manually and linked to the Service Instance. Service Mapping does NOT create Business Applications.'},
+
+  {domain:'CSDM',type:'single',
+   q:'In CSDM 5 (Zurich), what was "Application Service" renamed to?',
+   opts:['Technical Service','Business Service','Service Instance','Managed Service'],
+   correct:[2],exp:'CSDM 5 renamed Application Service → Service Instance. Table cmdb_ci_service_auto is unchanged. This naming change is tested frequently — especially in scenarios where the exam uses both terms in the same question to test whether candidates know they refer to the same thing.'},
+
+  {domain:'CSDM',type:'multi',multiCount:2,
+   q:'Which TWO statements correctly differentiate a Business Application from a Service Instance? (Select TWO)',
+   opts:['Business Applications are created automatically by Service Mapping; Service Instances are created manually','Business Applications are manually created and represent business ownership, cost center, and business capability','Service Instances are created by Service Mapping and represent the technical infrastructure topology','Both Business Applications and Service Instances are stored in cmdb_ci_service_auto'],
+   correct:[1,2],exp:'Business Applications (cmdb_ci_business_app) = business concept, manually created by service/business owners. Service Instances (cmdb_ci_service_auto) = technical artifact, auto-created by Service Mapping. They are separate CI types with different tables, linked by a relationship. A is backwards (Service Mapping creates Service Instances, not Business Apps). D is false — different tables.'},
+
+  {domain:'CSDM',type:'single',
+   q:'In CSDM, the "Manage" domain contains which type of CI?',
+   opts:['Business Applications linked to business capabilities','Service Catalog items offered to end users','Managed Services and Service Offerings — the operational layer bridging technical infrastructure and business consumers','Application Service topology maps created by Service Mapping'],
+   correct:[2],exp:'CSDM Manage domain = Service Offerings and Managed Services. This layer bridges the technical Build domain (Service Instances from Service Mapping) with the business-facing Sell/Consume domain (catalog, portal). Service Offerings define service terms; Managed Services group Application Services into operationally managed bundles.'},
+
+  {domain:'CSDM',type:'single',
+   q:'What distinguishes a Business Application (cmdb_ci_business_app) from a Service Instance (cmdb_ci_service_auto)?',
+   opts:['Business Applications are discovered automatically; Service Instances are entered manually','Business Application = business ownership, cost center, business capability — manually created; Service Instance = technical infrastructure topology — auto-created by Service Mapping','They are identical — CSDM 5 merged the two concepts into one CI type','Business Applications are stored in the Manage domain; Service Instances are in the Design domain'],
+   correct:[1],exp:'Business Application = Design domain business concept (who owns it, what business capability it supports, cost allocation). Service Instance = Build domain technical artifact (which servers/network/database support it), created by Service Mapping. They are linked but distinct. Reversing domain assignments (D) is a common distractor.'},
+
+  {domain:'CSDM',type:'single',
+   scenario:'CMDB 360 Foundation Dashboard shows "Business Application to Service Mapping coverage: 0%." Discovery and Service Mapping ran successfully, creating 92 Service Instance CIs.',
+   q:'Why is coverage 0%?',
+   opts:['Service Mapping failed to link Service Instances into the CMDB hierarchy','CMDB Health score is below the threshold required for coverage to calculate','No Business Application CIs have been created. Coverage requires Business Apps linked to Service Instances; Business Apps must be created manually','CSDM 5 changed the coverage metric name — look for "Service Instance Coverage" instead'],
+   correct:[2],exp:'Business Applications must be manually created and then related to their Service Instances. Service Mapping creates the technical layer (Service Instances) automatically, but the business layer (Business Applications in cmdb_ci_business_app) requires human effort. Until Business Apps exist and are linked, coverage is 0%.'},
+
+  /* ══════════════════════════════════════════════════════ INSIGHT — 12 Qs */
+  {domain:'INSIGHT',type:'single',
+   q:'What is the primary purpose of a Database View in ServiceNow?',
+   opts:['A cached copy of a table stored separately for reporting performance','A read-only virtual table that joins columns from multiple tables, making cross-table data accessible in Report Builder without scripting','A write-capable joined table for updating records across multiple tables simultaneously','A table storing aggregated summary data computed by a nightly scheduled job'],
+   correct:[1],exp:'Database Views create read-only virtual joined tables. They expose fields from multiple source tables as flat columns, usable directly in Report Builder. They are NOT write-capable (C) and are not cached aggregates (D). Key exam point: when a report needs data from tables with no built-in cross-table type, a Database View is the correct solution.'},
+
+  {domain:'INSIGHT',type:'single',
+   q:'What capability does Performance Analytics provide that standard ServiceNow Reports do NOT?',
+   opts:['Bar chart visualization of data','Recurring collection of metric values stored as time-series data, enabling trend analysis over weeks or months','Date-range filtering on report results','Email delivery of report output on a schedule'],
+   correct:[1],exp:'Standard Reports query current data — they cannot show how a metric has changed over time without manual comparison. Performance Analytics collects indicator values on a schedule and stores each as a timestamped data point, building a series for trend charts over any historical period. Email scheduling (D) is also available in standard reports.'},
+
+  {domain:'INSIGHT',type:'single',
+   q:'The CMDB 360 Foundation Dashboard provides what type of visibility?',
+   opts:['Real-time operational status monitoring of CI changes','A cross-domain view of CMDB health, coverage, and relationship completeness aligned to CSDM layers','Historical trend charts of incident volume per CI class','Security audit log of all CMDB record modifications'],
+   correct:[1],exp:'CMDB 360 provides cross-domain governance visibility: CMDB Health scores per domain, Business Application to Service Instance coverage gaps, relationship completeness, and CSDM alignment metrics. It is a governance and coverage tool, not operational monitoring, incident analysis, or audit logging.'},
+
+  {domain:'INSIGHT',type:'single',
+   q:'In the CMDB Workspace, what does "NLQ" stand for and what does it enable?',
+   opts:['Network Level Qualification — a Discovery credential standard','Natural Language Query — allows users to search CMDB data using conversational English phrases instead of encoded queries','Node Link Quality — a metric for CI relationship graph density','Normalized Lookup Query — a method for IRE to identify duplicate CIs'],
+   correct:[1],exp:'NLQ (Natural Language Query) in CMDB Workspace lets users type questions like "show me all Windows servers in New York" — the system translates them into CMDB queries. This is an AI/ML-enhanced search feature. The exam tests familiarity with CMDB Workspace capabilities introduced in recent ServiceNow releases.'},
+
+  {domain:'INSIGHT',type:'single',
+   q:'Which report type is best suited to showing how the count of open P1 incidents has changed day by day over 30 days?',
+   opts:['Pivot Table','Heat Map','Time Series (Line or Area chart)','Summary Report'],
+   correct:[2],exp:'Time Series charts plot metric values over a time axis, ideal for trend analysis. Pivot tables (A) show aggregated cross-dimensional data without temporal flow. Heat maps (B) show concentration/density patterns. Summary reports (D) show aggregated totals, not time progression. For "how has X changed over Y period," Time Series is the exam answer.'},
+
+  {domain:'INSIGHT',type:'multi',multiCount:2,
+   q:'Which TWO of the following are standard report types available in ServiceNow Report Builder? (Select TWO)',
+   opts:['Gantt Chart','Bar Chart','Heat Map','Radar Chart'],
+   correct:[1,2],exp:'ServiceNow Report Builder includes Bar charts, Pie charts, Line charts, Area charts, Heat Maps, Pivot Tables, Single Score, and more. Gantt Chart (A) is not a standard OOTB report type. Radar Chart (D) is also not a standard Report Builder option. Knowing which report types are available OOTB is tested.'},
+
+  {domain:'INSIGHT',type:'single',
+   q:'Where can a Scheduled Report deliver its output? (Select the most complete correct answer)',
+   opts:['Only to the report creator\'s email address','Email to specified recipients, or stored on the Scheduled Report record for viewing within the instance','Only as a PDF attachment on a ServiceNow task record','FTP transfer to an external file server'],
+   correct:[1],exp:'Scheduled Reports deliver output via email (PDF, CSV, Excel) to specified recipients/distribution lists AND store the output on the scheduled report record. FTP delivery (D) is not standard OOTB. The exam tests knowledge of OOTB delivery options: email and in-instance storage.'},
+
+  {domain:'INSIGHT',type:'single',
+   q:'A developer asks if a Database View can be used to update records. What is the correct answer?',
+   opts:['Yes — Database Views support both read and write on all joined tables','Yes, but only if created with write permission in the view definition','No — Database Views are strictly read-only virtual tables; updates must target the actual source tables directly','No — Database Views cannot be queried via GlideRecord or REST API'],
+   correct:[2],exp:'Database Views are explicitly read-only. They are virtual representations and cannot be used to write records. To update data visible in a view, target the specific source tables. Note: Database Views CAN be queried via GlideRecord and the REST API (making D incorrect) — they are read-only but fully accessible for read operations.'},
+
+  {domain:'INSIGHT',type:'single',
+   scenario:'A CMDB manager wants a widget showing CMDB Completeness % week-over-week for 6 months to prove ROI on a Discovery improvement initiative.',
+   q:'Which ServiceNow tool is required to populate this widget with historical trend data?',
+   opts:['Standard Reports with a date-range filter on the CMDB Health table','Database View joining CMDB Health snapshots by timestamp','Performance Analytics — define a PA Indicator for CMDB Completeness and run collection on a weekly schedule','CMDB Workspace NLQ — query "show completeness history for 6 months"'],
+   correct:[2],exp:'Performance Analytics is the only tool that stores time-series metric data. Define a PA Indicator targeting CMDB Health Completeness, set a weekly collection schedule, and PA accumulates data points over 6 months. Standard Reports (A) query current state only — no historical series. Database Views (B) don\'t store snapshots. NLQ (D) queries current CMDB data, not historical metric series.'},
+
+  {domain:'INSIGHT',type:'single',
+   scenario:'An admin needs a single list report showing open Incidents alongside the CI name and operational_status from the related CI record. The Incident table has a Reference field to cmdb_ci.',
+   q:'What is the most direct approach to include CI fields in this Incident report?',
+   opts:['Write a Business Rule to copy CI name and operational_status into custom Incident fields daily','Use dot-walking in the Report Builder — Reference fields support dot-walking to access fields in the referenced table without a Database View','Create a Database View joining incident and cmdb_ci, then build the report on the view','Use a PA Indicator to define CI name and operational_status as breakdowns'],
+   correct:[1],exp:'ServiceNow Report Builder supports dot-walking through Reference fields. In an Incident report, add cmdb_ci.name and cmdb_ci.operational_status as columns by dot-walking the cmdb_ci reference field. A Database View (C) is needed for more complex multi-table joins or when dot-walking doesn\'t cover the requirement. For simple reference traversal, dot-walking is the direct answer.'},
+
+  {domain:'INSIGHT',type:'single',
+   q:'On the CMDB 360 Foundation Dashboard, what drives the "Stale CI" widget count?',
+   opts:['Number of CIs with operational_status = 6 (Retired)','Number of CIs that have exceeded the configured Staleness Rule threshold — not confirmed by any data source within the period','Number of CIs flagged as Absent by CMDB Data Manager','Number of CIs with missing mandatory fields per Completeness Rules'],
+   correct:[1],exp:'The Stale CI widget counts CIs that have exceeded the Staleness threshold defined in their CMDB Health Staleness Rules — no data source confirmed them within the window. Absent (C) is a CMDB Data Manager state — related concept but driven by Data Manager logic, not the Staleness Rule threshold directly.'},
+
+  {domain:'INSIGHT',type:'single',
+   q:'What does a Performance Analytics Indicator collect and when?',
+   opts:['Current record counts or aggregated values at a configured schedule, storing each as a timestamped data point in a time series','Discovery payloads from MID Servers, stored in a staging table for IRE processing','Browser session user actions — page views and click analytics','ServiceNow system performance metrics (CPU, memory) from MID Servers'],
+   correct:[0],exp:'A PA Indicator is a defined metric (e.g., count of open P1 incidents, CMDB Completeness %) that PA collects at a configured schedule. Each collection stores a timestamp + value, building a series for trend analysis. Indicators are not Discovery-related (B), user behavior tracking (C), or system monitoring (D).'},
+
+  /* ══════════════════════════════════════════════════════ INGEST — 11 Qs */
+  {domain:'INGEST',type:'single',
+   q:'When data is loaded via an Import Set, where does it land before transformation?',
+   opts:['Directly into the target CMDB table without staging','In a temporary staging table specific to the data source (e.g., u_import_server_list)','In sys_import_set_row as generic key-value pairs for all imports','In the GlideRecord buffer pending commit'],
+   correct:[1],exp:'Import Set data lands in a dedicated staging table (often named u_<import_set_label>). This table mirrors the source data structure. The Transform Map then maps staging fields to target table fields, applying coalesce logic and scripts. The staging table isolates raw data from production until transformation validates and maps it.'},
+
+  {domain:'INGEST',type:'single',
+   q:'A Transform Map uses serial_number as the coalesce field. An incoming record has serial_number = "SN-NEW-001" but no CI has that serial number. What happens?',
+   opts:['The record is rejected — coalesce requires an existing match to proceed','A new CI record is created in the target table using the data from the staging row (INSERT)','The record is placed in an error queue for manual review','The Transform Map searches hostname and IP address as fallback coalesce fields automatically'],
+   correct:[1],exp:'Coalesce is a "find or create" (upsert) mechanism. No match = INSERT a new record. Match = UPDATE the existing record. This behavior is fundamental to Import Sets. No automatic fallback to other fields (D) — only configured coalesce fields are tried. Records are never auto-rejected on no match (A).'},
+
+  {domain:'INGEST',type:'single',
+   q:'Which type of field is most commonly used as a coalesce field for CMDB CI ingestion via Import Sets?',
+   opts:['An auto-generated sequential number field','A unique identifier such as serial_number, asset_tag, or hostname that reliably identifies the same real-world CI across imports','A date field representing the last update timestamp','A multi-select category field'],
+   correct:[1],exp:'A coalesce field must uniquely identify the real-world entity to enable correct upsert matching. Common choices: serial_number (hardware), asset_tag (ITAM), hostname (servers), or composites. Non-unique fields (A, C, D) cause incorrect matches or duplicate records. The coalesce concept directly parallels IRE Identification Rules — both solve the "find the right CI" problem.'},
+
+  {domain:'INGEST',type:'single',
+   q:'Can a MID Server write directly to ServiceNow database tables?',
+   opts:['Yes — MID Servers have a direct JDBC connection to the ServiceNow database for performance','No — MID Servers communicate with ServiceNow via HTTPS (ECC Queue); all writes go through ServiceNow\'s application layer','Yes, but only to CMDB tables via a privileged connection configured in MID Server properties','No — MID Servers cannot write any data; they only collect and forward read-only payloads'],
+   correct:[1],exp:'MID Servers have NO direct database access. They communicate via HTTPS, sending messages through the ECC Queue. All data submission goes through ServiceNow\'s application layer — where it may be processed by IRE (for Discovery payloads) or the Import Set engine. This architecture is by design: the MID Server is a network proxy, not a database client.'},
+
+  {domain:'INGEST',type:'multi',multiCount:2,
+   q:'Which TWO statements correctly distinguish Service Graph Connectors (SGC) from traditional Import Sets? (Select TWO)',
+   opts:['SGC requires a MID Server for all integrations; Import Sets do not require one','SGC uses pre-built integration spokes with IRE-native ingestion via the IRE API; Import Sets use custom Transform Maps with coalesce logic','SGC only works with cloud systems; Import Sets only handle on-premises data','SGC is built on Integration Hub using Spokes; traditional Import Sets use scheduled data sources and Transform Maps'],
+   correct:[1,3],exp:'SGC uses IRE-native ingestion (B) — pre-configured Identification and Reconciliation built in, publishing via the IRE API. It is built on Integration Hub Spokes (D). SGC can use MID Servers for on-prem systems but calls cloud APIs directly without one (A is false). SGC works with both cloud and on-prem systems (C is false).'},
+
+  {domain:'INGEST',type:'single',
+   scenario:'An IRE Identification Rule for cmdb_ci_linux_server uses only serial_number as the lookup field. A Discovery payload arrives for a Linux VM with serial_number = null because the hypervisor did not expose it.',
+   q:'What does IRE do when the payload\'s lookup identifier field is null?',
+   opts:['Creates a new CI — null identifiers always trigger CI creation to avoid data loss','Raises a critical halt event and stops processing the entire Discovery batch','Skips this Identification Rule and evaluates the next rule in priority order; if no rule matches, behavior depends on rule configuration','Automatically falls back to using the IP address as an identifier'],
+   correct:[2],exp:'IRE processes Identification Rules in priority order. A null identifier field means this rule cannot evaluate — IRE moves to the next rule in priority. No automatic IP fallback (D) unless an IP-based rule exists and is configured. No batch halt (B). Creation (A) only happens if a configured rule with "create if no match" fires.'},
+
+  {domain:'INGEST',type:'single',
+   scenario:'A Discovery schedule scans 256 IPs. 100 devices respond to PING. Of those, 70 match a Horizontal Pattern (CI class identified). The remaining 30 don\'t match any pattern.',
+   q:'How many CIs are created or updated after this Discovery run?',
+   opts:['256 — one per scanned IP','100 — one per device that responded to PING','70 — only devices with a matched Horizontal Pattern receive Vertical Discovery and CI creation','30 — only unclassified devices trigger new CI creation as Unclassified Device'],
+   correct:[2],exp:'Vertical Discovery (which collects CI attributes and triggers CI creation/update via IRE) only runs after Horizontal Discovery successfully classifies a device. The 30 unclassified devices remain invisible in the CMDB. Fix: create Horizontal Patterns for the unmatched device types. Answer choice D is a common distractor — ServiceNow does not auto-create "Unclassified Device" CIs OOTB.'},
+
+  {domain:'INGEST',type:'single',
+   scenario:'A scheduled Import Set uses a JDBC Data Source to pull server inventory from an on-premises Oracle database. ServiceNow is cloud-hosted.',
+   q:'Which component executes the JDBC query against the Oracle database?',
+   opts:['The ServiceNow cloud instance connects directly to Oracle via JDBC','The MID Server — running on-premises, it executes the JDBC query and sends the result set to ServiceNow via HTTPS','The Transform Map Engine queries the database as part of the transformation step','The Service Graph Connector handles all JDBC connections on behalf of Import Sets'],
+   correct:[1],exp:'The MID Server bridges network boundaries. For JDBC Data Sources, the MID Server runs on the same network as the on-premises database, executes the JDBC query, and sends results to ServiceNow via the ECC Queue over HTTPS. The cloud instance cannot reach on-premises databases directly. Transform Map (C) runs in ServiceNow after data arrives.'},
+
+  {domain:'INGEST',type:'single',
+   q:'How do Service Graph Connectors for cloud platforms (AWS, Azure) typically authenticate?',
+   opts:['Via a MID Server using SNMP community strings','Via API keys, OAuth 2.0 tokens, or service account credentials configured in the SGC spoke connection settings','Via LDAP credentials stored in the ServiceNow credential store','Via the same credentials used by Discovery for on-premises scanning'],
+   correct:[1],exp:'SGC spokes for cloud platforms use the cloud provider\'s standard API authentication: API keys, OAuth 2.0, or service account tokens configured in Integration Hub connection aliases. SNMP (A) is for network device polling in Discovery, not cloud APIs. LDAP (C) is directory authentication, irrelevant for cloud REST APIs.'},
+
+  {domain:'INGEST',type:'single',
+   q:'What does the Import Set Cleaner do?',
+   opts:['Validates incoming staging data against business rules before transformation','Removes old Import Set rows and staging table data from completed import runs to prevent database growth','Cleans up duplicate Transform Map entries when multiple maps target the same table','Purges orphaned CI records from the CMDB created by failed Import Set runs'],
+   correct:[1],exp:'The Import Set Cleaner is a scheduled job that deletes old import set rows (u_import_* staging table records) and completed import set header records. Import Sets accumulate staging data over time; the cleaner prevents database bloat from stale staging records. It does not validate data (A), clean transform maps (C), or manage CMDB CIs (D).'},
+
+  {domain:'INGEST',type:'single',
+   scenario:'A company has 500 network switches not discoverable by ServiceNow Discovery (SNMP blocked). The switches are tracked in a spreadsheet: hostname, IP, location, model, serial_number.',
+   q:'What is the most appropriate method for populating these CIs in the CMDB?',
+   opts:['Enable SSH on the switches and create new Discovery Patterns','Use a Service Graph Connector to pull switch inventory from a network management system (if no NMS exists, this is not viable)','Use Import Sets with a Transform Map targeting the appropriate switch CI class, coalescing on serial_number','Manually create each CI one by one in the CMDB Workspace'],
+   correct:[2],exp:'Import Sets are ideal for non-discoverable CIs from structured data files (spreadsheets, CSVs). Load the spreadsheet as a data source, create a Transform Map targeting the correct CI class, use serial_number as the coalesce field. SGC (B) requires a pre-built integration and an existing source system API — for a spreadsheet, Import Sets are simpler. Manual creation (D) doesn\'t scale to 500 CIs.'},
+
+  /* ══════════════════════════════════════════════════════ CONFIG/IRE — 7 Qs */
+  {domain:'CONFIG',type:'single',
+   q:'Three Reconciliation Rules exist for cmdb_ci_server.manufacturer: Discovery (priority 5), SCCM Import (priority 20), Manual Entry (priority 80). Which source wins?',
+   opts:['Manual Entry — human input should override automated sources','SCCM Import — middle priority acts as tiebreaker','Discovery — the LOWEST priority NUMBER has the HIGHEST precedence; priority 5 beats 20 and 80','The most recently received value regardless of priority number'],
+   correct:[2],exp:'IRE Reconciliation Rule priority: LOWER number = HIGHER authority. Priority 5 (Discovery) is most authoritative. This is counterintuitive — think "priority 1 is most important." This rule is one of the most-tested IRE concepts on the CIS-DF exam. Memorize: lower number = higher authority.'},
+
+  {domain:'CONFIG',type:'single',
+   q:'What is the correct order of the three IRE phases when processing a Discovery payload?',
+   opts:['Deduplication → Identification → Reconciliation','Reconciliation → Identification → Deduplication','Identification → Reconciliation → Deduplication','Identification → Deduplication → Reconciliation'],
+   correct:[2],exp:'IRE three phases in order: (1) Identification — find the existing CI or create a new one using Identification Rules; (2) Reconciliation — apply authoritative field values based on source priority; (3) Deduplication — detect and merge near-duplicate CIs. Order matters: identify the CI first, then write authoritative values, then check for duplicates.'},
+
+  {domain:'CONFIG',type:'single',
+   q:'When CMDB Deduplication merges two duplicate CI records, which record is retained?',
+   opts:['The record with the lower sys_id (alphabetically first GUID)','The most recently created record','The record designated as the Master — chosen based on data completeness, source authority, or admin selection in the deduplication task','Always the record discovered by Discovery, since Discovery is typically the authoritative source'],
+   correct:[2],exp:'During deduplication, one record is designated the Master (retained) and the Duplicate is merged into it (typically set to Retired or Absent). The master designation is configurable — it is not automatically the newest or the Discovery record. Relationship data from the duplicate can be migrated to the master during merge.'},
+
+  {domain:'CONFIG',type:'multi',multiCount:2,
+   q:'Which TWO types of lookup criteria can IRE Identification Rules use to find an existing CI? (Select TWO)',
+   opts:['The CI\'s last_discovered timestamp','A composite multi-field identifier — e.g., hostname + ip_address combined','A single unique field identifier — e.g., serial_number alone','The CI\'s operational_status value'],
+   correct:[1,2],exp:'IRE Identification Rules can use single-field identifiers (C) like serial_number, or composite multi-field identifiers (B) like hostname + ip_address + os. Multiple rules can exist per CI class in priority order. last_discovered (A) and operational_status (D) are not identification criteria — they don\'t uniquely identify a real-world entity.'},
+
+  {domain:'CONFIG',type:'single',
+   q:'A Flow Designer action uses a direct PATCH to /api/now/table/cmdb_ci_server/{sys_id} to update cpu_count. Does this write go through IRE Reconciliation?',
+   opts:['Yes — all writes to CMDB tables automatically invoke IRE','Yes, but only for fields with an active Reconciliation Rule','No — direct Table API calls and GlideRecord writes bypass IRE entirely; the value is written without reconciliation','No — Table API calls to CMDB tables are blocked; the IRE API must be used instead'],
+   correct:[2],exp:'IRE is NOT a transparent CMDB write interceptor. It is invoked only by Discovery payloads, SGC data flows, and explicit IRE API calls. A direct PATCH to the Table API writes the value immediately, ignoring Reconciliation Rule priority. This is a critical architecture trap: to participate in multi-source reconciliation, you must use the IRE API explicitly.'},
+
+  {domain:'CONFIG',type:'single',
+   scenario:'cpu_count Reconciliation Rules: Discovery priority=10, CMDB Manager priority=25, Legacy Import priority=50. Discovery reports cpu_count=16; Legacy Import reports cpu_count=8; CMDB Manager reports cpu_count=32. All three payloads arrive.',
+   q:'What value does IRE write to cmdb_ci_server.cpu_count?',
+   opts:['32 — the highest numeric value wins','8 — the largest priority number provides the safest fallback','16 — Discovery has the lowest priority number (highest authority); priority 10 beats 25 and 50','An average of 18 — IRE averages conflicting values'],
+   correct:[2],exp:'Lower priority number = higher authority. Discovery (priority 10) wins over CMDB Manager (25) and Legacy Import (50). cpu_count = 16. No averaging (D). Highest numeric value (A) is irrelevant to priority. Deterministic priority resolution is IRE\'s core design principle — it prevents last-write-wins instability.'},
+
+  {domain:'CONFIG',type:'single',
+   q:'Running CMDB Deduplication and merging 500 duplicate CI pairs primarily improves which CMDB Health KPI and sub-metric?',
+   opts:['Completeness — filling in empty fields from the merged records','Compliance — ensuring merged CIs conform to CSDM class standards','Correctness — specifically the Duplicate sub-metric within Correctness','Completeness — the merged record has data from both source records'],
+   correct:[2],exp:'Deduplication directly improves the Correctness KPI\'s Duplicate sub-metric. Correctness has two sub-metrics: Duplicate (CI duplication) and Staleness (data currency). Merging duplicates decreases the Duplicate count, improving Correctness. It does not directly improve Completeness (merged CIs may still have empty required fields) or Compliance (class conformance is separate).'}
+];
+
+document.addEventListener('DOMContentLoaded', function () {
+  MockExam.init({ questions: Q, examId: 'exam1', title: 'Mock Exam 1', examNum: 1 });
+});
+</script>
+</body>
+</html>

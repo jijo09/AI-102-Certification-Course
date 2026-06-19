@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -49,12 +49,12 @@
       <div style="margin-bottom:var(--space-6)">
         <div class="badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 6 · All 6 Topics</div>
         <h1 style="margin-bottom:var(--space-3)">Part 6 Full Quiz — Governance &amp; Data Quality</h1>
-        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions on Data Policies, Dictionary Overrides, field validation, reference qualifiers, and certification. Select an answer to reveal the explanation.</p>
+        <p style="color:var(--text-muted);font-size:0.9rem">18 questions (15 topic questions + 3 cross-topic integration) on Data Policies, Dictionary Overrides, field validation, reference qualifiers, and certification. Select an answer to reveal the explanation.</p>
       </div>
 
       <div class="quiz-strip" id="quiz-strip">
-        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
-        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 15</div></div>
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 18</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 18</div></div>
         <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
         <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0891b2"></div></div></div>
       </div>
@@ -64,7 +64,7 @@
       <div class="quiz-container" id="main-quiz">
         <div class="quiz-header">
           <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 6 — Governance &amp; Data Quality</span>
-          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+          <span class="quiz-question-count" data-q-counter>1 / 18</span>
         </div>
         <div style="height:3px;background:var(--navy-800)">
           <div style="height:3px;background:#0891b2;transition:width 0.4s ease;width:0%" data-q-progress></div>
@@ -357,10 +357,65 @@
             </div>
           </div>
 
+
+          <!-- Q16 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: An admin creates a Data Policy on the task table making the priority field mandatory. A user opens an incident form and saves without filling in priority. A separate REST API call also creates an incident record with no priority value.</div>
+              <p class="quiz-question">Does the Data Policy apply in both scenarios?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Only to the form — REST API calls bypass server-side Data Policies</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">To BOTH the form and the REST API — Data Policies are server-side rules that apply regardless of how data is submitted, including APIs, Import Sets, and scripts</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">To the form only if 'Apply on REST API' is explicitly checked in the policy configuration</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">To the task table forms but not to incident because incident has its own form configuration</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> The critical differentiator of Data Policies over UI Policies is server-side enforcement. Server-side means the rule runs regardless of access path: form save, REST API, Import Set transform, GlideRecord script. UI Policies only run in the browser. Because incident extends task (Part 1 Topic 1 table inheritance), the mandatory priority rule applies to all task child tables including incident.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q17 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: The cmdb_ci base table has a location field with label 'Location.' The infrastructure team wants cmdb_ci_server forms to show 'Data Center Location' instead, without changing it on any other CI table.</div>
+              <p class="quiz-question">Which mechanism should be used?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Edit the location field label in sys_dictionary on cmdb_ci — the change applies everywhere</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Create a Dictionary Override for cmdb_ci_server.location — it customizes the field's label for that specific child table without changing the parent cmdb_ci definition</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Create a UI Policy on cmdb_ci_server forms to display 'Data Center Location' as custom label text</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Create a separate data_center_location field on cmdb_ci_server and use a Business Rule to sync values</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Dictionary Overrides let you customize a field's dictionary attributes (label, mandatory, read-only, default value) for a specific child table without modifying the parent definition. Editing sys_dictionary on cmdb_ci (A) changes the label for ALL CI tables — too broad. UI Policies (C) only affect form display, not the dictionary record. Creating a new field (D) duplicates data and creates sync complexity. This uses Part 1's table inheritance to target exactly one child table.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q18 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: CMDB Data Manager identifies a CI that has not been updated by any data source for 180 days and marks it as 'Absent.' The admin searches for 'Absent' as an operational_status field value but cannot find it.</div>
+              <p class="quiz-question">Why can't the admin find 'Absent' in operational_status, and what IS 'Absent' in this context?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">'Absent' is a hidden reserved operational_status value — it only appears when Data Manager sets it programmatically</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">'Absent' is a CMDB Data Manager workflow STATE meaning the CI is no longer confirmed by any data source. It has NO corresponding operational_status value. The OOTB operational_status choices are 1=Operational through 8=Catalog with no Absent slot</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">'Absent' maps to operational_status = 5 (Ready)</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">'Absent' is an operational_status value added in recent ServiceNow releases — the instance may need an upgrade</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Absent is a CMDB Data Manager concept — a workflow state identifying a CI that no data source confirmed within the staleness threshold. It is NOT an operational_status field value. OOTB operational_status: 1=Operational, 2=Non-Operational, 3=Repair in Progress, 4=DR Standby, 5=Ready, 6=Retired, 7=Pipeline, 8=Catalog. No Absent slot. When Data Manager flags a CI as Absent, it initiates a review workflow — the admin may then change operational_status manually, but Absent itself is not stored in that field.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
         </div><!-- /quiz-body -->
 
         <div class="quiz-footer" data-quiz-footer>
-          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 18</span>
           <div style="display:flex;gap:var(--space-3)">
             <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
             <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
@@ -392,7 +447,7 @@
 <script src="../config.js"></script>
 <script src="../../scripts/engine.js"></script>
 <script>
-  const TOTAL = 15;
+  const TOTAL = 18;
   const dots = document.getElementById('q-dots');
   for (let i = 0; i < TOTAL; i++) {
     const d = document.createElement('div');

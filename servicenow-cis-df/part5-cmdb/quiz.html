@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -49,12 +49,12 @@
       <div style="margin-bottom:var(--space-6)">
         <div class="badge" style="background:rgba(8,145,178,0.15);color:#67e8f9;border:1px solid rgba(8,145,178,0.3);display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;font-family:var(--font-heading);margin-bottom:var(--space-3)">✅ Part 5 · All 8 Topics</div>
         <h1 style="margin-bottom:var(--space-3)">Part 5 Full Quiz — CMDB &amp; CSDM</h1>
-        <p style="color:var(--text-muted);font-size:0.9rem">15 scenario-based questions on CI classes, relationships, Discovery, IRE deduplication, and CMDB governance. Select an answer to reveal the explanation.</p>
+        <p style="color:var(--text-muted);font-size:0.9rem">18 questions (15 topic questions + 3 cross-topic integration) on CI classes, relationships, Discovery, IRE, CSDM, and CMDB governance. Select an answer to reveal the explanation.</p>
       </div>
 
       <div class="quiz-strip" id="quiz-strip">
-        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 15</div></div>
-        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 15</div></div>
+        <div><div class="qs-label">Questions</div><div class="qs-value"><span id="qs-current">1</span> / 18</div></div>
+        <div><div class="qs-label">Score</div><div class="qs-value" id="qs-score" style="color:#67e8f9">0 / 18</div></div>
         <div><div class="qs-label">Answered</div><div class="qs-value" id="qs-answered">0</div></div>
         <div style="flex:1"><div class="qs-label" style="margin-bottom:4px">Progress</div><div class="progress-bar" style="height:8px"><div class="progress-fill" id="qs-prog" style="width:0%;background:#0891b2"></div></div></div>
       </div>
@@ -64,7 +64,7 @@
       <div class="quiz-container" id="main-quiz">
         <div class="quiz-header">
           <span class="font-heading" style="font-size:0.875rem;font-weight:600">Part 5 — CMDB &amp; CSDM</span>
-          <span class="quiz-question-count" data-q-counter>1 / 15</span>
+          <span class="quiz-question-count" data-q-counter>1 / 18</span>
         </div>
         <div style="height:3px;background:var(--navy-800)">
           <div style="height:3px;background:#0891b2;transition:width 0.4s ease;width:0%" data-q-progress></div>
@@ -357,10 +357,65 @@
             </div>
           </div>
 
+
+          <!-- Q16 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: CMDB Health shows 42% Completeness for cmdb_ci_server CIs. The Completeness rule requires cpu_count, ram, os, and ip_address to be populated. Most servers show ip_address populated but cpu_count and ram empty.</div>
+              <p class="quiz-question">Which Discovery phase is most likely failing, and why does ip_address populate while cpu_count and ram do not?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Horizontal Discovery is failing — it couldn't classify the CI, so no CI was created at all</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">IP Range Discovery targeted the wrong subnet — the servers were found but the wrong data was collected</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Vertical Discovery is failing — Horizontal successfully classified the device and populated ip_address, but Vertical (which collects CPU, RAM, and OS attributes) is not running or lacks credentials</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">CMDB Identification Rules are blocking field updates for these servers</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>C is correct.</strong> Horizontal Discovery classifies the CI and records the IP address. Vertical Discovery then connects via SSH/WMI to collect detailed attributes: CPU count, RAM, OS. If Vertical fails (missing credentials, pattern gaps, network access issues), the CI exists with basic identity data but no detail attributes — exactly the pattern described. Check credential coverage and Vertical Pattern matching for the specific CI class. This connects Part 3 Discovery phases with Part 5 CMDB Health.</p>
+              </div>
+              <p data-correct="C" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q17 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: A CMDB admin sees a CI flagged as 'Absent' by CMDB Data Manager. The CI's operational_status shows 1 (Operational). The admin searches for 'Absent' in the operational_status choice list but cannot find it.</div>
+              <p class="quiz-question">What does 'Absent' mean, and what operational_status value does it map to?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">Absent means the CI has been decommissioned — operational_status should be 6 (Retired)</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">Absent is a CMDB Data Manager workflow state (the CI hasn't been confirmed by any data source within the staleness threshold) — it is NOT an operational_status value; there is no 'Absent' slot in the operational_status choice list</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Absent maps to operational_status = 5 (Ready), indicating the CI is ready to be re-evaluated</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Absent maps to operational_status = 0, marking the CI for deletion by the next purge job</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> Absent is a CMDB Data Manager workflow state — it represents a CI that no data source has confirmed within the configured threshold. It does NOT correspond to any operational_status value. The standard operational_status OOTB list: 1=Operational, 2=Non-Operational, 3=Repair in Progress, 4=DR Standby, 5=Ready, 6=Retired, 7=Pipeline, 8=Catalog. No 'Absent' slot. This is a very high-frequency exam trap also addressed in Part 6 Topic 6.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
+          <!-- Q18 — Cross-Topic -->
+          <div data-question style="display:none">
+            <div class="quiz-body">
+          <div class="q-topic-label" style="background:rgba(168,85,247,0.12);color:#c084fc">🔗 Cross-Topic Integration</div>
+              <div class="quiz-scenario">Scenario: The Dependency View for a cmdb_ci_server shows the Application Service 'Order Management' as an upstream CI with relationship type 'Runs on::Runs on.' The server is scheduled for maintenance downtime.</div>
+              <p class="quiz-question">According to CMDB relationship semantics, which CI is impacted and why?</p>
+              <div class="quiz-options">
+                <button class="quiz-option" data-option="A"><span class="quiz-option-letter">A</span><span class="quiz-option-text">No CIs are impacted — 'Runs on' is an informational relationship with no operational meaning</span></button>
+                <button class="quiz-option" data-option="B"><span class="quiz-option-letter">B</span><span class="quiz-option-text">The 'Order Management' Application Service is impacted — in cmdb_rel_ci, 'parent Runs on child' means the parent depends on the child; server downtime breaks the dependency and cascades upstream to the application</span></button>
+                <button class="quiz-option" data-option="C"><span class="quiz-option-letter">C</span><span class="quiz-option-text">Only CIs directly below the server in the hierarchy are impacted — upstream CIs are never affected by child CI outages</span></button>
+                <button class="quiz-option" data-option="D"><span class="quiz-option-letter">D</span><span class="quiz-option-text">Impact must be assessed manually — the Dependency View only shows connections, not impact direction</span></button>
+              </div>
+              <div class="quiz-explanation"><div class="quiz-explanation-title">💡 Explanation</div>
+                <p><strong>B is correct.</strong> In cmdb_rel_ci, 'parent Runs on child' means the parent DEPENDS ON the child. The Application Service (parent) runs on the server (child) — server downtime cascades upstream. The Dependency View visualizes exactly this impact chain. This connects Part 5 Topic 2 (CI Relationships) with the CSDM service model (Topics 6-7) and how CMDB supports Change impact analysis.</p>
+              </div>
+              <p data-correct="B" style="display:none"></p>
+            </div>
+          </div>
         </div><!-- /quiz-body -->
 
         <div class="quiz-footer" data-quiz-footer>
-          <span class="quiz-score-display" data-q-score>Score: 0 / 15</span>
+          <span class="quiz-score-display" data-q-score>Score: 0 / 18</span>
           <div style="display:flex;gap:var(--space-3)">
             <button class="btn btn-ghost btn-sm" data-q-prev disabled>← Prev</button>
             <button class="btn btn-primary btn-sm" data-q-next>Next →</button>
@@ -392,7 +447,7 @@
 <script src="../config.js"></script>
 <script src="../../scripts/engine.js"></script>
 <script>
-  const TOTAL = 15;
+  const TOTAL = 18;
   const dots = document.getElementById('q-dots');
   for (let i = 0; i < TOTAL; i++) {
     const d = document.createElement('div');
