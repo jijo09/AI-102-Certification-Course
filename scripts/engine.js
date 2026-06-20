@@ -1016,6 +1016,9 @@ const SidebarBuilder = {
     const _quizzesHtml = _showQuizzes
       ? '    <a href="' + _prefixPath + 'quizzes.html" class="sidebar-item sidebar-nav-tab"><span class="item-icon">\u270F\uFE0F</span><span>Practice Quizzes</span></a>'
       : '';
+    const _contentsHtml = _config.showContents
+      ? '    <a href="' + _prefixPath + 'contents.html" class="sidebar-item sidebar-nav-tab"><span class="item-icon">\uD83D\uDCCB</span><span>Course Index</span></a>'
+      : '';
 
     return [
       '<aside class="sidebar">',
@@ -1030,6 +1033,7 @@ const SidebarBuilder = {
       '  <nav class="sidebar-nav">',
       '    <a href="' + _prefixPath + 'index.html" class="sidebar-item sidebar-nav-tab"><span class="item-icon">\u2302</span><span>Dashboard</span></a>',
       _groups,
+      _contentsHtml,
       _revisionHtml,
       _quizzesHtml,
       '    <a href="#" onclick="ProgressManager.reset()" class="sidebar-item"><span class="item-icon">\u21BA</span><span>Reset Progress</span></a>',
@@ -1237,6 +1241,7 @@ const SidebarManager = (function () {
       'part quiz':        '?',
       'practice quizzes': '\u270F\uFE0F',
       'revision center':  '\uD83E\uDDE0',
+      'course index':     '\uD83D\uDCCB',
     };
     if (_specialMap[_normalized]) return _specialMap[_normalized];
     const _words = _label

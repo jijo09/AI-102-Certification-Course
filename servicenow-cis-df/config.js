@@ -11,6 +11,7 @@ window.COURSE_CONFIG = {
   settingsKey:  'cisdf_settings',
   examDateKey:  'cisdf_exam_date',
   showSearch:   false,
+  showContents: true,
 
   topicRegistry: [
     /* Part 1 — ServiceNow Data Model */

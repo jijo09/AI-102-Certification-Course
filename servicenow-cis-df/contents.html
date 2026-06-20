@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Index — CIS-DF Study Hub</title>
+  <link rel="stylesheet" href="../styles/main.css" />
+  <style>
+    /* ── TOC Container ── */
+    .toc-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-6) var(--space-12);
+    }
+
+    /* ── Hero ── */
+    .toc-hero {
+      text-align: center;
+      padding: var(--space-10) 0 var(--space-8);
+    }
+    .toc-hero-title {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 40%, #22d3ee 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+      margin-bottom: var(--space-3);
+    }
+    .toc-hero-sub {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: var(--space-6);
+    }
+    .toc-hero-pills {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+    .toc-pill {
+      background: rgba(8,145,178,0.08);
+      border: 1px solid rgba(8,145,178,0.2);
+      color: #22d3ee;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Search ── */
+    .toc-search-wrap {
+      position: sticky;
+      top: var(--topbar-height);
+      z-index: 10;
+      background: rgba(5,6,10,0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: var(--space-4) 0;
+      margin-bottom: var(--space-6);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .toc-search {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 28px;
+      padding: 12px 20px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .toc-search:focus {
+      border-color: rgba(8,145,178,0.5);
+      background: rgba(255,255,255,0.08);
+    }
+    .toc-search::placeholder { color: var(--text-muted); }
+
+    /* ── No results ── */
+    .toc-no-results {
+      display: none;
+      text-align: center;
+      padding: var(--space-10) 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* ── Part card ── */
+    .toc-part {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-2xl);
+      overflow: hidden;
+      margin-bottom: var(--space-4);
+      border-left: 3px solid var(--toc-accent, #0891b2);
+      transition: border-color 0.2s;
+    }
+    .toc-part.hidden { display: none; }
+
+    .toc-part-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .toc-part-header:hover { background: rgba(255,255,255,0.02); }
+    .toc-part-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .toc-part-meta { flex: 1; min-width: 0; }
+    .toc-part-num {
+      font-size: 0.62rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--toc-accent, #0891b2);
+      text-transform: uppercase;
+      margin-bottom: 1px;
+    }
+    .toc-part-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .toc-part-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-shrink: 0;
+    }
+    .toc-weight-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+    }
+    .toc-part-toggle {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+    }
+    .toc-part.collapsed .toc-part-toggle { transform: rotate(-90deg); }
+    .toc-part.collapsed .toc-topics-list { display: none; }
+
+    /* ── Quick links row (Flashcards / Part Quiz) ── */
+    .toc-part-links {
+      display: flex;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      background: rgba(255,255,255,0.01);
+    }
+    .toc-part-link {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 3px 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      background: transparent;
+      transition: all 0.15s;
+      letter-spacing: 0.03em;
+    }
+    .toc-part-link:hover {
+      color: var(--toc-accent, #0891b2);
+      border-color: var(--toc-accent, #0891b2);
+      background: rgba(8,145,178,0.06);
+    }
+
+    /* ── Topics list ── */
+    .toc-topics-list { padding: var(--space-1) 0 var(--space-2); }
+
+    /* ── Topic row ── */
+    .toc-topic {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-5);
+      text-decoration: none;
+      color: inherit;
+      border-bottom: 1px solid rgba(255,255,255,0.025);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .toc-topic:last-child { border-bottom: none; }
+    .toc-topic:hover { background: rgba(255,255,255,0.03); }
+    .toc-topic.hidden { display: none; }
+    .toc-topic.done .toc-topic-title { color: var(--emerald-400); }
+
+    .toc-topic-num {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 22px;
+      padding-top: 3px;
+      flex-shrink: 0;
+    }
+    .toc-topic-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      padding-top: 1px;
+    }
+    .toc-topic-body { flex: 1; min-width: 0; }
+    .toc-topic-title {
+      font-weight: 600;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .done-check {
+      display: none;
+      color: var(--emerald-400);
+      font-size: 0.75rem;
+    }
+    .toc-topic.done .done-check { display: inline; }
+
+    /* ── Section list (loaded async) ── */
+    .toc-sections {
+      margin-top: var(--space-2);
+      padding-left: var(--space-1);
+      border-left: 1px solid rgba(255,255,255,0.07);
+      margin-left: 2px;
+    }
+    .toc-section-link {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 2px var(--space-3);
+      line-height: 1.7;
+      transition: color 0.12s, padding-left 0.12s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .toc-section-link:hover {
+      color: var(--text-secondary);
+      padding-left: calc(var(--space-3) + 3px);
+    }
+    .toc-section-link.is-trap { color: rgba(251,191,36,0.6); }
+    .toc-section-link.is-trap:hover { color: var(--amber-400); }
+    .toc-sections-loading {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      padding: 2px var(--space-3);
+      opacity: 0.5;
+      font-style: italic;
+    }
+
+    /* ── Topic nav arrow ── */
+    .toc-topic-nav {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding-top: 3px;
+      flex-shrink: 0;
+      transition: color 0.12s, transform 0.12s;
+    }
+    .toc-topic:hover .toc-topic-nav {
+      color: var(--toc-accent, #0891b2);
+      transform: translateX(2px);
+    }
+
+    /* ── Search highlight ── */
+    mark {
+      background: rgba(8,145,178,0.25);
+      color: #22d3ee;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    @media (max-width: 600px) {
+      .toc-wrap { padding: var(--space-6) var(--space-4) var(--space-10); }
+      .toc-part-title { font-size: 0.85rem; }
+      .toc-weight-badge { display: none; }
+    }
+  </style>
+</head>
+<body class="theme-cis-df">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div id="sidebar-overlay"></div>
+
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+
+  <main class="main-content" id="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" aria-label="Open navigation menu"
+        onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+      <div class="topbar-breadcrumb">
+        <button class="back-to-hub-btn" onclick="switchCourse()">All Courses</button>
+        <span class="sep">›</span>
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none">Dashboard</a>
+        <span class="sep">›</span>
+        <span class="current">Course Index</span>
+      </div>
+    </header>
+
+    <div class="toc-wrap">
+
+      <!-- Hero -->
+      <div class="toc-hero">
+        <div class="badge" style="background:rgba(8,145,178,0.12);color:#22d3ee;margin-bottom:var(--space-4)">📋 Complete Course Navigator</div>
+        <h1 class="toc-hero-title">CIS-DF Course Index</h1>
+        <p class="toc-hero-sub">Every topic and section — click to navigate directly</p>
+        <div class="toc-hero-pills">
+          <span class="toc-pill" id="pill-parts">8 domains</span>
+          <span class="toc-pill" id="pill-topics">39 topics</span>
+          <span class="toc-pill" id="pill-sections">loading sections…</span>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="toc-search-wrap">
+        <input type="text" class="toc-search" id="toc-search"
+          placeholder="🔍  Search topics and sections…" autocomplete="off" />
+      </div>
+
+      <!-- TOC body -->
+      <div id="toc-body"></div>
+      <div class="toc-no-results" id="toc-no-results">No matches found. Try a different keyword.</div>
+
+    </div>
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script src="../scripts/engine.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── Part accent colors ── */
+  const PART_COLORS = {
+    1: '#0891b2', 2: '#0284c7', 3: '#0369a1', 4: '#7c3aed',
+    5: '#155e75', 6: '#0e7490', 7: '#0ea5e9', 8: '#6366f1'
+  };
+
+  /* ── Topic icons from STUDY_DATA (by encoded part/topic in topicRegistry id) ── */
+  function getTopicIcon(topicId) {
+    try {
+      const m = topicId.match(/cisdf_([^_]+)_([^_]+)_/);
+      if (!m) return '📄';
+      const part = window.STUDY_DATA && STUDY_DATA.parts[m[1]];
+      const topic = part && part.topics[m[2]];
+      return topic ? topic.icon : '📄';
+    } catch (_) { return '📄'; }
+  }
+
+  /* ── Progress from localStorage ── */
+  function getProgress() {
+    try {
+      const raw = localStorage.getItem(COURSE_CONFIG.storageKey || 'cisdf_progress');
+      return JSON.parse(raw || '{}');
+    } catch (_) { return {}; }
+  }
+
+  /* ── Build entire TOC ── */
+  function buildTOC() {
+    const reg   = COURSE_CONFIG.topicRegistry;
+    const parts = COURSE_CONFIG.partsMeta;
+    const pIdx  = COURSE_CONFIG.partIndexFiles || {};
+    const prog  = getProgress();
+    const body  = document.getElementById('toc-body');
+
+    /* Group topics by part number */
+    const byPart = {};
+    reg.forEach(function (t, i) {
+      if (!byPart[t.part]) byPart[t.part] = [];
+      byPart[t.part].push({ t: t, localIdx: i });
+    });
+
+    let topicCount = 0;
+
+    Object.keys(parts).sort(function (a, b) { return +a - +b; }).forEach(function (pNum) {
+      const meta   = parts[pNum];
+      const color  = PART_COLORS[pNum] || '#0891b2';
+      const topics = byPart[pNum] || [];
+      topicCount  += topics.length;
+
+      const partEl = document.createElement('div');
+      partEl.className   = 'toc-part';
+      partEl.dataset.part = pNum;
+      partEl.style.setProperty('--toc-accent', color);
+
+      /* ── Part header ── */
+      const header = document.createElement('div');
+      header.className = 'toc-part-header';
+      header.setAttribute('role', 'button');
+      header.setAttribute('aria-expanded', 'true');
+      header.innerHTML = `
+        <span class="toc-part-icon">${meta.icon || '📚'}</span>
+        <div class="toc-part-meta">
+          <div class="toc-part-num">Domain ${pNum}</div>
+          <div class="toc-part-title">${meta.title}</div>
+        </div>
+        <div class="toc-part-right">
+          <span class="toc-weight-badge">${meta.weight || '—'} exam</span>
+          <span class="toc-weight-badge">${topics.length} topics</span>
+          <span class="toc-part-toggle">▼</span>
+        </div>
+      `;
+      header.addEventListener('click', function () {
+        partEl.classList.toggle('collapsed');
+        header.setAttribute('aria-expanded', partEl.classList.contains('collapsed') ? 'false' : 'true');
+      });
+      partEl.appendChild(header);
+
+      /* ── Quick links: Flashcards / Quiz ── */
+      const partDir = (pIdx[pNum] || '').replace('index.html', '');
+      if (partDir) {
+        const linksRow = document.createElement('div');
+        linksRow.className = 'toc-part-links';
+        linksRow.innerHTML = `
+          <a href="${partDir}flashcards.html" class="toc-part-link">🃏 Flashcards</a>
+          <a href="${partDir}quiz.html" class="toc-part-link">✏️ Part Quiz</a>
+        `;
+        partEl.appendChild(linksRow);
+      }
+
+      /* ── Topics list ── */
+      const topicsList = document.createElement('div');
+      topicsList.className = 'toc-topics-list';
+
+      topics.forEach(function (item, ti) {
+        const t      = item.t;
+        const done   = prog[t.id] === true;
+        const icon   = getTopicIcon(t.id);
+        const href   = t.file; // relative from contents.html perspective = direct file path
+
+        const row = document.createElement('a');
+        row.className     = 'toc-topic' + (done ? ' done' : '');
+        row.href          = t.file;
+        row.dataset.topicId = t.id;
+        row.dataset.search  = t.title.toLowerCase();
+        row.innerHTML = `
+          <span class="toc-topic-num">${String(ti + 1).padStart(2, '0')}</span>
+          <span class="toc-topic-icon">${icon}</span>
+          <div class="toc-topic-body">
+            <div class="toc-topic-title">
+              ${t.title}
+              <span class="done-check" title="Completed">✓</span>
+            </div>
+            <div class="toc-sections">
+              <span class="toc-sections-loading">loading sections…</span>
+            </div>
+          </div>
+          <span class="toc-topic-nav" aria-hidden="true">›</span>
+        `;
+
+        /* Prevent link navigation when clicking a section link */
+        row.addEventListener('click', function (e) {
+          if (e.target.closest('.toc-section-link')) e.stopPropagation();
+        });
+
+        topicsList.appendChild(row);
+
+        /* Start async section fetch */
+        loadSections(t, row);
+      });
+
+      partEl.appendChild(topicsList);
+      body.appendChild(partEl);
+    });
+
+    /* Update hero pills */
+    document.getElementById('pill-parts').textContent  = Object.keys(parts).length + ' domains';
+    document.getElementById('pill-topics').textContent = topicCount + ' topics';
+  }
+
+  /* ── Fetch h2 headings from a topic file ── */
+  let totalSections = 0;
+  const SKIP_HEADINGS = /^(practice questions?|key facts|term grid)$/i;
+
+  async function loadSections(topic, rowEl) {
+    const sectionsEl = rowEl.querySelector('.toc-sections');
+    try {
+      const resp = await fetch(topic.file);
+      if (!resp.ok) throw new Error('fetch failed');
+      const html  = await resp.text();
+      const doc   = new DOMParser().parseFromString(html, 'text/html');
+      const h2s   = [...doc.querySelectorAll('h2')];
+      const valid = h2s.filter(function (h) {
+        return !SKIP_HEADINGS.test(h.textContent.trim());
+      });
+
+      if (!valid.length) {
+        sectionsEl.innerHTML = '';
+        return;
+      }
+
+      totalSections += valid.length;
+      document.getElementById('pill-sections').textContent = totalSections + ' sections';
+
+      const links = valid.map(function (h) {
+        const text = h.textContent.trim().replace(/\s+/g, ' ');
+        const isTrap = /exam trap/i.test(text);
+        const frag  = '#:~:text=' + encodeURIComponent(text.slice(0, 60));
+        return `<a class="toc-section-link${isTrap ? ' is-trap' : ''}" href="${topic.file}${frag}"
+          title="${text}">${text}</a>`;
+      }).join('');
+
+      sectionsEl.innerHTML = links;
+
+      /* Update search index for this row */
+      const existing = rowEl.dataset.search || '';
+      rowEl.dataset.search = existing + ' ' + valid.map(function (h) {
+        return h.textContent.trim().toLowerCase();
+      }).join(' ');
+
+    } catch (_) {
+      /* fetch not available (file://) — remove loading text silently */
+      sectionsEl.innerHTML = '';
+      document.getElementById('pill-sections').textContent = 'local mode';
+    }
+  }
+
+  /* ── Live search ── */
+  function initSearch() {
+    const input   = document.getElementById('toc-search');
+    const noRes   = document.getElementById('toc-no-results');
+
+    input.addEventListener('input', function () {
+      const q = input.value.trim().toLowerCase();
+
+      if (!q) {
+        /* Restore all */
+        document.querySelectorAll('.toc-part').forEach(function (p) { p.classList.remove('hidden'); });
+        document.querySelectorAll('.toc-topic').forEach(function (t) { t.classList.remove('hidden'); });
+        noRes.style.display = 'none';
+        return;
+      }
+
+      let anyVisible = false;
+
+      document.querySelectorAll('.toc-part').forEach(function (partEl) {
+        let partHasVisible = false;
+
+        partEl.querySelectorAll('.toc-topic').forEach(function (topicEl) {
+          const searchText = topicEl.dataset.search || '';
+          const matches    = searchText.includes(q);
+          topicEl.classList.toggle('hidden', !matches);
+          if (matches) { partHasVisible = true; anyVisible = true; }
+        });
+
+        partEl.classList.toggle('hidden', !partHasVisible);
+        /* Auto-expand matched parts */
+        if (partHasVisible) partEl.classList.remove('collapsed');
+      });
+
+      noRes.style.display = anyVisible ? 'none' : 'block';
+    });
+  }
+
+  /* ── Init ── */
+  document.addEventListener('DOMContentLoaded', function () {
+    buildTOC();
+    initSearch();
+  });
+})();
+</script>
+</body>
+</html>
