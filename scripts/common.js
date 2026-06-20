@@ -1639,4 +1639,23 @@ SidebarManager.injectAndInit = function() {
     } catch (e) {}
 };
 
+/* ============================================================
+   PWA BOOTSTRAP
+   Injects manifest link and registers service worker.
+   Degrades silently on file:// — requires http(s) to activate.
+   ============================================================ */
+(function () {
+  if (!document.querySelector('link[rel="manifest"]')) {
+    var _m = document.createElement('link');
+    _m.rel  = 'manifest';
+    _m.href = '/manifest.json';
+    document.head.appendChild(_m);
+  }
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+  }
+})();
+
 SidebarManager.injectAndInit();

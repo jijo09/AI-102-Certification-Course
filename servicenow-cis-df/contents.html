@@ -54,31 +54,25 @@
 
     /* ── Search ── */
     .toc-search-wrap {
-      position: sticky;
-      top: var(--topbar-height);
-      z-index: 10;
-      background: rgba(5,6,10,0.9);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: var(--space-4) 0;
       margin-bottom: var(--space-6);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
     .toc-search {
       width: 100%;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 28px;
-      padding: 12px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-2xl);
+      padding: 14px 22px;
       color: var(--text-primary);
       font-size: 0.9rem;
       font-family: var(--font-body);
       outline: none;
-      transition: border-color 0.2s, background 0.2s;
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
     }
     .toc-search:focus {
-      border-color: rgba(8,145,178,0.5);
-      background: rgba(255,255,255,0.08);
+      border-color: rgba(8,145,178,0.45);
+      box-shadow: 0 0 0 3px rgba(8,145,178,0.1), var(--shadow-card);
     }
     .toc-search::placeholder { color: var(--text-muted); }
 
@@ -405,7 +399,7 @@
       topicCount  += topics.length;
 
       const partEl = document.createElement('div');
-      partEl.className   = 'toc-part';
+      partEl.className   = 'toc-part collapsed';
       partEl.dataset.part = pNum;
       partEl.style.setProperty('--toc-accent', color);
 
@@ -413,7 +407,7 @@
       const header = document.createElement('div');
       header.className = 'toc-part-header';
       header.setAttribute('role', 'button');
-      header.setAttribute('aria-expanded', 'true');
+      header.setAttribute('aria-expanded', 'false');
       header.innerHTML = `
         <span class="toc-part-icon">${meta.icon || '📚'}</span>
         <div class="toc-part-meta">
@@ -543,16 +537,18 @@
 
   /* ── Live search ── */
   function initSearch() {
-    const input   = document.getElementById('toc-search');
-    const noRes   = document.getElementById('toc-no-results');
+    const input = document.getElementById('toc-search');
+    const noRes = document.getElementById('toc-no-results');
 
     input.addEventListener('input', function () {
       const q = input.value.trim().toLowerCase();
 
       if (!q) {
-        /* Restore all */
         document.querySelectorAll('.toc-part').forEach(function (p) { p.classList.remove('hidden'); });
-        document.querySelectorAll('.toc-topic').forEach(function (t) { t.classList.remove('hidden'); });
+        document.querySelectorAll('.toc-topic').forEach(function (t) {
+          t.classList.remove('hidden');
+          t.querySelectorAll('.toc-section-link').forEach(function (s) { s.style.display = ''; });
+        });
         noRes.style.display = 'none';
         return;
       }
@@ -563,14 +559,23 @@
         let partHasVisible = false;
 
         partEl.querySelectorAll('.toc-topic').forEach(function (topicEl) {
-          const searchText = topicEl.dataset.search || '';
-          const matches    = searchText.includes(q);
-          topicEl.classList.toggle('hidden', !matches);
-          if (matches) { partHasVisible = true; anyVisible = true; }
+          const titleText  = (topicEl.querySelector('.toc-topic-title') || topicEl).textContent.trim().toLowerCase();
+          const titleMatch = titleText.includes(q);
+          let sectionMatch = false;
+
+          topicEl.querySelectorAll('.toc-section-link').forEach(function (s) {
+            const sText  = s.textContent.trim().toLowerCase();
+            const sMatch = sText.includes(q);
+            s.style.display = (sMatch || titleMatch) ? '' : 'none';
+            if (sMatch) sectionMatch = true;
+          });
+
+          const visible = titleMatch || sectionMatch;
+          topicEl.classList.toggle('hidden', !visible);
+          if (visible) { partHasVisible = true; anyVisible = true; }
         });
 
         partEl.classList.toggle('hidden', !partHasVisible);
-        /* Auto-expand matched parts */
         if (partHasVisible) partEl.classList.remove('collapsed');
       });
 

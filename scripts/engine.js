@@ -1032,8 +1032,8 @@ const SidebarBuilder = {
       _searchHtml,
       '  <nav class="sidebar-nav">',
       '    <a href="' + _prefixPath + 'index.html" class="sidebar-item sidebar-nav-tab"><span class="item-icon">\u2302</span><span>Dashboard</span></a>',
-      _groups,
       _contentsHtml,
+      _groups,
       _revisionHtml,
       _quizzesHtml,
       '    <a href="#" onclick="ProgressManager.reset()" class="sidebar-item"><span class="item-icon">\u21BA</span><span>Reset Progress</span></a>',
@@ -1592,4 +1592,23 @@ window.ExamCountdown   = ExamCountdown;
 window.SidebarBuilder  = SidebarBuilder;
 window.SidebarManager  = SidebarManager;
 window.switchCourse    = switchCourse;
+
+/* ============================================================
+   PWA BOOTSTRAP
+   Injects manifest link and registers service worker.
+   Degrades silently on file:// — requires http(s) to activate.
+   ============================================================ */
+(function () {
+  if (!document.querySelector('link[rel="manifest"]')) {
+    var _m = document.createElement('link');
+    _m.rel  = 'manifest';
+    _m.href = '/manifest.json';
+    document.head.appendChild(_m);
+  }
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+  }
+})();
 window.toggleTheme     = toggleTheme;
