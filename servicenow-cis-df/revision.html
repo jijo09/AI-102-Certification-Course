@@ -10,7 +10,8 @@
 
     .view-card { background: var(--bg-card); border: 1px solid var(--border-default); border-radius: var(--radius-2xl); padding: var(--space-8); box-shadow: var(--shadow-glass); backdrop-filter: blur(var(--blur-md)); -webkit-backdrop-filter: blur(var(--blur-md)); position: relative; overflow: hidden; display: flex; flex-direction: column; }
 
-    .part-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: var(--space-3); margin-top: var(--space-6); }
+    .part-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); margin-top: var(--space-6); }
+    @media (max-width: 600px) { .part-grid { grid-template-columns: repeat(2, 1fr); } }
     .part-btn { background: var(--glass-1); border: 1px solid var(--gb-white); border-radius: var(--radius-xl); padding: var(--space-4); text-align: left; transition: all var(--transition-normal); cursor: pointer; display: flex; align-items: center; gap: var(--space-3); color: inherit; }
     .part-btn:hover { background: var(--glass-em); border-color: var(--gb-em); transform: translateY(-2px); box-shadow: var(--shadow-em); }
     .part-btn-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: rgba(255,255,255,0.05); flex-shrink: 0; }
