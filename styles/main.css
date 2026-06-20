@@ -3998,14 +3998,22 @@ body.light-mode :focus-visible {
   }
 }
 
-/* ── Sidebar Overlay — remove blur, keep dim ───────────────────────────── */
-/* Inline styles in each HTML file set backdrop-filter:blur(2px) on
-   #sidebar-overlay. This global rule overrides them — overlay still dims
-   the background (rgba(0,0,0,0.6)) but no longer blurs it, which prevents
-   sidebar nav items from bleeding through on tablet. */
+/* ── Sidebar Overlay ───────────────────────────────────────────────────── */
+/* CIS-DF pages define #sidebar-overlay in a per-page <style> block that
+   loads AFTER main.css, so !important is required to override their
+   backdrop-filter and opaque background. Reduced to 0.4 opacity so the
+   dim is softer and doesn't appear as a solid black bar on mobile. */
 #sidebar-overlay {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(0,0,0,0.4) !important;
+}
+
+/* ── Sidebar responsive width at intermediate viewports ────────────────── */
+/* At 901-1280px the 280px sidebar is proportionally too wide.
+   Reducing to 240px gives content more room without collapsing to icon mode. */
+@media (min-width: 901px) and (max-width: 1280px) {
+  :root { --sidebar-width-expanded: 240px; }
 }
 
 /* ── Visual Flow Diagrams ──────────────────────────────────────────────── */
