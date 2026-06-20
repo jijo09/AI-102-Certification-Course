@@ -2722,6 +2722,7 @@ table.comparison-table tr:hover td { background: rgba(16,185,129,0.04); }
 body.sidebar-collapsed .sidebar-logo > :not(.sidebar-logo-icon):not(.sidebar-desktop-toggle) {
   opacity: 0;
   width: 0;
+  height: 0;
   overflow: hidden;
   pointer-events: none;
 }

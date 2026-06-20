@@ -69,6 +69,26 @@
     .hidden { display: none !important; }
     .view-step { animation: slideInUp 0.4s ease both; }
     @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Visual Enhancements ── */
+    .rev-hero { text-align: center; padding: var(--space-10) var(--space-4) var(--space-6); }
+    .rev-hero-title { font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 900; background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 40%, #22d3ee 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.15; margin-bottom: var(--space-3); }
+    .rev-hero-sub { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+
+    .part-btn { flex-direction: column; gap: 0; padding: var(--space-5); }
+    .part-btn-top { display: flex; align-items: center; gap: var(--space-4); padding-bottom: var(--space-3); }
+    .part-btn-footer { display: flex; align-items: center; justify-content: space-between; padding-top: var(--space-3); border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); width: 100%; }
+    .tip-badge-sm { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--amber-400); padding: 2px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.03em; white-space: nowrap; }
+
+    .topic-list { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--space-3); flex-direction: unset; }
+    .topic-btn { flex-direction: column; align-items: flex-start; gap: var(--space-2); padding: var(--space-4); }
+    .topic-btn.all-deck { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: var(--space-4); background: rgba(8,145,178,0.06); border-color: rgba(8,145,178,0.2); }
+    .topic-btn-badge { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.2); color: #22d3ee; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .exam-tip-badge { font-size: 0.6rem; font-weight: 700; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.22); color: var(--amber-400); padding: 1px 6px; border-radius: 10px; }
+    .topic-meta { display: flex; align-items: center; gap: var(--space-2); margin-top: auto; }
+    .topic-count { font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); }
+
+    .fc-card[data-type="tip"] .fc-front { background: linear-gradient(145deg, rgba(245,158,11,0.07) 0%, rgba(0,0,0,0.05) 100%); border-color: rgba(245,158,11,0.2); }
   </style>
 </head>
 <body class="theme-cis-df">
@@ -95,9 +115,11 @@
 
       <!-- STEP 1: Select Part -->
       <div id="step-part" class="view-step">
-        <div class="badge" style="background:rgba(8,145,178,0.12);color:#22d3ee;margin-bottom:var(--space-4)">🧠 Consolidate Your Knowledge</div>
-        <h1 style="margin-bottom:var(--space-2)">Revision Center</h1>
-        <p style="margin-bottom:var(--space-8)">Choose a CIS-DF domain to revise key definitions and exam trap warnings.</p>
+        <div class="rev-hero">
+          <div class="badge" style="background:rgba(8,145,178,0.12);color:#22d3ee;margin-bottom:var(--space-4)">🧠 Consolidate Your Knowledge</div>
+          <h1 class="rev-hero-title">Revision Center</h1>
+          <p class="rev-hero-sub">Choose a CIS-DF domain to revise key definitions and exam trap warnings.</p>
+        </div>
         <div class="part-grid" id="part-grid"></div>
       </div>
 
@@ -240,17 +262,25 @@
   }
 
   function renderPartGrid() {
-    els.partGrid.innerHTML = Object.values(STUDY_DATA.parts).map(p => `
-      <div class="part-btn" onclick="selectPart('${p.id}')">
-        <div class="part-btn-icon" style="color:${p.color};border:1px solid color-mix(in srgb,${p.color} 30%,transparent)">
-          ${p.icon}
+    els.partGrid.innerHTML = Object.values(STUDY_DATA.parts).map(p => {
+      const cards = STUDY_DATA.cards.filter(c => c.p === p.id);
+      const tips  = cards.filter(c => c.type === 'tip').length;
+      return `
+        <div class="part-btn" onclick="selectPart('${p.id}')">
+          <div class="part-btn-top">
+            <div class="part-btn-icon" style="color:${p.color};border:1px solid color-mix(in srgb,${p.color} 30%,transparent)">${p.icon}</div>
+            <div>
+              <div class="part-btn-sub">Part ${p.label !== undefined ? p.label : p.id.slice(1)}</div>
+              <div class="part-btn-title">${p.title}</div>
+            </div>
+          </div>
+          <div class="part-btn-footer">
+            <span>${cards.length} cards</span>
+            ${tips > 0 ? `<span class="tip-badge-sm">${tips} exam tips</span>` : ''}
+          </div>
         </div>
-        <div>
-          <div class="part-btn-sub">Part ${p.label !== undefined ? p.label : p.id.slice(1)}</div>
-          <div class="part-btn-title">${p.title}</div>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   function showStep(step) {
@@ -269,20 +299,34 @@
       <p>Select a topic to revise, or choose all topics for this domain.</p>
     `;
 
+    const partCards = STUDY_DATA.cards.filter(c => c.p === currentPart.id);
+    const allTips   = partCards.filter(c => c.type === 'tip').length;
+
     let topicsHtml = `
-      <button class="topic-btn" onclick="startRevision('all')">
-        <div class="topic-btn-icon">📚</div>
-        <div class="topic-btn-title">All Part ${currentPart.label} Topics</div>
-        <div style="font-size:0.7rem;color:var(--text-muted)">FULL DECK</div>
+      <button class="topic-btn all-deck" onclick="startRevision('all')">
+        <div class="topic-btn-icon" style="font-size:1.4rem">📚</div>
+        <div style="flex:1">
+          <div class="topic-btn-title">All Part ${currentPart.label} Topics</div>
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">${partCards.length} cards · ${allTips} exam tips</div>
+        </div>
+        <span class="topic-btn-badge">FULL DECK</span>
       </button>
     `;
 
-    topicsHtml += Object.values(currentPart.topics).map(t => `
-      <button class="topic-btn" onclick="showRecap('${t.id}')">
-        <div class="topic-btn-icon">${t.icon}</div>
-        <div class="topic-btn-title">${t.title}</div>
-      </button>
-    `).join('');
+    topicsHtml += Object.values(currentPart.topics).map(t => {
+      const tCards = STUDY_DATA.cards.filter(c => c.p === currentPart.id && c.t === t.id);
+      const hasTip = tCards.some(c => c.type === 'tip');
+      return `
+        <button class="topic-btn" onclick="showRecap('${t.id}')">
+          <div class="topic-btn-icon" style="font-size:1.3rem">${t.icon}</div>
+          <div class="topic-btn-title">${t.title}</div>
+          <div class="topic-meta">
+            <span class="topic-count">${tCards.length} cards</span>
+            ${hasTip ? '<span class="exam-tip-badge">TIP</span>' : ''}
+          </div>
+        </button>
+      `;
+    }).join('');
 
     els.topicList.innerHTML = topicsHtml;
     showStep('topic');
@@ -349,6 +393,7 @@
 
   function renderCard() {
     const card = deck[ptr];
+    els.fc.card.dataset.type = card.type || 'term';
 
     if (card.type === 'tip') {
       els.fc.label.textContent = 'EXAM TIP';

@@ -1181,7 +1181,8 @@ const SidebarManager = (function () {
 
     // Tag utility sidebar items for short-label generation
     document.querySelectorAll('.sidebar-item').forEach(function (_item) {
-      const _label = _item.textContent.trim().replace(/\s+/g, ' ');
+      const _textSpan = _item.querySelector('span:not(.item-icon):not(.topic-dot)');
+      const _label = (_textSpan || _item).textContent.trim().replace(/\s+/g, ' ');
       if (_label) {
         _item.dataset.shortLabel = _buildShortLabel(_label);
         _item.title = _label;
