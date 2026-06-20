@@ -165,26 +165,42 @@
           This gives a recovery window between the two operations.
         </p>
 
-        <div class="flow-steps">
-          <div class="flow-step">
-            <div class="flow-step-num">1</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Record Meets Archive Condition</div>
-              <div class="flow-step-desc">Archive Rule triggers — record moves from incident to ar_archive_incident. No longer in active list views.</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Archive Phase</div>
+              <div class="vflow-title c-1">Record Meets Archive Condition → Moved to Archive Table</div>
+              <div class="vflow-desc">The Archive Rule's condition is met (e.g., <code class="code-inline">resolved_at &gt; 3 years ago</code>). The record is moved from the active table (<code class="code-inline">incident</code>) to the archive table (<code class="code-inline">ar_archive_incident</code>). It no longer appears in standard list views but remains queryable and retrievable.</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">2</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Retention Period in Archive</div>
-              <div class="flow-step-desc">Record sits in archive table for configured retention period (e.g., 5 years for compliance). Can be retrieved if needed.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">2</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Retention Window</div>
+              <div class="vflow-title c-3">Record Sits in Archive for Retention Period</div>
+              <div class="vflow-desc">The record is held in the archive table for the configured retention period (e.g., 5 years for regulatory compliance). During this window it can still be retrieved — a compliance officer or auditor can search archive tables and restore records if needed.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Still accessible via archive table queries</span>
+                <span class="vflow-tag">Retrievable to active table if needed</span>
+                <span class="vflow-tag">Counts toward compliance retention requirements</span>
+              </div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">3</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Purge Rule Triggers</div>
-              <div class="flow-step-desc">After retention period expires, Purge Rule permanently deletes the record from the archive table. This action is irreversible.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-err">3</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Purge Phase — Irreversible</div>
+              <div class="vflow-title c-in">Purge Rule Triggers → Permanent Deletion</div>
+              <div class="vflow-desc">After the retention period expires, the Purge Rule permanently deletes the record from the archive table. <strong>This action cannot be undone</strong> — no trash, no restore, no backup short of a full database restore. Always ensure retention periods align with legal requirements (GDPR, HIPAA, SOX) before configuring purge rules.</div>
             </div>
           </div>
         </div>

@@ -129,29 +129,75 @@
         </ul>
 
         <h3>The Three Layers of MID Server Communication</h3>
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">ServiceNow Instance</div>
-            <div class="flow-note">cloud platform</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">☁</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Layer 1 — Cloud</div>
+              <div class="vflow-title c-1">ServiceNow Instance</div>
+              <div class="vflow-desc">The ServiceNow cloud platform. Sends instructions to the MID Server by writing records to the <code class="code-inline">ecc_queue</code> table. Receives results the same way. Never initiates an outbound connection to the MID Server directly.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Hosted by ServiceNow</span>
+                <span class="vflow-tag">ecc_queue table (Input + Output)</span>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">↕</div>
-            <div class="flow-box">ECC Queue (ecc_queue table)</div>
-            <div class="flow-note">message bus inside ServiceNow</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">↕</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Transport — Outbound HTTPS :443</div>
+              <div class="vflow-title c-2">MID Server Polls via HTTPS</div>
+              <div class="vflow-desc">The MID Server makes outbound HTTPS requests to the ServiceNow instance URL to pick up instructions and post results. Only outbound port 443 is required — no inbound firewall rules needed on the server running the MID process.</div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">↕ HTTPS outbound poll</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">⚙</div>
+              <div class="vflow-line l-def"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Layer 2 — DMZ or On-Prem</div>
+              <div class="vflow-title c-2">MID Server Process</div>
+              <div class="vflow-desc">A Java process installed on a server in your environment (on-prem, cloud VM, or DMZ). Executes the instructions from ServiceNow against target resources using local network access.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Java process (agent.jar)</span>
+                <span class="vflow-tag">Installed in your environment</span>
+                <span class="vflow-tag">Managed via ServiceNow MID Server module</span>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">MID Server Process</div>
-            <div class="flow-note">Java process on your server</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">↕</div>
+              <div class="vflow-line l-def"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-def">Transport — Local Network</div>
+              <div class="vflow-title c-def">LAN / Private Network</div>
+              <div class="vflow-desc">Standard local network traffic between the MID Server and target resources. No special configuration required — MID Server has the same network access as any other server on the subnet.</div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">↕ local network</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-box">Target Resources</div>
-            <div class="flow-note">servers, network devices, databases, cloud APIs</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">🖥</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Layer 3 — Private Network</div>
+              <div class="vflow-title c-3">Target Resources</div>
+              <div class="vflow-desc">The actual infrastructure the MID Server scans or communicates with. These can be anywhere on the network the MID Server can reach — no internet exposure required.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Servers (SSH / WMI)</span>
+                <span class="vflow-tag">Network devices (SNMP)</span>
+                <span class="vflow-tag">Databases (JDBC)</span>
+                <span class="vflow-tag">Cloud APIs (REST)</span>
+              </div>
+            </div>
           </div>
         </div>
 

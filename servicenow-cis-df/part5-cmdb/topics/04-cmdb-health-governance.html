@@ -356,33 +356,65 @@
           <li><strong>Task creation</strong> — optionally create a task for human review before executing</li>
         </ul>
 
-        <div class="flow-steps">
-          <div class="flow-step">
-            <div class="flow-step-num">1</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Scheduled Run</div>
-              <div class="flow-step-desc">CMDB Data Manager policy runs on its configured schedule. Queries the target CI class with the specified filter condition.</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Scheduled Trigger</div>
+              <div class="vflow-title c-1">Policy Runs on Schedule</div>
+              <div class="vflow-desc">The CMDB Data Manager policy triggers on its configured schedule (daily, weekly). It queries the target CI class table using the policy's filter condition (e.g., <code class="code-inline">operational_status=Retired AND last_discovered &gt; 90 days ago</code>).</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">2</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Matching CIs Identified</div>
-              <div class="flow-step-desc">CIs matching the condition are collected into a candidate list. If review tasks are configured, tasks are created for each candidate.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Candidate Collection</div>
+              <div class="vflow-title c-2">Matching CIs Collected into Candidate List</div>
+              <div class="vflow-desc">All CIs matching the filter are gathered into a candidate batch. If the policy is configured to create review tasks, a task record is generated for each candidate CI and assigned to the designated reviewer.</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">3</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Optional Human Review</div>
-              <div class="flow-step-desc">If configured, a reviewer confirms or rejects each candidate. Rejected candidates are excluded from the batch action.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">3</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Human Review (Optional)</div>
+              <div class="vflow-title c-3">Reviewer Confirms or Rejects Each Candidate</div>
+              <div class="vflow-desc">If review tasks are enabled, a human reviewer evaluates each candidate. They confirm (proceed with action) or reject (exclude from batch). Rejected candidates are not acted on in this cycle.</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Confirmed</span>
+                  <div class="vflow-branch-name">Proceed to Action</div>
+                  <div class="vflow-branch-body">CI is added to the confirmed batch for the lifecycle action.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">Rejected</span>
+                  <div class="vflow-branch-name">Excluded This Cycle</div>
+                  <div class="vflow-branch-body">CI is skipped. Will be re-evaluated on the next scheduled run if it still meets the condition.</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">4</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Action Executed</div>
-              <div class="flow-step-desc">Retire, Archive, or Delete action is applied to confirmed candidates. Log entries record what was done and when.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">4</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Action Executed</div>
+              <div class="vflow-title c-ok">Retire / Archive / Delete Applied</div>
+              <div class="vflow-desc">The policy's configured action is applied to all confirmed candidates. Every action is logged with a timestamp, actor, and CI details for audit purposes.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Retire — sets operational_status=Retired</span>
+                <span class="vflow-tag">Archive — moves to archive table</span>
+                <span class="vflow-tag">Delete — permanently removes (irreversible)</span>
+              </div>
             </div>
           </div>
         </div>

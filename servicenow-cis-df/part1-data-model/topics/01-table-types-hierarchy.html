@@ -335,16 +335,35 @@
           The inheritance chain allows each level to add only the fields relevant to that type.
         </p>
 
-        <div class="flow-steps">
-          <div class="flow-step">cmdb_ci (root)</div>
-          <span class="flow-arrow">›</span>
-          <div class="flow-step">cmdb_ci_hardware</div>
-          <span class="flow-arrow">›</span>
-          <div class="flow-step">cmdb_ci_computer</div>
-          <span class="flow-arrow">›</span>
-          <div class="flow-step">cmdb_ci_server</div>
-          <span class="flow-arrow">›</span>
-          <div class="flow-step">cmdb_ci_linux_server</div>
+        <div class="hflow">
+          <div class="hflow-phase-group">
+            <div class="hflow-steps">
+              <div class="hflow-node">
+                <div class="hflow-box h-1">cmdb_ci</div>
+                <div class="hflow-num">Root — all CIs</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-2">cmdb_ci_hardware</div>
+                <div class="hflow-num">Physical assets</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-2">cmdb_ci_computer</div>
+                <div class="hflow-num">Computers</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-3">cmdb_ci_server</div>
+                <div class="hflow-num">Servers</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-ok">cmdb_ci_linux_server</div>
+                <div class="hflow-num">Linux servers</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <p>

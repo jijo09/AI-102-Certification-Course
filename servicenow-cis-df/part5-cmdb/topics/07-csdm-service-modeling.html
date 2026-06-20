@@ -295,29 +295,60 @@
         </p>
 
         <h3>How Change Impact Analysis Works with CSDM</h3>
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Change Request: Patch server DB-PROD-01 on Saturday 2am</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-in">↓</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Trigger</div>
+              <div class="vflow-title c-in">Change Request Created</div>
+              <div class="vflow-desc">CHG12345 is opened: "Patch server <code class="code-inline">DB-PROD-01</code> on Saturday 2am." The technician links the CI <code class="code-inline">DB-PROD-01</code> (<code class="code-inline">cmdb_ci_db_instance</code>) to the Change Request.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">System: DB-PROD-01 (cmdb_ci_db_instance) is member of Application Service "HR Database"</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">CSDM Relationship Lookup</div>
+              <div class="vflow-title c-1">CI → Application Service</div>
+              <div class="vflow-desc">ServiceNow traverses <code class="code-inline">cmdb_rel_ci</code>: <code class="code-inline">DB-PROD-01</code> is a member of Application Service <strong>"HR Database"</strong>. This relationship was built by Service Mapping.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Application Service "HR Database" supports Business Application "HR Self-Service"</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">CSDM Traversal</div>
+              <div class="vflow-title c-2">Application Service → Business Application</div>
+              <div class="vflow-desc">Application Service "HR Database" is linked to Business Application <strong>"HR Self-Service"</strong>. This is the Domain 2 → Domain 3 CSDM link that connects technical services to business-recognizable applications.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Business Application "HR Self-Service" is owned by VP of HR</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">3</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Ownership Lookup</div>
+              <div class="vflow-title c-3">Business Application Owner Identified</div>
+              <div class="vflow-desc">Business Application "HR Self-Service" has <strong>VP of HR</strong> assigned as the business owner. ServiceNow now knows who to notify about this change — no manual lookup required.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">System auto-notifies: "Your application is affected by Change CHG12345. Approval needed."</div>
-          </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Change Calendar shows HR Self-Service as impacted during the Saturday window</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">4</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Automatic Impact Communication</div>
+              <div class="vflow-title c-ok">Stakeholder Notified + Change Calendar Updated</div>
+              <div class="vflow-desc">The system automatically notifies the VP of HR: "Your application 'HR Self-Service' is affected by Change CHG12345 on Saturday 2am — approval needed." The Change Calendar marks HR Self-Service as impacted during the maintenance window.</div>
+            </div>
           </div>
         </div>
 

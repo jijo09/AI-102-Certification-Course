@@ -425,25 +425,49 @@
           typically move through:
         </p>
 
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Level 1: Reactive</div>
-            <div class="flow-note">// No formal governance. Data quality issues discovered during incidents. No dedicated roles.</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-err">1</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Level 1</div>
+              <div class="vflow-title c-in">Reactive</div>
+              <div class="vflow-desc">No formal governance structure exists. Data quality problems are discovered during incidents — when something breaks, someone notices the CMDB was wrong. No dedicated CMDB roles, no scheduled reviews, no policies. Governance is entirely ad-hoc and person-dependent.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Level 2: Defined</div>
-            <div class="flow-note">// Governance roles defined. Basic policies documented. CMDB Health monitoring in place.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">2</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Level 2</div>
+              <div class="vflow-title c-1">Defined</div>
+              <div class="vflow-desc">Governance roles are documented (CMDB Owner, CMDB Manager, Data Stewards). Basic policies exist on paper. CMDB Health dashboards are active and someone reviews them. IRE and Discovery are configured but not fully optimized. Progress is visible but execution is inconsistent.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Level 3: Managed</div>
-            <div class="flow-note">// Governance processes actively running. Regular data quality reviews. IRE and Discovery optimized.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">3</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Level 3</div>
+              <div class="vflow-title c-2">Managed</div>
+              <div class="vflow-desc">Governance processes are actively running, not just documented. Regular quarterly data quality reviews happen. All new integrations go through IRE onboarding. Discovery schedules are tuned. Data Stewards own specific CI classes and are accountable for data quality metrics.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Level 4: Optimized</div>
-            <div class="flow-note">// Governance is proactive. New integrations onboarded with full IRE compliance. CSDM complete. CMDB Health target consistently met.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">4</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Level 4</div>
+              <div class="vflow-title c-ok">Optimized</div>
+              <div class="vflow-desc">Governance is proactive — problems are prevented, not just fixed. New integrations are required to demonstrate IRE compliance before go-live. CSDM is complete through at least Level 3. CMDB Health targets are consistently met. Governance outcomes are connected to business value metrics stakeholders care about.</div>
+            </div>
           </div>
         </div>
 

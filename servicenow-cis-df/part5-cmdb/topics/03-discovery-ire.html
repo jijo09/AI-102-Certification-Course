@@ -165,40 +165,65 @@
         </p>
 
         <h3>How Identification Works Step-by-Step</h3>
-        <div class="flow-steps">
-          <div class="flow-step">
-            <div class="flow-step-num">1</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Payload Arrives</div>
-              <div class="flow-step-desc">An incoming CI payload arrives with a set of fields. IRE looks up the Identification Rule for the CI class specified in the payload.</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-in">↓</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Input</div>
+              <div class="vflow-title c-in">CI Payload Arrives at IRE</div>
+              <div class="vflow-desc">An incoming CI payload arrives with a CI class and a set of field values. IRE immediately looks up the Identification Rule configured for that CI class.</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">2</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Apply Identification Entries in Priority Order</div>
-              <div class="flow-step-desc">IRE evaluates each Identification Entry in priority order (lower number = higher priority). For each Entry, it checks if all the specified fields match an existing CI.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Entry Evaluation</div>
+              <div class="vflow-title c-1">Apply Identification Entries in Priority Order</div>
+              <div class="vflow-desc">IRE evaluates each Identification Entry in ascending priority order (lower number = higher priority). For each Entry, it checks whether all specified fields match an existing CI in the CMDB. All fields in an Entry must match (AND logic).</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">3</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Match Found → Update Existing CI</div>
-              <div class="flow-step-desc">If an Entry matches exactly one existing CI, IRE identifies that CI as the target. It does not create a new record.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-def"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Decision</div>
+              <div class="vflow-title c-2">How Many CIs Match?</div>
+              <div class="vflow-desc">The outcome of each Identifier Entry falls into one of three paths:</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Exactly One Match</span>
+                  <div class="vflow-branch-name">Existing CI Updated</div>
+                  <div class="vflow-branch-body">IRE identifies the matched CI as the update target. No new record created. Proceeds to Reconciliation.</div>
+                </div>
+                <div class="vflow-branch br-multi">
+                  <span class="vflow-branch-tag">Multiple Matches</span>
+                  <div class="vflow-branch-name">Duplicate Candidate Flagged</div>
+                  <div class="vflow-branch-body">More than one CI matches the Entry. IRE raises a "multiple match" event. Tracked in the CMDB Dedupe dashboard for deduplication review.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">No Match</span>
+                  <div class="vflow-branch-name">Try Next Entry or Create</div>
+                  <div class="vflow-branch-body">This Entry didn't match. If more Entries remain, IRE tries the next one in priority order. If all Entries are exhausted, a new CI is created.</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">4</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Multiple Matches → Duplicate Candidate</div>
-              <div class="flow-step-desc">If the Entry matches more than one existing CI, IRE raises a "multiple match" condition. The CMDB Dedupe dashboard tracks these for manual resolution.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">✓</div>
             </div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-step-num">5</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">No Match → Create New CI</div>
-              <div class="flow-step-desc">If no Identification Entry matches any existing CI, IRE creates a new CI record. This is a genuine new CI being added to the CMDB.</div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">No Match — All Entries Exhausted</div>
+              <div class="vflow-title c-ok">New CI Created</div>
+              <div class="vflow-desc">No Identification Entry matched any existing CI. IRE creates a new CI record in the appropriate class table and proceeds to set its field values via Reconciliation.</div>
             </div>
           </div>
         </div>
@@ -328,33 +353,48 @@
         </div>
 
         <h3>Discovery → CMDB Flow</h3>
-        <div class="flow-steps">
-          <div class="flow-step">
-            <div class="flow-step-num">1</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Scan → Horizontal Discovery</div>
-              <div class="flow-step-desc">MID Server pings IP ranges, identifies live devices. Classifies each device type (server, router, printer) using port scanning and SNMP.</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Horizontal Discovery</div>
+              <div class="vflow-title c-1">Scan — Find Live Devices</div>
+              <div class="vflow-desc">MID Server pings IP ranges and runs port scans to identify which hosts are alive. Each responding IP is classified by device type (server, router, printer) using port response patterns and SNMP OID lookups.</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">2</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Probe → Vertical Discovery</div>
-              <div class="flow-step-desc">For each device, runs detailed probes (SSH/WMI for servers, SNMP for network gear) to collect CI attribute data.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Vertical Discovery</div>
+              <div class="vflow-title c-2">Probe — Collect Device Attributes</div>
+              <div class="vflow-desc">For each live device, MID Server matches credentials and runs targeted probes (SSH/WMI for servers, SNMP for network gear, JDBC for databases) to collect detailed CI attribute data. Raw output is returned to the ServiceNow instance.</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">3</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Sensor Processes Probe Output</div>
-              <div class="flow-step-desc">Sensor transforms raw probe output into a structured CI payload with class, identification attributes, and field values.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">3</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Sensor Processing</div>
+              <div class="vflow-title c-3">Sensor Parses Raw Output → CI Payload</div>
+              <div class="vflow-desc">Sensors (JavaScript running on the ServiceNow instance) transform raw probe output into structured CI payloads — assigning CI class, identification attributes, and field values ready for IRE.</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">4</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">IRE Receives Payload</div>
-              <div class="flow-step-desc">IRE runs identification (match or create) then reconciliation (apply authoritative values). The CMDB CI record is created or updated.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">4</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">IRE → CMDB</div>
+              <div class="vflow-title c-ok">IRE Identifies, Reconciles → CI Created/Updated</div>
+              <div class="vflow-desc">IRE receives the payload, runs Identification (match or create CI) then Reconciliation (apply authoritative field values by source priority). The CMDB CI record is created or updated with only authoritative values.</div>
             </div>
           </div>
         </div>

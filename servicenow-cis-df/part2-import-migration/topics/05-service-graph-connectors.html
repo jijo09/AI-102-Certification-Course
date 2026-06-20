@@ -277,36 +277,60 @@
         </div>
 
         <h3>How the MID Server Communication Works</h3>
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">ServiceNow Instance</div>
-            <div class="flow-arrow">──→</div>
-            <div class="flow-box">ECC Queue (outbound instructions)</div>
-            <div class="flow-note">// posted to MID Server's job queue</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Dispatch</div>
+              <div class="vflow-title c-1">ServiceNow Posts Instructions to ECC Queue</div>
+              <div class="vflow-desc">ServiceNow writes outbound instructions (e.g., "collect data from vCenter") to the <code class="code-inline">ecc_queue</code> table inside the instance. The MID Server is not contacted directly — ServiceNow simply writes a record and waits.</div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">MID Server</div>
-            <div class="flow-arrow">──→</div>
-            <div class="flow-box">Polls ECC Queue</div>
-            <div class="flow-note">// outbound poll, firewall-friendly</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Poll</div>
+              <div class="vflow-title c-2">MID Server Polls ECC Queue</div>
+              <div class="vflow-desc">The MID Server makes outbound HTTPS requests to poll the ECC Queue for pending work. This outbound-only model requires no inbound firewall holes — the MID Server initiates all connections.</div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">MID Server</div>
-            <div class="flow-arrow">──→</div>
-            <div class="flow-box">Internal Resource (vCenter, DB, server)</div>
-            <div class="flow-note">// reaches private network directly</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">3</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Execute</div>
+              <div class="vflow-title c-2">MID Server Reaches Internal Resource</div>
+              <div class="vflow-desc">From within the private network, the MID Server connects to the target resource (vCenter, database, server) using local network access. No VPN or special routing required — the MID Server is already inside the network.</div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">MID Server</div>
-            <div class="flow-arrow">──→</div>
-            <div class="flow-box">ECC Queue (inbound results)</div>
-            <div class="flow-note">// results pushed back to ServiceNow</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">4</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Return</div>
+              <div class="vflow-title c-3">Results Posted Back to ECC Queue</div>
+              <div class="vflow-desc">MID Server writes collected data back to the ECC Queue as inbound results. ServiceNow picks up these results from the queue for processing.</div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">ServiceNow</div>
-            <div class="flow-arrow">──→</div>
-            <div class="flow-box">IRE processes results → CMDB</div>
-            <div class="flow-note">// deduplication and reconciliation</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">5</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Process</div>
+              <div class="vflow-title c-ok">IRE Processes Results → CMDB</div>
+              <div class="vflow-desc">ServiceNow passes the structured CI data through IRE — identification, reconciliation, and deduplication — before writing the final result to the CMDB.</div>
+            </div>
           </div>
         </div>
 

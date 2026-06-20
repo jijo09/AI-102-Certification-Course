@@ -240,26 +240,73 @@
           If no entries match, the CI is treated as new.
         </p>
 
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Incoming payload: Linux server, serial=SN-XYZ, ip=10.0.1.5, hostname=web-01</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-in">↓</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Input</div>
+              <div class="vflow-title c-in">Incoming CI Payload</div>
+              <div class="vflow-desc">Payload arrives: <code class="code-inline">cmdb_ci_linux_server</code> with <code class="code-inline">serial_number=SN-XYZ</code>, <code class="code-inline">ip_address=10.0.1.5</code>, <code class="code-inline">host_name=web-01</code>. IRE selects the Identification Rule for this CI class.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">IRE: select rule for cmdb_ci_linux_server</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Entry 1 — Priority 1</div>
+              <div class="vflow-title c-1">Match on serial_number + manufacturer</div>
+              <div class="vflow-desc">IRE tries the highest-priority Identifier Entry first. It queries the CMDB for a Linux server CI where <code class="code-inline">serial_number = SN-XYZ</code>.</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Match Found</span>
+                  <div class="vflow-branch-name">Stop — CI Identified</div>
+                  <div class="vflow-branch-body">Existing CI found. IRE uses its <code class="code-inline">sys_id</code> as the update target. Entry 2 is never evaluated.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">No Match</span>
+                  <div class="vflow-branch-name">Try Entry 2</div>
+                  <div class="vflow-branch-body">Serial number not found. IRE falls through to the next Identifier Entry in priority order.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Try Identifier Entry 1 (priority 1): match on serial_number + manufacturer</div>
-            <div class="flow-note">// serial=SN-XYZ → finds existing CI → MATCH! Stop here.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Entry 2 — Priority 2 (fallback)</div>
+              <div class="vflow-title c-2">Match on ip_address + host_name</div>
+              <div class="vflow-desc">Only evaluated if Entry 1 failed. IRE queries for a Linux server CI where <code class="code-inline">ip_address = 10.0.1.5</code> AND <code class="code-inline">host_name = web-01</code>. Both fields must match (AND logic).</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Match Found</span>
+                  <div class="vflow-branch-name">Stop — CI Identified</div>
+                  <div class="vflow-branch-body">Existing CI found via IP + hostname. IRE uses its <code class="code-inline">sys_id</code> as the update target.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">No Match</span>
+                  <div class="vflow-branch-name">All Entries Exhausted</div>
+                  <div class="vflow-branch-body">No entry matched. Proceeds to create a new CI.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓ (only if Entry 1 fails)</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Try Identifier Entry 2 (priority 2): match on ip_address + host_name</div>
-          </div>
-          <div class="flow-step"><div class="flow-arrow">↓ (only if Entry 2 fails)</div></div>
-          <div class="flow-step">
-            <div class="flow-box">No match → CREATE new CI</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">✓</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">No Match — Create Path</div>
+              <div class="vflow-title c-ok">New CI Created</div>
+              <div class="vflow-desc">No Identifier Entry matched any existing CI. IRE creates a new <code class="code-inline">cmdb_ci_linux_server</code> record and proceeds to Reconciliation to set its field values.</div>
+            </div>
           </div>
         </div>
 
@@ -388,19 +435,50 @@
         </p>
 
         <h3>Database Instance Lookup Rule — Step by Step</h3>
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Incoming payload: DB instance, name=PROD_DB, type=Oracle, host=web-server-01</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-in">↓</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Input</div>
+              <div class="vflow-title c-in">Incoming DB Instance Payload</div>
+              <div class="vflow-desc">Payload arrives for a database instance CI: <code class="code-inline">name=PROD_DB</code>, <code class="code-inline">type=Oracle</code>, <code class="code-inline">host=web-server-01</code>. The DB instance cannot be uniquely identified by its own attributes alone — its identity is tied to the server it runs on.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Lookup Rule: find the server CI where host_name = "web-server-01"</div>
-            <div class="flow-note">// finds sys_id of the host server CI</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Lookup Step</div>
+              <div class="vflow-title c-1">Find the Referenced Host Server CI</div>
+              <div class="vflow-desc">The Lookup Rule instructs IRE: "First find the server CI where <code class="code-inline">host_name = web-server-01</code>." IRE queries <code class="code-inline">cmdb_ci_server</code> and retrieves that record's <code class="code-inline">sys_id</code>.</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Server Found</span>
+                  <div class="vflow-branch-name">sys_id Retrieved</div>
+                  <div class="vflow-branch-body">Host server exists in CMDB. Proceed to Step 2 with the server's <code class="code-inline">sys_id</code>.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">Server Not Found</span>
+                  <div class="vflow-branch-name">Lookup Fails — Retry Later</div>
+                  <div class="vflow-branch-body">Host CI doesn't exist yet. Payload is queued for retry. This is why infrastructure CIs must be discovered before application CIs.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Now find: DB instance where name=PROD_DB AND type=Oracle AND runs_on=[server sys_id]</div>
-            <div class="flow-note">// exact match → found existing CI → UPDATE</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">2</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Compound Match</div>
+              <div class="vflow-title c-ok">DB Instance Found via Relationship</div>
+              <div class="vflow-desc">IRE queries: "Find the DB instance CI where <code class="code-inline">name=PROD_DB</code> AND <code class="code-inline">type=Oracle</code> AND <code class="code-inline">runs_on=[server sys_id]</code>." The compound key (own attributes + host relationship) uniquely identifies the DB instance → UPDATE.</div>
+            </div>
           </div>
         </div>
 

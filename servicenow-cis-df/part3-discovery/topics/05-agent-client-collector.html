@@ -219,28 +219,45 @@
         </p>
 
         <h3>Direct Connection (Cloud-to-Cloud)</h3>
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Server with ACC Agent</div>
-            <div class="flow-arrow">→ outbound HTTPS :443</div>
-            <div class="flow-box">ServiceNow Instance</div>
-            <div class="flow-note">// direct; works if cloud server has internet access</div>
+        <div class="hflow">
+          <div class="hflow-phase-group">
+            <div class="hflow-steps">
+              <div class="hflow-node">
+                <div class="hflow-box h-1">Server + ACC Agent</div>
+                <div class="hflow-num">Cloud VM (EC2, Azure…)</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-ok">ServiceNow Instance</div>
+                <div class="hflow-num">Outbound HTTPS :443</div>
+              </div>
+            </div>
           </div>
         </div>
         <p>
-          This is the simplest topology. Works for cloud servers (AWS EC2, Azure VMs) that
+          The simplest topology. Works for cloud servers (AWS EC2, Azure VMs) that
           have outbound internet access. No MID Server needed.
         </p>
 
         <h3>MID Server Relay (Isolated Networks)</h3>
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Server with ACC Agent</div>
-            <div class="flow-arrow">→ outbound HTTPS</div>
-            <div class="flow-box">MID Server (internal relay)</div>
-            <div class="flow-arrow">→ outbound HTTPS :443</div>
-            <div class="flow-box">ServiceNow Instance</div>
-            <div class="flow-note">// for servers in private subnets without internet access</div>
+        <div class="hflow">
+          <div class="hflow-phase-group">
+            <div class="hflow-steps">
+              <div class="hflow-node">
+                <div class="hflow-box h-1">Server + ACC Agent</div>
+                <div class="hflow-num">Private subnet (no internet)</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-2">MID Server</div>
+                <div class="hflow-num">Internal relay (LAN access)</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-ok">ServiceNow Instance</div>
+                <div class="hflow-num">Outbound HTTPS :443</div>
+              </div>
+            </div>
           </div>
         </div>
         <p>

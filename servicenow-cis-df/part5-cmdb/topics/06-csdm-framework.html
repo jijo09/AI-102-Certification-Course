@@ -493,30 +493,60 @@
           They define a maturity model with levels:
         </p>
 
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Level 0: No CSDM</div>
-            <div class="flow-note">// Raw CIs with no service relationships. No business context.</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-err">0</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Level 0 — Starting Point</div>
+              <div class="vflow-title c-in">No CSDM</div>
+              <div class="vflow-desc">Raw CI records exist in the CMDB but have no service relationships. Infrastructure is discoverable but unconnected to any business context. Change impact and incident routing rely entirely on manual knowledge.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Level 1: Basic CMDB Health</div>
-            <div class="flow-note">// CIs exist and are accurate. Identification Rules configured. But no service model.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Level 1 — Foundation</div>
+              <div class="vflow-title c-1">Basic CMDB Health</div>
+              <div class="vflow-desc">CIs are populated and reasonably accurate. Identification Rules are configured. Discovery runs regularly. IRE deduplication is active. There is still no service model — CIs are islands, not connected to services or business applications.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Level 2: Application Services Defined</div>
-            <div class="flow-note">// Application Services mapped via Service Mapping. CIs linked to services.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Level 2 — Service Model</div>
+              <div class="vflow-title c-2">Application Services Defined</div>
+              <div class="vflow-desc">Service Mapping has been run. Application Services (<code class="code-inline">cmdb_ci_service_auto</code>) exist and CIs are linked as members. The technical infrastructure is now connected to logical services. Change impact analysis becomes possible.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Level 3: Business Applications Linked</div>
-            <div class="flow-note">// Business Applications created and linked to Application Services. Business owners assigned.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">3</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Level 3 — Business Context</div>
+              <div class="vflow-title c-3">Business Applications Linked</div>
+              <div class="vflow-desc">Business Applications (<code class="code-inline">cmdb_ci_business_app</code>) are created and linked to Application Services. Business owners are assigned. ServiceNow can now route incidents and changes to the correct business stakeholder automatically.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Level 4: Full Business Hierarchy</div>
-            <div class="flow-note">// Business Capabilities, Products, Service Offerings, Commitments all populated and linked.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">4</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Level 4 — Full CSDM</div>
+              <div class="vflow-title c-ok">Complete Business Hierarchy</div>
+              <div class="vflow-desc">Business Capabilities, Products, Service Offerings, and Commitments are all populated and linked through the full CSDM chain. The platform can measure business outcomes, enforce SLAs per capability, and provide complete impact analysis from infrastructure CI to business stakeholder.</div>
+            </div>
           </div>
         </div>
 

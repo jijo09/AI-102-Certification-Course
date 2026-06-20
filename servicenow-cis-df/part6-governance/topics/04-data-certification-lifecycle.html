@@ -135,40 +135,71 @@
         <span class="section-label">Section 2</span>
         <h2>Data Certification Workflow</h2>
 
-        <div class="flow-steps">
-          <div class="flow-step">
-            <div class="flow-step-num">1</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Define the Certification</div>
-              <div class="flow-step-desc">Admin creates a Certification record specifying: target table, filter (which records to include), certifier assignment method, and schedule frequency.</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Configuration</div>
+              <div class="vflow-title c-1">Define the Certification</div>
+              <div class="vflow-desc">An admin creates a Certification record specifying: the target table (e.g., <code class="code-inline">cmdb_ci_server</code>), a filter condition (which CIs to include), the certifier assignment method (by CI owner, by group, or specific user), and how frequently the certification runs.</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">2</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Certification Runs (Scheduled)</div>
-              <div class="flow-step-desc">On the scheduled date, the system queries the target table with the filter, creates a <code>cert_result</code> record for each matching CI, and assigns certifiers.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Scheduled Run</div>
+              <div class="vflow-title c-2">Certification Generates Review Tasks</div>
+              <div class="vflow-desc">On the scheduled date, the system queries the target table with the filter, creates a <code class="code-inline">cert_result</code> record for each matching CI, and assigns review tasks to the designated certifiers.</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">3</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Certifier Reviews</div>
-              <div class="flow-step-desc">Certifier receives a task to review assigned records. For each: Mark <strong>Certified</strong> (data is correct) or <strong>Rejected</strong> (data needs updating) or leave open.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">3</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Human Review</div>
+              <div class="vflow-title c-2">Certifier Reviews Each Record</div>
+              <div class="vflow-desc">Certifiers open their assigned tasks and review each CI's data for accuracy. For each record they select an outcome:</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Certified</span>
+                  <div class="vflow-branch-name">Data Is Correct</div>
+                  <div class="vflow-branch-body">Certifier confirms the CI data is accurate. Record marked Certified — contributes positively to CMDB Health score.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">Rejected</span>
+                  <div class="vflow-branch-name">Data Needs Updating</div>
+                  <div class="vflow-branch-body">Certifier marks the record Rejected with a reason. Does NOT update the CI data directly — triggers remediation step.</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">4</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">Remediation</div>
-              <div class="flow-step-desc">Rejected records can trigger change requests or tasks to correct the underlying CI data. The certification captures the rejection reason.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">4</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Remediation</div>
+              <div class="vflow-title c-3">Rejected Records Trigger Fix Tasks</div>
+              <div class="vflow-desc">Rejected certification records can automatically trigger change requests or tasks to correct the underlying CI data. Certification only marks records — it does not modify CI field values itself. The rejection reason guides the correction.</div>
             </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-step-num">5</div>
-            <div class="flow-step-body">
-              <div class="flow-step-title">CMDB Health Score Updated</div>
-              <div class="flow-step-desc">Certified records contribute positively to CMDB Health completeness scores. Uncertified or expired certifications reduce health scores.</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">5</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Health Impact</div>
+              <div class="vflow-title c-ok">CMDB Health Score Updated</div>
+              <div class="vflow-desc">Certified records contribute positively to CMDB Health completeness and compliance dimensions. Uncertified or expired certifications lower health scores. This creates an ongoing incentive to keep certifications current.</div>
             </div>
           </div>
         </div>

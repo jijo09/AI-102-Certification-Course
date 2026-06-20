@@ -224,36 +224,96 @@
           it evaluates each field in the incoming payload:
         </p>
 
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Incoming field: cpu_count=8, source=ServiceNow (Discovery)</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-in">↓</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Input</div>
+              <div class="vflow-title c-in">Incoming Field Value</div>
+              <div class="vflow-desc">IRE receives a field update from an identified CI: <code class="code-inline">cpu_count = 8</code>, source = <strong>Discovery</strong>. For each field in the payload, IRE runs the reconciliation decision chain below.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Step 1: Does a Reconciliation Rule exist for this class + cpu_count field?</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Rule Lookup</div>
+              <div class="vflow-title c-1">Does a Reconciliation Rule Cover This Field?</div>
+              <div class="vflow-desc">IRE checks: is there a Reconciliation Rule for <code class="code-inline">cmdb_ci_linux_server.cpu_count</code>? If yes, use its source priority ordering. If no, fall back to the global CMDB Data Source Priority list.</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Rule Exists</span>
+                  <div class="vflow-branch-name">Use Field-Specific Priority</div>
+                  <div class="vflow-branch-body">The Reconciliation Rule defines a priority order for this field (e.g., Discovery &gt; SGC &gt; Manual).</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">No Rule</span>
+                  <div class="vflow-branch-name">Use Global Priority</div>
+                  <div class="vflow-branch-body">Falls back to the global CMDB Data Source Priority table, which ranks all sources for all fields.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">↓ Yes → use rule's source priority</div>
-            <div class="flow-arrow" style="margin-left:var(--space-8)">→ No → use global CMDB Data Source Priority</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Source Comparison</div>
+              <div class="vflow-title c-2">Rank Incoming Source vs. Current Source</div>
+              <div class="vflow-desc">What source last set <code class="code-inline">cpu_count</code> on the existing CI? Current value: <code class="code-inline">cpu_count=6</code>, set by <strong>SGC</strong> 30 days ago. Is Discovery ranked higher than SGC for this field?</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Incoming Wins</span>
+                  <div class="vflow-branch-name">Discovery &gt; SGC</div>
+                  <div class="vflow-branch-body">Discovery is authoritative for <code class="code-inline">cpu_count</code>. Proceed to staleness check.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">Current Wins</span>
+                  <div class="vflow-branch-name">Field Ignored</div>
+                  <div class="vflow-branch-body">Current source ranks higher. Incoming value is discarded — existing value preserved.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">Step 2: What is the current value's source on the CI?</div>
-            <div class="flow-note">// current ci.cpu_count was set by: SGC, last_updated=30 days ago</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">3</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Staleness Check</div>
+              <div class="vflow-title c-3">Is the Current Value Past Its Staleness Period?</div>
+              <div class="vflow-desc">Even if the incoming source has lower priority, a stale current value can be overwritten. If the Reconciliation Rule's staleness period has elapsed since the last update, lower-priority sources are allowed to write.</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Not Stale</span>
+                  <div class="vflow-branch-name">Standard Write</div>
+                  <div class="vflow-branch-body">Value is fresh. Discovery wins on priority — write <code class="code-inline">cpu_count = 8</code>.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">Stale</span>
+                  <div class="vflow-branch-name">Lower Source Can Write</div>
+                  <div class="vflow-branch-body">Staleness period expired — even a lower-priority source may update this field.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Step 3: Is Discovery ranked higher than SGC for cpu_count?</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-arrow">↓ Yes → Discovery is authoritative</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-box">Step 4: Is the current value stale (past staleness period)?</div>
-            <div class="flow-note">// if stale, even lower-priority sources can overwrite</div>
-          </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Discovery wins → cpu_count updated to 8</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">✓</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Result</div>
+              <div class="vflow-title c-ok">Field Written to CMDB CI</div>
+              <div class="vflow-desc">Discovery wins: <code class="code-inline">cpu_count</code> is updated to <code class="code-inline">8</code>. The CI's <code class="code-inline">discovery_source</code> and last-update metadata are stamped with Discovery as the authoritative source.</div>
+            </div>
           </div>
         </div>
 

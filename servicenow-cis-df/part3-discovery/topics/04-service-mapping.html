@@ -296,20 +296,32 @@
           The output of Service Mapping is a visual service map — a diagram showing all CIs
           involved in the service and the connections between them. The map has tiers:
         </p>
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Load Balancer</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">Web Servers (tier 1)</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">App Servers (tier 2)</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">Database Server (tier 3)</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-note">// Each box is a CI record; each arrow is a relationship in cmdb_rel_ci</div>
+        <div class="hflow">
+          <div class="hflow-phase-group">
+            <div class="hflow-steps">
+              <div class="hflow-node">
+                <div class="hflow-box h-1">Load Balancer</div>
+                <div class="hflow-num">Entry point CI</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-2">Web Servers</div>
+                <div class="hflow-num">Tier 1</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-3">App Servers</div>
+                <div class="hflow-num">Tier 2</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-ok">Database Server</div>
+                <div class="hflow-num">Tier 3</div>
+              </div>
+            </div>
           </div>
         </div>
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-top:var(--space-2)">Each node is a CI record in the CMDB. Each connection is a relationship row in <code class="code-inline">cmdb_rel_ci</code>.</p>
         <p>
           The map is stored as relationships in the <span class="code-inline">cmdb_rel_ci</span> table,
           with the Application Service CI as the parent that "uses" all component CIs.
@@ -558,26 +570,54 @@
         </p>
 
         <h3>Change Impact Analysis Flow</h3>
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Change Request created</div>
-            <div class="flow-note">// "Reboot DB-PRD-01 for patch"</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-in">↓</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Trigger</div>
+              <div class="vflow-title c-in">Change Request Created</div>
+              <div class="vflow-desc">A technician opens CHG12345: "Reboot DB-PRD-01 for patch on Saturday 2am." The CI <code class="code-inline">DB-PRD-01</code> is referenced in the Change Request's CI field.</div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">ServiceNow looks up DB-PRD-01's service map relationships</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Relationship Lookup</div>
+              <div class="vflow-title c-1">ServiceNow Traverses the Service Map</div>
+              <div class="vflow-desc">ServiceNow queries <code class="code-inline">cmdb_rel_ci</code> to find all Application Services that <code class="code-inline">DB-PRD-01</code> is a member of. This is only possible because Service Mapping built those relationships.</div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">Finds: DB-PRD-01 supports Online Banking, HR Portal, Payroll Processing</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Impact Identified</div>
+              <div class="vflow-title c-2">Affected Services Found</div>
+              <div class="vflow-desc">The relationship query returns three Application Services that include <code class="code-inline">DB-PRD-01</code> as a component CI: Online Banking, HR Portal, and Payroll Processing.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Online Banking</span>
+                <span class="vflow-tag">HR Portal</span>
+                <span class="vflow-tag">Payroll Processing</span>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">Change Impact section populated with 3 affected services</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">Approvers see the full blast radius before approving</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">3</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Approver Action</div>
+              <div class="vflow-title c-ok">Blast Radius Visible Before Approval</div>
+              <div class="vflow-desc">The Change Request's Impact section is automatically populated with all 3 affected services. Change approvers see the full blast radius and can make an informed decision before approving the maintenance window.</div>
+            </div>
           </div>
         </div>
 

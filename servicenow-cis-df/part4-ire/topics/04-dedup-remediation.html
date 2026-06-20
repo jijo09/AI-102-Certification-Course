@@ -348,31 +348,76 @@
           When a Remediation Playbook with action=Merge executes, here is exactly what happens:
         </p>
 
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Dedup event: Master CI (sys_id=A) ↔ Duplicate CI (sys_id=B)</div>
+        <div class="vflow">
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-in">↓</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Trigger</div>
+              <div class="vflow-title c-in">Dedup Event: Master CI ↔ Duplicate CI</div>
+              <div class="vflow-desc">IRE has determined that CI <code class="code-inline">sys_id=A</code> (Master) and CI <code class="code-inline">sys_id=B</code> (Duplicate) represent the same physical or logical entity. A Remediation Playbook with action=Merge is triggered.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Step 1: Compare fields — for each blank field on Master A, check if Duplicate B has a value</div>
-            <div class="flow-note">// e.g., master has no serial_number, duplicate has serial_number → copy to master</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Field Compare</div>
+              <div class="vflow-title c-1">Fill Blanks on Master from Duplicate</div>
+              <div class="vflow-desc">For each field that is blank on the Master CI but has a value on the Duplicate, IRE copies the Duplicate's value to the Master. Example: Master has no <code class="code-inline">serial_number</code>; Duplicate has one → copy to Master.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Step 2: Apply field-merge rules from Playbook — some fields from Duplicate may override Master values</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Playbook Rules</div>
+              <div class="vflow-title c-2">Apply Field-Merge Rules from Playbook</div>
+              <div class="vflow-desc">The Remediation Playbook may define explicit field-merge rules beyond simple blank-fill. Some fields from the Duplicate may override Master values regardless of whether Master has a value. This is configurable per organization policy.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Step 3: Re-point all relationships from Duplicate B to Master A</div>
-            <div class="flow-note">// incidents, changes, cmdb_rel_ci records, service mappings</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">3</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Relationship Migration</div>
+              <div class="vflow-title c-2">Re-point All Relationships to Master</div>
+              <div class="vflow-desc">All records pointing to Duplicate CI B are updated to point to Master CI A instead. This includes incidents, change requests, <code class="code-inline">cmdb_rel_ci</code> rows, and service map connections. No relationship is orphaned.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Incidents referencing Duplicate B → now reference Master A</span>
+                <span class="vflow-tag">cmdb_rel_ci rows → updated</span>
+                <span class="vflow-tag">Service map connections → transferred</span>
+              </div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Step 4: Retire or delete Duplicate CI (B) — mark as "Retired" in CI lifecycle</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">4</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Lifecycle Update</div>
+              <div class="vflow-title c-3">Duplicate CI Retired</div>
+              <div class="vflow-desc">The Duplicate CI (B) is marked as <strong>Retired</strong> in its operational status field. It is not immediately deleted — retirement preserves audit history. Fully automated deletion can be configured after a grace period.</div>
+            </div>
           </div>
-          <div class="flow-step"><div class="flow-arrow">↓</div></div>
-          <div class="flow-step">
-            <div class="flow-box">Step 5: Update dedup event status to "Resolved"</div>
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">5</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Resolution</div>
+              <div class="vflow-title c-ok">Dedup Event Marked Resolved</div>
+              <div class="vflow-desc">The dedup remediation event record is updated to <strong>Resolved</strong> status. The CMDB Dedupe dashboard reflects the resolution. Both the merge action and the resolution are logged for audit purposes.</div>
+            </div>
           </div>
         </div>
 
