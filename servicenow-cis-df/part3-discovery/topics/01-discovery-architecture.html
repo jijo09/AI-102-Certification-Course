@@ -376,49 +376,81 @@
           produces incomplete results.
         </p>
 
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">1. Schedule Fires</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">2. Discovery Status Record Created</div>
-            <div class="flow-note">// tracks entire run</div>
+        <div class="vflow">
+
+          <!-- Phase 1: Initiation -->
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Phase 1 — Initiation</div>
+              <div class="vflow-title c-1">Schedule Fires &amp; Run Begins</div>
+              <div class="vflow-desc">A Discovery Schedule triggers (time-based or on-demand). ServiceNow immediately creates a <code class="code-inline">Discovery Status</code> record in the instance — this is your single diagnostic view for the entire run.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Step 1: Schedule fires</span>
+                <span class="vflow-tag">Step 2: Discovery Status record created</span>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">3. IP Ranges Split into Chunks</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">4. Chunks Sent to MID Server via ECC Queue</div>
-            <div class="flow-note">// parallelization</div>
+
+          <!-- Phase 2: Horizontal Discovery -->
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Phase 2 — Horizontal Discovery</div>
+              <div class="vflow-title c-2">Network Scan — Find Live IPs</div>
+              <div class="vflow-desc">The target IP ranges are split into parallel chunks and dispatched to one or more MID Servers via the <strong>ECC Queue</strong>. Each MID Server pings its assigned IPs and runs port scans to identify which hosts are alive and what services they expose. This is called <em>horizontal</em> because it scans broadly across the network.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Step 3: IP ranges chunked</span>
+                <span class="vflow-tag">Step 4: Chunks → MID via ECC Queue</span>
+                <span class="vflow-tag">Step 5: MID pings + port scans</span>
+                <span class="vflow-tag">Step 6: Live IPs identified</span>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">5. Horizontal: MID Pings + Port Scans</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">6. Live IPs Identified</div>
-            <div class="flow-note">// Phase 1 complete</div>
+
+          <!-- Phase 3: Vertical Discovery -->
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">3</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Phase 3 — Vertical Discovery</div>
+              <div class="vflow-title c-3">Deep Device Probing</div>
+              <div class="vflow-desc">For each live IP, the MID Server matches credentials from the Credential Store, then runs <strong>Probes</strong> (legacy) or <strong>Patterns</strong> (Discovery 2.0) directly on the device. Probes/Patterns collect detailed OS, hardware, installed software, and relationship data. Raw output is returned to the ServiceNow instance over the ECC Queue.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Step 7: Credentials matched</span>
+                <span class="vflow-tag">Step 8: Probes / Patterns execute on device</span>
+                <span class="vflow-tag">Step 9: Raw data returned to ServiceNow</span>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">7. Vertical: Credentials Matched</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">8. Probes/Patterns Execute on Device</div>
-            <div class="flow-note">// Phase 2 begins</div>
+
+          <!-- Phase 4: Processing & CMDB Write -->
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">4</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Phase 4 — Processing &amp; CMDB Write</div>
+              <div class="vflow-title c-ok">Sensors → IRE → CMDB → Complete</div>
+              <div class="vflow-desc"><strong>Sensors</strong> (JavaScript on the instance) parse the raw probe/pattern output into structured CI payloads. Each payload is sent to <strong>IRE</strong>, which identifies existing CIs, reconciles field values by source authority, and detects duplicates. The final CI record is created or updated in the CMDB, and the Discovery Status record is stamped <em>Complete</em>.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Step 10: Sensors parse → CI payload</span>
+                <span class="vflow-tag">Step 11: CI payload → IRE</span>
+                <span class="vflow-tag">Step 12: IRE Identify + Reconcile + Dedup</span>
+                <span class="vflow-tag">Step 13: CMDB record created / updated</span>
+                <span class="vflow-tag">Step 14: Discovery Status → Complete</span>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">9. Raw Data Returned to ServiceNow</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">10. Sensors Parse Raw Data → CI Payload</div>
-            <div class="flow-note">// transforms raw → structured</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-box">11. CI Payload → IRE</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">12. IRE: Identify + Reconcile + Dedup</div>
-            <div class="flow-note">// same IRE as SGC</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-box">13. CMDB Record Created/Updated</div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-box">14. Discovery Status: Complete</div>
-            <div class="flow-note">// run finished</div>
-          </div>
+
         </div>
 
         <h3>Discovery Status — Monitoring a Run</h3>

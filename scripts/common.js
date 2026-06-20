@@ -726,7 +726,11 @@ const SidebarManager = (() => {
     if (partMatch) {
       const activePartNum = partMatch[1];
       const activeGroup = document.querySelector(`.sidebar-group[data-part-group="${activePartNum}"]`);
-      if (activeGroup) activeGroup.classList.add('open');
+      if (activeGroup) {
+        activeGroup.classList.add('open');
+        const gh = activeGroup.querySelector('[data-group-toggle]');
+        if (gh) gh.setAttribute('aria-expanded', 'true');
+      }
     }
 
     document.querySelectorAll('.sidebar-item[href]').forEach(item => {
@@ -751,7 +755,11 @@ const SidebarManager = (() => {
         item.classList.add('active');
         // Open parent sidebar group
         const group = item.closest('.sidebar-group');
-        if (group) group.classList.add('open');
+        if (group) {
+          group.classList.add('open');
+          const gh = group.querySelector('[data-group-toggle]');
+          if (gh) gh.setAttribute('aria-expanded', 'true');
+        }
       }
     });
   }
@@ -929,6 +937,7 @@ const SidebarManager = (() => {
           return;
         }
         group.classList.toggle('open');
+        btn.setAttribute('aria-expanded', group.classList.contains('open') ? 'true' : 'false');
       });
     });
   }
@@ -1495,7 +1504,7 @@ const SidebarTemplate = (p) => `
 
     <!-- Logo -->
     <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">🧠</div>
+      <div class="sidebar-logo-icon" aria-hidden="true">🧠</div>
       <div>
         <div class="sidebar-logo-text">AI-102 Study Hub</div>
         <div class="sidebar-logo-sub">Azure AI Engineer</div>
@@ -1504,9 +1513,9 @@ const SidebarTemplate = (p) => `
 
     <!-- Nav -->
     <nav class="sidebar-nav">
-      <a href="${p}index.html" class="sidebar-item sidebar-nav-tab" data-short-label="⌂"><span class="item-icon">⌂</span><span>Dashboard</span></a>
+      <a href="${p}index.html" class="sidebar-item sidebar-nav-tab" data-short-label="⌂" title="Dashboard"><span class="item-icon" aria-hidden="true">⌂</span><span>Dashboard</span></a>
       <div class="sidebar-group" data-part-group="1">
-        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span><span class="item-badge" data-part-progress="1">0/5</span></button>
+        <button class="sidebar-group-header" data-group-toggle aria-expanded="false"><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 1 — Plan &amp; Manage</span><span class="item-badge" data-part-progress="1">0/5</span></button>
         <div class="sidebar-group-body">
           <a href="${p}part1-plan-manage/topics/01-foundry-services.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-foundry-services"><span class="topic-dot" data-topic-check="p1-foundry-services"></span>Foundry Services</a>
           <a href="${p}part1-plan-manage/topics/02-plan-create-deploy.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p1-plan-create-deploy"><span class="topic-dot" data-topic-check="p1-plan-create-deploy"></span>Plan, Create &amp; Deploy</a>
@@ -1518,7 +1527,7 @@ const SidebarTemplate = (p) => `
         </div>
       </div>
       <div class="sidebar-group" data-part-group="2">
-        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 2 — Generative AI</span><span class="item-badge" data-part-progress="2">0/3</span></button>
+        <button class="sidebar-group-header" data-group-toggle aria-expanded="false"><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 2 — Generative AI</span><span class="item-badge" data-part-progress="2">0/3</span></button>
         <div class="sidebar-group-body">
           <a href="${p}part2-generative-ai/topics/01-foundry-build.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-foundry-build"><span class="topic-dot" data-topic-check="p2-foundry-build"></span>Build with Foundry</a>
           <a href="${p}part2-generative-ai/topics/02-azure-openai.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p2-azure-openai"><span class="topic-dot" data-topic-check="p2-azure-openai"></span>Azure OpenAI</a>
@@ -1528,7 +1537,7 @@ const SidebarTemplate = (p) => `
         </div>
       </div>
       <div class="sidebar-group" data-part-group="3">
-        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 3 — Agentic</span><span class="item-badge" data-part-progress="3">0/1</span></button>
+        <button class="sidebar-group-header" data-group-toggle aria-expanded="false"><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 3 — Agentic</span><span class="item-badge" data-part-progress="3">0/1</span></button>
         <div class="sidebar-group-body">
           <a href="${p}part3-agentic/topics/01-custom-agents.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p3-custom-agents"><span class="topic-dot" data-topic-check="p3-custom-agents"></span>Custom Agents</a>
           <a href="${p}part3-agentic/flashcards.html" class="sidebar-item sidebar-sub-item">Flashcards</a>
@@ -1536,7 +1545,7 @@ const SidebarTemplate = (p) => `
         </div>
       </div>
       <div class="sidebar-group" data-part-group="4">
-        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 4 — NLP</span><span class="item-badge" data-part-progress="4">0/3</span></button>
+        <button class="sidebar-group-header" data-group-toggle aria-expanded="false"><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 4 — NLP</span><span class="item-badge" data-part-progress="4">0/3</span></button>
         <div class="sidebar-group-body">
           <a href="${p}part4-nlp/topics/01-analyze-translate-text.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-analyze-text"><span class="topic-dot" data-topic-check="p4-analyze-text"></span>Analyze &amp; Translate Text</a>
           <a href="${p}part4-nlp/topics/02-speech.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p4-speech"><span class="topic-dot" data-topic-check="p4-speech"></span>Speech Processing</a>
@@ -1546,7 +1555,7 @@ const SidebarTemplate = (p) => `
         </div>
       </div>
       <div class="sidebar-group" data-part-group="5">
-        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 5 — Knowledge Mining</span><span class="item-badge" data-part-progress="5">0/3</span></button>
+        <button class="sidebar-group-header" data-group-toggle aria-expanded="false"><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 5 — Knowledge Mining</span><span class="item-badge" data-part-progress="5">0/3</span></button>
         <div class="sidebar-group-body">
           <a href="${p}part5-knowledge-mining/topics/01-ai-search.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-ai-search"><span class="topic-dot" data-topic-check="p5-ai-search"></span>Azure AI Search</a>
           <a href="${p}part5-knowledge-mining/topics/02-document-intelligence.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p5-document-intelligence"><span class="topic-dot" data-topic-check="p5-document-intelligence"></span>Document Intelligence</a>
@@ -1556,7 +1565,7 @@ const SidebarTemplate = (p) => `
         </div>
       </div>
       <div class="sidebar-group" data-part-group="6">
-        <button class="sidebar-group-header" data-group-toggle><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 6 — Computer Vision</span><span class="item-badge" data-part-progress="6">0/3</span></button>
+        <button class="sidebar-group-header" data-group-toggle aria-expanded="false"><span class="sidebar-chevron"></span><span class="sidebar-group-title">Part 6 — Computer Vision</span><span class="item-badge" data-part-progress="6">0/3</span></button>
         <div class="sidebar-group-body">
           <a href="${p}part6-computer-vision/topics/01-analyze-images.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-analyze-images"><span class="topic-dot" data-topic-check="p6-analyze-images"></span>Analyze Images</a>
           <a href="${p}part6-computer-vision/topics/02-custom-vision-models.html" class="sidebar-item sidebar-sub-item" data-topic-nav="p6-custom-vision"><span class="topic-dot" data-topic-check="p6-custom-vision"></span>Custom Vision Models</a>
@@ -1565,8 +1574,8 @@ const SidebarTemplate = (p) => `
           <a href="${p}part6-computer-vision/quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>
         </div>
       </div>
-      <a href="${p}revision.html" class="sidebar-item sidebar-nav-tab"><span class="item-icon">🧠</span><span>Revision Center</span></a>
-      <a href="#" onclick="ProgressManager.reset()" class="sidebar-item"><span class="item-icon">↺</span><span>Reset Progress</span></a>
+      <a href="${p}revision.html" class="sidebar-item sidebar-nav-tab" title="Revision Center"><span class="item-icon" aria-hidden="true">🧠</span><span>Revision Center</span></a>
+      <a href="#" onclick="ProgressManager.reset()" class="sidebar-item" title="Reset Progress"><span class="item-icon" aria-hidden="true">↺</span><span>Reset Progress</span></a>
     </nav>
 
     <!-- Sidebar Footer — Overall Progress -->
@@ -1607,6 +1616,7 @@ SidebarManager.injectAndInit = function() {
         tb.className = 'theme-toggle-btn';
         tb.id = 'theme-toggle-btn';
         tb.title = 'Toggle dark/light mode';
+        tb.setAttribute('aria-label', 'Toggle dark/light mode');
         tb.style.marginLeft = 'auto';
         tb.textContent = document.body.classList.contains('light-mode') ? '🌙' : '☀️';
         tb.onclick = toggleTheme;

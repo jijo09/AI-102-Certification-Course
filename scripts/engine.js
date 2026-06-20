@@ -995,7 +995,7 @@ const SidebarBuilder = {
       const _qzLink  = _partBase ? '\n        <a href="' + _prefixPath + _partBase + 'quiz.html" class="sidebar-item sidebar-sub-item">Part Quiz</a>' : '';
 
       return '\n      <div class="sidebar-group" data-part-group="' + _partNum + '">' +
-             '\n        <button class="sidebar-group-header" data-group-toggle>' +
+             '\n        <button class="sidebar-group-header" data-group-toggle aria-expanded="false">' +
              '<span class="sidebar-chevron"></span>' +
              '<span class="sidebar-group-title">Part ' + _partNum + ' \u2014 ' + _meta.title + '</span>' +
              '<span class="item-badge" data-part-progress="' + _partNum + '">0/' + _topics.length + '</span>' +
@@ -1020,7 +1020,7 @@ const SidebarBuilder = {
     return [
       '<aside class="sidebar">',
       '  <div class="sidebar-logo">',
-      '    <div class="sidebar-logo-icon" style="background:linear-gradient(135deg,' + _accentColor + 'cc,' + _accentColor + ')">' + _icon + '</div>',
+      '    <div class="sidebar-logo-icon" aria-hidden="true" style="background:linear-gradient(135deg,' + _accentColor + 'cc,' + _accentColor + ')">' + _icon + '</div>',
       '    <div>',
       '      <div class="sidebar-logo-text">' + _abbreviation + '</div>',
       '      <div class="sidebar-logo-sub">' + _courseTitle + '</div>',
@@ -1091,6 +1091,7 @@ const SidebarManager = (function () {
         _tb.className = 'theme-toggle-btn';
         _tb.id = 'theme-toggle-btn';
         _tb.title = 'Toggle dark/light mode';
+        _tb.setAttribute('aria-label', 'Toggle dark/light mode');
         _tb.style.marginLeft = 'auto';
         _tb.textContent = document.body.classList.contains('light-mode') ? '🌙' : '☀️';
         _tb.onclick = toggleTheme;
@@ -1137,7 +1138,11 @@ const SidebarManager = (function () {
     });
     if (_autoOpenPart) {
       const _activeGroup = document.querySelector('.sidebar-group[data-part-group="' + _autoOpenPart + '"]');
-      if (_activeGroup) _activeGroup.classList.add('open');
+      if (_activeGroup) {
+        _activeGroup.classList.add('open');
+        const _gh = _activeGroup.querySelector('[data-group-toggle]');
+        if (_gh) _gh.setAttribute('aria-expanded', 'true');
+      }
     }
 
     document.querySelectorAll('.sidebar-item[href]').forEach(function (_item) {
@@ -1159,7 +1164,11 @@ const SidebarManager = (function () {
       if (_isSamePath || _isDashboardMatch) {
         _item.classList.add('active');
         const _group = _item.closest('.sidebar-group');
-        if (_group) _group.classList.add('open');
+        if (_group) {
+          _group.classList.add('open');
+          const _gh = _group.querySelector('[data-group-toggle]');
+          if (_gh) _gh.setAttribute('aria-expanded', 'true');
+        }
       }
     });
   }
@@ -1338,6 +1347,7 @@ const SidebarManager = (function () {
         }
 
         _group.classList.toggle('open');
+        _btn.setAttribute('aria-expanded', _group.classList.contains('open') ? 'true' : 'false');
       });
     });
   }

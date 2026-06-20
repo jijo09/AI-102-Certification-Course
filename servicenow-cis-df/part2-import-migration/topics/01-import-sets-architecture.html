@@ -145,14 +145,30 @@
           Understanding the full pipeline is essential — the exam tests each step independently.
         </p>
 
-        <div class="flow-steps">
-          <div class="flow-step">1. Data Source</div>
-          <span class="flow-arrow">›</span>
-          <div class="flow-step">2. Import Set Table (staging)</div>
-          <span class="flow-arrow">›</span>
-          <div class="flow-step">3. Transform Map</div>
-          <span class="flow-arrow">›</span>
-          <div class="flow-step">4. Target Table</div>
+        <div class="hflow">
+          <div class="hflow-phase-group">
+            <div class="hflow-steps">
+              <div class="hflow-node">
+                <div class="hflow-box h-1">Data Source</div>
+                <div class="hflow-num">Step 1</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-2">Import Set Table</div>
+                <div class="hflow-num">Step 2 — Staging</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-3">Transform Map</div>
+                <div class="hflow-num">Step 3</div>
+              </div>
+              <div class="hflow-arrow">›</div>
+              <div class="hflow-node">
+                <div class="hflow-box h-ok">Target Table</div>
+                <div class="hflow-num">Step 4 — CMDB / Any</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <h3>Step 1 — Data Source</h3>

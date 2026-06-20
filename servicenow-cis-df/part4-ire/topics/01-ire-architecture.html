@@ -218,41 +218,119 @@
           Deduplication and Remediation Playbooks are covered in depth in Topic 4 of this Part.
         </p>
 
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box">Incoming CI Payload</div>
-            <div class="flow-note">// from Discovery, SGC, Import Set, or direct API</div>
+        <div class="vflow">
+
+          <!-- Trigger -->
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-in">↓</div>
+              <div class="vflow-line l-in"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-in">Trigger</div>
+              <div class="vflow-title c-in">Incoming CI Payload</div>
+              <div class="vflow-desc">Structured CI data arrives from any ingestion pathway. IRE receives the same input format regardless of source.</div>
+              <div class="vflow-tags">
+                <span class="vflow-tag">Discovery</span>
+                <span class="vflow-tag">Service Graph Connector</span>
+                <span class="vflow-tag">Import Set</span>
+                <span class="vflow-tag">IRE API (direct)</span>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">↓</div>
+
+          <!-- Phase 1: Identification -->
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-1">1</div>
+              <div class="vflow-line l-1"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-1">Phase 1</div>
+              <div class="vflow-title c-1">Identification</div>
+              <div class="vflow-desc"><em>"Does this CI already exist in the CMDB?"</em> — Applies <strong>Identification Rules</strong> for the CI class (e.g., match on serial number, IP address, or name).</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Match Found</span>
+                  <div class="vflow-branch-name">Existing CI Located</div>
+                  <div class="vflow-branch-body">Payload linked to the existing record's <code class="code-inline">sys_id</code>. Continues to Phase 2 Reconciliation.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">No Match</span>
+                  <div class="vflow-branch-name">New CI Created</div>
+                  <div class="vflow-branch-body">No existing record found — IRE creates a new CI stub, then proceeds to Phase 2.</div>
+                </div>
+                <div class="vflow-branch br-multi">
+                  <span class="vflow-branch-tag">Multiple Matches</span>
+                  <div class="vflow-branch-name">Duplicate Flagged</div>
+                  <div class="vflow-branch-body">More than one CI matches — escalated directly to Phase 3 Deduplication.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">Phase 1: IDENTIFICATION</div>
-            <div class="flow-note">// Apply Identification Rules → match existing CI?</div>
+
+          <!-- Phase 2: Reconciliation -->
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-2">2</div>
+              <div class="vflow-line l-2"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-2">Phase 2</div>
+              <div class="vflow-title c-2">Reconciliation</div>
+              <div class="vflow-desc"><em>"Which source's value wins for each field?"</em> — Applies <strong>Reconciliation Rules</strong> with a per-field priority tier. Higher-priority sources overwrite lower-priority ones; non-authoritative values are silently discarded.</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Authoritative</span>
+                  <div class="vflow-branch-name">Field Written</div>
+                  <div class="vflow-branch-body">Source has the highest priority for this field — value is written to the CI record in CMDB.</div>
+                </div>
+                <div class="vflow-branch br-no">
+                  <span class="vflow-branch-tag">Not Authoritative</span>
+                  <div class="vflow-branch-name">Field Ignored</div>
+                  <div class="vflow-branch-body">Another source has higher priority — incoming value is discarded; existing authoritative value is preserved.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">↓ if match found</div>
-            <div class="flow-arrow" style="margin-left:var(--space-8)">→ if no match</div>
-            <div class="flow-box">Create new CI</div>
+
+          <!-- Output: CMDB Write -->
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-ok">✓</div>
+              <div class="vflow-line l-3"></div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-ok">Output</div>
+              <div class="vflow-title c-ok">CMDB Record Written</div>
+              <div class="vflow-desc">CI record created or updated with only the authoritative field values from each source. The <code class="code-inline">discovery_source</code> field is stamped with the ingestion source name.</div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-box">Phase 2: RECONCILIATION</div>
-            <div class="flow-note">// Apply Reconciliation Rules → which fields can this source update?</div>
+
+          <!-- Phase 3: Deduplication (parallel) -->
+          <div class="vflow-step">
+            <div class="vflow-spine">
+              <div class="vflow-num n-3">3</div>
+            </div>
+            <div class="vflow-body">
+              <div class="vflow-phase c-3">Phase 3 — Parallel Process</div>
+              <div class="vflow-title c-3">Deduplication Detection</div>
+              <div class="vflow-desc">Runs continuously in the background — not triggered sequentially after Phase 2. IRE scans for existing CI pairs that appear to represent the same physical or logical entity.</div>
+              <div class="vflow-branches">
+                <div class="vflow-branch br-yes">
+                  <span class="vflow-branch-tag">Auto-Merge Eligible</span>
+                  <div class="vflow-branch-name">IRE Auto-Merges</div>
+                  <div class="vflow-branch-body">One CI merged into the other per a Remediation Playbook. Non-surviving record deleted; all relationships transferred to the surviving CI.</div>
+                </div>
+                <div class="vflow-branch br-ok">
+                  <span class="vflow-branch-tag">Needs Review</span>
+                  <div class="vflow-branch-name">Remediation Task Created</div>
+                  <div class="vflow-branch-body">IRE creates a CMDB Remediation Task assigned to a team or person to investigate and resolve the duplicate manually.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flow-step">
-            <div class="flow-arrow">↓</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-box">CMDB Record Written (Create or Update)</div>
-            <div class="flow-note">// authoritative values written; non-authoritative values ignored</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-arrow">↓ (parallel)</div>
-          </div>
-          <div class="flow-step">
-            <div class="flow-box">Phase 3: DEDUPLICATION CHECK</div>
-            <div class="flow-note">// detect existing duplicate pairs → auto-merge or create task</div>
-          </div>
+
         </div>
       </div>
 

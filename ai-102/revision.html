@@ -33,7 +33,7 @@
     .stat-pill { background: var(--glass-1); border: 1px solid var(--gb-white); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; }
     
     .fc-wrapper { perspective: 1400px; margin-bottom: var(--space-6); min-height: 300px; }
-    .fc-card { position: relative; width: 100%; height: 300px; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+    .fc-card { position: relative; width: 100%; height: 300px; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
     .fc-card.flipped { transform: rotateY(180deg); }
     .fc-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: var(--radius-2xl); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-8) var(--space-10); text-align: center; border: 1.5px solid var(--border-default); box-shadow: var(--shadow-card); }
     .fc-front { background: linear-gradient(145deg, var(--mono-800), var(--mono-900)); }
@@ -59,7 +59,7 @@
     .score-circle { position: relative; width: 120px; height: 120px; margin: 0 auto var(--space-6); display: flex; align-items: center; justify-content: center; }
     .score-svg { transform: rotate(-90deg); width: 120px; height: 120px; }
     .score-bg { fill: none; stroke: var(--mono-750); stroke-width: 8; }
-    .score-fill { fill: none; stroke: var(--emerald-500); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 251.2; stroke-dashoffset: 251.2; transition: stroke-dashoffset 1s ease-out; }
+    .score-fill { fill: none; stroke: var(--emerald-500); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 251.2; stroke-dashoffset: 251.2; transition: stroke-dashoffset 0.6s ease-out; }
     .score-text { position: absolute; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: var(--text-primary); }
 
     /* Recap Panel */
@@ -78,6 +78,13 @@
     @keyframes slideInUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .rev-container { padding: var(--space-5) var(--space-4); }
+      .fc-face { padding: var(--space-6) var(--space-5); }
+      .fc-term { font-size: clamp(1.1rem, 5vw, 1.5rem); }
+      .rating-row { gap: var(--space-2); }
     }
   </style>
 </head>
