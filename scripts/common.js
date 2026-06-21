@@ -1641,11 +1641,8 @@ SidebarManager.injectAndInit = function() {
 
 /* ============================================================
    PWA BOOTSTRAP
-   Injects manifest link and registers service worker.
-   Degrades silently on file:// — requires http(s) to activate.
    ============================================================ */
 (function () {
-  /* Derive root from this script's URL — works on any host/subdirectory */
   var _src  = (document.currentScript || {}).src || '';
   var _base = _src ? _src.replace(/scripts\/[^/]+$/, '') : '/';
 
@@ -1660,6 +1657,62 @@ SidebarManager.injectAndInit = function() {
       navigator.serviceWorker.register(_base + 'sw.js', { scope: _base }).catch(function () {});
     });
   }
+
+  /* Install button — hidden in standalone mode or after install */
+  var _deferredPrompt = null;
+  var _btn = null;
+
+  function _isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true;
+  }
+
+  function _injectBtn() {
+    if (_isStandalone() || document.getElementById('pwa-install-btn')) return;
+    var style = document.createElement('style');
+    style.textContent = [
+      '#pwa-install-btn{',
+        'position:fixed;bottom:24px;right:20px;z-index:9999;',
+        'display:flex;align-items:center;gap:8px;',
+        'padding:10px 18px;border-radius:999px;border:none;cursor:pointer;',
+        'background:#0891b2;color:#fff;font-size:0.85rem;font-weight:600;',
+        'font-family:var(--font-body,system-ui);',
+        'box-shadow:0 4px 18px rgba(8,145,178,0.45);',
+        'transition:opacity .2s,transform .2s;',
+      '}',
+      '#pwa-install-btn:hover{transform:translateY(-2px);background:#0e7490;}',
+      '#pwa-install-btn.hidden{opacity:0;pointer-events:none;}'
+    ].join('');
+    document.head.appendChild(style);
+
+    _btn = document.createElement('button');
+    _btn.id = 'pwa-install-btn';
+    _btn.className = 'hidden';
+    _btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Install App';
+    _btn.addEventListener('click', function () {
+      if (!_deferredPrompt) return;
+      _deferredPrompt.prompt();
+      _deferredPrompt.userChoice.then(function () {
+        _deferredPrompt = null;
+        _btn.classList.add('hidden');
+      });
+    });
+    document.body.appendChild(_btn);
+  }
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    _deferredPrompt = e;
+    _injectBtn();
+    if (_btn) _btn.classList.remove('hidden');
+  });
+
+  window.addEventListener('appinstalled', function () {
+    if (_btn) _btn.classList.add('hidden');
+    _deferredPrompt = null;
+  });
+
+  document.addEventListener('DOMContentLoaded', _injectBtn);
 })();
 
 SidebarManager.injectAndInit();
