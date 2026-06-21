@@ -3,17 +3,17 @@
 const CACHE = 'prepassist-v1';
 
 const PRECACHE = [
-  '/',
-  '/index.html',
-  '/styles/main.css',
-  '/scripts/common.js',
-  '/scripts/engine.js',
-  '/scripts/study-data.js',
-  '/icons/icon.svg',
-  '/manifest.json',
-  '/ai-102/index.html',
-  '/servicenow-cis-df/index.html',
-  '/servicenow-csa/index.html',
+  './',
+  'index.html',
+  'styles/main.css',
+  'scripts/common.js',
+  'scripts/engine.js',
+  'scripts/study-data.js',
+  'icons/icon.svg',
+  'manifest.json',
+  'ai-102/index.html',
+  'servicenow-cis-df/index.html',
+  'servicenow-csa/index.html',
 ];
 
 /* Install — cache core shell */

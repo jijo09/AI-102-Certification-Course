@@ -2,7 +2,8 @@
   "name": "PrepAssist Study Hub",
   "short_name": "PrepAssist",
   "description": "Certification study hub for AI-102, CIS-DF and CSA. Flashcards, quizzes and structured topics.",
-  "start_url": "/",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "orientation": "any",
   "theme_color": "#0891b2",
@@ -11,13 +12,13 @@
   "categories": ["education", "productivity"],
   "icons": [
     {
-      "src": "/icons/icon.svg",
+      "src": "icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon.svg",
+      "src": "icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
@@ -27,17 +28,17 @@
   "shortcuts": [
     {
       "name": "AI-102",
-      "url": "/ai-102/index.html",
+      "url": "ai-102/index.html",
       "description": "Microsoft Azure AI Engineer study hub"
     },
     {
       "name": "CIS-DF",
-      "url": "/servicenow-cis-df/index.html",
+      "url": "servicenow-cis-df/index.html",
       "description": "ServiceNow Data Foundations study hub"
     },
     {
       "name": "CSA",
-      "url": "/servicenow-csa/index.html",
+      "url": "servicenow-csa/index.html",
       "description": "ServiceNow System Administrator study hub"
     }
   ]

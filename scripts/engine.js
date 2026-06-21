@@ -1599,15 +1599,19 @@ window.switchCourse    = switchCourse;
    Degrades silently on file:// — requires http(s) to activate.
    ============================================================ */
 (function () {
+  /* Derive root from this script's URL — works on any host/subdirectory */
+  var _src  = (document.currentScript || {}).src || '';
+  var _base = _src ? _src.replace(/scripts\/[^/]+$/, '') : '/';
+
   if (!document.querySelector('link[rel="manifest"]')) {
     var _m = document.createElement('link');
     _m.rel  = 'manifest';
-    _m.href = '/manifest.json';
+    _m.href = _base + 'manifest.json';
     document.head.appendChild(_m);
   }
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/sw.js').catch(function () {});
+      navigator.serviceWorker.register(_base + 'sw.js', { scope: _base }).catch(function () {});
     });
   }
 })();
